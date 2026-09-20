@@ -1,0 +1,863 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Garden Gnome — Outline</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="navigation.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <aside class="sidebar">
+    <a class="brand" href="#build">Garden Gnome</a>
+    <p class="label">Working outline</p>
+    <nav aria-label="Documentation"></nav>
+  </aside>
+
+  <main id="content" tabindex="-1">
+    <noscript><p>Enable JavaScript for section navigation. All sections are shown below.</p></noscript>
+
+    <!-- Edit section titles and H2s here; navigation is generated from them. -->
+    <article id="build" aria-labelledby="build-title">
+      <header>
+        <h1 id="build-title">Build</h1>
+      </header>
+      <ul class="section-cards" aria-label="Build sections"></ul>
+    </article>
+
+    <article id="build-canvas" data-parent="build" aria-labelledby="build-canvas-title">
+      <header>
+        <p class="label">Build</p>
+        <h1 id="build-canvas-title">Canvas</h1>
+        <p>The canvas provides a grid-based layout for designing and organizing land into fields, plots, and planting areas. It helps gardeners see which areas are ready to grow and decide where to plant. A shared overview of activity across fields helps coordinate growing, harvesting, tilling, and other work without manually tracking each area separately.</p>
+      </header>
+
+      <div class="layout-preview">
+        <iframe src="build-layout.html" title="Build screen layout preview" tabindex="-1" aria-hidden="true" inert></iframe>
+        <a href="build-layout.html" aria-label="Open the full Build screen layout"></a>
+      </div>
+      <section>
+        <h2 id="build-viewport">Viewport</h2>
+        <p>The viewport is the visible part of the canvas. Navigate across the land without changing its dimensions or the size of the menus.</p>
+        <h3 id="build-viewport-navigation">Navigation</h3>
+        <p>Scroll the mouse wheel over the canvas to zoom in or out around the pointer. Hold the middle mouse button and drag to pan; release it to stop. Scrolling over a menu scrolls its content instead of zooming the canvas. Choose Small, Medium, or Large under Settings → Viewport → Menu scaling to resize menus independently.</p>
+        <h3 id="build-viewport-zoom">Zoom</h3>
+        <p>Proposed zoom policy: start at 100%, with a default range of 25%–800% for home gardens. Clamp zoom at those limits. Preferences → Appearance &amp; behavior lets users change the minimum and maximum; the range must include 100%. If a new limit excludes the current zoom, move to the nearest allowed zoom without changing the drawing.</p>
+        <p>At 100%, one grid-cell side represents the distance entered under Settings → Measure → Scale. The bottom-left scale always describes one currently visible grid-cell side, not the whole viewport. Keep grid spacing between 30 and 60 screen pixels: at each doubling of zoom, halve the distance represented by a cell; at each halving of zoom, double it. Grid lines remain anchored to the same canvas origin. These display changes do not alter land dimensions, the configured base scale, or the snapping target.</p>
+        <table class="outline-table" aria-labelledby="build-viewport-zoom">
+          <thead><tr><th scope="col">Zoom breakpoint</th><th scope="col">Distance per grid-cell side</th><th scope="col">Example: base scale 4 ft</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">25%</th><td>4 × base scale</td><td>16 ft</td></tr>
+            <tr><th scope="row">50%</th><td>2 × base scale</td><td>8 ft</td></tr>
+            <tr><th scope="row">100%</th><td>Base scale</td><td>4 ft</td></tr>
+            <tr><th scope="row">200%</th><td>½ × base scale</td><td>2 ft</td></tr>
+            <tr><th scope="row">400%</th><td>¼ × base scale</td><td>1 ft</td></tr>
+            <tr><th scope="row">800%</th><td>⅛ × base scale</td><td>0.5 ft</td></tr>
+          </tbody>
+        </table>
+        <p>Between breakpoints, zoom is continuous while the distance per cell stays fixed. The same doubling rule continues beyond the defaults when custom limits allow it. Wheel zoom, middle-button panning, and adaptive grid spacing are specified here for the drawing engine; the prototype currently previews menu scaling and appearance controls.</p>
+      </section>
+      <section>
+        <h2 id="build-farm">Layers</h2>
+        <p>Layers lets gardeners choose the active layer to draw on and organize land into fields, plots, and areas. Fields mark property boundaries; multiple fields are allowed, but their areas cannot overlap. Plots represent major sections within a field, staying entirely inside its boundary without overlapping other plots. Areas define the actual growing spaces within plots, with properties such as rows or mounds that support planting calculations using growing instructions from seed references.</p>
+        <div class="property-outline">
+          <iframe class="property-preview" src="build-layout.html?panel=layers" title="Layers mockup" width="272" height="510" tabindex="-1" aria-hidden="true" inert></iframe>
+          <table class="outline-table" aria-labelledby="build-farm">
+            <thead><tr><th scope="col">Layer</th><th scope="col">Description</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Field</th><td>A top-level layer marking a property boundary. Multiple fields can be drawn, but their areas cannot overlap.</td></tr>
+              <tr><th scope="row">Plot</th><td>A major section within a field, such as vegetables or flowers. Must stay entirely within its parent field and cannot overlap another plot. Select a field before adding a plot to it.</td></tr>
+              <tr><th scope="row">Area</th><td>The actual growing space within a plot. Flat, row, or mound properties support planting calculations based on growing instructions from seed references. Stays inside its parent plot. Select a plot before adding an area to it.</td></tr>
+              <tr><th scope="row">Reference</th><td>An image used to trace and scale the layout. Added at the bottom of the layer stack, outside the Field/Plot/Area hierarchy; each new reference goes beneath existing layers.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section>
+        <h2 id="build-tools">Tools</h2>
+        <div class="table-scroll" role="region" aria-label="Tools table, scroll horizontally for more" tabindex="0">
+          <table class="outline-table tools-table" aria-labelledby="build-tools">
+            <thead><tr><th scope="col">Tool</th><th scope="col">Icon</th><th scope="col">Description</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Point</th><td class="tool-symbol"><svg class="tool-icon" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3L6 19L11 14L16 21L19 19L14 12L21 11Z"/></svg></td><td>Open the Move, Place, Connect, and Delete functions for working with points.</td></tr>
+              <tr><th scope="row">Point - Move</th><td class="tool-symbol"><svg class="tool-icon" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3V21M3 12H21M8 7L12 3L16 7M8 17L12 21L16 17M7 8L3 12L7 16M17 8L21 12L17 16"/></svg></td><td>Grab and move a point; its connected lines move with it.</td></tr>
+              <tr><th scope="row">Point - Place</th><td class="tool-symbol"><svg class="tool-icon" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3V19L7 15L11 21L14 19L10 13L16 12Z"/><circle cx="19" cy="5" r="3"/></svg></td><td>Place a new point on the canvas.</td></tr>
+              <tr><th scope="row">Point - Connect</th><td class="tool-symbol"><svg class="tool-icon" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3V19L7 15L11 21L14 19L10 13L16 12Z M17.5 4.5L19.5 6.5"/><circle cx="16" cy="3" r="2"/><circle cx="21" cy="8" r="2"/></svg></td><td>Join points with a connecting line.</td></tr>
+              <tr><th scope="row">Point - Delete</th><td class="tool-symbol"><svg class="tool-icon" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3V19L7 15L11 21L14 19L10 13L16 12Z M17 3L22 8M22 3L17 8"/></svg></td><td>Remove a point.</td></tr>
+              <tr><th scope="row">Line</th><td class="tool-symbol"><svg class="tool-icon" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19L19 5"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="5" r="2"/></svg></td><td>Draw between points, including positions along an existing line—not just its endpoints. Lines must not cross other lines.</td></tr>
+              <tr><th scope="row">Center-diameter circle</th><td class="tool-symbol"><svg class="tool-icon" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12H21M12 9V15"/></svg></td><td>Set a center, then specify the diameter.</td></tr>
+              <tr><th scope="row">Two-point circle</th><td class="tool-symbol"><svg class="tool-icon" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M5.6 18.4L18.4 5.6"/><circle cx="5.6" cy="18.4" r="2"/><circle cx="18.4" cy="5.6" r="2"/></svg></td><td>Define a circle using two points.</td></tr>
+              <tr><th scope="row">Fill</th><td class="tool-symbol"><svg class="tool-icon" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9L12 2L20 10L12 19Z M4 9H19M4 22H22"/></svg></td><td>Fill a closed shape with dots, crosshatch, or crosses. These are visual patterns, separate from ground features.</td></tr>
+              <tr><th scope="row">Reference</th><td class="tool-symbol"><svg class="tool-icon" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18"/><circle cx="8" cy="8" r="2"/><path d="M3 18L9 12L13 16L17 10L21 14"/></svg></td><td>Work with the actively selected reference image. Unavailable when a field, plot, area, or empty reference layer is selected.</td></tr>
+              <tr><th scope="row">Reference - Move</th><td class="tool-symbol"><svg class="tool-icon" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3V21M3 12H21M8 7L12 3L16 7M8 17L12 21L16 17M7 8L3 12L7 16M17 8L21 12L17 16"/></svg></td><td>Reposition the reference image without moving field geometry.</td></tr>
+              <tr><th scope="row">Reference - Scale</th><td class="tool-symbol"><svg class="tool-icon" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10V20H14M4 20L20 4M13 4H20V11"/></svg></td><td>Resize the reference image while preserving its proportions.</td></tr>
+              <tr><th scope="row">Reference - Reference Line</th><td class="tool-symbol"><svg class="tool-icon" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12H20M4 7V17M20 7V17M8 10V14M12 10V14M16 10V14"/></svg></td><td>Draw a line across a known distance in the selected image, then enter that distance in Reference properties. Automatically scale the image so the line matches the canvas distance, preserving proportions and leaving field geometry unchanged.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <h2 id="build-canvas-properties">Settings</h2>
+        <p>Measure sets units and the grid scale at 100% zoom. Snapping chooses the alignment target, while Viewport controls menu sizing independently of canvas zoom.</p>
+        <div class="property-outline">
+          <iframe class="property-preview" src="build-layout.html?properties=canvas" title="Settings mockup" width="272" height="430" tabindex="-1" aria-hidden="true" inert></iframe>
+          <table class="outline-table" aria-labelledby="build-canvas-properties">
+            <thead><tr><th scope="col">Property</th><th scope="col">Description</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Units</th><td>Choose ft or m. Scale and Reference known-distance labels use these units; changing units in the prototype does not convert entered values.</td></tr>
+              <tr><th scope="row">Scale</th><td>Enter the positive distance represented by one grid length. The label shows the selected units, such as Scale (ft), and the canvas scale updates as you type. Blank or invalid values show a dash.</td></tr>
+              <tr><th scope="row">Snapping</th><td>Turn snapping on or off with the checkbox. Choose Grid or Drawing from Snap to; the dropdown is disabled while snapping is off and retains its selection. When Snap to is Drawing, snapping attempts to snap to the last drawing selected.</td></tr>
+              <tr><th scope="row">Menu scaling</th><td>Small (85%), Medium (100%, default), or Large (115%). Changes floating menu sizes without changing the grid, drawing dimensions, or viewport zoom.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section>
+        <h2 id="build-preferences">Preferences</h2>
+        <p>Preferences → Appearance &amp; behavior groups adjustable drawing styles and navigation limits. Apply updates the appearance preview and retains the chosen limits for the session; reloading restores defaults.</p>
+        <table class="outline-table" aria-labelledby="build-preferences">
+          <thead><tr><th scope="col">Preference</th><th scope="col">Default</th><th scope="col">Purpose</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Line width</th><td>2 px</td><td>Thickness of field, plot, and area outlines; does not change their boundaries.</td></tr>
+            <tr><th scope="row">Grid thickness</th><td>1 px</td><td>Thickness of grid lines, independent of drawing outlines.</td></tr>
+            <tr><th scope="row">Grid color</th><td>#dce0d6</td><td>Color of grid lines.</td></tr>
+            <tr><th scope="row">Grid opacity</th><td>100%</td><td>Visibility of grid lines, from transparent to opaque.</td></tr>
+            <tr><th scope="row">Minimum zoom</th><td>25%</td><td>Furthest zoom out. Must be positive and no greater than 100%.</td></tr>
+            <tr><th scope="row">Maximum zoom</th><td>800%</td><td>Closest zoom in. Must be at least 100%; increase it for finer detail.</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section>
+        <h2 id="build-field-properties">Field properties</h2>
+        <p>Name the field, choose its outline color, and record drainage and soil sample results. The seed engine will use the soil information to flag crops that may grow poorly in the field’s soil.</p>
+        <div class="property-outline">
+          <iframe class="property-preview" src="build-layout.html?properties=field" title="Field properties mockup" width="272" height="730" tabindex="-1" aria-hidden="true" inert></iframe>
+          <table class="outline-table" aria-labelledby="build-field-properties">
+            <thead><tr><th scope="col">Property</th><th scope="col">Description</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Name</th><td>Rename the field with the pencil icon.</td></tr>
+              <tr><th scope="row">Color</th><td>Choose the field outline color from the dropdown.</td></tr>
+              <tr><th scope="row">Soil drainage</th><td>Excessive, good, moderate, fair, or poor.</td></tr>
+              <tr><th scope="row">Soil management</th><td>Enter pH, P, K, Ca, Mg, CEC, EC, and organic matter from soil samples.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section>
+        <h2 id="build-plot-properties">Plot properties</h2>
+        <p>Name the plot and choose its outline color and fill pattern.</p>
+        <div class="property-outline">
+          <iframe class="property-preview" src="build-layout.html?properties=plot" title="Plot properties mockup" width="272" height="300" tabindex="-1" aria-hidden="true" inert></iframe>
+          <table class="outline-table" aria-labelledby="build-plot-properties">
+            <thead><tr><th scope="col">Property</th><th scope="col">Description</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Name</th><td>Rename the plot with the pencil icon.</td></tr>
+              <tr><th scope="row">Color</th><td>Choose the plot outline color from the dropdown.</td></tr>
+              <tr><th scope="row">Pattern</th><td>Choose none, dots, crosshatch, or crosses. A visual fill, separate from ground layout.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section>
+        <h2 id="build-plot">Area properties</h2>
+        <p>Name the area and choose Flat, Row, or Mound from the Planting type dropdown under Options. The section below the divider shows settings for that type. Generated features stay inside the area boundary.</p>
+        <div class="property-outline">
+          <iframe class="property-preview" src="build-layout.html?properties=area" title="Area properties mockup" width="272" height="430" tabindex="-1" aria-hidden="true" inert></iframe>
+          <table class="outline-table" aria-labelledby="build-plot">
+            <thead><tr><th scope="col">Planting type</th><th scope="col">Description</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Flat</th><td>A continuous planting surface within the area boundary. No additional settings yet.</td></tr>
+              <tr><th scope="row">Row</th><td>Numeric inputs for row width, spacing, and direction in degrees (0–360°).</td></tr>
+              <tr><th scope="row">Mound</th><td>Numeric inputs for mound diameter and spacing.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section>
+        <h2 id="build-reference-properties">Reference properties</h2>
+        <p>Name the reference layer, choose its color and a local image, and enter the known distance for its Reference Line. Select the layer by its name or gear to enable Reference tools. Image movement and distance-based scaling are planned drawing behavior.</p>
+        <div class="property-outline">
+          <iframe class="property-preview" src="build-layout.html?properties=reference" title="Reference properties mockup" width="272" height="350" tabindex="-1" aria-hidden="true" inert></iframe>
+          <table class="outline-table" aria-labelledby="build-reference-properties">
+            <thead><tr><th scope="col">Property</th><th scope="col">Description</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Name</th><td>Rename the reference layer with the pencil icon.</td></tr>
+              <tr><th scope="row">Color</th><td>Choose a color for the reference layer. The prototype retains the selection per layer without tinting the image.</td></tr>
+              <tr><th scope="row">Image</th><td>Choose a local PNG, JPEG, or WebP image. It stays in the browser and is cleared on reload.</td></tr>
+              <tr><th scope="row">Known distance</th><td>The real distance between the Reference Line endpoints. The label shows the Canvas units in parentheses: ft or m. Used to scale only the selected image.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section>
+        <h2 id="build-open-questions">Open questions</h2>
+        <ul>
+          <li>Should lines join existing edges at any point, without crossing them?</li>
+          <li>Should the two-point circle use opposite ends of the diameter?</li>
+          <li>Which soil-report units and lab methods should we support before comparing results with crop requirements?</li>
+        </ul>
+      </section>
+    </article>
+
+    <article id="build-api" aria-labelledby="build-api-title">
+      <header>
+        <h1 id="build-api-title">Build API</h1>
+      </header>
+      <ul class="section-cards" aria-label="Build API sections"></ul>
+    </article>
+
+    <article id="api-field" data-parent="build-api" aria-labelledby="api-field-title">
+      <header>
+        <p class="label">Build API</p>
+        <h1 id="api-field-title">Field</h1>
+        <p>One major farming space, containing its outline and plots. The outline is proposed; the runtime model still stores only id, name, and Plots.</p>
+      </header>
+      <section>
+        <h2 id="api-field-shape">Shape</h2>
+        <pre><code class="language-yaml" data-proposed-shape="Field">Field:
+  id: {type: string, required: true}
+  name: {type: string, required: true}
+  outline: {type: FieldGeometry, required: true}
+  Plots:
+    type: list
+    items: Plot
+    default: []</code></pre>
+        <table class="outline-table" aria-labelledby="api-field-shape">
+          <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>id</code></th><td>A caller-supplied identifier.</td></tr>
+            <tr><th scope="row"><code>name</code></th><td>The field’s display name.</td></tr>
+            <tr><th scope="row"><code>outline</code></th><td>The <a href="#api-field-geometry">FieldGeometry</a> object holding the field’s outline geometry.</td></tr>
+            <tr><th scope="row"><code>Plots</code></th><td>The <a href="#api-plots">Plot</a> objects belonging to this field. Starts empty.</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section>
+        <h2 id="api-field-geometry">Outline</h2>
+        <p><code>FieldGeometry</code> is stored in <code>Field.outline</code>. It inherits the geometry collections and ID counters from <a href="#api-geometry">Geometry</a>, with no additional fields yet. Collections start empty and counters start at zero. These YAML type blocks are documentation notation, not an executable schema.</p>
+        <pre><code class="language-yaml" data-proposed-shape="FieldGeometry">FieldGeometry:
+  extends: Geometry</code></pre>
+        <table class="outline-table" aria-labelledby="api-field-geometry">
+          <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>extends</code></th><td>Inherits all <a href="#api-geometry-shape">Geometry attributes</a> and defaults. This describes inheritance rather than a stored field.</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section>
+        <h2 id="api-field-example">Example</h2>
+        <p>A proposed Field record with an empty outline, before drawing.</p>
+        <pre><code class="language-yaml" data-proposed-example="Field">id: north-field
+name: North field
+outline:
+  last_ids:
+    points: 0
+    lines: 0
+    circles: 0
+    shapes: 0
+  points: []
+  lines: []
+  circles: []
+  shapes: []
+Plots:
+  - id: vegetables
+    name: Vegetable plot
+    ground: null
+    outline:
+      last_ids: {points: 0, lines: 0, circles: 0, shapes: 0}
+      points: []
+      lines: []
+      circles: []
+      shapes: []
+    Areas: []</code></pre>
+        <p><a href="../src/build/field.js">View current Field source</a> (without outline).</p>
+      </section>
+    </article>
+
+    <article id="api-geometry" data-parent="build-api" aria-labelledby="api-geometry-title">
+      <header>
+        <p class="label">Build API</p>
+        <h1 id="api-geometry-title">Geometry</h1>
+        <p>Geometry is the base object holding points, lines, circles, closed shapes, and their ID counters. FieldGeometry, PlotGeometry, and AreaGeometry inherit this structure. These are proposed storage structures, not yet implemented.</p>
+      </header>
+      <section>
+        <h2 id="api-geometry-shape">Shape</h2>
+        <pre><code class="language-yaml" data-proposed-shape="Geometry">Geometry:
+  last_ids:
+    type: object
+    fields:
+      points: {type: integer, minimum: 0, default: 0}
+      lines: {type: integer, minimum: 0, default: 0}
+      circles: {type: integer, minimum: 0, default: 0}
+      shapes: {type: integer, minimum: 0, default: 0}
+  points: {type: list, items: Point, default: []}
+  lines: {type: list, items: Line, default: []}
+  circles: {type: list, items: Circle, default: []}
+  shapes: {type: list, items: ClosedShape, default: []}</code></pre>
+        <table class="outline-table" aria-labelledby="api-geometry-shape">
+          <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>last_ids</code></th><td>Sequential ID counters for this geometry instance. Each counter starts at zero and retains the highest assigned number after deletion.</td></tr>
+            <tr><th scope="row"><code>last_ids.points</code></th><td>Highest assigned point ID number.</td></tr>
+            <tr><th scope="row"><code>last_ids.lines</code></th><td>Highest assigned line ID number.</td></tr>
+            <tr><th scope="row"><code>last_ids.circles</code></th><td>Highest assigned circle ID number.</td></tr>
+            <tr><th scope="row"><code>last_ids.shapes</code></th><td>Highest assigned closed-shape ID number.</td></tr>
+            <tr><th scope="row"><code>points</code></th><td><a href="#api-field-point">Point</a> records. Starts empty.</td></tr>
+            <tr><th scope="row"><code>lines</code></th><td><a href="#api-field-line">Line</a> records referencing points. Starts empty.</td></tr>
+            <tr><th scope="row"><code>circles</code></th><td><a href="#api-field-circle">Circle</a> records. Starts empty.</td></tr>
+            <tr><th scope="row"><code>shapes</code></th><td><a href="#api-field-closed-shape">ClosedShape</a> records grouping lines into enclosed regions. Starts empty.</td></tr>
+          </tbody>
+        </table>
+        <p>Every Geometry instance owns its own collections and counters; they are not shared between instances or subclasses.</p>
+      </section>
+      <section>
+        <h2 id="api-geometry-subclasses">Subclasses</h2>
+        <pre><code class="language-yaml" data-proposed-subclasses="Geometry">FieldGeometry:
+  extends: Geometry
+PlotGeometry:
+  extends: Geometry
+AreaGeometry:
+  extends: Geometry
+  dimensions:
+    type: object
+    fields:
+      flat: {type: object, fields: {}, default: {}}
+      row:
+        type: object
+        fields:
+          width: {type: number, nullable: true, default: null, minimum: 0}
+          spacing: {type: number, nullable: true, default: null, minimum: 0}
+          direction:
+            type: number
+            nullable: true
+            default: null
+            minimum: 0
+            maximum: 360
+            unit: degrees
+      mound:
+        type: object
+        fields:
+          diameter: {type: number, nullable: true, default: null, minimum: 0}
+          spacing: {type: number, nullable: true, default: null, minimum: 0}</code></pre>
+        <table class="outline-table" aria-labelledby="api-geometry-subclasses">
+          <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>extends</code></th><td>Each subclass inherits all <a href="#api-geometry-shape">Geometry attributes</a> and defaults. This describes inheritance rather than a stored field.</td></tr>
+            <tr><th scope="row"><code>dimensions</code></th><td>AreaGeometry’s dimensions for each planting arrangement.</td></tr>
+            <tr><th scope="row"><code>dimensions.flat</code></th><td>Flat arrangement settings. Starts as an empty object.</td></tr>
+            <tr><th scope="row"><code>dimensions.row</code></th><td>Row width, spacing, and direction. Each value starts as null.</td></tr>
+            <tr><th scope="row"><code>dimensions.row.width</code></th><td>Width of a row.</td></tr>
+            <tr><th scope="row"><code>dimensions.row.spacing</code></th><td>Spacing between rows.</td></tr>
+            <tr><th scope="row"><code>dimensions.row.direction</code></th><td>Row direction in degrees, from 0 through 360 inclusive.</td></tr>
+            <tr><th scope="row"><code>dimensions.mound</code></th><td>Mound diameter and spacing. Each value starts as null.</td></tr>
+            <tr><th scope="row"><code>dimensions.mound.diameter</code></th><td>Diameter of a mound.</td></tr>
+            <tr><th scope="row"><code>dimensions.mound.spacing</code></th><td>Spacing between mounds.</td></tr>
+          </tbody>
+        </table>
+        <p>The parent owns the geometry directly: <a href="#api-field-geometry">Field.outline</a> is FieldGeometry, <a href="#api-plots">Plot.outline</a> is PlotGeometry, and <a href="#api-area">Area.outline</a> is AreaGeometry. Properties objects hold non-geometric menu settings, not dimensions or geometry objects.</p>
+      </section>
+      <section>
+        <h2 id="api-geometry-area-dimensions">Area dimensions</h2>
+        <p>The menu’s dimension inputs edit <code>Area.outline.dimensions</code>, even though they appear in the properties panel. <a href="#api-area-properties">AreaProperties.planting_type</a> selects which type’s controls are shown and which dimensions are active. Switching types preserves the other dimensions.</p>
+        <p>Blank numeric inputs become null; entered values are finite numbers. Direction accepts 0 through 360 degrees, inclusive. The nonnegative limits mirror the menu, not a guarantee that zero-sized features can be generated. Required dimensions and stricter drawing checks remain for the drawing functions.</p>
+        <p>The mockup does not label length units or define whether spacing is measured between edges or centers. Those conventions, and the reference axis for direction, remain open. No automatic unit conversion is specified.</p>
+      </section>
+      <section>
+        <h2 id="api-geometry-ids">ID counters</h2>
+        <p>Each counter stores the highest number assigned for that type, not the number of records currently present. Zero means none have been assigned. The next candidate uses the counter plus one, with the existing type prefix:</p>
+        <pre><code class="language-yaml" data-id-formats="Geometry">points: point-{number}
+lines: line-{number}
+circles: circle-{number}
+shapes: shape-{number}</code></pre>
+        <p>For example, when <code>last_ids.points</code> is 6, the next candidate is <code>point-7</code>. Once assigned, the point counter becomes 7; the other counters stay unchanged. Deleting a point does not lower its counter or make its number available again.</p>
+        <p>Store the counters with the geometry so later editing continues the sequence. Each counter must be at least the highest assigned suffix of its type, including deleted records. IDs are local to a Geometry instance: separate instances may both contain <code>point-1</code>, so a reference outside the instance also needs its owning context.</p>
+        <p>This defines stored ID bookkeeping only. Collision checks, counter updates in drawing functions, and handling imported or concurrent edits will be designed later; a counter alone does not enforce uniqueness.</p>
+      </section>
+
+      <section>
+        <h2 id="api-field-point">Point</h2>
+        <pre><code class="language-yaml" data-proposed-shape="Point">Point:
+  id: {type: string, required: true}
+  x: {type: number, required: true}
+  y: {type: number, required: true}</code></pre>
+        <table class="outline-table" aria-labelledby="api-field-point">
+          <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>id</code></th><td>The point’s identifier within this geometry instance.</td></tr>
+            <tr><th scope="row"><code>x</code></th><td>Position along the canvas’s x axis.</td></tr>
+            <tr><th scope="row"><code>y</code></th><td>Position along the canvas’s y axis.</td></tr>
+          </tbody>
+        </table>
+        <p>A point is a position with its own identity. Different IDs may have identical coordinates, so a line’s start and end can sit on top of each other without becoming the same point. Reusing an ID means sharing one point; moving it changes every line or circle that references it.</p>
+      </section>
+      <section>
+        <h2 id="api-field-line">Line</h2>
+        <pre><code class="language-yaml" data-proposed-shape="Line">Line:
+  id: {type: string, required: true}
+  start: {type: Point.id, required: true}
+  middle:
+    type: map
+    keys: middle_1, middle_2, ...
+    values: Point.id
+    default: {}
+  end: {type: Point.id, required: true}</code></pre>
+        <table class="outline-table" aria-labelledby="api-field-line">
+          <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>id</code></th><td>The line’s identifier within this geometry instance.</td></tr>
+            <tr><th scope="row"><code>start</code></th><td>ID of the first point.</td></tr>
+            <tr><th scope="row"><code>middle</code></th><td>Optional intermediate point IDs, keyed as middle_1, middle_2, and so on in traversal order. These are vertices rather than calculated halfway positions. Starts empty.</td></tr>
+            <tr><th scope="row"><code>end</code></th><td>ID of the final point.</td></tr>
+          </tbody>
+        </table>
+        <p>A line follows straight segments from start through its middle points to end. With no middle points, this is a single straight segment.</p>
+        <p>Number middle keys consecutively from 1 with no gaps, and read them by numeric suffix, not YAML key order or alphabetical order. Consecutive vertices must have different coordinates; the final endpoint may return to the start to close a shape. A line itself has no fill pattern.</p>
+      </section>
+      <section>
+        <h2 id="api-field-circle">Circle</h2>
+        <pre><code class="language-yaml" data-proposed-shape="Circle">Circle:
+  id: {type: string, required: true}
+  center: {type: Point.id, required: true}
+  radius: {type: number, required: true, exclusive_minimum: 0}
+  pattern:
+    type: string
+    nullable: true
+    default: null
+    allowed: [null, dots, crosshatch, crosses]</code></pre>
+        <table class="outline-table" aria-labelledby="api-field-circle">
+          <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>id</code></th><td>The circle’s identifier within this geometry instance.</td></tr>
+            <tr><th scope="row"><code>center</code></th><td>ID of the center point.</td></tr>
+            <tr><th scope="row"><code>radius</code></th><td>Finite, positive distance from the center to the boundary, in the same units as the coordinates.</td></tr>
+            <tr><th scope="row"><code>pattern</code></th><td>Visual fill: dots, crosshatch, or crosses. Defaults to null for an empty fill.</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section>
+        <h2 id="api-field-closed-shape">Closed shape</h2>
+        <pre><code class="language-yaml" data-proposed-shape="ClosedShape">ClosedShape:
+  id: {type: string, required: true}
+  lines: {type: list, items: Line.id, required: true, minimum_items: 1}
+  pattern:
+    type: string
+    nullable: true
+    default: null
+    allowed: [null, dots, crosshatch, crosses]</code></pre>
+        <table class="outline-table" aria-labelledby="api-field-closed-shape">
+          <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>id</code></th><td>The closed shape’s identifier within this geometry instance.</td></tr>
+            <tr><th scope="row"><code>lines</code></th><td>One or more line IDs in boundary order. Each line is traversed from its start through its middle points to its end.</td></tr>
+            <tr><th scope="row"><code>pattern</code></th><td>Visual fill for the enclosed region: dots, crosshatch, or crosses. Defaults to null for an empty fill.</td></tr>
+          </tbody>
+        </table>
+        <p>A closed shape groups lines into one filled region. Its points are reached through those lines, so a second point list is unnecessary.</p>
+        <p>Each line’s end must meet the next line’s start by coordinates, and the final end must meet the first start. Matching coordinates close the boundary even when the point IDs differ; they do not merge the points. One line with middle points can form the whole boundary.</p>
+        <p>For this first version, the boundary must enclose nonzero area without crossing or retracing itself. The shape owns one pattern; its points and lines do not. Holes are left for a later pass.</p>
+      </section>
+      <section>
+        <h2 id="api-field-geometry-example">Geometry example</h2>
+        <p>A proposed <a href="#api-field">Field</a> record whose outline contains a dotted region and a crosshatched circle. The region uses two lines; its final point has the same coordinates as its first but a different ID.</p>
+        <pre><code class="language-yaml" data-proposed-example="Field">id: north-field
+name: North field
+Plots: []
+outline:
+  last_ids:
+    points: 6
+    lines: 2
+    circles: 1
+    shapes: 1
+  points:
+    - {id: point-1, x: 0, y: 0}
+    - {id: point-2, x: 12, y: 0}
+    - {id: point-3, x: 12, y: 8}
+    - {id: point-4, x: 0, y: 8}
+    - {id: point-5, x: 0, y: 0}
+    - {id: point-6, x: 6, y: 4}
+  lines:
+    - id: line-1
+      start: point-1
+      middle:
+        middle_1: point-2
+        middle_2: point-3
+      end: point-4
+    - id: line-2
+      start: point-4
+      middle: {}
+      end: point-5
+  circles:
+    - id: circle-1
+      center: point-6
+      radius: 2
+      pattern: crosshatch
+  shapes:
+    - id: shape-1
+      lines: [line-1, line-2]
+      pattern: dots</code></pre>
+      </section>
+    </article>
+
+    <article id="api-plots" data-parent="build-api" aria-labelledby="api-plots-title">
+      <header>
+        <p class="label">Build API</p>
+        <h1 id="api-plots-title">Plot</h1>
+        <p>One plot within a field, containing its outline and the areas to be planted. The outline is proposed; the runtime model still stores id, name, ground, and Areas. Ground layout is planned to move to Area.</p>
+      </header>
+      <section>
+        <h2 id="api-plots-shape">Shape</h2>
+        <pre><code class="language-yaml" data-proposed-shape="Plot">Plot:
+  id: {type: string, required: true}
+  name: {type: string, required: true}
+  outline: {type: PlotGeometry, required: true}
+  ground: {type: string, nullable: true, default: null}
+  Areas:
+    type: list
+    items: Area
+    default: []</code></pre>
+        <table class="outline-table" aria-labelledby="api-plots-shape">
+          <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>id</code></th><td>A caller-supplied identifier.</td></tr>
+            <tr><th scope="row"><code>name</code></th><td>The plot’s display name, such as “Vegetables.”</td></tr>
+            <tr><th scope="row"><code>outline</code></th><td>The <a href="#api-geometry-subclasses">PlotGeometry</a> object holding geometry separately from <a href="#api-plot-properties">PlotProperties</a>.</td></tr>
+            <tr><th scope="row"><code>ground</code></th><td>A ground description or null.</td></tr>
+            <tr><th scope="row"><code>Areas</code></th><td>The <a href="#api-area">Area</a> objects within this plot. Starts empty.</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section>
+        <h2 id="api-plots-example">Example</h2>
+        <p>A proposed Plot record with an empty outline, before drawing.</p>
+        <pre><code class="language-yaml" data-proposed-example="Plot">id: vegetables
+name: Vegetable plot
+outline:
+  last_ids: {points: 0, lines: 0, circles: 0, shapes: 0}
+  points: []
+  lines: []
+  circles: []
+  shapes: []
+ground: rows
+Areas:
+  - id: carrot-bed
+    name: Carrot bed
+    outline:
+      last_ids: {points: 0, lines: 0, circles: 0, shapes: 0}
+      points: []
+      lines: []
+      circles: []
+      shapes: []
+      dimensions:
+        flat: {}
+        row: {width: null, spacing: null, direction: null}
+        mound: {diameter: null, spacing: null}
+    crop: Carrot</code></pre>
+        <p><a href="../src/build/plot.js">View current Plot source</a> (without outline).</p>
+      </section>
+
+    </article>
+
+    <article id="api-area" data-parent="build-api" aria-labelledby="api-area-title">
+      <header>
+        <p class="label">Build API</p>
+        <h1 id="api-area-title">Area</h1>
+        <p>A space within a plot, designated for a crop rather than a scheduled planting. Its proposed outline holds AreaGeometry, including dimension data; the runtime model still stores only id, name, and crop.</p>
+      </header>
+      <section>
+        <h2 id="api-area-shape">Shape</h2>
+        <pre><code class="language-yaml" data-proposed-shape="Area">Area:
+  id: {type: string, required: true}
+  name: {type: string, required: true}
+  outline: {type: AreaGeometry, required: true}
+  crop: {type: string, nullable: true, default: null}</code></pre>
+        <table class="outline-table" aria-labelledby="api-area-shape">
+          <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>id</code></th><td>A caller-supplied identifier.</td></tr>
+            <tr><th scope="row"><code>name</code></th><td>The area’s display name.</td></tr>
+            <tr><th scope="row"><code>outline</code></th><td>The <a href="#api-geometry-subclasses">AreaGeometry</a> object holding geometry and <a href="#api-geometry-area-dimensions">dimension data</a>, separately from <a href="#api-area-properties">AreaProperties</a>.</td></tr>
+            <tr><th scope="row"><code>crop</code></th><td>A crop name, or null if unassigned.</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section>
+        <h2 id="api-area-example">Example</h2>
+        <p>A proposed Area record before its outline is drawn or dimensions are entered.</p>
+        <pre><code class="language-yaml" data-proposed-example="Area">id: carrot-bed
+name: Carrot bed
+outline:
+  last_ids: {points: 0, lines: 0, circles: 0, shapes: 0}
+  points: []
+  lines: []
+  circles: []
+  shapes: []
+  dimensions:
+    flat: {}
+    row: {width: null, spacing: null, direction: null}
+    mound: {diameter: null, spacing: null}
+crop: Carrot</code></pre>
+        <p><a href="../src/build/area.js">View current Area source</a> (without outline).</p>
+      </section>
+
+    </article>
+
+    <article id="api-field-properties" data-parent="build-api" aria-labelledby="api-field-properties-title">
+      <header>
+        <p class="label">Build API</p>
+        <h1 id="api-field-properties-title">FieldProperties</h1>
+        <p>Stores the field’s outline color, soil drainage, and soil sample values.</p>
+      </header>
+      <section>
+        <h2 id="api-field-properties-shape">Shape</h2>
+        <pre><code class="language-yaml" data-proposed-shape="FieldProperties">FieldProperties:
+  color:
+    type: string
+    default: "#465b3c"
+    allowed: ["#465b3c", "#376b95", "#82603e", "#805891", "#b26930"]
+  soil_drainage:
+    type: string
+    nullable: true
+    default: null
+    allowed: [null, excessive, good, moderate, fair, poor]
+  soil_management:
+    type: object
+    fields:
+      ph: {type: number, nullable: true, default: null}
+      p: {type: number, nullable: true, default: null}
+      k: {type: number, nullable: true, default: null}
+      ca: {type: number, nullable: true, default: null}
+      mg: {type: number, nullable: true, default: null}
+      cec: {type: number, nullable: true, default: null}
+      ec: {type: number, nullable: true, default: null}
+      organic_matter: {type: number, nullable: true, default: null}</code></pre>
+      </section>
+      <section>
+        <h2 id="api-field-properties-attributes">Attributes</h2>
+        <table class="outline-table" aria-labelledby="api-field-properties-attributes">
+          <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>color</code></th><td>Outline color: green, blue, brown, purple, or orange, in the listed order. Defaults to green.</td></tr>
+            <tr><th scope="row"><code>soil_drainage</code></th><td>Drainage category. Null means unassigned.</td></tr>
+            <tr><th scope="row"><code>soil_management</code></th><td>One set of soil sample values. Each value starts as null.</td></tr>
+            <tr><th scope="row"><code>soil_management.ph</code></th><td>Soil pH.</td></tr>
+            <tr><th scope="row"><code>soil_management.p</code></th><td>Phosphorus (P).</td></tr>
+            <tr><th scope="row"><code>soil_management.k</code></th><td>Potassium (K).</td></tr>
+            <tr><th scope="row"><code>soil_management.ca</code></th><td>Calcium (Ca).</td></tr>
+            <tr><th scope="row"><code>soil_management.mg</code></th><td>Magnesium (Mg).</td></tr>
+            <tr><th scope="row"><code>soil_management.cec</code></th><td>Cation exchange capacity (CEC).</td></tr>
+            <tr><th scope="row"><code>soil_management.ec</code></th><td>Electrical conductivity (EC).</td></tr>
+            <tr><th scope="row"><code>soil_management.organic_matter</code></th><td>Organic matter.</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section>
+        <h2 id="api-field-properties-example">Example</h2>
+        <pre><code class="language-yaml" data-proposed-example="FieldProperties">color: "#465b3c"
+soil_drainage: null
+soil_management:
+  ph: null
+  p: null
+  k: null
+  ca: null
+  mg: null
+  cec: null
+  ec: null
+  organic_matter: null</code></pre>
+      </section>
+
+    </article>
+
+    <article id="api-plot-properties" data-parent="build-api" aria-labelledby="api-plot-properties-title">
+      <header>
+        <p class="label">Build API</p>
+        <h1 id="api-plot-properties-title">PlotProperties</h1>
+        <p>Stores the plot’s outline color and fill pattern.</p>
+      </header>
+      <section>
+        <h2 id="api-plot-properties-shape">Shape</h2>
+        <pre><code class="language-yaml" data-proposed-shape="PlotProperties">PlotProperties:
+  color:
+    type: string
+    default: "#99a18f"
+    allowed: ["#99a18f", "#376b95", "#82603e", "#805891", "#b26930"]
+  pattern:
+    type: string
+    nullable: true
+    default: null
+    allowed: [null, dots, crosshatch, crosses]</code></pre>
+      </section>
+      <section>
+        <h2 id="api-plot-properties-attributes">Attributes</h2>
+        <table class="outline-table" aria-labelledby="api-plot-properties-attributes">
+          <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>color</code></th><td>Outline color: green, blue, brown, purple, or orange, in the listed order. Defaults to green.</td></tr>
+            <tr><th scope="row"><code>pattern</code></th><td>Fill pattern: dots, crosshatch, or crosses. Null leaves the fill empty.</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section>
+        <h2 id="api-plot-properties-example">Example</h2>
+        <pre><code class="language-yaml" data-proposed-example="PlotProperties">color: "#99a18f"
+pattern: null</code></pre>
+      </section>
+
+    </article>
+
+    <article id="api-area-properties" data-parent="build-api" aria-labelledby="api-area-properties-title">
+      <header>
+        <p class="label">Build API</p>
+        <h1 id="api-area-properties-title">AreaProperties</h1>
+        <p>Stores the area’s planting type.</p>
+      </header>
+      <section>
+        <h2 id="api-area-properties-shape">Shape</h2>
+        <pre><code class="language-yaml" data-proposed-shape="AreaProperties">AreaProperties:
+  planting_type:
+    type: string
+    required: true
+    allowed: [flat, row, mound]</code></pre>
+      </section>
+      <section>
+        <h2 id="api-area-properties-attributes">Attributes</h2>
+        <table class="outline-table" aria-labelledby="api-area-properties-attributes">
+          <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>planting_type</code></th><td>Planting arrangement: a flat surface, rows, or mounds.</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section>
+        <h2 id="api-area-properties-example">Example</h2>
+        <pre><code class="language-yaml" data-proposed-example="AreaProperties">planting_type: row</code></pre>
+      </section>
+
+    </article>
+
+    <article id="api-drawing-tools" data-parent="build-api" aria-labelledby="api-drawing-tools-title">
+      <header>
+        <p class="label">Build API</p>
+        <h1 id="api-drawing-tools-title">DrawingTools</h1>
+        <p>Placeholders for the <a href="#build-tools">drawing tool</a> objects. Shapes are not yet defined or implemented.</p>
+      </header>
+      <section>
+        <h2 id="api-drawing-tools-point">Point</h2>
+        <pre><code class="language-yaml" data-shape="Point">Point: {}</code></pre>
+      </section>
+      <section>
+        <h2 id="api-drawing-tools-line">Line</h2>
+        <pre><code class="language-yaml" data-shape="Line">Line: {}</code></pre>
+      </section>
+      <section>
+        <h2 id="api-drawing-tools-center-diameter-circle">CenterDiameterCircle</h2>
+        <pre><code class="language-yaml" data-shape="CenterDiameterCircle">CenterDiameterCircle: {}</code></pre>
+      </section>
+      <section>
+        <h2 id="api-drawing-tools-two-point-circle">TwoPointCircle</h2>
+        <pre><code class="language-yaml" data-shape="TwoPointCircle">TwoPointCircle: {}</code></pre>
+      </section>
+      <section>
+        <h2 id="api-drawing-tools-fill">Fill</h2>
+        <pre><code class="language-yaml" data-shape="Fill">Fill: {}</code></pre>
+      </section>
+      <section>
+        <h2 id="api-drawing-tools-reference">Reference</h2>
+        <pre><code class="language-yaml" data-shape="Reference">Reference: {}</code></pre>
+      </section>
+    </article>
+
+    <article id="plant" aria-labelledby="plant-title">
+      <header>
+        <h1 id="plant-title">Plant</h1>
+        <p>Choose available seeds, arrange plantings, and turn the plan into directions.</p>
+      </header>
+      <section>
+        <h2 id="plant-seed-vault">Seed vault</h2>
+        <p>Stored seeds and quantities available to plan with.</p>
+      </section>
+      <section>
+        <h2 id="plant-greenhouse">Greenhouse</h2>
+        <p>Sown seeds that are germinating or being raised for planting.</p>
+      </section>
+      <section>
+        <h2 id="plant-grow-engine">Grow engine</h2>
+        <p>Suggest what is available now and next season, using seed stock, greenhouse starts, and growing guidance from Johnny’s Selected Seeds. Show estimated time to harvest.</p>
+        <figure>
+          <ol class="flow"><li>Seeds + starts</li><li>Season + guidance</li><li>Planting suggestions</li></ol>
+        </figure>
+      </section>
+      <section>
+        <h2 id="plant-seasons">Seasons</h2>
+        <p>Season planning needs both the USDA zone and local frost dates. Zone alone does not determine planting dates.</p>
+      </section>
+      <section>
+        <h2 id="plant-planting-tool">Planting tool</h2>
+        <p>Choose from the grow engine or seed vault, then place seeds in plots and choose when to plant. Use row or flat spacing to estimate capacity and potential maximum yield.</p>
+        <figure>
+          <div class="planting-sketch"><span>Seed selection</span><span aria-hidden="true">→</span><div class="seed-plot"><span>Plot</span><span class="seed-row" aria-hidden="true">○ &nbsp; ○ &nbsp; ○ &nbsp; ○</span><span class="seed-row" aria-hidden="true">○ &nbsp; ○ &nbsp; ○ &nbsp; ○</span></div></div>
+        </figure>
+      </section>
+      <section>
+        <h2 id="plant-instructions">Instructions</h2>
+        <p>Generate what to sow, when to sow, and how to sow from the planting plan.</p>
+      </section>
+    </article>
+
+    <article id="harvest" aria-labelledby="harvest-title">
+      <header>
+        <h1 id="harvest-title">Harvest</h1>
+        <p>A rolling view of expected harvests from planned and growing crops.</p>
+      </header>
+      <section>
+        <h2 id="harvest-window">Harvest window</h2>
+        <p>Show approximate readiness by crop and plot.</p>
+        <figure>
+          <div class="harvest-sketch"><div class="timeline-labels"><span>Now</span><span>Upcoming</span><span>Later</span></div><div class="timeline-track"><span>Estimated harvest window</span></div></div>
+        </figure>
+      </section>
+      <section>
+        <h2 id="harvest-yield">Yield</h2>
+        <p>Estimate amounts in crop-appropriate units: pounds, heads, bunches, and others.</p>
+      </section>
+    </article>
+
+    <article id="money" aria-labelledby="money-title">
+      <header>
+        <h1 id="money-title">Money</h1>
+        <p>Compare growing inputs with estimated harvest value.</p>
+      </header>
+      <section>
+        <h2 id="money-input-costs">Input costs</h2>
+        <p>Seeds, water, fertilizer, amendments, and other growing costs.</p>
+      </section>
+      <section>
+        <h2 id="money-yield-value">Yield value</h2>
+        <p>Value the expected harvest and compare yield value / input cost.</p>
+        <figure>
+          <ol class="flow"><li>Yield × unit value</li><li>÷ input cost</li><li>Value-to-cost ratio</li></ol>
+        </figure>
+      </section>
+    </article>
+
+    <article id="reference" aria-labelledby="reference-title">
+      <header>
+        <h1 id="reference-title">Reference</h1>
+        <p>A growing knowledge record for every seed vault item.</p>
+      </header>
+      <section>
+        <h2 id="reference-growing-guidance">Growing guidance</h2>
+        <p>Keep variety information and Johnny’s Selected Seeds growing guidance linked to each seed item.</p>
+      </section>
+      <section>
+        <h2 id="reference-local-knowledge">Local knowledge</h2>
+        <p>Save notes, tips, and observations to refine growing practices for this area over time.</p>
+        <figure>
+          <ol class="flow"><li>Seed item</li><li>Guidance + local notes</li><li>Future planting decisions</li></ol>
+        </figure>
+      </section>
+    </article>
+  </main>
+</body>
+</html>

@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Build — Screen layout · Garden Gnome</title>
+  <link rel="stylesheet" href="build-layout.css">
+  <script src="build-layout.js" defer></script>
+</head>
+<body>
+  <header class="page-header">
+    <a class="icon-button" href="index.html#build-canvas" aria-label="Back to Canvas documentation"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12H4M11 5L4 12L11 19"/></svg></a>
+    <h1>Drawing workspace</h1>
+    <nav class="workspace-bar" aria-label="Workspace menus">
+      <button type="button" disabled title="File actions are not implemented">File</button>
+      <details id="view-menu">
+        <summary>View</summary>
+        <div class="view-options">
+          <label><input type="checkbox" data-panel-visibility="tools-panel" aria-controls="tools-panel" checked>Drawing tools</label>
+          <label><input type="checkbox" data-panel-visibility="canvas-settings-panel" aria-controls="canvas-settings-panel" checked>Settings</label>
+          <label><input type="checkbox" data-panel-visibility="layers-panel" aria-controls="layers-panel" checked>Layers</label>
+        </div>
+      </details>
+      <details id="preferences-menu">
+        <summary>Preferences</summary>
+        <div class="preferences-options">
+          <button id="open-preferences" type="button" aria-controls="preferences-panel" aria-expanded="false">Appearance &amp; behavior</button>
+        </div>
+      </details>
+    </nav>
+  </header>
+  <main>
+    <div class="drawing-scroll" role="region" aria-label="Drawing workspace">
+      <div class="drawing-board">
+        <svg class="drawing" viewBox="0 0 1400 900" preserveAspectRatio="xMidYMid slice" role="img" aria-labelledby="drawing-title drawing-description">
+          <title id="drawing-title">A field divided into plots and planting areas on a grid</title>
+          <desc id="drawing-description">A closed field boundary contains a vegetable plot with a selected row area and a mound area, and a flower plot with a circular flat area. The selected area has four point handles. All shapes are inside their parent boundaries.</desc>
+          <defs>
+            <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse"><path d="M30 0H0V30" fill="none" stroke="#dce0d6" stroke-width="1"/></pattern>
+            <pattern id="dots" width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="7" cy="7" r="1.3" fill="#9ea994"/></pattern>
+            <pattern id="crosshatch" width="14" height="14" patternUnits="userSpaceOnUse"><path d="M0 0L14 14M0 14L14 0" fill="none" stroke="#9ea994" stroke-width="1"/></pattern>
+            <pattern id="crosses" width="14" height="14" patternUnits="userSpaceOnUse"><path d="M7 4V10M4 7H10" fill="none" stroke="#9ea994" stroke-width="1"/></pattern>
+            <pattern id="rows" width="30" height="36" patternUnits="userSpaceOnUse"><rect x="0" y="7" width="30" height="14" fill="#dae4cf"/><path d="M0 7H30M0 21H30" stroke="#9eaf90" stroke-width="1"/></pattern>
+            <pattern id="mounds" x="369" y="514" width="45" height="48" patternUnits="userSpaceOnUse"><circle cx="22.5" cy="24" r="12" fill="#e5e8df" stroke="#a5af9b" stroke-width="1.2"/></pattern>
+          </defs>
+          <rect width="1400" height="900" fill="#f8f9f3"/>
+          <g id="reference-images"></g>
+          <rect width="1400" height="900" fill="url(#grid)"/>
+          <path d="M0 0H1400V900H0Z M310 155H945L1050 285V730H310Z" fill="#e4e7df" fill-opacity=".58" fill-rule="evenodd"/>
+          <path id="field-boundary" d="M310 155H945L1050 285V730H310Z" fill="none" stroke="#465b3c" stroke-width="3"/>
+          <text x="330" y="139" class="field-label" data-layer-label="field">Field</text>
+
+          <rect data-plot-id="vegetables" x="344" y="199" width="365" height="489" rx="0" fill="#f6f7f0" fill-opacity=".7" stroke="#99a18f" stroke-width="1.5" stroke-dasharray="7 5"/>
+          <text x="365" y="227" class="plot-label"><tspan data-layer-label="vegetables">Vegetables</tspan> / Plot</text>
+          <rect data-area-id="area-01" x="369" y="263" width="315" height="200" fill="url(#rows)" stroke="#365e3e" stroke-width="2"/>
+          <g fill="#faf9f5" stroke="#365e3e" stroke-width="2">
+            <circle cx="369" cy="263" r="5"/><circle cx="684" cy="263" r="5"/>
+            <circle cx="369" cy="463" r="5"/><circle cx="684" cy="463" r="5"/>
+          </g>
+          <rect x="384" y="282" width="160" height="30" fill="#faf9f5"/>
+          <text x="394" y="303" class="area-label"><tspan data-layer-label="area-01">Area 01</tspan><tspan data-ground-label="area-01"> · Row</tspan></text>
+          <rect data-area-id="area-02" x="369" y="514" width="315" height="144" fill="url(#mounds)" stroke="#8d9981" stroke-width="1.2"/>
+          <rect x="384" y="528" width="179" height="30" fill="#faf9f5"/>
+          <text x="394" y="549" class="area-label"><tspan data-layer-label="area-02">Area 02</tspan><tspan data-ground-label="area-02"> · Mound</tspan></text>
+
+          <path data-plot-id="flowers" d="M750 199H923L1016 304V688H750Z" fill="#f6f7f0" fill-opacity=".7" stroke="#99a18f" stroke-width="1.5" stroke-dasharray="7 5"/>
+          <text x="772" y="338" class="plot-label"><tspan data-layer-label="flowers">Flowers</tspan> / Plot</text>
+          <circle data-area-id="area-03" cx="883" cy="493" r="106" fill="url(#dots)" stroke="#8d9981" stroke-width="1.2"/>
+          <rect x="806" y="477" width="154" height="30" fill="#faf9f5"/>
+          <text x="815" y="498" class="area-label"><tspan data-layer-label="area-03">Area 03</tspan><tspan data-ground-label="area-03"> · Flat</tspan></text>
+        </svg>
+
+        <div class="workspace-menus">
+        <section id="tools-panel" class="panel tools" aria-labelledby="tools-heading">
+          <div class="panel-heading">
+            <h2 id="tools-heading">Drawing tools</h2>
+            <button type="button" class="icon-button panel-toggle" data-panel-toggle aria-label="Minimize Drawing tools" aria-controls="tools-content" aria-expanded="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12H19"/><path class="expand-mark" d="M12 5V19"/></svg></button>
+            <button type="button" class="icon-button" data-panel-close aria-label="Close Drawing tools"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6L18 18M18 6L6 18"/></svg></button>
+          </div>
+          <div id="tools-content" class="panel-content">
+          <div class="panel-inner">
+          <ul class="tool-list">
+            <li><button type="button" data-tool="point" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3L6 19L11 14L16 21L19 19L14 12L21 11Z"/></svg><span>Point</span></button></li>
+            <li><button type="button" data-tool="line" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19L19 5"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="5" r="2"/></svg><span>Line</span></button></li>
+            <li><button type="button" data-tool="center-diameter-circle" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12H21M12 9V15"/></svg><span>Center-diameter circle</span></button></li>
+            <li><button type="button" data-tool="two-point-circle" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M5.6 18.4L18.4 5.6"/><circle cx="5.6" cy="18.4" r="2"/><circle cx="18.4" cy="5.6" r="2"/></svg><span>Two-point circle</span></button></li>
+            <li><button type="button" data-tool="fill" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9L12 2L20 10L12 19Z M4 9H19M4 22H22"/></svg><span>Fill</span></button></li>
+            <li><button type="button" data-tool="reference" aria-pressed="false" disabled title="Select a reference layer with an image"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18"/><circle cx="8" cy="8" r="2"/><path d="M3 18L9 12L13 16L17 10L21 14"/></svg><span>Reference</span></button></li>
+          </ul>
+          <fieldset class="property-group tool-options" aria-live="polite">
+            <legend>Functions</legend>
+            <div data-tool-options="point">
+              <ul class="tool-list" aria-label="Point functions">
+                <li><button type="button" data-point-action="move" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3V21M3 12H21M8 7L12 3L16 7M8 17L12 21L16 17M7 8L3 12L7 16M17 8L21 12L17 16"/></svg><span>Move</span></button></li>
+                <li><button type="button" data-point-action="place" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3V19L7 15L11 21L14 19L10 13L16 12Z"/><circle cx="19" cy="5" r="3"/></svg><span>Place</span></button></li>
+                <li><button type="button" data-point-action="connect" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3V19L7 15L11 21L14 19L10 13L16 12Z M17.5 4.5L19.5 6.5"/><circle cx="16" cy="3" r="2"/><circle cx="21" cy="8" r="2"/></svg><span>Connect</span></button></li>
+                <li><button type="button" data-point-action="delete" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3V19L7 15L11 21L14 19L10 13L16 12Z M17 3L22 8M22 3L17 8"/></svg><span>Delete</span></button></li>
+              </ul>
+            </div>
+            <div data-tool-options="fill" hidden>
+              <div class="swatches"><span><i class="dots"></i>Dots</span><span><i class="hatch"></i>Crosshatch</span><span><i class="crosses"></i>Crosses</span></div>
+            </div>
+            <div data-tool-options="reference" hidden>
+              <ul class="tool-list" aria-label="Reference functions">
+                <li><button type="button" data-reference-action="move" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3V21M3 12H21M8 7L12 3L16 7M8 17L12 21L16 17M7 8L3 12L7 16M17 8L21 12L17 16"/></svg><span>Move</span></button></li>
+                <li><button type="button" data-reference-action="scale" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10V20H14M4 20L20 4M13 4H20V11"/></svg><span>Scale</span></button></li>
+                <li><button type="button" data-reference-action="line" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12H20M4 7V17M20 7V17M8 10V14M12 10V14M16 10V14"/></svg><span>Reference Line</span></button></li>
+              </ul>
+            </div>
+          </fieldset>
+          </div>
+          </div>
+        </section>
+
+        <section id="canvas-settings-panel" class="panel canvas-properties" aria-labelledby="canvas-properties-heading">
+          <div class="panel-heading">
+            <h2 id="canvas-properties-heading">Settings</h2>
+            <button type="button" class="icon-button panel-toggle" data-panel-toggle aria-label="Minimize Settings" aria-controls="properties-content" aria-expanded="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12H19"/><path class="expand-mark" d="M12 5V19"/></svg></button>
+            <button type="button" class="icon-button" data-panel-close aria-label="Close Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6L18 18M18 6L6 18"/></svg></button>
+          </div>
+          <div id="properties-content" class="panel-content">
+          <div class="panel-inner">
+          <fieldset id="canvas-settings" class="property-group">
+            <legend>Measure</legend>
+            <div class="property-control">
+              <label for="canvas-units">Units</label>
+              <select id="canvas-units" name="canvas-units">
+                <option value="ft">ft</option>
+                <option value="m">m</option>
+              </select>
+            </div>
+            <div class="property-control">
+              <label for="canvas-scale">Scale (ft)</label>
+              <input id="canvas-scale" name="canvas-scale" type="number" min="0" step="any">
+            </div>
+          </fieldset>
+          <fieldset class="property-group">
+            <legend>Snapping</legend>
+            <div class="property-control">
+              <label for="canvas-snapping">Enabled</label>
+              <input id="canvas-snapping" name="canvas-snapping" type="checkbox" aria-controls="canvas-snap-target">
+            </div>
+            <div class="property-control">
+              <label for="canvas-snap-target">Snap to</label>
+              <select id="canvas-snap-target" name="canvas-snap-target" disabled>
+                <option value="grid">Grid</option>
+                <option value="drawing">Drawing</option>
+              </select>
+            </div>
+          </fieldset>
+          <fieldset class="property-group">
+            <legend>Viewport</legend>
+            <div class="property-control">
+              <label for="menu-scaling">Menu scaling</label>
+              <select id="menu-scaling" name="menu-scaling">
+                <option value="small">Small</option>
+                <option value="medium" selected>Medium</option>
+                <option value="large">Large</option>
+              </select>
+            </div>
+          </fieldset>
+          </div>
+          </div>
+        </section>
+        </div>
+
+        <div class="layer-menus">
+        <section id="layer-settings" class="panel properties" aria-labelledby="layer-properties-heading">
+          <div class="panel-heading">
+            <h2 id="layer-properties-heading" data-layer-kind>Properties - Area</h2>
+            <button type="button" class="icon-button panel-toggle" data-panel-toggle aria-label="Minimize Properties" aria-controls="layer-properties-content" aria-expanded="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12H19"/><path class="expand-mark" d="M12 5V19"/></svg></button>
+            <button type="button" class="icon-button" data-panel-close aria-label="Close Properties"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6L18 18M18 6L6 18"/></svg></button>
+          </div>
+          <div id="layer-properties-content" class="panel-content">
+          <div class="panel-inner">
+          <div class="layer-heading">
+            <h3 id="properties-heading">Area 01</h3>
+            <button type="button" class="icon-button" id="rename-layer" aria-label="Rename layer" aria-controls="rename-form" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15L15 4L20 9L9 20L3 21Z M12 7L17 12"/></svg></button>
+          </div>
+          <form id="rename-form" hidden>
+            <label for="layer-name">Layer name</label>
+            <input id="layer-name" name="name" type="text" required pattern=".*\S.*" autocomplete="off">
+            <div class="rename-actions"><button type="submit">Save name</button><button type="button" id="cancel-rename">Cancel</button></div>
+          </form>
+          <div data-layer-context="Field" hidden>
+            <fieldset class="property-group">
+              <legend>Options</legend>
+              <div class="property-control">
+                <label for="field-color">Color</label>
+                <select id="field-color" name="field-color">
+                  <option value="#465b3c">Green</option>
+                  <option value="#376b95">Blue</option>
+                  <option value="#82603e">Brown</option>
+                  <option value="#805891">Purple</option>
+                  <option value="#b26930">Orange</option>
+                </select>
+              </div>
+              <div class="property-control">
+                <label for="soil-drainage">Soil drainage</label>
+                <select id="soil-drainage" name="soil-drainage">
+                  <option value="">Select…</option>
+                  <option value="excessive">Excessive</option>
+                  <option value="good">Good</option>
+                  <option value="moderate">Moderate</option>
+                  <option value="fair">Fair</option>
+                  <option value="poor">Poor</option>
+                </select>
+              </div>
+            </fieldset>
+            <fieldset class="property-group soil-management">
+              <legend>Soil management</legend>
+              <div class="property-control"><label for="soil-ph">pH</label><input id="soil-ph" name="soil-ph" type="number" step="any"></div>
+              <div class="property-control"><label for="soil-p">P</label><input id="soil-p" name="soil-p" type="number" step="any"></div>
+              <div class="property-control"><label for="soil-k">K</label><input id="soil-k" name="soil-k" type="number" step="any"></div>
+              <div class="property-control"><label for="soil-ca">Ca</label><input id="soil-ca" name="soil-ca" type="number" step="any"></div>
+              <div class="property-control"><label for="soil-mg">Mg</label><input id="soil-mg" name="soil-mg" type="number" step="any"></div>
+              <div class="property-control"><label for="soil-cec">CEC</label><input id="soil-cec" name="soil-cec" type="number" step="any"></div>
+              <div class="property-control"><label for="soil-ec">EC</label><input id="soil-ec" name="soil-ec" type="number" step="any"></div>
+              <div class="property-control"><label for="soil-organic-matter">Organic matter</label><input id="soil-organic-matter" name="soil-organic-matter" type="number" step="any"></div>
+            </fieldset>
+          </div>
+          <div data-layer-context="Plot" hidden>
+            <fieldset class="property-group">
+              <legend>Options</legend>
+              <div class="property-control">
+                <label for="plot-color">Color</label>
+                <select id="plot-color" name="plot-color">
+                  <option value="#99a18f">Green</option>
+                  <option value="#376b95">Blue</option>
+                  <option value="#82603e">Brown</option>
+                  <option value="#805891">Purple</option>
+                  <option value="#b26930">Orange</option>
+                </select>
+              </div>
+              <div class="property-control">
+                <label for="plot-pattern">Pattern</label>
+                <select id="plot-pattern" name="plot-pattern">
+                  <option value="none">None</option>
+                  <option value="dots">Dots</option>
+                  <option value="crosshatch">Crosshatch</option>
+                  <option value="crosses">Crosses</option>
+                </select>
+              </div>
+            </fieldset>
+          </div>
+          <div data-layer-context="area">
+            <fieldset class="property-group">
+              <legend>Options</legend>
+              <div class="property-control">
+                <label for="area-planting-type">Planting type</label>
+                <select id="area-planting-type" name="area-planting-type" aria-controls="area-options">
+                  <option value="flat">Flat</option>
+                  <option value="row">Row</option>
+                  <option value="mound">Mound</option>
+                </select>
+              </div>
+            </fieldset>
+            <fieldset id="area-options" class="property-group" aria-live="polite">
+              <legend id="area-options-heading">Row options</legend>
+              <div id="area-dimensions"></div>
+            </fieldset>
+          </div>
+          <div data-layer-context="reference" hidden>
+            <fieldset class="property-group">
+              <legend>Options</legend>
+              <div class="property-control">
+                <label for="reference-color">Color</label>
+                <select id="reference-color" name="reference-color">
+                  <option value="#99a18f">Green</option>
+                  <option value="#376b95">Blue</option>
+                  <option value="#82603e">Brown</option>
+                  <option value="#805891">Purple</option>
+                  <option value="#b26930">Orange</option>
+                </select>
+              </div>
+              <div class="reference-image-control">
+                <label class="reference-file-button">Choose file<input id="reference-image" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Choose reference image" aria-describedby="reference-image-name"></label>
+                <span id="reference-image-name">No image chosen</span>
+              </div>
+              <div class="property-control"><label for="reference-distance">Known distance (ft)</label><input id="reference-distance" type="number" min="0" step="any"></div>
+            </fieldset>
+          </div>
+          </div>
+          </div>
+        </section>
+
+        <section id="layers-panel" class="panel layers" aria-labelledby="layers-heading">
+          <div class="panel-heading">
+            <h2 id="layers-heading">Layers</h2>
+            <button type="button" class="icon-button panel-toggle" data-panel-toggle aria-label="Minimize Layers" aria-controls="layers-content" aria-expanded="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12H19"/><path class="expand-mark" d="M12 5V19"/></svg></button>
+            <button type="button" class="icon-button" data-panel-close aria-label="Close Layers"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6L18 18M18 6L6 18"/></svg></button>
+          </div>
+          <div id="layers-content" class="layers-content">
+          <div class="panel-content">
+          <div class="panel-inner">
+          <ul class="layer-tree">
+            <li><div class="layer-row" data-layer-id="field" data-kind="Field" data-parent="" data-ground=""><span class="layer-name">Field</span><small>Field</small><button type="button" class="icon-button" aria-label="Settings for Field" aria-controls="layer-settings" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3H15L16 6L19 7L21 12L19 17L16 18L15 21H9L8 18L5 17L3 12L5 7L8 6Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+              <ul>
+                <li><div class="layer-row" data-layer-id="vegetables" data-kind="Plot" data-parent="field" data-ground=""><span class="layer-name">Vegetables</span><small>Plot</small><button type="button" class="icon-button" aria-label="Settings for Vegetables" aria-controls="layer-settings" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3H15L16 6L19 7L21 12L19 17L16 18L15 21H9L8 18L5 17L3 12L5 7L8 6Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+                  <ul>
+                    <li><div class="layer-row" data-layer-id="area-01" data-kind="Area" data-parent="vegetables" data-ground="row"><span class="layer-name">Area 01</span><small>Row</small><button type="button" class="icon-button" aria-label="Settings for Area 01" aria-controls="layer-settings" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3H15L16 6L19 7L21 12L19 17L16 18L15 21H9L8 18L5 17L3 12L5 7L8 6Z"/><circle cx="12" cy="12" r="3"/></svg></button></div></li>
+                    <li><div class="layer-row" data-layer-id="area-02" data-kind="Area" data-parent="vegetables" data-ground="mound"><span class="layer-name">Area 02</span><small>Mound</small><button type="button" class="icon-button" aria-label="Settings for Area 02" aria-controls="layer-settings" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3H15L16 6L19 7L21 12L19 17L16 18L15 21H9L8 18L5 17L3 12L5 7L8 6Z"/><circle cx="12" cy="12" r="3"/></svg></button></div></li>
+                  </ul>
+                </li>
+                <li><div class="layer-row" data-layer-id="flowers" data-kind="Plot" data-parent="field" data-ground=""><span class="layer-name">Flowers</span><small>Plot</small><button type="button" class="icon-button" aria-label="Settings for Flowers" aria-controls="layer-settings" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3H15L16 6L19 7L21 12L19 17L16 18L15 21H9L8 18L5 17L3 12L5 7L8 6Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+                  <ul><li><div class="layer-row" data-layer-id="area-03" data-kind="Area" data-parent="flowers" data-ground="flat"><span class="layer-name">Area 03</span><small>Flat</small><button type="button" class="icon-button" aria-label="Settings for Area 03" aria-controls="layer-settings" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3H15L16 6L19 7L21 12L19 17L16 18L15 21H9L8 18L5 17L3 12L5 7L8 6Z"/><circle cx="12" cy="12" r="3"/></svg></button></div></li></ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+          </div>
+          </div>
+          <div class="layer-actions" role="group" aria-label="Add a layer">
+            <button type="button" aria-label="Add Plot" title="Add Plot" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18"/><path d="M3 10H21M10 3V21"/></svg></button>
+            <button type="button" aria-label="Add Area" title="Add Area" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18"/><path d="M6 7H18M6 12H18M6 17H18"/></svg></button>
+            <button id="add-reference" type="button" aria-label="Add Reference" title="Add Reference"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18"/><circle cx="8" cy="8" r="2"/><path d="M3 17L9 11L13 15L17 11L21 15"/></svg></button>
+          </div>
+          </div>
+        </section>
+        </div>
+        <section id="preferences-panel" class="panel preferences" aria-labelledby="preferences-heading" hidden>
+          <div class="panel-heading">
+            <h2 id="preferences-heading">Appearance &amp; behavior</h2>
+            <button type="button" class="icon-button panel-toggle" data-panel-toggle aria-label="Minimize Appearance and behavior" aria-controls="preferences-content" aria-expanded="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12H19"/><path class="expand-mark" d="M12 5V19"/></svg></button>
+            <button type="button" class="icon-button" data-panel-close aria-label="Close Appearance and behavior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6L18 18M18 6L6 18"/></svg></button>
+          </div>
+          <form id="preferences-content" class="panel-content">
+            <div class="panel-inner">
+              <fieldset class="property-group">
+                <legend>Drawing</legend>
+                <div class="property-control"><label for="drawing-line-width">Line width (px)</label><input id="drawing-line-width" type="number" min="0.25" step="0.25" value="2" required></div>
+              </fieldset>
+              <fieldset class="property-group">
+                <legend>Grid</legend>
+                <div class="property-control"><label for="grid-thickness">Thickness (px)</label><input id="grid-thickness" type="number" min="0.25" step="0.25" value="1" required></div>
+                <div class="property-control"><label for="grid-color">Color</label><input id="grid-color" type="color" value="#dce0d6"></div>
+                <div class="property-control"><label for="grid-opacity">Opacity (%)</label><input id="grid-opacity" type="number" min="0" max="100" step="1" value="100" required></div>
+              </fieldset>
+              <fieldset class="property-group">
+                <legend>Zoom limits</legend>
+                <div class="property-control"><label for="viewport-min-zoom">Minimum (%)</label><input id="viewport-min-zoom" type="number" min="1" max="100" step="1" value="25" required></div>
+                <div class="property-control"><label for="viewport-max-zoom">Maximum (%)</label><input id="viewport-max-zoom" type="number" min="100" step="1" value="800" required></div>
+              </fieldset>
+              <div class="preference-actions"><button type="submit">Apply</button><span id="preferences-status" role="status"></span></div>
+            </div>
+          </form>
+        </section>
+        <div class="canvas-status">
+          <div class="scale-readout">
+            <svg id="grid-scale-bar" viewBox="0 0 30 12" preserveAspectRatio="none" aria-hidden="true"><path d="M0 0V12M0 6H30M30 0V12" fill="none" stroke="currentColor" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg>
+            <span id="grid-scale-label" aria-live="polite">1 grid length = — ft</span>
+          </div>
+          <span id="selected-layer">Selected: Vegetables / Area 01</span>
+        </div>
+      </div>
+    </div>
+  </main>
+  <template id="reference-layer-template">
+    <li><div class="layer-row" data-kind="Reference" data-parent="" data-ground=""><button type="button" class="layer-name">Reference</button><small>Image</small><button type="button" class="icon-button" aria-label="Settings for Reference" aria-controls="layer-settings" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3H15L16 6L19 7L21 12L19 17L16 18L15 21H9L8 18L5 17L3 12L5 7L8 6Z"/><circle cx="12" cy="12" r="3"/></svg></button></div></li>
+  </template>
+</body>
+</html>
