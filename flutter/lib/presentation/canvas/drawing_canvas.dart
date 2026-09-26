@@ -246,6 +246,7 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
                       selectedImageId: editor.selectedImage?.id,
                       referenceLineImageId: editor.referenceLineImageId,
                       referenceLineStart: editor.referenceLineStart,
+                      devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
                     ),
                   ),
                 );

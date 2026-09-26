@@ -41,6 +41,7 @@ class SceneState {
     this.selectedImageId,
     this.referenceLineImageId,
     this.referenceLineStart,
+    this.devicePixelRatio = 1,
   });
 
   final GardenDocument document;
@@ -69,6 +70,10 @@ class SceneState {
   /// that image's pixels.
   final String? referenceLineImageId;
   final Vec? referenceLineStart;
+
+  /// Physical pixels per logical pixel, so pattern tiles are drawn at the
+  /// screen's own sharpness.
+  final double devicePixelRatio;
 }
 
 /// Draws the grid, every layer, and the current tool feedback.
@@ -214,6 +219,7 @@ class ScenePainter extends CustomPainter {
       pattern,
       color.withValues(alpha: 0.45),
       _camera.toScreen(Vec.zero),
+      devicePixelRatio: scene.devicePixelRatio,
     );
   }
 
@@ -240,27 +246,19 @@ class ScenePainter extends CustomPainter {
 
   /// Light grey diagonal lines marking a closed layer that is not active.
   void _paintHatch(Canvas canvas, Path region) {
-    final bounds = region.getBounds();
-    canvas.save();
-    canvas.clipPath(region);
-    final visible = visibleRect(canvas, bounds);
-    if (visible != null) {
-      canvas.drawRect(
-        visible,
-        Paint()..color = Palette.hatch.withValues(alpha: 0.12),
-      );
-      // Only the on-screen part is hatched, keeping the lines' spacing
-      // tied to the shape's corner so they do not shift as the view moves.
-      final lines = LineBatch();
-      risingDiagonals(lines, visible, bounds.left + bounds.top, 8);
-      lines.draw(
-        canvas,
-        Paint()
-          ..color = Palette.hatch
-          ..strokeWidth = 1,
-      );
-    }
-    canvas.restore();
+    canvas.drawPath(
+      region,
+      Paint()..color = Palette.hatch.withValues(alpha: 0.12),
+    );
+    // The lines are tied to the shape's corner, so they move with it.
+    paintHatch(
+      canvas,
+      region,
+      Palette.hatch,
+      8,
+      region.getBounds().topLeft,
+      devicePixelRatio: scene.devicePixelRatio,
+    );
   }
 
   void _paintLabel(

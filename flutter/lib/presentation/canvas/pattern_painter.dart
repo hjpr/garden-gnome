@@ -10,84 +10,38 @@ import '../../domain/layer.dart';
 /// [anchor] is the screen position of the world origin: tying the pattern
 /// to it keeps the marks still while the view pans.
 ///
-/// Only the part of [area] that is on screen gets marks. Zoomed in, a
-/// shape can be far larger than the view, and marking all of it made the
-/// work grow with the square of the zoom.
+/// The marks are drawn once into a small repeating tile, and the area is
+/// filled with that tile in one draw. Drawing each mark through a clip
+/// shaped like the area was far slower, most of all zoomed in.
 void paintFillPattern(
   Canvas canvas,
   Path area,
   FillPattern pattern,
   Color color,
-  Offset anchor,
-) {
-  final bounds = area.getBounds();
-  if (bounds.isEmpty) return;
-  canvas.save();
-  canvas.clipPath(area);
-  final visible = visibleRect(canvas, bounds);
-  if (visible != null) _paintMarks(canvas, visible, pattern, color, anchor);
-  canvas.restore();
+  Offset anchor, {
+  double devicePixelRatio = 1,
+}) {
+  final spec = _specs[pattern]!;
+  canvas.drawPath(
+    area,
+    _tilePaint(_Tile(spec, color, devicePixelRatio), anchor),
+  );
 }
 
-/// The part of [bounds] inside the canvas clip, grown a little so marks
-/// that only just reach the clip edge still draw their anti-aliased edge.
-/// Null when nothing of [bounds] is visible.
-Rect? visibleRect(Canvas canvas, Rect bounds) {
-  final clip = canvas.getLocalClipBounds();
-  if (!clip.overlaps(bounds)) return null;
-  return clip.intersect(bounds).inflate(2);
-}
-
-void _paintMarks(
+/// Light grey diagonal lines [step] pixels apart along x, filling
+/// [region], with [phase] fixing where the lines fall.
+void paintHatch(
   Canvas canvas,
-  Rect bounds,
-  FillPattern pattern,
+  Path region,
   Color color,
-  Offset anchor,
-) {
-  final lines = Paint()
-    ..color = color
-    ..strokeWidth = 1
-    ..style = PaintingStyle.stroke;
-  final segments = LineBatch();
-  switch (pattern) {
-    case FillPattern.diagonal:
-      _diagonals(segments, bounds, anchor, 10, rising: true);
-    case FillPattern.rows:
-      _horizontals(segments, bounds, anchor, 9);
-    case FillPattern.crosshatch:
-      _diagonals(segments, bounds, anchor, 12, rising: true);
-      _diagonals(segments, bounds, anchor, 12, rising: false);
-    case FillPattern.grid:
-      _horizontals(segments, bounds, anchor, 12);
-      _verticals(segments, bounds, anchor, 12);
-    case FillPattern.dots:
-      // Round points as wide as a dot draw the same discs as drawCircle,
-      // in one call instead of one per dot.
-      final dots = <double>[];
-      _eachCell(
-        bounds,
-        anchor,
-        10,
-        (c) => dots
-          ..add(c.dx)
-          ..add(c.dy),
-      );
-      canvas.drawRawPoints(
-        PointMode.points,
-        Float32List.fromList(dots),
-        Paint()
-          ..color = color
-          ..strokeWidth = 3.6
-          ..strokeCap = StrokeCap.round,
-      );
-    case FillPattern.crosses:
-      _eachCell(bounds, anchor, 14, (c) {
-        segments.add(c - const Offset(3, 0), c + const Offset(3, 0));
-        segments.add(c - const Offset(0, 3), c + const Offset(0, 3));
-      });
-  }
-  segments.draw(canvas, lines);
+  double step,
+  Offset phase, {
+  double devicePixelRatio = 1,
+}) {
+  canvas.drawPath(
+    region,
+    _tilePaint(_Tile(_TileSpec.hatch(step), color, devicePixelRatio), phase),
+  );
 }
 
 /// Straight line pieces collected so they are drawn in one call. Each
@@ -111,98 +65,143 @@ class LineBatch {
   }
 }
 
-/// The first multiple of [step] (offset by [phase]) at or below [value].
-double patternStart(double value, double phase, double step) =>
-    ((value - phase) / step).floorToDouble() * step + phase;
+// --------------------------------------------------------------- tiles
 
-void _horizontals(LineBatch out, Rect bounds, Offset anchor, double step) {
-  for (
-    var y = patternStart(bounds.top, anchor.dy, step);
-    y <= bounds.bottom;
-    y += step
-  ) {
-    out.add(Offset(bounds.left, y), Offset(bounds.right, y));
+/// How one pattern repeats: the tile's side in logical pixels, and how to
+/// draw its marks inside a square of that side with the world origin at
+/// the tile's corner. Marks that cross an edge are drawn on both sides,
+/// so tiles join without seams.
+class _TileSpec {
+  const _TileSpec(this.key, this.side, this.draw);
+
+  /// Diagonals [spacing] apart. Their repeat along x is spacing·√2, which
+  /// is not a whole number of pixels, so the tile holds several repeats
+  /// and the spacing is stretched by well under a hundredth of a pixel to
+  /// fit exactly.
+  factory _TileSpec.diagonal(
+    String key,
+    double spacing, {
+    required int repeats,
+    bool crossed = false,
+  }) {
+    final side = (spacing * math.sqrt2 * repeats).roundToDouble();
+    final step = side / repeats;
+    return _TileSpec(key, side, (canvas, color) {
+      final lines = LineBatch();
+      for (var k = -side; k <= 2 * side + 0.001; k += step) {
+        // x + y = k (rising) across the tile, from top to bottom.
+        lines.add(Offset(k, 0), Offset(k - side, side));
+        // x − y = k (falling).
+        if (crossed) lines.add(Offset(k - side, 0), Offset(k, side));
+      }
+      lines.draw(canvas, _stroke(color));
+    });
   }
+
+  /// The grey hatch on inactive land: rising lines [step] apart along x.
+  factory _TileSpec.hatch(double step) =>
+      _TileSpec('hatch$step', step, (canvas, color) {
+        final lines = LineBatch();
+        for (var k = 0.0; k <= 2 * step + 0.001; k += step) {
+          lines.add(Offset(k, 0), Offset(k - step, step));
+        }
+        lines.draw(canvas, _stroke(color));
+      });
+
+  final String key;
+  final double side;
+  final void Function(Canvas canvas, Color color) draw;
 }
 
-void _verticals(LineBatch out, Rect bounds, Offset anchor, double step) {
-  for (
-    var x = patternStart(bounds.left, anchor.dx, step);
-    x <= bounds.right;
-    x += step
-  ) {
-    out.add(Offset(x, bounds.top), Offset(x, bounds.bottom));
-  }
-}
+Paint _stroke(Color color) => Paint()
+  ..color = color
+  ..strokeWidth = 1
+  ..style = PaintingStyle.stroke;
 
-/// 45° lines [spacing] apart. A rising line keeps x + y constant; a
-/// falling one x − y.
-void _diagonals(
-  LineBatch out,
-  Rect bounds,
-  Offset anchor,
-  double spacing, {
-  required bool rising,
-}) {
-  // Lines [spacing] apart measured across them are step apart along x.
-  final step = spacing * math.sqrt2;
-  if (rising) {
-    risingDiagonals(out, bounds, anchor.dx + anchor.dy, step);
-    return;
-  }
-  final h = bounds.height;
-  for (
-    var k = patternStart(
-      bounds.left - bounds.bottom,
-      anchor.dx - anchor.dy,
-      step,
-    );
-    k <= bounds.right - bounds.top;
-    k += step
-  ) {
-    // x − y = k.
-    out.add(
-      Offset(k + bounds.top, bounds.top),
-      Offset(k + bounds.top + h, bounds.bottom),
-    );
-  }
-}
-
-/// Lines where x + y = [phase] + n·[step], across [bounds] from its top
-/// edge to its bottom edge.
-void risingDiagonals(LineBatch out, Rect bounds, double phase, double step) {
-  final h = bounds.height;
-  for (
-    var k = patternStart(bounds.left + bounds.top, phase, step);
-    k <= bounds.right + bounds.bottom;
-    k += step
-  ) {
-    out.add(
-      Offset(k - bounds.top, bounds.top),
-      Offset(k - bounds.top - h, bounds.bottom),
-    );
-  }
-}
-
-/// Calls [draw] at the centre of every [step]-sized cell covering bounds.
-void _eachCell(
-  Rect bounds,
-  Offset anchor,
-  double step,
-  void Function(Offset centre) draw,
-) {
-  final half = step / 2;
-  for (
-    var y = patternStart(bounds.top - half, anchor.dy, step);
-    y <= bounds.bottom + half;
-    y += step
-  ) {
-    for (
-      var x = patternStart(bounds.left - half, anchor.dx, step);
-      x <= bounds.right + half;
-      x += step
-    ) {
-      draw(Offset(x + half, y + half));
+final Map<FillPattern, _TileSpec> _specs = {
+  FillPattern.diagonal: _TileSpec.diagonal('diagonal', 10, repeats: 7),
+  FillPattern.crosshatch: _TileSpec.diagonal(
+    'crosshatch',
+    12,
+    repeats: 35,
+    crossed: true,
+  ),
+  FillPattern.rows: _TileSpec('rows', 9, (canvas, color) {
+    LineBatch()
+      ..add(const Offset(0, 0), const Offset(9, 0))
+      ..add(const Offset(0, 9), const Offset(9, 9))
+      ..draw(canvas, _stroke(color));
+  }),
+  FillPattern.grid: _TileSpec('grid', 12, (canvas, color) {
+    final lines = LineBatch();
+    for (final at in [0.0, 12.0]) {
+      lines
+        ..add(Offset(0, at), Offset(12, at))
+        ..add(Offset(at, 0), Offset(at, 12));
     }
-  }
+    lines.draw(canvas, _stroke(color));
+  }),
+  // One dot in the middle of each 10 px cell.
+  FillPattern.dots: _TileSpec('dots', 10, (canvas, color) {
+    canvas.drawCircle(const Offset(5, 5), 1.8, Paint()..color = color);
+  }),
+  // One small cross in the middle of each 14 px cell.
+  FillPattern.crosses: _TileSpec('crosses', 14, (canvas, color) {
+    LineBatch()
+      ..add(const Offset(4, 7), const Offset(10, 7))
+      ..add(const Offset(7, 4), const Offset(7, 10))
+      ..draw(canvas, _stroke(color));
+  }),
+};
+
+/// One drawn tile: a pattern in one colour at one screen density.
+class _Tile {
+  _Tile(this.spec, this.color, this.devicePixelRatio);
+
+  final _TileSpec spec;
+  final Color color;
+  final double devicePixelRatio;
+
+  String get key => '${spec.key}|${color.toARGB32()}|$devicePixelRatio';
+}
+
+/// Tiles already drawn. There are only a few patterns and layer colours,
+/// so this stays small.
+final Map<String, Image> _tiles = {};
+
+/// A paint that fills with [tile], repeated, with a tile corner at
+/// [origin] so the marks keep their place as the view moves.
+Paint _tilePaint(_Tile tile, Offset origin) {
+  final side = tile.spec.side;
+  // Drawn at the screen's own density so marks stay as sharp as before.
+  final pixels = math.max(1, (side * tile.devicePixelRatio).round());
+  final image = _tiles[tile.key] ??= () {
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder)..scale(pixels / side);
+    tile.spec.draw(canvas, tile.color);
+    final picture = recorder.endRecording();
+    final image = picture.toImageSync(pixels, pixels);
+    picture.dispose();
+    return image;
+  }();
+  final scale = side / pixels;
+  // A tile corner on a whole screen pixel keeps the marks crisp.
+  final ratio = tile.devicePixelRatio;
+  origin = Offset(
+    (origin.dx * ratio).roundToDouble() / ratio,
+    (origin.dy * ratio).roundToDouble() / ratio,
+  );
+  return Paint()
+    ..filterQuality = FilterQuality.low
+    ..shader = ImageShader(
+      image,
+      TileMode.repeated,
+      TileMode.repeated,
+      Float64List.fromList([
+        scale, 0, 0, 0, //
+        0, scale, 0, 0,
+        0, 0, 1, 0,
+        origin.dx, origin.dy, 0, 1,
+      ]),
+    );
 }
