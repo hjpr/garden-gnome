@@ -10,8 +10,7 @@ class ArcPreview extends Preview {
     this.curve,
     required this.valid,
     this.joinTarget,
-    super.guideX,
-    super.guideY,
+    super.guides,
   });
 
   final Vec start;
@@ -30,8 +29,7 @@ class PolygonPreview extends Preview {
     required this.start,
     required this.corners,
     required this.valid,
-    super.guideX,
-    super.guideY,
+    super.guides,
   });
 
   final Vec start;

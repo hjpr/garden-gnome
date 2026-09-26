@@ -78,8 +78,7 @@ extension _ConstructionInput on CanvasInput {
         start: points.first.position,
         through: snap.position,
         valid: true,
-        guideX: snap.guideX,
-        guideY: snap.guideY,
+        guides: snap.guides,
       );
     }
     final end = _arcEndpointAt(geometry, screen, from: points.first.pointId);
@@ -97,8 +96,7 @@ extension _ConstructionInput on CanvasInput {
       valid:
           curve != null &&
           _staysValid(layerId, (e) => _addArc(e, points.first, end, curve)),
-      guideX: end.pointId == null ? snap.guideX : null,
-      guideY: end.pointId == null ? snap.guideY : null,
+      guides: end.pointId == null ? snap.guides : SnapGuides.none,
     );
   }
 
@@ -153,12 +151,7 @@ extension _ConstructionInput on CanvasInput {
     final snap = _snapped(screen);
     final start = editor.polygonStart;
     if (start == null) {
-      return PointPreview(
-        snap.position,
-        valid: true,
-        guideX: snap.guideX,
-        guideY: snap.guideY,
-      );
+      return PointPreview(snap.position, valid: true, guides: snap.guides);
     }
     final corners = _polygonCorners(start, snap.position);
     return PolygonPreview(
@@ -167,8 +160,7 @@ extension _ConstructionInput on CanvasInput {
       valid:
           corners != null &&
           _staysValid(layerId, (e) => _addPolygon(e, corners)),
-      guideX: snap.guideX,
-      guideY: snap.guideY,
+      guides: snap.guides,
     );
   }
 

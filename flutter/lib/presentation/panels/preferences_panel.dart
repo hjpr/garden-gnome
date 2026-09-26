@@ -6,8 +6,22 @@ import '../../application/workspace_settings.dart';
 import '../theme.dart';
 import '../widgets/panel.dart';
 
-/// Drawing styles and zoom limits. Typed values are held until Apply, and
-/// kept while the panel is minimized; closing the panel discards them.
+/// The groups Preferences is split into, listed down its left side.
+enum PreferencesCategory {
+  canvas('Canvas'),
+  style('Style'),
+  notifications('Notifications');
+
+  const PreferencesCategory(this.label);
+
+  final String label;
+}
+
+/// Preferences: categories on the left, their options on the right.
+///
+/// Typed values are held until Apply, across categories; closing the
+/// dialog discards them. Choices from a list (menu size, toast position)
+/// apply at once.
 class PreferencesBody extends StatefulWidget {
   const PreferencesBody({super.key, required this.editor});
 
@@ -29,6 +43,7 @@ class _PreferencesBodyState extends State<PreferencesBody> {
   };
 
   late final Map<String, TextEditingController> _text;
+  PreferencesCategory _category = PreferencesCategory.canvas;
   String? _status;
   bool _statusIsError = false;
 
@@ -73,7 +88,8 @@ class _PreferencesBodyState extends State<PreferencesBody> {
       for (final e in _text.entries) e.key: e.value.text,
     };
     _editor.draftsChanged();
-    if (_status != null) setState(() => _status = null);
+    // Apply lights up once something has been typed.
+    setState(() => _status = null);
   }
 
   void _apply() {
@@ -104,6 +120,7 @@ class _PreferencesBodyState extends State<PreferencesBody> {
         gridColor: 0xFF000000 | int.parse(colour!.group(1)!, radix: 16),
         zoomLimits: ZoomLimits(min: values[3]! / 100, max: values[4]! / 100),
         historyCapacity: history!,
+        toastPosition: _editor.settings.appearance.toastPosition,
       );
       problem = next.problem;
     }
@@ -134,39 +151,162 @@ class _PreferencesBodyState extends State<PreferencesBody> {
     ),
   );
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        PropertyGroup(title: 'Drawing', children: [_field('lineWidth')]),
+  List<Widget> _options(PreferencesCategory category) {
+    final s = _editor.settings;
+    return switch (category) {
+      PreferencesCategory.canvas => [
         PropertyGroup(
-          title: 'Grid',
+          title: 'ZOOM LIMITS',
+          children: [_field('zoomMin'), _field('zoomMax')],
+        ),
+        PropertyGroup(title: 'HISTORY', children: [_field('history')]),
+        PropertyGroup(
+          title: 'VIEWPORT',
+          children: [
+            PropertyRow(
+              label: 'Menu size',
+              child: CompactDropdown<MenuScale>(
+                label: 'Menu size',
+                value: s.menuScale,
+                items: {for (final m in MenuScale.values) m: m.label},
+                onChanged: (m) {
+                  _editor.updateSettings(s.copyWith(menuScale: m));
+                  setState(() {});
+                },
+              ),
+            ),
+          ],
+        ),
+      ],
+      PreferencesCategory.style => [
+        PropertyGroup(title: 'DRAWING', children: [_field('lineWidth')]),
+        PropertyGroup(
+          title: 'GRID',
           children: [
             _field('gridThickness'),
             _field('gridColor'),
             _field('gridOpacity'),
           ],
         ),
+      ],
+      PreferencesCategory.notifications => [
         PropertyGroup(
-          title: 'Zoom limits',
-          children: [_field('zoomMin'), _field('zoomMax')],
-        ),
-        PropertyGroup(title: 'History', children: [_field('history')]),
-        Row(
+          title: 'TOASTS',
           children: [
-            FilledButton(onPressed: _apply, child: const Text('Apply')),
-            const SizedBox(width: 12),
-            if (_status != null)
+            PropertyRow(
+              label: 'Position',
+              child: CompactDropdown<ToastPosition>(
+                label: 'Toast position',
+                value: s.appearance.toastPosition,
+                items: {for (final p in ToastPosition.values) p: p.label},
+                onChanged: (p) {
+                  _editor.updateSettings(
+                    s.copyWith(appearance: s.appearance.withToastPosition(p)),
+                  );
+                  setState(() {});
+                },
+              ),
+            ),
+          ],
+        ),
+      ],
+    };
+  }
+
+  Widget _categoryButton(PreferencesCategory category) {
+    final selected = category == _category;
+    final colour = selected ? Palette.accent : Palette.ink;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 2),
+      child: Semantics(
+        button: true,
+        selected: selected,
+        label: category.label,
+        child: Material(
+          color: selected ? Palette.wash : Colors.transparent,
+          borderRadius: BorderRadius.circular(Metrics.radius),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(Metrics.radius),
+            hoverColor: Palette.hover,
+            onTap: () => setState(() => _category = category),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      category.label,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: colour,
+                        fontWeight: selected
+                            ? FontWeight.w600
+                            : FontWeight.w400,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pending = _editor.preferencesPending;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                width: 168,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (final c in PreferencesCategory.values)
+                      _categoryButton(c),
+                  ],
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: VerticalDivider(width: 1),
+              ),
               Expanded(
-                child: Text(
-                  _status!,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: _statusIsError ? Palette.invalid : Palette.muted,
+                child: SingleChildScrollView(
+                  child: Column(
+                    key: ValueKey(_category),
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: _options(_category),
                   ),
                 ),
               ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                _status ?? '',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: _statusIsError ? Palette.invalid : Palette.muted,
+                ),
+              ),
+            ),
+            FilledButton(
+              onPressed: pending ? _apply : null,
+              child: const Text('Apply'),
+            ),
           ],
         ),
       ],

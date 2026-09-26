@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -13,8 +14,10 @@ import '../domain/region.dart';
 import '../domain/vec.dart';
 import 'camera.dart';
 import 'drafts.dart';
+import 'guides.dart';
 import 'history.dart';
 import 'previews.dart';
+import 'toasts.dart';
 import 'tools.dart';
 import 'workspace_settings.dart';
 
@@ -24,21 +27,6 @@ const _uuid = Uuid();
 /// which is not a layer.
 const referenceDraftOwner = 'reference-image';
 String newUuid() => _uuid.v4();
-
-/// A reference to one item in one layer's geometry.
-class ItemRef {
-  const ItemRef(this.layerId, this.itemId);
-
-  final String layerId;
-  final String itemId;
-
-  @override
-  bool operator ==(Object other) =>
-      other is ItemRef && other.layerId == layerId && other.itemId == itemId;
-
-  @override
-  int get hashCode => Object.hash(layerId, itemId);
-}
 
 /// The Build screen's state and the only place drawing changes are made.
 ///
@@ -50,16 +38,23 @@ class EditorController extends ChangeNotifier {
     GardenDocument? document,
     WorkspaceSettings settings = const WorkspaceSettings(),
     Camera camera = const Camera(),
-    this.title = 'Untitled garden',
+    this.title = 'Untitled',
     this.libraryId,
-  }) : _document = document ?? GardenDocument(id: newUuid()),
+    ToastCenter? toasts,
+  }) : toasts = toasts ?? ToastCenter(),
+       _document = document ?? GardenDocument(id: newUuid()),
        _settings = settings,
        _camera = camera {
     drafts.onChanged = draftsChanged;
     _savedDocument = _document;
+    _savedTitle = title;
     _ledger.record(_document);
     _history.capacity = settings.appearance.historyCapacity;
   }
+
+  /// Short pop-up messages. Shared by every drawing opened in a session,
+  /// so it is not disposed with the editor.
+  final ToastCenter toasts;
 
   // ---------------------------------------------------------------- drawing
 
@@ -78,11 +73,22 @@ class EditorController extends ChangeNotifier {
   String? libraryId;
 
   late GardenDocument _savedDocument;
+  late String _savedTitle;
 
-  /// Whether the drawing differs from the last save.
+  /// Whether the drawing or its name differs from the last save.
   ///
   /// Compares content, so undoing back to the saved state counts as clean.
-  bool get isDirty => !sameContent(_document, _savedDocument);
+  bool get isDirty =>
+      title != _savedTitle || !sameContent(_document, _savedDocument);
+
+  /// Renames the drawing. Takes effect in the library on the next Save; a
+  /// blank name is ignored.
+  void renameDrawing(String name) {
+    final trimmed = name.trim();
+    if (trimmed.isEmpty || trimmed == title) return;
+    title = trimmed;
+    notifyListeners();
+  }
 
   /// Switches to a copy of the drawing with a new identity (Save as).
   ///
@@ -98,6 +104,7 @@ class EditorController extends ChangeNotifier {
     _savedDocument = saved;
     if (libraryId != null) this.libraryId = libraryId;
     if (title != null) this.title = title;
+    _savedTitle = this.title;
     notifyListeners();
   }
 
@@ -141,6 +148,7 @@ class EditorController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _guideDwell?.cancel();
     _viewChanges.dispose();
     super.dispose();
   }
@@ -225,9 +233,25 @@ class EditorController extends ChangeNotifier {
   /// Selected items in the selected layer's geometry.
   Set<String> get selection => Set.unmodifiable(_selection);
 
-  /// The last single item selected; its points guide Drawing snapping.
-  ItemRef? _snapTarget;
-  ItemRef? get snapTarget => _snapTarget;
+  /// The geometry last hovered, which guides come from.
+  final GuideMemory guideMemory = GuideMemory();
+  List<ItemRef> get recentGuideItems => guideMemory.recent;
+
+  /// Reports the point, line or circle under the pointer, for guides.
+  /// Only the canvas redraws.
+  void hoverGuideItem(ItemRef? item) {
+    _guideDwell?.cancel();
+    if (guideMemory.hover(item)) _viewChanges.fire();
+    // A pointer resting still sends no more events, so check again once
+    // the dwell has passed.
+    if (item != null) {
+      _guideDwell = Timer(GuideMemory.dwell, () {
+        if (guideMemory.settle()) _viewChanges.fire();
+      });
+    }
+  }
+
+  Timer? _guideDwell;
 
   /// Whether Properties is showing its content: shown and not minimized.
   bool get propertiesOpen =>
@@ -236,7 +260,7 @@ class EditorController extends ChangeNotifier {
 
   Tool _tool = Tool.select;
   Tool get tool => _tool;
-  ToolFunction _function = ToolFunction.select;
+  ToolFunction _function = ToolFunction.marquee;
   ToolFunction get function => _function;
   final Map<Tool, ToolFunction> _functionMemory = {};
 
@@ -400,6 +424,22 @@ class EditorController extends ChangeNotifier {
     selectItem(itemId, toggle: toggle);
   }
 
+  /// Selects [itemIds] on [layerId] after a marquee or lasso, switching to
+  /// that layer if needed. [add] keeps what was already selected on it.
+  void selectItems(String layerId, Set<String> itemIds, {bool add = false}) {
+    if (!_document.layers.containsKey(layerId)) return;
+    _clearReferenceSelection();
+    if (layerId != _selectedLayerId) {
+      drafts.settleForLayerSwitch();
+      _selectedLayerId = layerId;
+      add = false;
+    }
+    if (!add) _selection.clear();
+    _selection.addAll(itemIds);
+    _openProperties();
+    notifyListeners();
+  }
+
   /// Replaces or toggles the geometry selection after a click.
   void selectItem(String? itemId, {bool toggle = false}) {
     if (itemId != null || !toggle) _clearReferenceSelection();
@@ -411,9 +451,6 @@ class EditorController extends ChangeNotifier {
       _selection
         ..clear()
         ..add(itemId);
-    }
-    if (_selection.length == 1 && _selectedLayerId != null) {
-      _snapTarget = ItemRef(_selectedLayerId!, _selection.single);
     }
     notifyListeners();
   }
@@ -1134,12 +1171,6 @@ class EditorController extends ChangeNotifier {
         ? null
         : _document.geometryOf(_selectedLayerId!);
     _selection.removeWhere((id) => geometry == null || !geometry.contains(id));
-    final target = _snapTarget;
-    if (target != null &&
-        (!_document.layers.containsKey(target.layerId) ||
-            !_document.geometryOf(target.layerId).contains(target.itemId))) {
-      _snapTarget = null;
-    }
     final layerGeometry = geometry;
     if (_lineAnchor != null && layerGeometry?.points[_lineAnchor] == null) {
       _lineAnchor = null;

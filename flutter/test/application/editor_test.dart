@@ -6,6 +6,7 @@ import 'package:garden_gnome/application/hit_testing.dart';
 import 'package:garden_gnome/application/tools.dart';
 import 'package:garden_gnome/domain/land_rules.dart';
 import 'package:garden_gnome/domain/layer.dart';
+import 'package:garden_gnome/domain/vec.dart';
 import '../support/first_shape.dart';
 
 /// At 100% zoom with the camera at the origin, one metre is 30 pixels.
@@ -327,7 +328,8 @@ void main() {
     test('it is the first tool and has a black arrow icon', () {
       expect(Tool.values.first, Tool.select);
       expect(Tool.select.icon, 'select.svg');
-      expect(Tool.select.hasFunctionChoice, isFalse);
+      // Its functions are Marquee and Lasso.
+      expect(Tool.select.hasFunctionChoice, isTrue);
     });
 
     test('clicking nested land picks the innermost piece', () {
@@ -649,6 +651,53 @@ void main() {
       final geometry = editor.document.geometryOf(field);
       expect(geometry.circles, isEmpty);
       expect(geometry.boundaryId, isNull);
+    });
+
+    test('deleting a circle takes its centre point too', () {
+      final (editor, input) = newEditor();
+      editor.addLayer(LayerKind.field);
+      final field = editor.selectedLayerId!;
+      editor.selectTool(Tool.circle);
+      click(input, at(5, 5));
+      click(input, at(8, 5));
+      editor.deleteSelection();
+      final geometry = editor.document.geometryOf(field);
+      expect(geometry.circles, isEmpty);
+      expect(geometry.points, isEmpty, reason: 'no stray centre is left');
+      expect(editor.document.problemOf(field), isNull);
+      editor.undo();
+      expect(editor.document.geometryOf(field).points, hasLength(1));
+    });
+
+    test('deleting a shape keeps points another shape still uses', () {
+      final (editor, input) = newEditor();
+      editor.addLayer(LayerKind.field);
+      final field = editor.selectedLayerId!;
+      drawLoop(input, [at(0, 0), at(10, 0), at(10, 10), at(0, 10)]);
+      // A circle centred on a corner of the square shares that point.
+      editor.selectTool(Tool.circle);
+      click(input, at(10, 10));
+      click(input, at(12, 10));
+      final geometry = editor.document.geometryOf(field);
+      final (next, _) = editor.tryGeometryEdit(
+        field,
+        (e) => e.delete([geometry.boundaryId!]),
+      );
+      expect(next!.geometryOf(field).points.values, [const Vec(10, 10)]);
+      expect(next.geometryOf(field).circles, hasLength(1));
+    });
+
+    test('deleting a line still keeps its points', () {
+      final (editor, input) = newEditor();
+      editor.addLayer(LayerKind.field);
+      final field = editor.selectedLayerId!;
+      drawLoop(input, [at(0, 0), at(10, 0), at(10, 10), at(0, 10)]);
+      final geometry = editor.document.geometryOf(field);
+      final (next, _) = editor.tryGeometryEdit(
+        field,
+        (e) => e.delete([geometry.lines.keys.first]),
+      );
+      expect(next!.geometryOf(field).points, hasLength(4));
     });
   });
 

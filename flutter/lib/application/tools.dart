@@ -2,7 +2,12 @@ import '../domain/layer.dart';
 
 /// What a tool function does with pointer input.
 enum ToolFunction {
-  select('Select', 'select.svg'),
+  /// Select → Marquee: drag a rectangle to select everything it touches.
+  marquee('Marquee', 'marquee.svg'),
+
+  /// Select → Lasso: drag any closed outline to select everything it
+  /// touches.
+  lasso('Lasso', 'lasso.svg'),
   place('Place', 'point-place.svg'),
   draw('Draw', 'line.svg'),
   join('Join', 'point-connect.svg'),
@@ -54,9 +59,10 @@ enum ToolFunction {
     _ => null,
   };
 
-  /// Select drags what is under the pointer; the others act on a click.
-  /// Moving and resizing are done with Select.
-  bool get drags => this == select;
+  /// Select drags what is under the pointer, or draws a selection outline
+  /// on empty ground; the others act on a click. Moving and resizing are
+  /// done with Select.
+  bool get drags => this == marquee || this == lasso;
 
   bool get drawsCircle => this == centerCircle || this == twoPointCircle;
 }
@@ -64,7 +70,7 @@ enum ToolFunction {
 /// The drawing tools, in the order the Tools panel shows them.
 enum Tool {
   /// Picks, moves, and resizes anything on any unlocked layer.
-  select('Select', 'select.svg', [ToolFunction.select]),
+  select('Select', 'select.svg', [ToolFunction.marquee, ToolFunction.lasso]),
   point('Point', 'point.svg', [ToolFunction.place, ToolFunction.delete]),
   line('Line', 'line.svg', [
     ToolFunction.draw,

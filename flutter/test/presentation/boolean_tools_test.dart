@@ -165,13 +165,15 @@ void main() {
         e.addCircle(e.addPoint(const Vec(6, 6)), 2);
       });
       editor.commit('Two shapes', next!);
-      editor.updateSettings(editor.settings.copyWith(units: Units.metres));
+      editor.updateSettings(
+        editor.settings.copyWith(areaUnits: AreaUnits.squareMetres),
+      );
       await tester.pumpWidget(workbench(editor));
       await tester.pumpAndSettle();
       expect(find.text('Net area'), findsOneWidget);
       // Two overlapping shapes: each counts until they are combined.
       final both = 100 + math.pi * 4;
-      expect(find.text(Units.metres.formatArea(both)), findsOneWidget);
+      expect(find.text(AreaUnits.squareMetres.format(both)), findsOneWidget);
       final origin = tester.getTopLeft(find.byType(DrawingCanvas));
       // Buttons stay disabled until two shapes are selected.
       await tester.tap(find.text('Subtract'));
@@ -187,17 +189,19 @@ void main() {
       await tester.tap(find.text('Subtract'));
       await tester.pumpAndSettle();
       final area = 100 - math.pi * 4;
-      expect(find.text(Units.metres.formatArea(area)), findsOneWidget);
+      expect(find.text(AreaUnits.squareMetres.format(area)), findsOneWidget);
       expect(editor.document.geometryOf(layer).boundary!.holes, hasLength(1));
-      editor.updateSettings(editor.settings.copyWith(units: Units.feet));
+      editor.updateSettings(
+        editor.settings.copyWith(areaUnits: AreaUnits.squareFeet),
+      );
       await tester.pumpAndSettle();
-      expect(find.text(Units.feet.formatArea(area)), findsOneWidget);
+      expect(find.text(AreaUnits.squareFeet.format(area)), findsOneWidget);
       editor.undo();
       await tester.pumpAndSettle();
-      expect(find.text(Units.feet.formatArea(both)), findsOneWidget);
+      expect(find.text(AreaUnits.squareFeet.format(both)), findsOneWidget);
       editor.redo();
       await tester.pumpAndSettle();
-      expect(find.text(Units.feet.formatArea(area)), findsOneWidget);
+      expect(find.text(AreaUnits.squareFeet.format(area)), findsOneWidget);
       await tester.tap(find.text('Select'));
       await tester.pumpAndSettle();
       await tester.tapAt(origin + editor.camera.toScreen(const Vec(6, 6)));

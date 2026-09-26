@@ -638,14 +638,23 @@ class GeometryEditor {
 
   /// Removes the items and anything that depends on them.
   ///
-  /// Deleting a point removes its lines and any circle drawn around it;
-  /// deleting a shape removes its lines. Deleting a circle keeps its
-  /// centre point. Neighbouring points are never reconnected.
+  /// Deleting a point removes its lines and any circle drawn around it.
+  /// Deleting a shape or circle removes it whole: its lines, and its
+  /// points unless another line or circle still uses them. Otherwise a
+  /// left-behind point (a circle's centre, say) would leave the layer
+  /// unfinished with nothing obvious to show why. Deleting a line keeps
+  /// its points. Neighbouring points are never reconnected.
   void delete(Iterable<String> itemIds) {
     final linesToRemove = <String>{};
     final pointsToRemove = <String>{};
     final circlesToRemove = <String>{};
+    // Points of deleted shapes and circles, dropped if nothing else uses
+    // them once those are gone.
+    final wholeShapePoints = <String>{};
     for (final id in itemIds) {
+      if (_circles[id] case final circle?) {
+        wholeShapePoints.add(circle.center);
+      }
       if (_points.containsKey(id)) {
         pointsToRemove.add(id);
         linesToRemove.addAll(
@@ -659,9 +668,15 @@ class GeometryEditor {
       if (_lines.containsKey(id)) linesToRemove.add(id);
       final shape = _shapes[id];
       if (shape != null) {
-        linesToRemove.addAll(
-          shape.rings.expand((ring) => ring).map((ref) => ref.segmentId),
-        );
+        final segments = shape.rings
+            .expand((ring) => ring)
+            .map((ref) => ref.segmentId);
+        linesToRemove.addAll(segments);
+        for (final segment in segments) {
+          if (_lines[segment] case final line?) {
+            wholeShapePoints.addAll([line.start, line.end]);
+          }
+        }
         // Deleting the whole object discards its holes as well as its rim.
         _shapes.remove(id);
         _order.remove(id);
@@ -676,6 +691,12 @@ class GeometryEditor {
     for (final id in circlesToRemove) {
       _circles.remove(id);
       _order.remove(id);
+    }
+    for (final id in wholeShapePoints) {
+      if (!_lines.values.any((line) => line.touches(id)) &&
+          !_circles.values.any((circle) => circle.center == id)) {
+        _points.remove(id);
+      }
     }
     _refreshBoundary();
   }

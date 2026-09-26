@@ -11,14 +11,6 @@ enum Units {
   double fromMetres(double metres) => metres / metresPerUnit;
   double toMetres(double value) => value * metresPerUnit;
 
-  /// Net land area, stored in square metres; open boundaries show a dash.
-  String formatArea(double? squareMetres) {
-    if (squareMetres == null) return '—';
-    final value = squareMetres / (metresPerUnit * metresPerUnit);
-    final text = value.toStringAsFixed(2).replaceFirst(RegExp(r'\.?0+$'), '');
-    return '$text $symbol²';
-  }
-
   /// A short, readable length such as "3.28 ft" or "0.125 m".
   String format(double metres) {
     final value = fromMetres(metres);
@@ -26,5 +18,32 @@ enum Units {
         ? value.toStringAsFixed(0)
         : value.toStringAsFixed(3).replaceFirst(RegExp(r'\.?0+$'), '');
     return '$text $symbol';
+  }
+}
+
+/// How areas are shown to the user. Stored areas are always square metres.
+enum AreaUnits {
+  squareFeet('ft²', 0.09290304, 2),
+  squareMetres('m²', 1, 2),
+  acres('acres', 4046.8564224, 4);
+
+  const AreaUnits(this.symbol, this.squareMetresPerUnit, this.decimals);
+
+  final String symbol;
+  final double squareMetresPerUnit;
+
+  /// Garden plots are a small part of an acre, so acres keep more places.
+  final int decimals;
+
+  /// Net land area; open boundaries show a dash.
+  String format(double? squareMetres) {
+    if (squareMetres == null) return '—';
+    final value = squareMetres / squareMetresPerUnit;
+    final text = value
+        .toStringAsFixed(decimals)
+        .replaceFirst(RegExp(r'\.?0+$'), '');
+    // "1 acre", but "0.5 acres" and "2 acres".
+    final unit = this == acres && text == '1' ? 'acre' : symbol;
+    return '$text $unit';
   }
 }

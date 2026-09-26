@@ -1,15 +1,6 @@
 import '../domain/units.dart';
 import 'camera.dart';
 
-enum SnapMode {
-  grid('Grid'),
-  drawing('Drawing');
-
-  const SnapMode(this.label);
-
-  final String label;
-}
-
 enum MenuScale {
   small('Small', 0.85),
   medium('Medium', 1),
@@ -30,7 +21,7 @@ enum PanelId {
 
   /// Actions on the selected shapes, such as Boolean Union and Subtract.
   operations('Operations', DockSide.left),
-  settings('Settings', DockSide.left),
+  settings('Controls', DockSide.left),
   properties('Properties', DockSide.right),
   layers('Layers', DockSide.right);
 
@@ -161,6 +152,16 @@ class DockLayout {
   }
 }
 
+/// Which edge of the window toasts appear at.
+enum ToastPosition {
+  top('Top'),
+  bottom('Bottom');
+
+  const ToastPosition(this.label);
+
+  final String label;
+}
+
 /// Drawing styles and limits edited in Preferences and applied together.
 class Appearance {
   const Appearance({
@@ -170,6 +171,7 @@ class Appearance {
     this.gridOpacity = 1,
     this.zoomLimits = const ZoomLimits(),
     this.historyCapacity = 50,
+    this.toastPosition = ToastPosition.bottom,
   });
 
   /// Outline width in logical pixels.
@@ -183,6 +185,19 @@ class Appearance {
 
   /// Undo and Redo steps kept together.
   final int historyCapacity;
+
+  /// Where toasts appear.
+  final ToastPosition toastPosition;
+
+  Appearance withToastPosition(ToastPosition position) => Appearance(
+    lineWidth: lineWidth,
+    gridThickness: gridThickness,
+    gridColor: gridColor,
+    gridOpacity: gridOpacity,
+    zoomLimits: zoomLimits,
+    historyCapacity: historyCapacity,
+    toastPosition: position,
+  );
 
   /// Returns a reason the settings cannot be applied, or null when valid.
   String? get problem {
@@ -212,8 +227,9 @@ class Appearance {
 class WorkspaceSettings {
   const WorkspaceSettings({
     this.units = Units.feet,
+    this.areaUnits = AreaUnits.squareFeet,
     this.snappingEnabled = false,
-    this.snapMode = SnapMode.grid,
+    this.guidesEnabled = false,
     this.menuScale = MenuScale.medium,
     this.appearance = const Appearance(),
     this.hiddenPanels = const {},
@@ -221,9 +237,17 @@ class WorkspaceSettings {
     this.docks = const DockLayout(),
   });
 
+  /// How lengths are shown.
   final Units units;
+
+  /// How areas are shown.
+  final AreaUnits areaUnits;
+
+  /// Snap new and moved positions to the grid.
   final bool snappingEnabled;
-  final SnapMode snapMode;
+
+  /// Line positions up with the geometry last hovered; see guides.dart.
+  final bool guidesEnabled;
   final MenuScale menuScale;
   final Appearance appearance;
   final Set<PanelId> hiddenPanels;
@@ -234,8 +258,9 @@ class WorkspaceSettings {
 
   WorkspaceSettings copyWith({
     Units? units,
+    AreaUnits? areaUnits,
     bool? snappingEnabled,
-    SnapMode? snapMode,
+    bool? guidesEnabled,
     MenuScale? menuScale,
     Appearance? appearance,
     Set<PanelId>? hiddenPanels,
@@ -243,8 +268,9 @@ class WorkspaceSettings {
     DockLayout? docks,
   }) => WorkspaceSettings(
     units: units ?? this.units,
+    areaUnits: areaUnits ?? this.areaUnits,
     snappingEnabled: snappingEnabled ?? this.snappingEnabled,
-    snapMode: snapMode ?? this.snapMode,
+    guidesEnabled: guidesEnabled ?? this.guidesEnabled,
     menuScale: menuScale ?? this.menuScale,
     appearance: appearance ?? this.appearance,
     hiddenPanels: hiddenPanels ?? this.hiddenPanels,

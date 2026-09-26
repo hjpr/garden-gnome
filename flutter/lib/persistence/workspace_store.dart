@@ -24,10 +24,22 @@ class WorkspaceStore {
     try {
       final json = jsonDecode(raw) as Map<String, Object?>;
       final a = json['appearance'] as Map<String, Object?>;
+      // Older saves chose between grid and drawing snapping; drawing
+      // snapping became Guides.
+      final snapping = json['snapping'] as bool;
+      final oldDrawingSnap = json['snap_mode'] == 'drawing';
       final settings = WorkspaceSettings(
         units: Units.values.byName(json['units'] as String),
-        snappingEnabled: json['snapping'] as bool,
-        snapMode: SnapMode.values.byName(json['snap_mode'] as String),
+        // Saves from before area units matched them to the length units.
+        areaUnits:
+            AreaUnits.values
+                .where((u) => u.name == json['area_units'])
+                .firstOrNull ??
+            (json['units'] == Units.metres.name
+                ? AreaUnits.squareMetres
+                : AreaUnits.squareFeet),
+        snappingEnabled: snapping && !oldDrawingSnap,
+        guidesEnabled: json['guides'] as bool? ?? (snapping && oldDrawingSnap),
         menuScale: MenuScale.values.byName(json['menu_scale'] as String),
         hiddenPanels: _panels(json['hidden']),
         minimizedPanels: _panels(json['minimized']),
@@ -50,6 +62,11 @@ class WorkspaceStore {
             max: (a['zoom_max'] as num).toDouble(),
           ),
           historyCapacity: a['history_capacity'] as int,
+          toastPosition:
+              ToastPosition.values
+                  .where((p) => p.name == a['toast_position'])
+                  .firstOrNull ??
+              ToastPosition.bottom,
         ),
       );
       final c = json['camera'] as Map<String, Object?>;
@@ -77,8 +94,9 @@ class WorkspaceStore {
       '$_prefix$documentId',
       jsonEncode({
         'units': settings.units.name,
+        'area_units': settings.areaUnits.name,
         'snapping': settings.snappingEnabled,
-        'snap_mode': settings.snapMode.name,
+        'guides': settings.guidesEnabled,
         'menu_scale': settings.menuScale.name,
         'hidden': [for (final p in settings.hiddenPanels) p.name],
         'minimized': [for (final p in settings.minimizedPanels) p.name],
@@ -96,6 +114,7 @@ class WorkspaceStore {
           'zoom_min': a.zoomLimits.min,
           'zoom_max': a.zoomLimits.max,
           'history_capacity': a.historyCapacity,
+          'toast_position': a.toastPosition.name,
         },
         'camera': {
           'x': camera.topLeft.x,

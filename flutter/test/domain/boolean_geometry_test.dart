@@ -523,8 +523,8 @@ void main() {
       expect(deleted.lines, isEmpty);
       expect(
         deleted.points,
-        before.points,
-        reason: 'ordinary Delete retains anchors',
+        isEmpty,
+        reason: 'deleting a whole shape takes its points with it',
       );
       expect(deleted.isClosed, isFalse);
       expect(deleted.shapes, isEmpty);

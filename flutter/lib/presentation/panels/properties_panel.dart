@@ -26,15 +26,7 @@ class PropertiesBody extends StatelessWidget {
     }
     final layer = editor.selectedLayer;
     if (layer == null) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Text(
-          editor.document.layers.isEmpty
-              ? 'Add a field in Layers to get started.'
-              : 'Select a layer or shape to see its details.',
-          style: const TextStyle(fontSize: 12.5, color: Palette.muted),
-        ),
-      );
+      return const EmptyPanelText('Nothing selected.');
     }
     final document = editor.document;
     final invalid = !document.isValid(layer.id);
@@ -59,7 +51,7 @@ class PropertiesBody extends StatelessWidget {
         PropertyRow(
           label: 'Net area',
           child: Text(
-            editor.settings.units.formatArea(
+            editor.settings.areaUnits.format(
               document.geometryOf(layer.id).area,
             ),
             key: const ValueKey('net-area'),

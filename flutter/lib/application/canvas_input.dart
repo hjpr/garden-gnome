@@ -9,16 +9,21 @@ import '../domain/planar.dart';
 import '../domain/polygon_shapes.dart';
 import '../domain/reference_image.dart';
 import '../domain/vec.dart';
+import 'area_selection.dart';
 import 'editor_controller.dart';
+import 'guides.dart';
 import 'hit_testing.dart';
 import 'history.dart';
 import 'previews.dart';
 import 'snapping.dart';
+import 'toasts.dart';
 import 'tools.dart';
-import 'workspace_settings.dart';
+import 'transform_box.dart';
 
+part 'canvas_area_select.dart';
 part 'canvas_construction.dart';
 part 'canvas_reference.dart';
+part 'canvas_transform.dart';
 
 /// Turns primary-button pointer input on the canvas into tool actions.
 ///
@@ -39,14 +44,35 @@ class CanvasInput {
   _Press? _press;
   _Drag? _drag;
   _ReferenceDrag? _referenceDrag;
+  _BoxDrag? _boxDrag;
+  _AreaDrag? _areaDrag;
+
+  /// The selection-box grip under the pointer while hovering, if any.
+  BoxGrip? _hoverGrip;
 
   /// Whether a drag is in progress. Navigation waits until it ends.
-  bool get isDragging => _drag != null || _referenceDrag != null;
+  bool get isDragging =>
+      _drag != null ||
+      _referenceDrag != null ||
+      _boxDrag != null ||
+      _areaDrag != null;
+
+  /// The selection-box grip being dragged, or else the one under the
+  /// pointer. The canvas picks its cursor from it.
+  BoxGrip? get activeGrip =>
+      _boxDrag?.grip ?? (_press == null ? _hoverGrip : null);
 
   // ------------------------------------------------------------ pointer API
 
   void hover(Offset screen) {
     if (_press != null) return;
+    if (editor.settings.guidesEnabled) {
+      editor.hoverGuideItem(
+        guideItemAt(editor.document, editor.camera, screen),
+      );
+    }
+    _hoverGrip = editor.tool == Tool.select ? _boxGripAt(screen) : null;
+    if (_hoverGrip != null) return editor.setPreview(null);
     if (editor.tool == Tool.select) {
       final top = _selectHits(screen).firstOrNull;
       return editor.setPreview(
@@ -88,23 +114,44 @@ class CanvasInput {
   }
 
   void press(Offset screen, {required bool shift}) {
-    _press = _Press(screen, shift: shift);
+    _press = _Press(
+      screen,
+      shift: shift,
+      grip: editor.tool == Tool.select ? _boxGripAt(screen) : null,
+    );
   }
 
-  void move(Offset screen) {
+  /// [shift] keeps a corner scale in proportion and turns a rotation in
+  /// 15° steps.
+  void move(Offset screen, {bool shift = false}) {
     final press = _press;
     if (press == null) return;
-    if (_drag == null) {
+    if (_drag == null &&
+        _boxDrag == null &&
+        _areaDrag == null &&
+        !press.travelled) {
       if ((screen - press.origin).distance <= PointerReach.dragThreshold) {
         return;
       }
       press.travelled = true;
       if (editor.tool == Tool.reference) _startReferenceLineDrag(press);
       if (editor.function.drags) {
-        _referenceDrag = _startReferenceDrag(press);
-        if (_referenceDrag == null) _drag = _startDrag(press);
+        _boxDrag = _startBoxDrag(press);
+        if (_boxDrag == null && press.grip == null) {
+          _referenceDrag = _startReferenceDrag(press);
+          if (_referenceDrag == null && _dragTarget(press.origin) == null) {
+            // Empty ground: draw a marquee or lasso instead of moving.
+            _areaDrag = _startAreaDrag(press);
+          } else if (_referenceDrag == null) {
+            _drag = _startDrag(press);
+          }
+        }
       }
     }
+    final areaDrag = _areaDrag;
+    if (areaDrag != null) return _updateAreaDrag(areaDrag, screen);
+    final boxDrag = _boxDrag;
+    if (boxDrag != null) return _updateBoxDrag(boxDrag, screen, shift: shift);
     final referenceDrag = _referenceDrag;
     if (referenceDrag != null) {
       return _updateReferenceDrag(referenceDrag, screen);
@@ -121,12 +168,26 @@ class CanvasInput {
     final press = _press;
     final drag = _drag;
     final referenceDrag = _referenceDrag;
+    final boxDrag = _boxDrag;
+    final areaDrag = _areaDrag;
     _press = null;
     _drag = null;
     _referenceDrag = null;
+    _boxDrag = null;
+    _areaDrag = null;
     if (press == null) return;
+    if (areaDrag != null) {
+      _finishAreaDrag(areaDrag);
+      return hover(screen);
+    }
+    if (boxDrag != null) {
+      _finishBoxDrag(boxDrag);
+      return hover(screen);
+    }
     if (referenceDrag != null) return _finishReferenceDrag(referenceDrag);
     if (drag != null) return _finishDrag(drag);
+    // A click on the selection box keeps the selection as it is.
+    if (press.grip != null) return hover(screen);
     if (!press.travelled) {
       _click(screen, shift: press.shift);
     } else if (editor.tool == Tool.reference &&
@@ -149,7 +210,10 @@ class CanvasInput {
   /// when there is nothing to choose, or the press has become a drag.
   List<LayerHit> takeHoldChoices() {
     final press = _press;
-    if (press == null || press.travelled || editor.tool != Tool.select) {
+    if (press == null ||
+        press.travelled ||
+        press.grip != null ||
+        editor.tool != Tool.select) {
       return const [];
     }
     final hits = _selectHits(press.origin);
@@ -178,6 +242,9 @@ class CanvasInput {
     _press = null;
     _drag = null;
     _referenceDrag = null;
+    _boxDrag = null;
+    _areaDrag = null;
+    _hoverGrip = null;
   }
 
   // ------------------------------------------------------------------ clicks
@@ -188,6 +255,9 @@ class CanvasInput {
 
     final layerId = editor.selectedLayerId;
     if (layerId == null) {
+      if (editor.document.fields.isEmpty) {
+        return editor.toasts.show(noLayersToast, kind: ToastKind.error);
+      }
       return editor.showNotice('Select or add a layer to draw on');
     }
     final locked = editor.lockNotice(layerId);
@@ -431,12 +501,7 @@ class CanvasInput {
           : null;
       if (reused != null) return HoverPreview(reused, joinable: true);
       final snap = _snapped(screen);
-      return PointPreview(
-        snap.position,
-        valid: true,
-        guideX: snap.guideX,
-        guideY: snap.guideY,
-      );
+      return PointPreview(snap.position, valid: true, guides: snap.guides);
     }
     final snap = _snapped(screen);
     final plan = _circlePlan(start, snap.position);
@@ -447,12 +512,13 @@ class CanvasInput {
       centre: plan.centre,
       radius: plan.radius,
       valid: _staysValid(layerId, (e) => _addCircle(e, plan)),
-      guideX: snap.guideX,
-      guideY: snap.guideY,
+      guides: snap.guides,
     );
   }
 
   // ---------------------------------------------------------------- previews
+
+  static const noLayersToast = 'Add a Field layer to start drawing.';
 
   static const tooClose =
       'Too close to another point. Place it farther away, or click the point to use it';
@@ -479,14 +545,43 @@ class CanvasInput {
       );
     }
     final snap = _snapped(screen);
+    // A guide can land the point on a line of this layer (e.g. its
+    // midpoint); it then splits that line rather than sitting on top.
+    final landedOn = snap.guides.isEmpty
+        ? null
+        : _lineThrough(geometry, snap.position);
+    if (landedOn != null) {
+      return PointPreview(
+        snap.position,
+        valid: _staysValid(
+          layerId,
+          (e) => e.insertPoint(landedOn, snap.position),
+        ),
+        lineId: landedOn,
+        guides: snap.guides,
+      );
+    }
     return PointPreview(
       snap.position,
       valid:
           !_crowded(geometry, snap.position) &&
           _staysValid(layerId, (e) => e.addPoint(snap.position)),
-      guideX: snap.guideX,
-      guideY: snap.guideY,
+      guides: snap.guides,
     );
+  }
+
+  /// A line of [geometry] that [position] lies on, away from its ends.
+  String? _lineThrough(Geometry geometry, Vec position) {
+    final reach = editor.camera.metres(PointerReach.pointDiameter);
+    for (final line in geometry.lines.values) {
+      final curve = line.curve(geometry.points);
+      if (curve.distanceTo(position) < 1e-9 &&
+          curve.start.distanceTo(position) >= reach &&
+          curve.end.distanceTo(position) >= reach) {
+        return line.id;
+      }
+    }
+    return null;
   }
 
   Preview? _drawPreview(String layerId, Geometry geometry, Offset screen) {
@@ -512,8 +607,7 @@ class CanvasInput {
         layerId,
         (e) => e.connect(anchor, e.addPoint(snap.position)),
       ),
-      guideX: snap.guideX,
-      guideY: snap.guideY,
+      guides: snap.guides,
     );
   }
 
@@ -670,7 +764,7 @@ class CanvasInput {
     if (drag.resizing case final target?) {
       return _updateResize(drag, target, screen);
     }
-    final snap = _snappedWorld(pointer - drag.grabOffset, exclude: drag.moving);
+    final snap = _snappedMove(drag, pointer - drag.grabOffset);
     final delta = snap.position - drag.anchorStart;
     var candidate = drag.original;
     drag.moving.forEach((layerId, points) {
@@ -690,8 +784,7 @@ class CanvasInput {
         document: candidate,
         moved: drag.moving,
         valid: candidate.newProblemsSince(drag.original).isEmpty,
-        guideX: snap.guideX,
-        guideY: snap.guideY,
+        guides: snap.guides,
       ),
     );
   }
@@ -723,8 +816,7 @@ class CanvasInput {
         document: candidate,
         moved: drag.moving,
         valid: candidate.newProblemsSince(drag.original).isEmpty,
-        guideX: snap.guideX,
-        guideY: snap.guideY,
+        guides: snap.guides,
       ),
     );
   }
@@ -752,43 +844,89 @@ class CanvasInput {
   SnapResult _snapped(Offset screen) =>
       _snappedWorld(editor.camera.toWorld(screen), exclude: const {});
 
-  /// Snaps [world] to the grid or to the snap target's points, ignoring
-  /// [exclude]d points (keyed by layer) that are themselves moving.
+  /// Snaps [world] to guides and the grid. Each axis takes a guide within
+  /// reach first, then the grid if snapping is on. [exclude] holds points
+  /// (keyed by layer) that are themselves moving, so they cannot guide.
   SnapResult _snappedWorld(
     Vec world, {
     required Map<String, Set<String>> exclude,
   }) {
-    final settings = editor.settings;
-    if (!settings.snappingEnabled) return SnapResult(world);
-    if (settings.snapMode == SnapMode.grid) {
-      return snapToGrid(world, editor.camera);
-    }
-    return alignToPoints(world, editor.camera, _guidePoints(exclude));
+    final gridded = editor.settings.snappingEnabled
+        ? snapToGrid(world, editor.camera).position
+        : world;
+    return snapToGuides(
+      world,
+      editor.camera,
+      activeGuideSet(moving: exclude),
+      fallback: gridded,
+    );
   }
 
-  /// Points of the snap target that can guide alignment, in ID order.
-  List<Vec> _guidePoints(Map<String, Set<String>> exclude) {
-    final target = editor.snapTarget;
-    final document = editor.document;
-    if (target == null || !document.layers.containsKey(target.layerId)) {
-      return const [];
-    }
-    final geometry = document.geometryOf(target.layerId);
-    final skip = exclude[target.layerId] ?? const {};
-    final ids = geometry.definingPoints([target.itemId]).toList()
-      ..sort(compareItemIds);
-    return [
-      for (final id in ids)
-        if (!skip.contains(id)) geometry.points[id]!,
-    ];
+  /// Where a move's anchor goes. Every moving point, and the outermost
+  /// points of every moving circle, may line up with a guide; whichever
+  /// is closest pulls the whole move. The grid still places the anchor
+  /// on an axis no guide claims.
+  SnapResult _snappedMove(_Drag drag, Vec anchor) {
+    final gridded = editor.settings.snappingEnabled
+        ? snapToGrid(anchor, editor.camera).position
+        : anchor;
+    final set = activeGuideSet(moving: drag.moving);
+    if (set.isEmpty) return SnapResult(gridded);
+    final shift = anchor - drag.anchorStart;
+    final handles = [for (final p in drag.handles) p + shift];
+    final fit = fitToGuides(handles, set, editor.camera);
+    final moved = anchor + fit.shift;
+    return SnapResult(
+      Vec(fit.freeX ? gridded.x : moved.x, fit.freeY ? gridded.y : moved.y),
+      guides: fit.guides,
+    );
+  }
+
+  /// The guides in use now: those of the geometry last hovered, skipping
+  /// anything being dragged. Empty while Guides is off.
+  GuideSet activeGuideSet({Map<String, Set<String>>? moving}) {
+    if (!editor.settings.guidesEnabled) return GuideSet.empty;
+    return activeGuides(
+      editor.document,
+      editor.recentGuideItems,
+      moving: moving ?? _drag?.moving ?? const {},
+    );
   }
 }
 
+/// The positions that can line up with a guide while [moving] points
+/// move: the points themselves and the outermost points of circles
+/// centred on them.
+List<Vec> _moveHandles(
+  GardenDocument document,
+  Map<String, Set<String>> moving,
+) {
+  final handles = <Vec>[];
+  moving.forEach((layerId, ids) {
+    final geometry = document.geometryOf(layerId);
+    for (final id in ids) {
+      handles.add(geometry.points[id]!);
+    }
+    for (final circle in geometry.circles.values) {
+      if (ids.contains(circle.center)) {
+        handles.addAll(
+          circleExtremes(geometry.points[circle.center]!, circle.radius),
+        );
+      }
+    }
+  });
+  return handles;
+}
+
 class _Press {
-  _Press(this.origin, {required this.shift});
+  _Press(this.origin, {required this.shift, this.grip});
 
   final Offset origin;
   final bool shift;
+
+  /// The selection-box grip the press landed on, if any. It then scales
+  /// or rotates the selection instead of picking what is underneath.
+  final BoxGrip? grip;
 
   /// Set once the pointer moves past the drag threshold; the press is then
   /// no longer a click.
@@ -802,9 +940,13 @@ class _Drag {
     required this.anchorStart,
     required this.grabOffset,
     this.resizing,
-  });
+  }) : handles = resizing == null ? _moveHandles(original, moving) : const [];
 
   final GardenDocument original;
+
+  /// Positions at the start of the move that guides can line up; see
+  /// [_moveHandles].
+  final List<Vec> handles;
 
   /// The points being moved, keyed by layer.
   final Map<String, Set<String>> moving;

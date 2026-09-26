@@ -2,6 +2,8 @@ import '../domain/curve_edge.dart';
 import '../domain/document.dart';
 import '../domain/reference_image.dart';
 import '../domain/vec.dart';
+import 'snapping.dart';
+import 'transform_box.dart';
 
 part 'construction_previews.dart';
 
@@ -9,13 +11,10 @@ part 'construction_previews.dart';
 ///
 /// Previews are never saved or undone. The painter only reads them.
 sealed class Preview {
-  const Preview({this.guideX, this.guideY});
+  const Preview({this.guides = SnapGuides.none});
 
-  /// World x of a vertical alignment guide to draw, if snapping used one.
-  final double? guideX;
-
-  /// World y of a horizontal alignment guide to draw, if snapping used one.
-  final double? guideY;
+  /// The dashed guides a snap lined the pointer up with, if any.
+  final SnapGuides guides;
 }
 
 /// Where a new point would go. [lineId] is set when it would split a line.
@@ -24,8 +23,7 @@ class PointPreview extends Preview {
     this.position, {
     required this.valid,
     this.lineId,
-    super.guideX,
-    super.guideY,
+    super.guides,
   });
 
   final Vec position;
@@ -42,8 +40,7 @@ class SegmentPreview extends Preview {
     this.to, {
     required this.valid,
     this.joinTarget,
-    super.guideX,
-    super.guideY,
+    super.guides,
   });
 
   final Vec from;
@@ -58,9 +55,13 @@ class MovePreview extends Preview {
     required this.document,
     required this.moved,
     required this.valid,
-    super.guideX,
-    super.guideY,
+    this.box,
+    super.guides,
   });
+
+  /// The selection box turned with a rotation in progress; null for other
+  /// drags, whose box is measured around the moved shapes.
+  final TransformBox? box;
 
   final GardenDocument document;
 
@@ -82,8 +83,7 @@ class CirclePreview extends Preview {
     required this.centre,
     required this.radius,
     required this.valid,
-    super.guideX,
-    super.guideY,
+    super.guides,
   });
 
   final Vec start;
@@ -122,6 +122,22 @@ class HoverPreview extends Preview {
 
   @override
   int get hashCode => Object.hash(itemId, layerId, destructive, joinable);
+}
+
+/// A marquee or lasso being drawn with Select, in world metres, and what
+/// letting go would select: [items] on [layerId] (null when nothing).
+class AreaSelectPreview extends Preview {
+  const AreaSelectPreview(
+    this.outline, {
+    required this.lasso,
+    required this.layerId,
+    required this.items,
+  });
+
+  final List<Vec> outline;
+  final bool lasso;
+  final String? layerId;
+  final Set<String> items;
 }
 
 /// The reference image as it would be if a move or scale were released

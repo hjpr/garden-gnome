@@ -40,7 +40,7 @@ once there is an active plot.
 
 ## The screen
 
-- Left side: Drawing tools, Operations and Settings. Right side: Properties
+- Left side: Drawing tools, Operations and Controls. Right side: Properties
   and Layers.
 - Each side has a slim strip along the window edge. Click the strip (or
   its arrow) to fold that side away and give the drawing more room;
@@ -79,8 +79,32 @@ Select (black arrow, the starting tool)
 - Press and hold without moving to open a small menu listing everything
   under the pointer. Pick the one you mean.
 - Shift-click adds to the selection within the same layer.
+- Select has two functions, Marquee (the default) and Lasso. Drag from
+  empty ground to select several things at once:
+  - Marquee draws a dashed rectangle; Lasso (the pointer turns into a
+    lasso) draws any outline you like and closes it back to where you
+    started.
+  - Anything the outline touches is selected, even if only part of it
+    is inside. Things about to be picked light up while you drag.
+  - A selection stays on one layer. The selected layer is used if the
+    outline touches it; otherwise the innermost land wins (an area before
+    its plot), as with a click. Locked layers are skipped.
+  - Hold Shift as you start to add to the selection. An outline that
+    touches nothing clears the selection.
 - On a circle: drag its edge to resize it, or its inside (or centre
   point) to move it.
+- A selected shape or circle gets a dashed box with a dot at each corner
+  and edge middle. The status bar shows the box's width (W) and height
+  (H), live while you drag.
+  - Corner dot: drag to scale from the opposite corner. Hold Shift to
+    keep the proportions.
+  - Edge (the dashed line or its middle dot): drag to stretch one way.
+  - Just outside a corner the pointer turns into a curved arrow: drag to
+    rotate around the box's centre. The status bar shows the angle. Hold
+    Shift for 15° steps. Rotating carries the land inside, as moving
+    does; scaling does not.
+  - Circles always scale evenly. Scale, Rotate and Move are each one
+    Undo step.
 
 Point (a dot)
 - Place: click to place a loose point. Click on a straight or curved edge
@@ -270,6 +294,10 @@ browser may decline. Your view (zoom and position) is remembered when you
 switch away from or close the tab. Switching away mid-drawing cancels the
 unfinished shape, as Esc does.
 
+To rename the drawing, click the pencil beside its name at the top (or
+double-click the name), type, and press Enter or click away. Esc keeps the
+old name. The new name is stored with the next Save.
+
 A dot after the drawing name at the top means there are unsaved changes.
 The browser will also warn you before you close the tab.
 
@@ -285,12 +313,40 @@ holes and unfinished Boolean operands using schema 2. Older schema 1
 drawings still open, but older app versions cannot read schema 2 files.
 
 
-## Settings and preferences
+## Controls and preferences
 
-- Settings panel: units (feet or metres), snapping on or off, what to snap
-  to (the grid or other drawing points), and menu size.
-- Edit > Preferences: line width, grid thickness, colour and opacity,
-  zoom limits, and how many undo steps to keep. Press Apply to use them.
+- Controls panel: Units (Dimensions in ft or m; Area in ft², m² or
+  acres), Snapping (to the grid) on or off, and Guides on or off.
+
+Guides line things up with their neighbours while you draw or move them.
+Rest the pointer on a point, line or circle for a moment; small blue
+crosses show what it offers. Then draw, or grab something else with
+Select and move it. When it comes close, it is pulled into line and a
+dashed guide shows the alignment.
+
+- A point: its horizontal and vertical.
+- A line: its middle, which you snap onto directly; the line's own path,
+  carried on past both ends; and the perpendicular through its middle.
+  An arc's path is its whole circle.
+- A circle: its leftmost, rightmost, top and bottom points, which you
+  snap onto directly (no guide lines).
+
+For a horizontal or vertical line through a line's middle, place a point
+there first and use that point as the guide.
+
+When moving a whole shape or circle, whichever of its corners (or a
+circle's outermost points) is closest lines up. With Snapping also on, a
+guide wins on its axis and the grid places the other.
+- Edit > Preferences, in three categories down the left:
+  - Canvas: zoom limits, how many undo steps to keep, and menu size.
+  - Style: line width, and grid thickness, colour and opacity.
+  - Notifications: whether messages pop up at the top or bottom.
+  Typed values are kept while you switch categories; press Apply to use
+  them. The toast position takes effect straight away.
+
+Short messages (saved, exported, errors such as "Add a Field layer to
+start drawing.") pop up as toasts and go away on their own. Point at them
+to spread them out and keep them on screen; the × dismisses one.
 
 Lengths are always stored in metres. Changing units only changes how
 numbers are shown.

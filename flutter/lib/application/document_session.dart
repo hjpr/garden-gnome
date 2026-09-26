@@ -6,6 +6,7 @@ import '../persistence/drawing_library.dart';
 import '../persistence/workspace_store.dart';
 import 'camera.dart';
 import 'editor_controller.dart';
+import 'toasts.dart';
 import 'workspace_settings.dart';
 
 /// The outcome of a file command, for the screen to report.
@@ -42,12 +43,18 @@ class DocumentSession extends ChangeNotifier {
     required this.library,
     required this.workspace,
     EditorController? editor,
-  }) : _editor = editor ?? EditorController();
+  }) : toasts = editor?.toasts ?? ToastCenter() {
+    _editor = editor ?? EditorController(toasts: toasts);
+  }
 
   final DrawingLibrary library;
   final WorkspaceStore workspace;
 
-  EditorController _editor;
+  /// Toasts outlive any one drawing, so one raised just before New or
+  /// Open is still seen afterwards.
+  final ToastCenter toasts;
+
+  late EditorController _editor;
   EditorController get editor => _editor;
 
   /// Whether leaving now would lose typed or drawn work.
@@ -81,7 +88,7 @@ class DocumentSession extends ChangeNotifier {
     return _write(
       copy,
       copy.id,
-      title.trim().isEmpty ? 'Untitled garden' : title.trim(),
+      title.trim().isEmpty ? 'Untitled' : title.trim(),
     );
   }
 
@@ -108,7 +115,7 @@ class DocumentSession extends ChangeNotifier {
   /// Starts a fresh, empty drawing.
   Future<void> newDrawing() async {
     await _rememberWorkspace();
-    _replaceEditor(EditorController());
+    _replaceEditor(EditorController(toasts: toasts));
   }
 
   /// Opens a drawing from the browser library.
@@ -158,6 +165,7 @@ class DocumentSession extends ChangeNotifier {
       camera: stored?.$2 ?? const Camera(),
       title: title,
       libraryId: libraryId,
+      toasts: toasts,
     );
     editor.ledger.merge(ledger);
     _replaceEditor(editor);

@@ -51,16 +51,7 @@ class _LayersBodyState extends State<LayersBody> {
     if (document.fields.isEmpty) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
-            child: Text(
-              'No layers yet. Press + Field below to add your first field.',
-              style: TextStyle(fontSize: 12.5, color: Palette.muted),
-            ),
-          ),
-          ?reference,
-        ],
+        children: [const EmptyPanelText('Add a field to start.'), ?reference],
       );
     }
     return Column(

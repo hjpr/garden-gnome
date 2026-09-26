@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 
 import '../application/document_session.dart';
 import '../application/editor_controller.dart';
+import '../application/toasts.dart';
 import '../application/tool_prompts.dart';
 import '../application/tools.dart';
 import '../application/workspace_settings.dart';
@@ -21,8 +22,11 @@ import 'panels/settings_panel.dart';
 import 'panels/tools_panel.dart';
 import 'theme.dart';
 import 'widgets/dock.dart';
+import 'widgets/drawing_title.dart';
 import 'widgets/panel.dart';
+import 'widgets/selection_readout.dart';
 import 'widgets/text_focus.dart';
+import 'widgets/toaster.dart';
 
 /// Smallest window the editor supports, in logical pixels.
 const Size minimumEditorSize = Size(800, 600);
@@ -84,20 +88,10 @@ class _BuildScreenState extends State<BuildScreen> {
 
   // ------------------------------------------------------------- commands
 
-  void _toast(String message, {bool error = false}) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: error ? Palette.invalid : Palette.ink,
-          behavior: SnackBarBehavior.floating,
-          width: 420,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          duration: Duration(seconds: error ? 6 : 3),
-        ),
-      );
-  }
+  void _toast(String message, {bool error = false}) => _session.toasts.show(
+    message,
+    kind: error ? ToastKind.error : ToastKind.success,
+  );
 
   /// Reports a command's result and returns whether it succeeded.
   bool _report(CommandResult result) {
@@ -182,8 +176,9 @@ class _BuildScreenState extends State<BuildScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Preferences'),
         content: SizedBox(
-          width: 380,
-          child: SingleChildScrollView(child: PreferencesBody(editor: _editor)),
+          width: 600,
+          height: 360,
+          child: PreferencesBody(editor: _editor),
         ),
         actions: [
           TextButton(
@@ -335,24 +330,34 @@ class _BuildScreenState extends State<BuildScreen> {
               constraints.maxWidth < minimumEditorSize.width ||
               constraints.maxHeight < minimumEditorSize.height;
           return Scaffold(
-            body: Column(
+            body: Stack(
               children: [
-                _Header(
-                  title: _editor.title,
-                  dirty: _session.hasUnsavedWork,
-                  editor: _editor,
-                  onNew: _new,
-                  onOpen: _open,
-                  onSave: _save,
-                  onSaveAs: _saveAs,
-                  onExport: _export,
-                  onClose: _close,
-                  onPreferences: _preferences,
+                Column(
+                  children: [
+                    _Header(
+                      title: _editor.title,
+                      dirty: _session.hasUnsavedWork,
+                      editor: _editor,
+                      onNew: _new,
+                      onOpen: _open,
+                      onSave: _save,
+                      onSaveAs: _saveAs,
+                      onExport: _export,
+                      onClose: _close,
+                      onPreferences: _preferences,
+                    ),
+                    Expanded(
+                      child: tooSmall ? const _TooSmallNotice() : _workspace(),
+                    ),
+                    _StatusBar(editor: _editor),
+                  ],
                 ),
-                Expanded(
-                  child: tooSmall ? const _TooSmallNotice() : _workspace(),
+                Positioned.fill(
+                  child: Toaster(
+                    toasts: _session.toasts,
+                    position: _editor.settings.appearance.toastPosition,
+                  ),
                 ),
-                _StatusBar(editor: _editor),
               ],
             ),
           );
@@ -578,28 +583,12 @@ class _Header extends StatelessWidget {
             ],
           ),
           Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Flexible(
-                  child: Text(
-                    title,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                if (dirty)
-                  const Tooltip(
-                    message: 'Unsaved changes',
-                    child: Padding(
-                      padding: EdgeInsets.only(left: 6),
-                      child: Icon(Icons.circle, size: 7, color: Palette.muted),
-                    ),
-                  ),
-              ],
+            child: Center(
+              child: DrawingTitle(
+                title: title,
+                dirty: dirty,
+                onRename: editor.renameDrawing,
+              ),
             ),
           ),
           IconAction(
@@ -667,6 +656,9 @@ class _StatusBar extends StatelessWidget {
               liveRegion: true,
               child: Row(
                 children: [
+                  // What is selected: the selection box's size.
+                  SelectionReadout(editor: editor),
+                  const SizedBox(width: 12),
                   if (notice != null)
                     const Padding(
                       padding: EdgeInsets.only(right: 6),

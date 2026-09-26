@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import '../../application/camera.dart';
 import '../../application/hit_testing.dart';
 import '../../application/previews.dart';
+import '../../application/snapping.dart';
+import '../../application/transform_box.dart';
 import '../../application/workspace_settings.dart';
 import '../../domain/document.dart';
 import '../../domain/fill_patterns.dart';
@@ -42,6 +44,8 @@ class SceneState {
     this.referenceLineImageId,
     this.referenceLineStart,
     this.devicePixelRatio = 1,
+    this.selectionBox,
+    this.guideMarkers = const [],
   });
 
   final GardenDocument document;
@@ -74,6 +78,14 @@ class SceneState {
   /// Physical pixels per logical pixel, so pattern tiles are drawn at the
   /// screen's own sharpness.
   final double devicePixelRatio;
+
+  /// The dashed box with scale handles around the selected shapes, or
+  /// null when there is none.
+  final TransformBox? selectionBox;
+
+  /// Where guides come from right now (the geometry last hovered), marked
+  /// so the user can see what a move or new point will line up with.
+  final List<Vec> guideMarkers;
 }
 
 /// Draws the grid, every layer, and the current tool feedback.
@@ -108,7 +120,35 @@ class ScenePainter extends CustomPainter {
       _paintSelectedLayerDetail(canvas, document.geometryOf(selectedId), move);
     }
     if (move != null) _paintMovedLines(canvas, document, move);
+    if (scene.selectionBox case final box?) _paintSelectionBox(canvas, box);
     _paintPreview(canvas, size);
+    _paintGuideAnchors(canvas);
+  }
+
+  /// The dashed box around the selection, with a handle dot at each
+  /// corner and edge middle for scaling. Rotating grabs just outside a
+  /// corner, so nothing extra is drawn for it.
+  void _paintSelectionBox(Canvas canvas, TransformBox box) {
+    final corners = box.screenCorners(_camera);
+    final outline = Path()..addPolygon(corners, true);
+    dashedPath(
+      canvas,
+      outline,
+      Palette.accent.withValues(alpha: 0.8),
+      width: 1,
+      dash: 5,
+      gap: 4,
+    );
+    final fill = Paint()..color = Palette.paper;
+    final ring = Paint()
+      ..color = Palette.accent
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+    for (final handle in BoxHandle.values) {
+      final at = box.screenPointOf(handle, _camera);
+      canvas.drawCircle(at, BoxReach.handleRadius, fill);
+      canvas.drawCircle(at, BoxReach.handleRadius, ring);
+    }
   }
 
   // -------------------------------------------------------------------- grid
@@ -194,11 +234,8 @@ class ScenePainter extends CustomPainter {
         canvas.drawCircle(centre, radius, stroke);
       }
     }
-    // Every piece of the layer carries its name, so land split across
-    // several places reads as one group.
-    for (final id in geometry.closedIds) {
-      _paintLabel(canvas, layer, geometry, id);
-    }
+    // Shapes carry no name on the canvas: Properties and the status bar
+    // say what is selected, and colour and pattern tell layers apart.
   }
 
   /// The layer's decorative pattern. Land of smaller layers (plots in a
@@ -259,63 +296,6 @@ class ScenePainter extends CustomPainter {
       region.getBounds().topLeft,
       devicePixelRatio: scene.devicePixelRatio,
     );
-  }
-
-  void _paintLabel(
-    Canvas canvas,
-    Layer layer,
-    Geometry geometry,
-    String shapeId,
-  ) {
-    final region = _regionPath(geometry, id: shapeId);
-    final bounds = region.getBounds();
-    if (!canvas.getLocalClipBounds().overlaps(bounds)) return;
-    final style = switch (layer.kind) {
-      LayerKind.field => const TextStyle(
-        fontSize: 15,
-        letterSpacing: 2,
-        fontWeight: FontWeight.w600,
-      ),
-      LayerKind.plot => const TextStyle(fontSize: 13, letterSpacing: 1),
-      LayerKind.area => const TextStyle(fontSize: 14),
-    };
-    final text = layer.kind == LayerKind.area
-        ? layer.name
-        : layer.name.toUpperCase();
-    final painter = TextPainter(
-      text: TextSpan(
-        text: text,
-        style: style.copyWith(color: const Color(0xFF3F5039)),
-      ),
-      textDirection: TextDirection.ltr,
-      maxLines: 1,
-      ellipsis: '…',
-    )..layout(maxWidth: math.max(0, bounds.width - 8));
-    if (painter.width < 12 || painter.height > bounds.height - 4) return;
-    // Fields label their top-left corner, clear of the plots inside. A
-    // circular field has no corner, so its label sits in the upper part of
-    // the circle (where the chord is still 80% of the width). Other circles
-    // label just below their centre point, leaving the point visible.
-    final isCircle = geometry.circles.containsKey(shapeId);
-    final anchor = switch ((layer.kind, isCircle)) {
-      (LayerKind.field, false) => Offset(bounds.left + 10, bounds.top + 8),
-      (LayerKind.field, true) => Offset(
-        bounds.center.dx - painter.width / 2,
-        bounds.center.dy - bounds.height * 0.3 - painter.height / 2,
-      ),
-      (_, true) => bounds.center + Offset(-painter.width / 2, 10),
-      _ => bounds.center - Offset(painter.width / 2, painter.height / 2),
-    };
-    final labelBox = anchor & Size(painter.width, painter.height);
-    if (!region.contains(labelBox.center) ||
-        !region.contains(labelBox.topLeft) ||
-        !region.contains(labelBox.bottomRight)) {
-      return;
-    }
-    canvas.save();
-    canvas.clipPath(region);
-    painter.paint(canvas, anchor);
-    canvas.restore();
   }
 
   // -------------------------------------------------------- selected layer
@@ -474,49 +454,15 @@ class ScenePainter extends CustomPainter {
         if (joinTarget != null) _joinRing(canvas, _camera.toScreen(to), valid);
       case HoverPreview(:final itemId, :final destructive, :final joinable):
         if (geometry == null) return;
-        final colour = destructive ? Palette.invalid : Palette.accent;
-        final point = geometry.points[itemId];
-        final line = geometry.lines[itemId];
-        final circle = geometry.circles[itemId];
-        if (circle != null && !joinable) {
-          // A circle is both an edge and a region; show both.
-          canvas.drawPath(
-            _circlePath(geometry, circle),
-            Paint()..color = colour.withValues(alpha: 0.10),
-          );
-          canvas.drawPath(
-            _circlePath(geometry, circle),
-            Paint()
-              ..color = colour.withValues(alpha: 0.6)
-              ..strokeWidth = scene.appearance.lineWidth + 4
-              ..style = PaintingStyle.stroke,
-          );
-        } else if (point != null && joinable) {
-          _joinRing(canvas, _camera.toScreen(point), true);
-        } else if (point != null) {
-          canvas.drawCircle(
-            _camera.toScreen(point),
-            PointerReach.pointDiameter / 2 + 3,
-            Paint()
-              ..color = colour
-              ..style = PaintingStyle.stroke
-              ..strokeWidth = 2,
-          );
-        } else if (line != null) {
-          canvas.drawPath(
-            curvePath(line.curve(geometry.points), _camera),
-            Paint()
-              ..color = colour.withValues(alpha: 0.6)
-              ..strokeWidth = scene.appearance.lineWidth + 4
-              ..style = PaintingStyle.stroke
-              ..strokeCap = StrokeCap.round,
-          );
-        } else if (geometry.regionOf(itemId) != null) {
-          canvas.drawPath(
-            _regionPath(geometry, id: itemId),
-            Paint()..color = colour.withValues(alpha: 0.10),
-          );
-        }
+        _paintHighlight(
+          canvas,
+          geometry,
+          itemId,
+          destructive ? Palette.invalid : Palette.accent,
+          joinable: joinable,
+        );
+      case AreaSelectPreview():
+        _paintAreaSelect(canvas, preview);
       case CirclePreview(
         :final start,
         :final edge,
@@ -568,6 +514,87 @@ class ScenePainter extends CustomPainter {
     }
   }
 
+  /// Marks one item as about to be picked: a point's ring, a line's glow,
+  /// or a shape's tinted inside.
+  void _paintHighlight(
+    Canvas canvas,
+    Geometry geometry,
+    String itemId,
+    Color colour, {
+    bool joinable = false,
+  }) {
+    final point = geometry.points[itemId];
+    final line = geometry.lines[itemId];
+    final circle = geometry.circles[itemId];
+    if (circle != null && !joinable) {
+      // A circle is both an edge and a region; show both.
+      canvas.drawPath(
+        _circlePath(geometry, circle),
+        Paint()..color = colour.withValues(alpha: 0.10),
+      );
+      canvas.drawPath(
+        _circlePath(geometry, circle),
+        Paint()
+          ..color = colour.withValues(alpha: 0.6)
+          ..strokeWidth = scene.appearance.lineWidth + 4
+          ..style = PaintingStyle.stroke,
+      );
+    } else if (point != null && joinable) {
+      _joinRing(canvas, _camera.toScreen(point), true);
+    } else if (point != null) {
+      canvas.drawCircle(
+        _camera.toScreen(point),
+        PointerReach.pointDiameter / 2 + 3,
+        Paint()
+          ..color = colour
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2,
+      );
+    } else if (line != null) {
+      canvas.drawPath(
+        curvePath(line.curve(geometry.points), _camera),
+        Paint()
+          ..color = colour.withValues(alpha: 0.6)
+          ..strokeWidth = scene.appearance.lineWidth + 4
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round,
+      );
+    } else if (geometry.regionOf(itemId) != null) {
+      canvas.drawPath(
+        _regionPath(geometry, id: itemId),
+        Paint()..color = colour.withValues(alpha: 0.10),
+      );
+    }
+  }
+
+  /// The marquee rectangle or lasso outline, lightly tinted, with every
+  /// item that letting go would select highlighted.
+  void _paintAreaSelect(Canvas canvas, AreaSelectPreview preview) {
+    if (preview.layerId case final layerId?
+        when scene.document.layers.containsKey(layerId)) {
+      final geometry = scene.document.geometryOf(layerId);
+      for (final id in preview.items) {
+        _paintHighlight(canvas, geometry, id, Palette.accent);
+      }
+    }
+    final outline = Path()
+      ..addPolygon([
+        for (final p in preview.outline) _camera.toScreen(p),
+      ], true);
+    canvas.drawPath(
+      outline,
+      Paint()..color = Palette.accent.withValues(alpha: 0.06),
+    );
+    dashedPath(
+      canvas,
+      outline,
+      Palette.accent.withValues(alpha: 0.9),
+      width: 1,
+      dash: 5,
+      gap: 4,
+    );
+  }
+
   /// The outer ring shown when a click would reuse an existing point.
   void _joinRing(Canvas canvas, Offset centre, bool valid) {
     canvas.drawCircle(
@@ -580,32 +607,81 @@ class ScenePainter extends CustomPainter {
     );
   }
 
+  static const _guideColour = Color(0xFF376B95);
+
+  /// Four short diagonal ticks around each place guides come from, so
+  /// the user sees what is lined up against before moving anything. They
+  /// sit outside the point marker and hover ring so neither hides them.
+  void _paintGuideAnchors(Canvas canvas) {
+    if (scene.guideMarkers.isEmpty) return;
+    final paint = Paint()
+      ..color = _guideColour
+      ..strokeWidth = 1.5
+      ..strokeCap = StrokeCap.round;
+    const inner = 8.0;
+    const outer = 13.0;
+    for (final marker in scene.guideMarkers) {
+      final c = _camera.toScreen(marker);
+      for (final d in const [
+        Offset(1, 1),
+        Offset(1, -1),
+        Offset(-1, 1),
+        Offset(-1, -1),
+      ]) {
+        final unit = d / d.distance;
+        canvas.drawLine(c + unit * inner, c + unit * outer, paint);
+      }
+    }
+  }
+
+  /// Each guide in use drawn dashed across the view, and a ring on a
+  /// target landed on.
   void _paintGuides(Canvas canvas, Size size, Preview preview) {
-    const colour = Color(0xFF376B95);
-    if (preview.guideX case final x?) {
-      final sx = _camera.toScreen(Vec(x, 0)).dx;
-      _dashedLine(
-        canvas,
-        Offset(sx, 0),
-        Offset(sx, size.height),
-        colour,
-        dash: 2,
-        gap: 4,
-        width: 1,
+    final guides = preview.guides;
+    for (final guide in guides.lines) {
+      switch (guide) {
+        case GuideLine():
+          _paintGuideLine(canvas, size, guide);
+        case GuideCircle(:final centre, :final radius):
+          _dashedCircle(
+            canvas,
+            _camera.toScreen(centre),
+            radius * _camera.pixelsPerMetreNow,
+            _guideColour,
+            width: 1,
+            dash: 4,
+            gap: 4,
+          );
+      }
+    }
+    if (guides.mark case final mark?) {
+      canvas.drawCircle(
+        _camera.toScreen(mark),
+        PointerReach.point,
+        Paint()
+          ..color = _guideColour
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.5,
       );
     }
-    if (preview.guideY case final y?) {
-      final sy = _camera.toScreen(Vec(0, y)).dy;
-      _dashedLine(
-        canvas,
-        Offset(0, sy),
-        Offset(size.width, sy),
-        colour,
-        dash: 2,
-        gap: 4,
-        width: 1,
-      );
-    }
+  }
+
+  /// A straight guide, clipped to the view: it runs through the view's
+  /// centre projection, out as far as the view's diagonal each way.
+  void _paintGuideLine(Canvas canvas, Size size, GuideLine guide) {
+    final middle = guide.project(
+      _camera.toWorld(Offset(size.width / 2, size.height / 2)),
+    );
+    final half = _camera.metres(size.longestSide * 1.5);
+    _dashedLine(
+      canvas,
+      _camera.toScreen(middle - guide.direction * half),
+      _camera.toScreen(middle + guide.direction * half),
+      _guideColour,
+      dash: 4,
+      gap: 4,
+      width: 1,
+    );
   }
 
   // ----------------------------------------------------------------- helpers

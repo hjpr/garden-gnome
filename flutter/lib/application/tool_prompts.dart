@@ -2,11 +2,10 @@ import 'editor_controller.dart';
 import 'tools.dart';
 
 /// A one-line hint for the status bar describing what a click will do now.
+/// Select has none: its part of the status bar shows the selection's size
+/// instead.
 String toolPrompt(EditorController editor) {
-  if (editor.tool == Tool.select) {
-    return 'Click to select, drag to move. Drag a circle\'s edge to resize it. '
-        'Hold to pick from shapes underneath. Locked layers are skipped';
-  }
+  if (editor.tool == Tool.select) return '';
   if (editor.tool == Tool.reference) return _referencePrompt(editor);
   if (editor.selectedLayer == null) {
     return editor.document.fields.isEmpty

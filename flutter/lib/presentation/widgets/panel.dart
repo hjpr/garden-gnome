@@ -221,6 +221,27 @@ class DockPanel extends StatelessWidget {
   }
 }
 
+/// The greyed, centred line a panel shows when it has nothing to show.
+class EmptyPanelText extends StatelessWidget {
+  const EmptyPanelText(this.message, {super.key});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8),
+    child: Text(
+      message,
+      textAlign: TextAlign.center,
+      style: const TextStyle(
+        fontSize: 12.5,
+        fontStyle: FontStyle.italic,
+        color: Palette.faint,
+      ),
+    ),
+  );
+}
+
 /// A titled group of controls inside a panel.
 class PropertyGroup extends StatelessWidget {
   const PropertyGroup({super.key, required this.title, required this.children});

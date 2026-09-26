@@ -8,6 +8,8 @@ import '../../application/canvas_input.dart';
 import '../../application/editor_controller.dart';
 import '../../application/hit_testing.dart';
 import '../../application/previews.dart';
+import '../../application/tools.dart';
+import '../../application/transform_box.dart';
 import '../../platform/canvas_cursor.dart';
 import '../widgets/text_focus.dart';
 import 'reference_image_cache.dart';
@@ -54,15 +56,30 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
     widget.editor.addListener(_updateCursor);
   }
 
-  /// Select picks and moves, so it shows its own arrow. Drawing tools keep
+  /// Select picks and moves, so it shows its own arrow, and the selection
+  /// box's handles show which way they scale or turn. Drawing tools keep
   /// the crosshair, and panning keeps the grab hand.
   void _updateCursor() {
-    showSelectArrowCursor(
-      _pointerInside &&
-          widget.editor.tool.usesArrowCursor &&
-          !_spaceHeld &&
-          _panPointer == null,
-    );
+    final ours =
+        _pointerInside &&
+        widget.editor.tool.usesArrowCursor &&
+        !_spaceHeld &&
+        _panPointer == null;
+    // A box drag keeps its cursor even when the pointer leaves the canvas.
+    final grip = _input.activeGrip;
+    showCanvasCursor(switch (grip) {
+      _ when !ours && !_input.isDragging => CanvasCursor.system,
+      null when ours && widget.editor.function == ToolFunction.lasso =>
+        CanvasCursor.lasso,
+      null => ours ? CanvasCursor.arrow : CanvasCursor.system,
+      BoxGrip(rotate: true) => CanvasCursor.rotate,
+      BoxGrip(:final handle) when handle.sx == 0 => CanvasCursor.resizeVertical,
+      BoxGrip(:final handle) when handle.sy == 0 =>
+        CanvasCursor.resizeHorizontal,
+      BoxGrip(:final handle) when handle.sx == handle.sy =>
+        CanvasCursor.resizeDiagonalDown,
+      _ => CanvasCursor.resizeDiagonalUp,
+    });
   }
 
   bool get _spaceHeld =>
@@ -136,7 +153,10 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
     if (event.pointer == _panPointer) {
       widget.editor.panBy(event.delta);
     } else if (event.pointer == _toolPointer) {
-      _input.move(event.localPosition);
+      _input.move(
+        event.localPosition,
+        shift: HardwareKeyboard.instance.isShiftPressed,
+      );
       if (_input.isDragging) _holdTimer?.cancel();
     }
   }
@@ -155,13 +175,14 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
       } else {
         _input.cancel();
       }
+      _updateCursor();
     }
   }
 
   @override
   void dispose() {
     widget.editor.removeListener(_updateCursor);
-    showSelectArrowCursor(false);
+    showCanvasCursor(CanvasCursor.system);
     _holdTimer?.cancel();
     _pictures.dispose();
     super.dispose();
@@ -204,8 +225,8 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
             _updateCursor();
           },
           onHover: (event) {
-            _updateCursor();
             _input.hover(event.localPosition);
+            _updateCursor();
           },
           onExit: (_) {
             _pointerInside = false;
@@ -247,6 +268,8 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
                       referenceLineImageId: editor.referenceLineImageId,
                       referenceLineStart: editor.referenceLineStart,
                       devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
+                      selectionBox: selectionBoxOf(editor),
+                      guideMarkers: _input.activeGuideSet().markers,
                     ),
                   ),
                 );
