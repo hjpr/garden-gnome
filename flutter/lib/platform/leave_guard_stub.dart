@@ -1,0 +1,1 @@
+void setLeaveWarning(bool enabled) {}

@@ -30,7 +30,8 @@
       <header>
         <p class="label">Build</p>
         <h1 id="build-canvas-title">Canvas</h1>
-        <p>The canvas provides a grid-based layout for designing and organizing land into fields, plots, and planting areas. It helps gardeners see which areas are ready to grow and decide where to plant. A shared overview of activity across fields helps coordinate growing, harvesting, tilling, and other work without manually tracking each area separately.</p>
+        <p>Design land on a grid, divide fields into plots and growing areas, and edit each layer's properties.</p>
+        <p>This page describes the planned workspace. The layout study illustrates the screen and selected controls; the Build API pages define the objects and behavior.</p>
       </header>
 
       <div class="layout-preview">
@@ -38,29 +39,56 @@
         <a href="build-layout.html" aria-label="Open the full Build screen layout"></a>
       </div>
       <section>
+        <h2 id="build-flutter-milestone">Flutter delivery scope</h2>
+        <p>Complete this entire Build contract before coding; deliver it in stages.</p>
+        <ul>
+          <li>Milestone 1: native desktop and desktop web boundary editor. Fields, plots, areas; straight-edged boundaries; Point and Line tools; Shift-click multi-selection with common translation/deletion; containment and overlap; camera, grid, units, fixed panels, basic properties, history, and save/open. Recovery and persistence are required, not optional follow-ups.</li>
+          <li>Milestone 2: both circle tools, circular boundaries, decorative Fill, and extended recorded layer properties. First-milestone invalidity hatching is already required and is not decorative Fill.</li>
+          <li>Milestone 3: reference-image import, durable assets, movement/scaling, calibration, replacement, and recovery.</li>
+          <li>Milestone 4: planting-type and row/mound settings with derived generation. Do not expose controls whose output is not implemented. Existing schema fields remain preserved even before their controls ship.</li>
+          <li>Basic properties in milestone 1: names; Field/Plot existing color choices; optional Field drainage category; Plot ground text; Area crop name as a nullable label; read-only Active/Inactive. Areas remain Flat until milestone 4. Do not add an Area color property solely for symmetry.</li>
+          <li>Numerical soil observations ship with extended properties, not agronomic calculations. Their limits are in B12.</li>
+          <li>Deferred from this Build scope: marquee/lasso selection, persistent grouping, holes, multiple occupied regions in one layer, layer hiding/locking/reordering, geometry rotation/nonuniform scaling, image rotation/cropping/skew, collaboration/cloud synchronization, autosave/crash drafts, touch and dedicated trackpad gestures, and crop suitability/seed/yield/schedule engines. Ordinary mouse-compatible trackpad events still use the mouse contract.</li>
+          <li>Initial release targets: Linux x86-64 desktop (Ubuntu 24.04 LTS baseline) and desktop Chrome/Firefox on Linux. Record actual stable browser versions and machines when implementation is exercised. Windows, macOS, Safari, mobile, and other targets are not implicitly verified by Flutter support.</li>
+        </ul>
+        <p>These stage assignments close earlier open placement of multi-selection, Fill, soil entry, and planting settings. They do not remove the later features from this document.</p>
+        <p>The prebuild decisions are consolidated in the <a href="flutter-build-workthrough.md">workthrough</a>; application implementation requires separate authorization.</p>
+      </section>
+      <section>
         <h2 id="build-viewport">Viewport</h2>
-        <p>The viewport is the visible part of the canvas. Navigate across the land without changing its dimensions or the size of the menus.</p>
+        <p>The viewport is the visible drawing rectangle between the header and status bar. Panels sit above it without changing its size. Resizing the window keeps the same land point at its center and leaves zoom unchanged. <a href="#api-canvas">Canvas</a> holds the drawing, view, and panels; <a href="#api-canvas-controller">CanvasController</a> applies user actions.</p>
         <h3 id="build-viewport-navigation">Navigation</h3>
         <p>Scroll the mouse wheel over the canvas to zoom in or out around the pointer. Hold the middle mouse button and drag to pan; release it to stop. Scrolling over a menu scrolls its content instead of zooming the canvas. Choose Small, Medium, or Large under Settings → Viewport → Menu scaling to resize menus independently.</p>
+        <p>Pan and zoom between clicks in an unfinished drawing without losing its placed points. While holding a geometry drag, finish or cancel it before panning or zooming.</p>
         <h3 id="build-viewport-zoom">Zoom</h3>
-        <p>Proposed zoom policy: start at 100%, with a default range of 25%–800% for home gardens. Clamp zoom at those limits. Preferences → Appearance &amp; behavior lets users change the minimum and maximum; the range must include 100%. If a new limit excludes the current zoom, move to the nearest allowed zoom without changing the drawing.</p>
-        <p>At 100%, one grid-cell side represents the distance entered under Settings → Measure → Scale. The bottom-left scale always describes one currently visible grid-cell side, not the whole viewport. Keep grid spacing between 30 and 60 screen pixels: at each doubling of zoom, halve the distance represented by a cell; at each halving of zoom, double it. Grid lines remain anchored to the same canvas origin. These display changes do not alter land dimensions, the configured base scale, or the snapping target.</p>
+        <p>Within <code>Canvas.control</code>, start at <code>zoom_current: 1</code> (100%), with <code>zoom_min: 0.25</code> and <code>zoom_max: 8</code>. Preferences → Appearance &amp; behavior lets users change the limits; the range must include 100%. Clamp the current zoom to the nearest limit when necessary, without changing the drawing. <code>zoom_steps</code> defaults to four wheel increments per doubling; <code>zoom_breakpoints</code> controls grid detail separately. Pan and pointer-anchored zoom update <code>viewport_position.current</code>.</p>
+        <p>Zoom in to draw smaller geometry and out to see more land. At 100%, one metre occupies 30 logical screen pixels. The bottom-left scale describes one visible grid-cell side in the selected ft or m units. Keep grid spacing from 30 up to, but not including, 60 logical pixels: at each doubling of zoom, halve the distance represented by a cell. Grid lines stay anchored to the canvas origin, and their thickness does not grow with zoom.</p>
         <table class="outline-table" aria-labelledby="build-viewport-zoom">
-          <thead><tr><th scope="col">Zoom breakpoint</th><th scope="col">Distance per grid-cell side</th><th scope="col">Example: base scale 4 ft</th></tr></thead>
+          <thead><tr><th scope="col">Zoom breakpoint</th><th scope="col">Distance per grid-cell side</th><th scope="col">Screen spacing at breakpoint</th></tr></thead>
           <tbody>
-            <tr><th scope="row">25%</th><td>4 × base scale</td><td>16 ft</td></tr>
-            <tr><th scope="row">50%</th><td>2 × base scale</td><td>8 ft</td></tr>
-            <tr><th scope="row">100%</th><td>Base scale</td><td>4 ft</td></tr>
-            <tr><th scope="row">200%</th><td>½ × base scale</td><td>2 ft</td></tr>
-            <tr><th scope="row">400%</th><td>¼ × base scale</td><td>1 ft</td></tr>
-            <tr><th scope="row">800%</th><td>⅛ × base scale</td><td>0.5 ft</td></tr>
+            <tr><th scope="row">25%</th><td>4 m</td><td>30 px</td></tr>
+            <tr><th scope="row">50%</th><td>2 m</td><td>30 px</td></tr>
+            <tr><th scope="row">100%</th><td>1 m</td><td>30 px</td></tr>
+            <tr><th scope="row">200%</th><td>0.5 m</td><td>30 px</td></tr>
+            <tr><th scope="row">400%</th><td>0.25 m</td><td>30 px</td></tr>
+            <tr><th scope="row">800%</th><td>0.125 m</td><td>30 px</td></tr>
           </tbody>
         </table>
-        <p>Between breakpoints, zoom is continuous while the distance per cell stays fixed. The same doubling rule continues beyond the defaults when custom limits allow it. Wheel zoom, middle-button panning, and adaptive grid spacing are specified here for the drawing engine; the prototype currently previews menu scaling and appearance controls.</p>
+        <p>Between breakpoints, the distance per cell stays fixed while its screen spacing changes. The doubling rule continues beyond the defaults when custom limits allow it. Changing units converts displayed lengths, not the physical drawing. Grid snapping follows visible intersections; Drawing snapping shows dotted alignment guides from the last individually selected item.</p>
       </section>
       <section>
         <h2 id="build-farm">Layers</h2>
         <p>Layers lets gardeners choose the active layer to draw on and organize land into fields, plots, and areas. Fields mark property boundaries; multiple fields are allowed, but their areas cannot overlap. Plots represent major sections within a field, staying entirely inside its boundary without overlapping other plots. Areas define the actual growing spaces within plots, with properties such as rows or mounds that support planting calculations using growing instructions from seed references.</p>
+        <p>Containment includes boundary contact: a plot may touch or run along its field boundary, and an area may touch or run along its plot boundary, but neither may extend outside its parent. Sibling regions may meet at a point or share an edge without requiring a gap. Contact alone does not count as overlap. Areas within a plot, like fields and sibling plots, must not overlap one another's interiors. See <a href="#api-geometry-boundary-contact">Containment and touching</a>.</p>
+        <p>Each completed field, plot, or area represents one closed region with a single boundary. Disconnected pieces use separate layers; grouping is deferred. The first milestone uses closed, straight-edged polygons, with circle boundaries available when the later circle tools are added. Holes remain deferred. See <a href="#api-geometry-land-boundary">Land boundary</a>.</p>
+        <p>Show a validity icon beside each layer without status text or tooltips, and render invalid interiors light grey with an angled hatch. A boundary participates only when it and all its ancestors are valid; invalid parents also make their children invalid/inactive. Retain affected layers, but exclude them from seeds and boundary-based operations/calculations until eligible again. This <a href="#api-geometry-boundary-validity">active-boundary status</a> is independent of selection; see <a href="#api-geometry-invalid-appearance">Invalid-boundary appearance</a>.</p>
+        <p>Finishing the first valid closed loop automatically makes it the layer's boundary. Validate the result before marking the layer complete; a self-crossing or otherwise invalid loop keeps its preview for correction and explains the problem. Completing a field enables Add Plot while that field is selected; completing a plot within a completed field enables Add Area while that plot is selected. Once complete, edit the existing boundary rather than draw another independent region in the same layer. See <a href="#api-geometry-boundary-completion">Completing a boundary</a>.</p>
+        <p>Selecting a layer makes it the drawing destination and opens Properties. Several geometry items can be selected within that layer. Switching layers clears those items and cancels unfinished drawing while keeping the active tool and snap target. Closing Properties leaves the layer selected.</p>
+        <p>Each plot belongs to exactly one field, and each area belongs to exactly one plot; children are not shared between parents. Layer IDs are permanent and unique within the workspace, independently of their display names. Renaming changes only the name, leaving children and geometry references intact. Sibling land layers appear in creation order. The first milestone has no per-layer hiding, locking, or manual reordering; land remains visible, with editing governed by selection and validity rules. Hiding a workspace panel does not hide its land layers. See <a href="#api-canvas-layer-ownership">Layer identity and ownership</a>.</p>
+        <p>Use Add Field, Add Plot, or Add Area in Layers to create an empty layer before drawing its boundary. Add Field needs no selection; Add Plot requires its field selected, and Add Area requires its plot selected. The new layer becomes selected and its Properties opens, while the active tool stays unchanged. Drawing does not start automatically. Cancelling an unfinished boundary keeps the layer; deleting it is a separate action.</p>
+        <p>A field boundary must be completed before adding or drawing plots; a plot boundary and its owning field boundary must be completed before adding areas. Child geometry editing also requires its completed parent boundary. Keep Add Plot/Add Area disabled when their prerequisites are unmet. A small hover tooltip explains: “complete field before adding new plot” or “complete plot before adding new area.” These explanations must remain available even while the action is disabled. See <a href="#api-canvas-child-editing">Parent boundaries and child editing</a>.</p>
+        <p>Delete in Layers acts on the selected layer. Confirm the layer and any children that will be removed: deleting a field also removes its plots and areas; deleting a plot also removes its areas. Cancel changes nothing. The deletion is one undoable action, and Undo restores the removed layers, IDs, geometry, and properties. See <a href="#api-canvas-layer-deletion">Deleting layers</a>.</p>
+        <p>New layers receive names such as Field 1, Plot 1, and Area 1, with a separate workspace-wide sequence for each type. Renaming or deleting a layer does not recycle its number. Use fresh default properties rather than copying a parent or the last edited layer: fields and plots use their documented green outline colors; areas start Flat with no crop or entered row/mound measurements. All new boundaries are empty. See <a href="#api-canvas-layer-defaults">Creation defaults</a>.</p>
         <div class="property-outline">
           <iframe class="property-preview" src="build-layout.html?panel=layers" title="Layers mockup" width="272" height="510" tabindex="-1" aria-hidden="true" inert></iframe>
           <table class="outline-table" aria-labelledby="build-farm">
@@ -68,7 +96,7 @@
             <tbody>
               <tr><th scope="row">Field</th><td>A top-level layer marking a property boundary. Multiple fields can be drawn, but their areas cannot overlap.</td></tr>
               <tr><th scope="row">Plot</th><td>A major section within a field, such as vegetables or flowers. Must stay entirely within its parent field and cannot overlap another plot. Select a field before adding a plot to it.</td></tr>
-              <tr><th scope="row">Area</th><td>The actual growing space within a plot. Flat, row, or mound properties support planting calculations based on growing instructions from seed references. Stays inside its parent plot. Select a plot before adding an area to it.</td></tr>
+              <tr><th scope="row">Area</th><td>The actual growing space within a plot. Flat, row, or mound properties support planting calculations based on growing instructions from seed references. Stays inside or on its parent plot boundary and must not overlap another area's interior; sibling boundaries may touch. Select a plot before adding an area to it.</td></tr>
               <tr><th scope="row">Reference</th><td>An image used to trace and scale the layout. Added at the bottom of the layer stack, outside the Field/Plot/Area hierarchy; each new reference goes beneath existing layers.</td></tr>
             </tbody>
           </table>
@@ -76,23 +104,27 @@
       </section>
       <section>
         <h2 id="build-tools">Tools</h2>
+        <p>Start with Point → Move. Each tool remembers its last-used function during the session. Escape or changing tools cancels unfinished drawing. Use explicit point/segment draw and delete functions rather than Backspace correction steps. An invalid drag leaves the original geometry unchanged; invalid Line completion remains visible with its failure reason until cancellation/redrawing. See <a href="#api-geometry-tool-functions">Tool functions and cancellation</a>.</p>
         <div class="table-scroll" role="region" aria-label="Tools table, scroll horizontally for more" tabindex="0">
           <table class="outline-table tools-table" aria-labelledby="build-tools">
             <thead><tr><th scope="col">Tool</th><th scope="col">Icon</th><th scope="col">Description</th></tr></thead>
             <tbody>
-              <tr><th scope="row">Point</th><td class="tool-symbol"><svg class="tool-icon" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3L6 19L11 14L16 21L19 19L14 12L21 11Z"/></svg></td><td>Open the Move, Place, Connect, and Delete functions for working with points.</td></tr>
-              <tr><th scope="row">Point - Move</th><td class="tool-symbol"><svg class="tool-icon" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3V21M3 12H21M8 7L12 3L16 7M8 17L12 21L16 17M7 8L3 12L7 16M17 8L21 12L17 16"/></svg></td><td>Grab and move a point; its connected lines move with it.</td></tr>
-              <tr><th scope="row">Point - Place</th><td class="tool-symbol"><svg class="tool-icon" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3V19L7 15L11 21L14 19L10 13L16 12Z"/><circle cx="19" cy="5" r="3"/></svg></td><td>Place a new point on the canvas.</td></tr>
-              <tr><th scope="row">Point - Connect</th><td class="tool-symbol"><svg class="tool-icon" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3V19L7 15L11 21L14 19L10 13L16 12Z M17.5 4.5L19.5 6.5"/><circle cx="16" cy="3" r="2"/><circle cx="21" cy="8" r="2"/></svg></td><td>Join points with a connecting line.</td></tr>
-              <tr><th scope="row">Point - Delete</th><td class="tool-symbol"><svg class="tool-icon" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3V19L7 15L11 21L14 19L10 13L16 12Z M17 3L22 8M22 3L17 8"/></svg></td><td>Remove a point.</td></tr>
-              <tr><th scope="row">Line</th><td class="tool-symbol"><svg class="tool-icon" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19L19 5"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="5" r="2"/></svg></td><td>Draw between points, including positions along an existing line—not just its endpoints. Lines must not cross other lines.</td></tr>
-              <tr><th scope="row">Center-diameter circle</th><td class="tool-symbol"><svg class="tool-icon" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12H21M12 9V15"/></svg></td><td>Set a center, then specify the diameter.</td></tr>
-              <tr><th scope="row">Two-point circle</th><td class="tool-symbol"><svg class="tool-icon" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M5.6 18.4L18.4 5.6"/><circle cx="5.6" cy="18.4" r="2"/><circle cx="18.4" cy="5.6" r="2"/></svg></td><td>Define a circle using two points.</td></tr>
-              <tr><th scope="row">Fill</th><td class="tool-symbol"><svg class="tool-icon" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9L12 2L20 10L12 19Z M4 9H19M4 22H22"/></svg></td><td>Fill a closed shape with dots, crosshatch, or crosses. These are visual patterns, separate from ground features.</td></tr>
-              <tr><th scope="row">Reference</th><td class="tool-symbol"><svg class="tool-icon" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18"/><circle cx="8" cy="8" r="2"/><path d="M3 18L9 12L13 16L17 10L21 14"/></svg></td><td>Work with the actively selected reference image. Unavailable when a field, plot, area, or empty reference layer is selected.</td></tr>
-              <tr><th scope="row">Reference - Move</th><td class="tool-symbol"><svg class="tool-icon" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3V21M3 12H21M8 7L12 3L16 7M8 17L12 21L16 17M7 8L3 12L7 16M17 8L21 12L17 16"/></svg></td><td>Reposition the reference image without moving field geometry.</td></tr>
-              <tr><th scope="row">Reference - Scale</th><td class="tool-symbol"><svg class="tool-icon" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10V20H14M4 20L20 4M13 4H20V11"/></svg></td><td>Resize the reference image while preserving its proportions.</td></tr>
-              <tr><th scope="row">Reference - Reference Line</th><td class="tool-symbol"><svg class="tool-icon" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12H20M4 7V17M20 7V17M8 10V14M12 10V14M16 10V14"/></svg></td><td>Draw a line across a known distance in the selected image, then enter that distance in Reference properties. Automatically scale the image so the line matches the canvas distance, preserving proportions and leaving field geometry unchanged.</td></tr>
+              <tr><th scope="row">Point</th><td class="tool-symbol"><img class="tool-icon" src="../src/icons/point.svg" alt=""></td><td>Open the Move, Place, and Delete functions for working with points. Use Line → Join to connect existing points.</td></tr>
+              <tr><th scope="row">Point - Move</th><td class="tool-symbol"><img class="tool-icon" src="../src/icons/move.svg" alt=""></td><td>Grab and move a point; its connected lines move with it.</td></tr>
+              <tr><th scope="row">Point - Place</th><td class="tool-symbol"><img class="tool-icon" src="../src/icons/point-place.svg" alt=""></td><td>Place points to outline a shape; do not create one over an existing point. Require at least one displayed point diameter between centres, checking existing points on the selected drawing layer only. Reject too-close placement without shifting or merging points. Inserting a point along an existing segment automatically splits it at that point. Keep Place selected after placement or insertion for repeated use; nearby-segment acquisition uses a screen-pixel distance independently of Grid/Drawing snapping; its acquisition distance is 6 logical px.</td></tr>
+              <tr><th scope="row">Point - Delete</th><td class="tool-symbol"><img class="tool-icon" src="../src/icons/point-delete.svg" alt=""></td><td>Hover to highlight a point, then click to delete it and its incident segments without reconnecting its neighbors. Keep Delete selected for repeated use. A boundary becomes incomplete until the user closes it again.</td></tr>
+              <tr><th scope="row">Line</th><td class="tool-symbol"><img class="tool-icon" src="../src/icons/line.svg" alt=""></td><td>Functions: Draw, Join, Move, Delete. First-use Draw; use 6 px edge hits and 8 px eligible endpoint acquisition.</td></tr>
+              <tr><th scope="row">Line - Join</th><td class="tool-symbol">—</td><td>Click two existing points to join them, with a straight preview between clicks and validation before commitment. Same-point or already-connected pairs add nothing. Keep Join selected for a new pair after success; Escape cancels the pending join. Reuse points within the selected drawing layer.</td></tr>
+              <tr><th scope="row">Line - Draw</th><td class="tool-symbol">—</td><td>Draw between points with the approved click sequence, including endpoint reuse and ring/union feedback. Each accepted placement commits immediately; Enter or Escape ends drawing while preserving placed geometry and discarding the trailing preview. Line does not attach to edge interiors; insert explicitly with Point and never create a branch. Use the same function for repair.</td></tr>
+              <tr><th scope="row">Line - Move</th><td class="tool-symbol">—</td><td>Translate the selected segment/group or polygon interior with fixed descendants, one common displacement, and live connected-edge validity previews.</td></tr>
+              <tr><th scope="row">Line - Delete</th><td class="tool-symbol">—</td><td>Hover to highlight a segment, then click to delete only that committed segment, keeping its endpoints and other connections. Keep Delete selected for repeated use. Do not reconnect the gap or delete a whole multi-segment Line.</td></tr>
+              <tr><th scope="row">Center-diameter circle</th><td class="tool-symbol"><img class="tool-icon" src="../src/icons/center-diameter-circle.svg" alt=""></td><td>Draw: click center then circumference, with diameter readout or numeric diameter. Resize/Delete are explicit functions; creation commits atomically.</td></tr>
+              <tr><th scope="row">Two-point circle</th><td class="tool-symbol"><img class="tool-icon" src="../src/icons/two-point-circle.svg" alt=""></td><td>Draw: click opposite diameter ends; commit one center-reference/radius Circle. Resize/Delete share the other circle tool’s behavior.</td></tr>
+              <tr><th scope="row">Fill</th><td class="tool-symbol"><img class="tool-icon" src="../src/icons/fill.svg" alt=""></td><td>Milestone 2: choose None, dots, crosshatch, or crosses and click the selected layer’s closed boundary. Visual patterns are separate from generated ground features.</td></tr>
+              <tr><th scope="row">Reference</th><td class="tool-symbol"><img class="tool-icon" src="../src/icons/reference.svg" alt=""></td><td>Work with the actively selected reference image. Unavailable when a field, plot, area, or empty reference layer is selected.</td></tr>
+              <tr><th scope="row">Reference - Move</th><td class="tool-symbol"><img class="tool-icon" src="../src/icons/move.svg" alt=""></td><td>Reposition the reference image without moving field geometry.</td></tr>
+              <tr><th scope="row">Reference - Scale</th><td class="tool-symbol"><img class="tool-icon" src="../src/icons/reference-scale.svg" alt=""></td><td>Resize the reference image while preserving its proportions.</td></tr>
+              <tr><th scope="row">Reference - Reference Line</th><td class="tool-symbol"><img class="tool-icon" src="../src/icons/reference-line.svg" alt=""></td><td>Draw a line across a known distance in the selected image, then enter that distance in Reference properties. Automatically scale the image so the line matches the canvas distance, preserving proportions and leaving field geometry unchanged.</td></tr>
             </tbody>
           </table>
         </div>
@@ -100,15 +132,14 @@
 
       <section>
         <h2 id="build-canvas-properties">Settings</h2>
-        <p>Measure sets units and the grid scale at 100% zoom. Snapping chooses the alignment target, while Viewport controls menu sizing independently of canvas zoom.</p>
+        <p>Measure chooses display units; zoom determines the displayed scale. Snapping belongs to <a href="#api-canvas-control">Canvas.control</a>. Units and menu sizing belong to <a href="#api-canvas-display">Canvas.display</a>, independently of canvas zoom.</p>
         <div class="property-outline">
-          <iframe class="property-preview" src="build-layout.html?properties=canvas" title="Settings mockup" width="272" height="430" tabindex="-1" aria-hidden="true" inert></iframe>
+          <iframe class="property-preview" src="build-layout.html?properties=canvas" title="Settings mockup" width="272" height="360" tabindex="-1" aria-hidden="true" inert></iframe>
           <table class="outline-table" aria-labelledby="build-canvas-properties">
             <thead><tr><th scope="col">Property</th><th scope="col">Description</th></tr></thead>
             <tbody>
-              <tr><th scope="row">Units</th><td>Choose ft or m. Scale and Reference known-distance labels use these units; changing units in the prototype does not convert entered values.</td></tr>
-              <tr><th scope="row">Scale</th><td>Enter the positive distance represented by one grid length. The label shows the selected units, such as Scale (ft), and the canvas scale updates as you type. Blank or invalid values show a dash.</td></tr>
-              <tr><th scope="row">Snapping</th><td>Turn snapping on or off with the checkbox. Choose Grid or Drawing from Snap to; the dropdown is disabled while snapping is off and retains its selection. When Snap to is Drawing, snapping attempts to snap to the last drawing selected.</td></tr>
+              <tr><th scope="row">Units</th><td>Choose ft or m for length inputs and readouts. The drawing keeps physical lengths in metres. Changing units does not resize it.</td></tr>
+              <tr><th scope="row">Snapping</th><td>Choose Grid for visible grid intersections or Drawing for horizontal and vertical alignment guides from the last individually selected item. Turning snapping off hides its guides and keeps the target for later use.</td></tr>
               <tr><th scope="row">Menu scaling</th><td>Small (85%), Medium (100%, default), or Large (115%). Changes floating menu sizes without changing the grid, drawing dimensions, or viewport zoom.</td></tr>
             </tbody>
           </table>
@@ -116,10 +147,11 @@
       </section>
       <section>
         <h2 id="build-preferences">Preferences</h2>
-        <p>Preferences → Appearance &amp; behavior groups adjustable drawing styles and navigation limits. Apply updates the appearance preview and retains the chosen limits for the session; reloading restores defaults.</p>
+        <p>Preferences → Appearance &amp; behavior groups drawing styles and zoom limits. Apply checks and applies the settings together. Closing discards unapplied changes; minimizing keeps them until the panel is reopened. Applied settings are restored for this workspace on its next opening.</p>
         <table class="outline-table" aria-labelledby="build-preferences">
           <thead><tr><th scope="col">Preference</th><th scope="col">Default</th><th scope="col">Purpose</th></tr></thead>
           <tbody>
+            <tr><th scope="row">Action history capacity</th><td>50 action groups</td><td>Maximum retained edit groups across Undo and Redo together in ActionsBuffer. Accepts whole numbers from 1 to 1,000 inclusive. Apply trims excess oldest Undo entries, then furthest-future Redo entries if needed, without changing the drawing.</td></tr>
             <tr><th scope="row">Line width</th><td>2 px</td><td>Thickness of field, plot, and area outlines; does not change their boundaries.</td></tr>
             <tr><th scope="row">Grid thickness</th><td>1 px</td><td>Thickness of grid lines, independent of drawing outlines.</td></tr>
             <tr><th scope="row">Grid color</th><td>#dce0d6</td><td>Color of grid lines.</td></tr>
@@ -130,8 +162,16 @@
         </table>
       </section>
       <section>
+        <h2 id="build-panel-behavior">Panels and inputs</h2>
+        <p>Field, Plot, and Area Properties show a compact read-only Active/Inactive status near the top. It describes the selected boundary's eligibility, including ancestor validity, without adding a manual toggle or status tooltip. See <a href="#api-geometry-invalid-appearance">Invalid-boundary appearance</a>.</p>
+        <p>View shows or hides Drawing tools, Settings, and Layers. Close hides a panel, Minimize leaves its heading visible, and reopening expands it. Selecting a layer expands its Properties and hides any other Properties panel.</p>
+        <p>Layer dropdowns and colors apply immediately. Valid text and numbers apply on Enter or when focus leaves the input. Before switching layers or closing Properties, apply valid ordinary input to its original layer and discard invalid input. Rename uses Save and Cancel.</p>
+        <p>Length inputs use the selected ft or m units. If units change during an edit, apply valid input in the previous units first. Invalid input blocks the unit change until corrected or discarded. Display rounding does not change stored dimensions.</p>
+        <p>Reopening a workspace restores its view, applied settings, and non-property panels. Selection starts empty, Properties stays closed, and the tool starts at Point → Move. Unfinished drawing and unapplied inputs are discarded.</p>
+      </section>
+      <section>
         <h2 id="build-field-properties">Field properties</h2>
-        <p>Name the field, choose its outline color, and record drainage and soil sample results. The seed engine will use the soil information to flag crops that may grow poorly in the field’s soil.</p>
+        <p>Name the field, choose its outline color, and record optional drainage. Numerical soil fields are later raw laboratory observations with unspecified units/methods, not inputs for crop suitability. Agronomic comparisons require a separate unit/method/source contract.</p>
         <div class="property-outline">
           <iframe class="property-preview" src="build-layout.html?properties=field" title="Field properties mockup" width="272" height="730" tabindex="-1" aria-hidden="true" inert></iframe>
           <table class="outline-table" aria-labelledby="build-field-properties">
@@ -177,27 +217,24 @@
       </section>
       <section>
         <h2 id="build-reference-properties">Reference properties</h2>
-        <p>Name the reference layer, choose its color and a local image, and enter the known distance for its Reference Line. Select the layer by its name or gear to enable Reference tools. Image movement and distance-based scaling are planned drawing behavior.</p>
+        <p>Name the reference layer, choose its color and image, and enter the known distance for its Reference Line. Select a reference layer with an image to enable Reference tools. Moving or scaling it leaves field geometry unchanged.</p>
         <div class="property-outline">
           <iframe class="property-preview" src="build-layout.html?properties=reference" title="Reference properties mockup" width="272" height="350" tabindex="-1" aria-hidden="true" inert></iframe>
           <table class="outline-table" aria-labelledby="build-reference-properties">
             <thead><tr><th scope="col">Property</th><th scope="col">Description</th></tr></thead>
             <tbody>
               <tr><th scope="row">Name</th><td>Rename the reference layer with the pencil icon.</td></tr>
-              <tr><th scope="row">Color</th><td>Choose a color for the reference layer. The prototype retains the selection per layer without tinting the image.</td></tr>
-              <tr><th scope="row">Image</th><td>Choose a local PNG, JPEG, or WebP image. It stays in the browser and is cleared on reload.</td></tr>
+              <tr><th scope="row">Color</th><td>Choose a color for the reference layer.</td></tr>
+              <tr><th scope="row">Image</th><td>Choose a PNG, JPEG, or WebP image. The layer keeps an image reference so the application can load it.</td></tr>
               <tr><th scope="row">Known distance</th><td>The real distance between the Reference Line endpoints. The label shows the Canvas units in parentheses: ft or m. Used to scale only the selected image.</td></tr>
             </tbody>
           </table>
         </div>
       </section>
       <section>
-        <h2 id="build-open-questions">Open questions</h2>
-        <ul>
-          <li>Should lines join existing edges at any point, without crossing them?</li>
-          <li>Should the two-point circle use opposite ends of the diameter?</li>
-          <li>Which soil-report units and lab methods should we support before comparing results with crop requirements?</li>
-        </ul>
+        <h2 id="build-open-questions">Scope and handoff</h2>
+        <p>The Build decisions are resolved in the <a href="flutter-build-workthrough.md">Flutter workthrough</a>. Point insertion uses a 6 px segment acquisition distance; Line does not create branches. Two-point circles use opposite diameter ends. Soil values are raw observations, not crop suitability inputs.</p>
+        <p>Touch, layer locking/reordering, holes, collaboration, autosave, and agronomic calculations remain explicit future scope, not blockers for the defined Build implementation.</p>
       </section>
     </article>
 
@@ -208,35 +245,629 @@
       <ul class="section-cards" aria-label="Build API sections"></ul>
     </article>
 
+    <article id="api-canvas" data-parent="build-api" aria-labelledby="api-canvas-title">
+      <header>
+        <p class="label">Build API</p>
+        <h1 id="api-canvas-title">Canvas</h1>
+        <p>One drawing workspace. It holds the land being drawn, the current view and selection, and the appearance of the drawing and its panels.</p>
+        <p>These pages describe the application design. YAML blocks show object fields and examples; they are not application code. References point to existing objects. Example references use readable labels in place of UUIDs. Expanded examples are partial reference views, not the portable representation; the save contract stores each record once in keyed registries.</p>
+      </header>
+      <section>
+        <h2 id="api-canvas-shape">Shape</h2>
+        <pre><code class="language-yaml" data-proposed-shape="Canvas">Canvas:
+  control: {type: CanvasControl, required: true}
+  display: {type: CanvasDisplay, required: true}
+  layers: {type: Layers, required: true}
+  preview: {type: Preview, nullable: true}
+  canvas_size:
+    type: object
+    fields:
+      width: {type: number, nullable: true, exclusive_minimum: 0, default: null}
+      height: {type: number, nullable: true, exclusive_minimum: 0, default: null}</code></pre>
+        <table class="outline-table" aria-labelledby="api-canvas-shape">
+          <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>control</code></th><td><a href="#api-canvas-control">CanvasControl</a> holds the view, selection, active tool, unfinished drawing, and snapping settings.</td></tr>
+            <tr><th scope="row"><code>display</code></th><td><a href="#api-canvas-display">CanvasDisplay</a> holds appearance, display units, and panel states.</td></tr>
+            <tr><th scope="row"><code>layers</code></th><td>The Layers object owns fields, plots, areas, and reference layers. Each layer owns its properties and references its owned geometry records; coordinates are not copied into the layer. The detailed Layers structure is a separate design task.</td></tr>
+            <tr><th scope="row"><code>canvas_size</code></th><td>Drawing extent in metres, not window dimensions. Both values null means an unbounded canvas; otherwise both must be positive. A finite canvas extends right and down from the origin.</td></tr>
+            <tr><th scope="row"><code>canvas_size.width</code></th><td>Finite horizontal extent, or null for an unbounded canvas.</td></tr>
+            <tr><th scope="row"><code>canvas_size.height</code></th><td>Finite vertical extent, or null for an unbounded canvas.</td></tr>
+          </tbody>
+        </table>
+        <p>Each workspace has its own control, display, and layer data. <a href="#api-canvas-controller">CanvasController</a> applies changes to these objects. The drawing function reads them and paints the result.</p>
+        <h3 id="api-canvas-preview">Tool previews</h3>
+        <p>Canvas.preview holds the selected tool's transient Preview object, such as PreviewPoint or PreviewLine, or null when the tool has no preview. Preview is the shared contract for these tool-specific objects, not committed geometry. Selecting another tool replaces this object or clears it. Function changes reset or replace its function-specific state so an old operation cannot carry over.</p>
+        <p>Call the current Preview's drawing function directly during the normal canvas paint pass, without a separate callback registry. It reads the current candidate and view transform to draw tool feedback without committing geometry, validating edits as a paint side effect, or recording history. CanvasController coordinates input, candidate updates, validation, commitment, and cancellation. Exact drawing-method names remain implementation details; painting uses only the current Canvas.preview so replaced previews cannot render stale feedback.</p>
+        <p>Keep operation context in Canvas.control.interaction.active_operation and the preview object in Canvas.preview, not two independently owned previews. An idle selected tool may still have a Preview object; it draws only applicable feedback. Ending or cancelling an operation clears its candidate and cues without requiring removal of the selected tool's preview capability. Neither preview objects nor their temporary candidates are saved or entered in ActionsBuffer.</p>
+        <p>Zoom, pan, and window resizing never change canvas_size or existing geometry. A finite extent marks the drawing surface, not a field boundary; it does not prevent panning beyond the edge. Reducing the extent must not crop or delete geometry. An unbounded extent has no canvas edge.</p>
+        <p><a href="build-layout.html">View the layout study</a>.</p>
+        <h3 id="api-canvas-layer-ownership">Layer identity and ownership</h3>
+        <h4>Records and ownership</h4>
+        <ul>
+          <li>One document owns ordered root Fields and References; each Plot has exactly one Field, each Area exactly one Plot. No shared children. Reference layers are outside the land hierarchy, beneath land; each new Reference goes beneath existing references.</li>
+          <li>Document and layer IDs are generated UUIDs, stable and independent of names. One Geometry instance per land layer has a stable geometry ID and typed Point/LineSegment/Circle/ClosedShape registries. A layer's outline references that instance. No coordinate copies live in layer menus or dependent segments.</li>
+          <li>Within a Geometry, retain local IDs point-N, line-N, circle-N, shape-N and high-water counters. An external GeometryRef contains layer_id, geometry_id, kind, and item_id; local segment endpoints contain Point IDs. Validate owner and kind on resolution.</li>
+          <li>Allocate IDs only when a transaction is accepted. Rejection/cancelled previews consume none. Undo never rewinds counters; Redo restores original identities. Runtime lookups use maps keyed by ID and dependency indexes, not coordinate equality.</li>
+          <li>Automatic names use document-wide nonrecycled counters per type: Field 1, Plot 1, Area 1, Reference 1. Skip a generated name already present for that type and consume the skipped number. Manual duplicates are allowed; hierarchy/type disambiguates them. Trim names and require a nonempty single line of at most 120 Unicode characters. Renaming never changes IDs, references, or order.</li>
+          <li>Persist high-water marks; retain their maxima in local workspace metadata keyed by document ID, including after Undo. Reopening merges saved and locally known maxima. This prevents reuse in the document's saved/local lineage, not across independent historical copies on machines that share no allocation ledger. UUID layer IDs do not require such a ledger.</li>
+        </ul>
+        <h3 id="api-canvas-layer-controls">First-milestone layer controls</h3>
+        <p>Per-layer hiding, locking, and manual reordering are deferred from the first milestone. Keep land layers visible and unlocked, subject to the active-layer and geometry-validity rules, with siblings in creation order. Do not add hidden/locked layer state or controls for this milestone. This does not change the existing ability to hide, minimize, or reopen workspace panels. Later support for these layer controls requires a separate scope decision.</p>
+        <h3 id="api-canvas-layer-creation">Adding land layers</h3>
+        <p>The Layers panel provides Add Field, Add Plot, and Add Area. Add Field does not require a selected layer. Add Plot requires the intended Field to be selected and its boundary completed. Add Area requires the intended Plot to be selected, with both its boundary and its owning field boundary completed. Do not infer a parent from a selected descendant or enable creation because a different parent has a completed boundary.</p>
+        <p>A successful Add creates an empty layer with its own identity and, for a child, its selected parent as owner. Apply the ordinary layer-switch rules to the previous layer, select the new layer, and expand its matching Properties together. Keep the active tool unchanged and retain the snap target under the existing selection rules. Do not begin drawing automatically.</p>
+        <p>The user can rename the new layer or choose a drawing tool next. Cancelling an unfinished drawing discards its preview but does not delete the layer or its committed properties. Removing the layer is a separate, confirmed <a href="#api-canvas-layer-deletion">Delete action</a>.</p>
+        <h3 id="api-canvas-layer-deletion">Deleting layers</h3>
+        <p>Delete in Layers targets the selected layer and asks for confirmation identifying it and any descendants that will also be removed. This applies to empty layers too. Cancel leaves the document unchanged; no layer is removed before confirmation.</p>
+        <p>Confirming deletion removes the layer and its descendants together. A field deletion removes its plots and their areas; a plot deletion removes its areas. Other parents and siblings remain unchanged, and no child is left without its owner. Record the whole deletion as one undoable action. Undo restores the removed subtree with its original identities, geometry, properties, and parent relationships.</p>
+        <p>Clear selection referencing removed items, cancel affected drawing previews, close affected Properties, and clear a snap target inside the removed subtree. Keep the active tool and do not select a replacement layer automatically. Unaffected selection and references remain intact.</p>
+        <p>Opening confirmation suspends draft settlement; Cancel restores drafts/focus, Confirm discards removed-owner drafts and deletes committed records. Undo restores committed values without auto-selecting restored objects. Individual geometry deletion follows its own dependency rules.</p>
+        <h3 id="api-canvas-child-editing">Parent boundaries and child editing</h3>
+        <p>Drawing or editing a child's geometry requires valid completed ancestor boundaries. Block plot geometry actions when its field is invalid, and area geometry actions when its plot or field is invalid. An unfinished parent boundary preview does not satisfy this prerequisite. Inherited invalidity also excludes descendants from planting and boundary-based calculations; see <a href="#api-geometry-boundary-validity">Validity and active boundaries</a>.</p>
+        <p>Disable Add Plot without a completed selected field boundary. Disable Add Area without a completed selected plot boundary and its completed owning field boundary. With no completed fields, plots and areas cannot be added; with no completed plots, areas cannot be added. Do not create empty child records while these prerequisites are unmet.</p>
+        <p>When the missing prerequisite is a completed parent boundary, show a small hover tooltip on the disabled action: “complete field before adding new plot” for Add Plot, and “complete plot before adding new area” for Add Area. The disabled action must still expose its tooltip. Expose the same explanation on keyboard focus. Wrong/no selection instead says to select the required Field or Plot.</p>
+        <p>A user may delete a parent boundary point and leave that parent incomplete. Retain existing children visibly and without changing their geometry/data, but mark the affected subtree invalid/inactive and block participation and descendant geometry editing. Reclose the parent validly around retained children before reevaluating their eligibility. Children whose own boundaries remain incomplete/invalid do not reactivate merely because the parent is repaired.</p>
+        <h3 id="api-canvas-layer-defaults">Creation defaults</h3>
+        <h4>Creation and defaults</h4>
+        <ul>
+          <li>Add Field needs no selection. Add Plot requires the selected Field to have a completed valid boundary. Add Area requires the selected Plot and its Field to be valid. Do not select a different suitable parent automatically.</li>
+          <li>Incomplete-parent explanations stay exactly <code>complete field before adding new plot</code> and <code>complete plot before adding new area</code>. Wrong/no selection uses the distinct prerequisite to select a Field or Plot.</li>
+          <li>Create empty, select the new layer, open/expand its Properties, retain the current tool. Do not start drawing automatically. Empty Reference creation is separate from its file picker/import action.</li>
+          <li>Field/Plot colors remain #465b3c/#99a18f. Soil values and drainage begin unassigned. Plot pattern and ground begin null. Area begins Flat, crop null, all row/mound dimensions null. Geometry collections and local counters begin empty/zero. Do not inherit a parent's or previously edited layer's values.</li>
+          <li>Land sibling order is creation order. No per-layer hiding, locking, or manual ordering in the agreed scope.</li>
+        </ul>
+        <h4>Deletion</h4>
+        <ul>
+          <li>Confirm whole-layer deletion with the name and descendant count. Field deletion includes plots/areas; Plot deletion includes areas. One action restores the same records, properties, IDs, ownership, and order on Undo.</li>
+          <li>Clear only affected selection, Properties, operations, and snap references; retain the tool, and do not auto-select a replacement. Unrelated selections/references survive. Draft handling is B09, not an accidental blur side effect.</li>
+        </ul>
+      </section>
+      <section>
+        <h2 id="api-canvas-organization">Organization</h2>
+        <pre aria-label="Canvas object relationships">Canvas
+  control: CanvasControl
+    View position and zoom
+    Snapping settings
+    interaction
+      Selected layer and geometry
+      Active tool and function choices
+      Snap target and unfinished operation
+  display: CanvasDisplay
+    Drawing appearance and units
+    Menu appearance and panel states
+    Property menus referring to selected layers
+  layers: Layers
+    Fields, their plots, and their areas
+    Reference layers
+  preview: Preview or null
+    Selected tool's transient renderer and candidate feedback
+  canvas_size
+
+CanvasController
+  Applies changes to this Canvas</pre>
+        <p>The screen has a drawing viewport with panels above it. The header and status bar sit outside the viewport. Panels show the workspace's values and send edits to CanvasController.</p>
+      </section>
+      <section>
+        <h2 id="api-canvas-saving">Saving and reopening</h2>
+        <h3>Commands and drafts</h3>
+        <ul>
+          <li>One controller command path handles menu/button/keyboard Save, Save As, and Save chosen on leaving. Intercept before blur handlers can mutate a draft incidentally.</li>
+          <li>Direct Save/Save As first validates all ordinary property drafts in captured owner/units. If any is invalid, block the save and retain drafts with focus/error; otherwise commit valid changed values once. Unchanged values add no action. Preflight all drafts before committing any, so one invalid field does not partially settle a batch.</li>
+          <li>Pending Rename or Preferences drafts block document Save until the user uses Save/Cancel or Apply/discard and retries. Never silently Save Rename or Apply Preferences. Apply changes workspace settings, not drawing history.</li>
+          <li>Save serializes committed geometry, including standalone Points/open outlines/inactive descendants, not a dashed candidate or unfinished drag. Saving without leaving preserves the operation/preview context. It never completes a boundary.</li>
+          <li>New/Open/Close with unsaved content or pending drafts offers Save/Discard/Cancel. Opening the confirmation changes neither content nor drafts. Save runs the same settlement path and leaves only on successful save; explicit drafts needing attention return to editing. Cancel preserves data, drafts, selection, and drawing context.</li>
+          <li>Discard abandons changes/drafts only when the destination transition succeeds. Cancelling an Open picker or failing candidate validation retains the current drawing even after choosing Discard. No prompt is needed when both document and drafts are clean.</li>
+          <li>Save failure/dialog cancellation causes no further document change. Ordinary edits deliberately committed during settlement remain committed and undoable; do not roll them back or mark them saved. This clarifies “keeps the drawing unchanged” as preservation of in-memory work, not reversal of accepted input settlement.</li>
+          <li>New creates a new document identity/default settings. Close returns to the empty application shell; web Close is not a browser-tab close. Open loads into a detached candidate and swaps only after validation/successful leave handling.</li>
+        </ul>
+        <h3>Storage and saved state</h3>
+        <ul>
+          <li>Native: explicit Save/Save As to a portable .ggnome container. Save As creates a new document identity while preserving internal layer/geometry IDs; copy applied workspace settings and retain session history. If the destination step fails/cancels, do not change document identity/location.</li>
+          <li>Web baseline: explicit Save to this browser, using an IndexedDB document/asset transaction. Open chooses a browser-saved drawing or Import file; Export file produces the same .ggnome container. Save As creates a new browser-library identity/name. Clearly label browser-local storage as not cloud backup. Export initiation alone is not proof a file was saved, so it does not clear a dirty state that browser Save has not persisted.</li>
+          <li>Request persistent browser storage where available but handle denial/quota/private-mode errors. Keep in-memory data and unsaved state, offer retry/export, never suggest clearing storage. File System Access is an optional later enhancement, not the cross-browser baseline.</li>
+          <li>Native writes use same-directory temporary output, completed-write readback/validation, then platform-safe replacement. Preserve the previous good file on failure. Detect an externally changed destination and require Save As or an explicit overwrite choice. Browser writes confirm transaction completion and read back the written revision before success. Do not claim saved on an initiated write.</li>
+          <li>Capture an immutable revision for saving. Mark only that snapshot saved; edits made afterward remain dirty. Dirty comparison covers user content, not allocator high-water bookkeeping, selection, camera, or history position. Returning to saved content via Undo/Redo clears the indicator even if counters increased. Explicit Save persists high-water marks; workspace metadata also retains local maxima.</li>
+          <li>Persist applied appearance/navigation settings, camera, and non-property panel states separately by document ID. Reopen with empty history, no selection/snap target, closed Properties, Point → Move, and no tool-function memory/drafts. No autosave or crash recovery is implied.</li>
+        </ul>
+        <h3>Portable structure and load</h3>
+        <ul>
+          <li>.ggnome is ZIP containing document.json plus optional assets/ entries. JSON schema_version starts at 1, with format: garden-gnome, document_id, canvas_size, ordered layer IDs/parent links, geometry registry, name/ID high-water counters, and asset manifest. Use tagged GeometryRef values for external geometry references. Images address immutable asset IDs with SHA-256 digest and decoded dimensions; manifest paths are relative assets/ entries, never absolute or traversing paths.</li>
+          <li>Runtime objects remain reference-based. Serialize each layer and Geometry once in keyed registries; layers contain outline geometry IDs and ordered child IDs, not recursively copied geometry. Local segments refer to local Point IDs; ClosedShape refers to segment IDs plus traversal direction. No duplicate saved calculated Active flags, previews, selections, generated rows, or history.</li>
+          <li>Structurally validate supported schema/features, unique IDs, owner/type references, hierarchy acyclicity and exclusive ownership, order membership, counters at least the saved maxima, finite values, enums, bounds, and asset sizes before swapping. Reject dangling references, duplicate IDs, unsupported versions/features, and unsafe ZIP entries. Do not silently repair/merge/prune a document.</li>
+          <li>Derive topology/completeness/participation from saved records. Open outlines and closed inactive descendants are legitimate. Reject a complete cycle/circle that violates own geometry or valid-parent/sibling requirements rather than silently importing a changed land region. Missing image bytes are a recoverable asset warning, not a reason to throw away valid land data.</li>
+          <li>Container safety bounds: 100 MiB compressed, 256 MiB total uncompressed, 16 MiB document.json, 100 image assets, plus B11 per-image limits. Reject duplicate entries/path traversal and decompression beyond declared limits. Do not execute or retrieve resources referenced by imported files.</li>
+          <li>Broken/missing image assets open as placeholders; keep their descriptors and available bytes on re-save with an explicit warning. Relink/remove is intentional and undoable. Unsupported newer feature kinds block opening to prevent lossy re-save. There is no legacy migration from the JS prototype because it has no saved-document format.</li>
+        </ul>
+        <h3>Platform limits</h3>
+        <ul>
+          <li>Application-controlled New/Open/Close uses the full confirmation contract. Browser tab close/reload/external navigation can show only the browser's generic warning, after user interaction, and it is not guaranteed. Register it only for dirty data/drafts. Do not promise custom Save/Discard/Cancel or asynchronous saving during browser termination.</li>
+          <li>Forced process termination/crashes can lose unsaved work on native too. No automatic recovery snapshots are added under the guise of workspace preferences. These are platform boundaries, not a change to the app-controlled leave flow.</li>
+        </ul>
+        <h3>Portable record envelope</h3>
+        <pre><code class="language-yaml" data-proposed-shape="PortableDocument">PortableDocument:
+  format: garden-gnome
+  schema_version: 1
+  document_id: UUID
+  canvas_size: {width: metres_or_null, height: metres_or_null}
+  root_fields: ordered_Field_IDs
+  references: ordered_ReferenceLayer_IDs
+  name_counters: high_water_by_layer_type
+  layers: map_LayerId_to_record
+  geometries: map_GeometryId_to_owned_record
+  assets: map_AssetId_to_manifest_entry
+AssetManifestEntry:
+  path: safe_relative_assets_path
+  sha256: content_digest
+  media_type: supported_image_type
+  pixel_width: positive_integer
+  pixel_height: positive_integer
+  byte_length: nonnegative_integer
+  availability: present_or_missing_or_corrupt</code></pre>
+        <p>Field.Plots and Plot.Areas are typed ordered-reference views; the portable layer record uses parent_id and children. Geometry subtypes retain their local registries and high-water marks. Applied workspace settings are separate records keyed by document_id. This is a versioned JSON codec contract, not a YAML dependency.</p>
+      </section>
+      <section>
+        <h2 id="api-canvas-open-questions">Implementation handoff</h2>
+        <p>Product behavior is defined in the <a href="flutter-build-workthrough.md">B01–B16 handoff</a>. Flutter class/method names, equivalent internal algorithms, package pinning, and rendering optimizations are engineering choices. The remaining execution gate is permission to implement, followed by real application tests and native/web evidence.</p>
+      </section>
+      <section>
+        <h2 id="api-canvas-example">Example</h2>
+        <p>An unbounded drawing surface. The control and display examples on their own pages show the initial view and panels.</p>
+        <pre><code class="language-yaml" data-proposed-partial-example="Canvas">canvas_size: {width: null, height: null}</code></pre>
+      </section>
+    </article>
+
+    <article id="api-canvas-control" data-parent="build-api" aria-labelledby="api-canvas-control-title">
+      <header>
+        <p class="label">Build API</p>
+        <h1 id="api-canvas-control-title">CanvasControl</h1>
+        <p>Holds the view, snapping settings, selection, tool choices, and unfinished drawing for one workspace. It lives in Canvas.control; CanvasController applies changes to it.</p>
+      </header>
+      <section>
+        <h2 id="api-canvas-control-shape">Shape</h2>
+        <pre><code class="language-yaml" data-proposed-shape="CanvasControl">CanvasControl:
+  zoom_min: {type: number, exclusive_minimum: 0, maximum: 1, default: 0.25}
+  zoom_max: {type: number, minimum: 1, default: 8}
+  zoom_current: {type: number, exclusive_minimum: 0, default: 1}
+  zoom_steps: {type: integer, minimum: 1, default: 4}
+  zoom_breakpoints:
+    type: list
+    items: number
+    default: [0.25, 0.5, 1, 2, 4, 8]
+  viewport_position:
+    type: object
+    fields:
+      current:
+        type: object
+        fields:
+          x: {type: number, default: 0}
+          y: {type: number, default: 0}
+  snapping_enabled: {type: boolean, default: false}
+  snapping_to: {type: string, values: [grid, drawing], default: grid}
+  interaction:
+    type: object
+    fields:
+      selected_layer:
+        type: reference
+        targets: [Field, Plot, Area, ReferenceLayer]
+        nullable: true
+        default: null
+      selected_geometry:
+        type: list
+        items: geometry reference
+        default: []
+      active_tool: {type: string, default: point}
+      active_function: {type: string, nullable: true, default: move}
+      tool_function_memory: {type: map, keys: tool ID, values: function ID, default: {}}
+      snap_target: {type: geometry reference, nullable: true, default: null}
+      active_operation: {type: object, nullable: true, default: null}</code></pre>
+        <table class="outline-table" aria-labelledby="api-canvas-control-shape">
+          <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>zoom_min</code></th><td>Lowest allowed zoom multiplier. Must be positive and no greater than 1.</td></tr>
+            <tr><th scope="row"><code>zoom_max</code></th><td>Highest allowed zoom multiplier. Must be at least 1.</td></tr>
+            <tr><th scope="row"><code>zoom_current</code></th><td>Current multiplier, clamped between the limits. A value of 1 means 100%.</td></tr>
+            <tr><th scope="row"><code>zoom_steps</code></th><td>Number of equal multiplicative wheel increments per doubling of zoom. Controls navigation speed, not grid detail.</td></tr>
+            <tr><th scope="row"><code>zoom_breakpoints</code></th><td>Ascending, unique positive multipliers at which grid detail changes. Include 1; adjacent entries double. Extend the list by doubling or halving to cover custom zoom limits.</td></tr>
+            <tr><th scope="row"><code>viewport_position</code></th><td>Viewport position state, containing the current canvas coordinate.</td></tr>
+            <tr><th scope="row"><code>viewport_position.current</code></th><td>Canvas coordinate at the top-left of the drawing viewport, before menu overlays. Panning and pointer-anchored zoom update this position.</td></tr>
+            <tr><th scope="row"><code>viewport_position.current.x</code></th><td>Horizontal position in metres, increasing to the right; negative values are allowed.</td></tr>
+            <tr><th scope="row"><code>viewport_position.current.y</code></th><td>Vertical position in metres, increasing downward; negative values are allowed.</td></tr>
+            <tr><th scope="row"><code>snapping_enabled</code></th><td>Whether new or moved geometry snaps to the selected target. Turning it off retains the target.</td></tr>
+            <tr><th scope="row"><code>snapping_to</code></th><td>Grid uses visible grid intersections. Drawing uses alignment guides from the retained individual item. Without a usable target, Drawing mode does not snap.</td></tr>
+            <tr><th scope="row"><code>interaction</code></th><td>The editing state shared by the drawing surface, layer list, tools, and Properties.</td></tr>
+            <tr><th scope="row"><code>interaction.selected_layer</code></th><td>The layer receiving new drawing and shown in Properties. Null means no layer is selected.</td></tr>
+            <tr><th scope="row"><code>interaction.selected_geometry</code></th><td>Selected points, lines, circles, or shapes within the active layer. Multiple items may be selected. Starts empty.</td></tr>
+            <tr><th scope="row"><code>interaction.active_tool</code></th><td>The chosen tool. Starts with Point, written as <code>point</code>.</td></tr>
+            <tr><th scope="row"><code>interaction.active_function</code></th><td>The chosen function within the active tool. Point starts with Move, written as <code>move</code>. Null for a tool without functions.</td></tr>
+            <tr><th scope="row"><code>interaction.tool_function_memory</code></th><td>Session-only function choice per tool; default Point Move, Line Draw, circles Draw, Reference Move, Fill None.</td></tr>
+            <tr><th scope="row"><code>interaction.snap_target</code></th><td>The last individually selected geometry item. It can belong to a different layer from the active drawing destination.</td></tr>
+            <tr><th scope="row"><code>interaction.active_operation</code></th><td>The unfinished edit's context, or null when idle. Canvas.preview owns its tool-specific visual preview.</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section>
+        <h2 id="api-canvas-actions-buffer">ActionsBuffer</h2>
+        <h3>Actions and capacity</h3>
+        <ul>
+          <li>Store action-specific immutable recovery records, not pointer events. An action carries geometry/property changes, stable identity/ownership, before/after values or deleted records, and eligible operation context. Undo executes an inverse and moves recovery information to Redo only after successful atomic application; Redo restores the original identities. PlacePoint/RemovePoint are illustrative inverse types, not simulated tool clicks.</li>
+          <li>Group as one action: standalone Point placement; new endpoint+segment; existing-Point join connection only; insertion+segment split; one completed point/segment/group movement; Point deletion with incident segments/dependent circles; direct segment deletion; selected-set deletion; whole-layer subtree deletion; empty-layer creation; each committed property edit (Rename on Save); Fill change; completed Circle creation/resize/delete; image assignment/replacement/move/scale/reference-line/calibration. Generated output has no entries beyond its input edits.</li>
+          <li>Rejected/no-op edits, unchanged values/moves, Escape/Enter, preview updates, pan/zoom, selection, tool/panel changes, and Preferences create no drawing-history action and do not invalidate Redo. A new committed edit after Undo clears Redo.</li>
+          <li>Default 50 action groups; Preferences accepts integers 1–1,000, counting Undo+Redo together. Transfer is not duplication. New overflow evicts oldest undoable history, not geometry. Applied capacity reduction trims oldest Undo entries first, then furthest-future Redo entries, preserving the next redoable steps. Increasing capacity cannot resurrect evicted entries.</li>
+          <li>Retain old immutable assets while document/history references them. Asset cleanup considers both sides of history, open saves, and current document; never delete data needed by an inverse.</li>
+        </ul>
+        <h3>State restoration</h3>
+        <ul>
+          <li>History is session-only: Save preserves it; reopening starts empty. Keep the content-based saved marker independent of buffer index/counters.</li>
+          <li>Undo/Redo keeps surviving current selection, clears references to removed items, and does not auto-select restored objects or resurrect an old snap target. Counters never rewind. Restoration order must preserve dependencies, ownership, boundary membership, properties, and derived eligibility together.</li>
+          <li>Failed replay leaves document/history unchanged, shows a brief failure notice, and does not skip the entry. Pre-replay cancellation of a transient candidate remains separate. Empty-history controls are disabled; a canvas shortcut may still clear a transient candidate without changing document content.</li>
+          <li>Field-local Undo/Redo never falls through to drawing history. Drawing-history controls are gated by unapplied property drafts under B09.</li>
+        </ul>
+        <h3>Live Line context</h3>
+        <ul>
+          <li>Canvas.preview holds the selected tool's Preview object (PreviewPoint, PreviewLine, etc.) or null, distinct from active_operation. CanvasController updates candidate/validity; painting directly calls only the current Preview's read-only drawing method. No callback registry or paint-time scanning of ActionsBuffer.</li>
+          <li>active_operation holds target/tool/function, a transient operation token, current anchor and starting data. Actions record eligible before/after Line context, but the live anchor survives history eviction independently of the buffer. Token representation is an internal detail, not saved document data.</li>
+          <li>During the same uninterrupted Line operation, Undo A–B removes B/segment and resumes the dashed preview from A. Undoing newly placed A removes it, leaving Line selected awaiting a start; keep replay eligibility so immediate Redo can restore A/preview. Reused starting Points are not new geometry actions and are never removed by cancelling the start.</li>
+          <li>Redo restores the relevant starting preview, next anchor if drawing was ongoing, or completed state without a trailing preview. Completion can retain the latest operation token for immediate Undo until a new operation/explicit cancellation/context switch starts; it does not keep a visible trailing candidate.</li>
+          <li>Switching tool/function/layer, explicit Enter/Escape, pointer-capture loss, document transition, or starting another operation invalidates prior context eligibility. History still restores geometry but cannot revive the old drawing operation after returning. Same-tool/function reselection, pan/zoom between clicks, and Save do not invalidate it. Unrelated committed document edits end the live operation before applying; this avoids replaying a property action into a stale geometry context.</li>
+          <li>Other tool Undo/Redo clears the candidate and starts fresh unless a future explicit contract grants continuation. Preview objects/candidates are not independently saved or undone; line context recovery is limited metadata attached to geometry actions.</li>
+        </ul>
+      </section>
+      <section>
+        <h2 id="api-canvas-control-selection">Selection</h2>
+        <ul>
+          <li>Canvas hits inspect the selected layer only. Use Layers to change drawing destination; a canvas click never silently redirects to another layer. Inspection remains possible beneath invalid ancestors, but mutation is blocked.</li>
+          <li>Point → Move supports general click selection, but drags Points only. Line → Move drags segments or selected polygon interiors; circle Resize/Point center movement are B06. Click selection in Move functions ranks Point handles, then segment/circle outlines, then boundary interior. Layer selection and boundary selection remain distinct.</li>
+          <li>Plain click replaces geometry selection; Shift-click toggles. Empty plain click clears geometry selection but retains selected layer and snap target; Shift-empty does nothing. Include Shift multi-selection in milestone 1; defer marquee/lasso and persistent groups.</li>
+          <li>A drag on an already-selected eligible item translates the selected group; an unselected hit first becomes the sole selection. Expand selected edges/boundaries/circles into a deduplicated defining-Point set so shared Points move once. A selected circle moves by its center, not by changing radius.</li>
+          <li>Single-item explicit selection updates snap_target. Group selection leaves it unchanged; removing an item from selection does not erase a still-existing target. Deletion clears it. An unavailable existing target remains referenced but supplies no guides. Inactivity alone does not remove known geometry coordinates.</li>
+          <li>Initial logical-screen tolerances: Point/endpoint acquisition 8 px; segment/circle-outline hit and point-to-segment insertion 6 px; move gesture threshold 4 px. Keep separate named constants. Rank eligible hits by category, then distance, then ascending numeric ID suffix; external ties include owning IDs. Only one join/insertion target is highlighted.</li>
+          <li>Creation selects its direct result: placed/inserted Point, newly committed segment, completed Circle. Closure does not unexpectedly select the whole boundary. Rejection/cancellation retains surviving selection. Undo does not automatically select restored objects.</li>
+          <li>Reselecting the same layer reopens/expands Properties without cancelling drawing or clearing geometry selection. Reselecting the same tool/function is a no-op. Selecting a different layer/function/tool follows cancellation and draft rules.</li>
+        </ul>
+      </section>
+      <section>
+        <h2 id="api-canvas-control-viewport">Viewport</h2>
+        <p>The viewport is the drawing rectangle supplied by the screen layout. Its width and height are logical screen pixels: the units used to lay out controls, independent of the display's physical pixel density.</p>
+        <p>The header and status bar sit outside this rectangle. Floating panels cover part of it without changing its size. Opening, closing, minimizing, or expanding a panel leaves the view position and zoom unchanged.</p>
+        <p>Measure pointer positions from the viewport's top-left corner. Drawing, selection, and snapping use the same conversion between these screen positions and canvas coordinates in metres. Calculate the visible land bounds from the view position, zoom, and viewport size.</p>
+        <p>When the window resizes, keep the same canvas point at the viewport's center and keep zoom unchanged. Update the stored top-left position to match. More or less land becomes visible; the drawing's dimensions stay the same.</p>
+      </section>
+      <section>
+        <h2 id="api-canvas-control-navigation">Navigation</h2>
+        <p>Canvas coordinates are metres, with origin (0, 0), x increasing rightward and y downward. At 100% zoom, one metre occupies 30 logical screen pixels. For each axis, screen position = (canvas position − viewport_position.current) × 30 × zoom_current. Reverse this calculation to convert a pointer position to canvas coordinates.</p>
+        <p>Wheel zoom multiplies the current zoom by 2 raised to (1 / zoom_steps) for each increment in, and divides by the same factor for each increment out. Continuous input may use fractional increments. Clamp the result to the limits and adjust viewport_position.current so the canvas point beneath the pointer stays fixed. Middle-button dragging pans without modifying geometry. Scrolling over a menu only scrolls that menu.</p>
+        <p>Choose the largest zoom breakpoint no greater than zoom_current. One grid-cell side represents 1 / breakpoint metres, and its screen spacing is 30 × zoom_current / breakpoint. At the exact breakpoint, switch to the new spacing. Keep the grid anchored to the origin; <a href="#api-canvas-display">Canvas.display</a> supplies its appearance and label units. There is no separate scale attribute.</p>
+        <p>Between clicks in an unfinished drawing, allow pan and zoom. Keep already committed Points fixed in canvas coordinates; navigation does not place a new point. During a held geometry drag, ignore pan and zoom until that drag finishes or is cancelled.</p>
+      </section>
+      <section>
+        <h2 id="api-canvas-control-snapping">Input and snapping</h2>
+        <ul>
+          <li>Use shared viewport-local screen/world conversions. World metres, x right/y down; 100% zoom is 30 logical px/metre. Camera stores top-left world position. Panels overlay the viewport; header/status bar are outside it. Pointer zoom preserves the point under the pointer; resize preserves the previous world center at unchanged zoom.</li>
+          <li>Wheel zoom retains documented multiplicative steps and limits. Grid spacing follows zoom breakpoints, anchored to world origin. Middle-drag pans; Space+primary-drag is the alternative when no text field owns input. Scrolling over a panel scrolls only the panel.</li>
+          <li>A held geometry drag owns the gesture: ignore pan/zoom and extra buttons/pointers. Temporary pan between construction clicks preserves the operation and never places a point. Release over a panel or outside the viewport cancels a held edit. Capture loss/app deactivation cancels transient geometry work, preserving accepted placements.</li>
+          <li>Click-only Draw/Join/Place/Delete accepts a click only if pointer displacement stays within 4 px. Crossing that threshold suppresses the click, not an implicit drag. Move functions begin their drag after the threshold. No click-through after closing a menu/dialog.</li>
+          <li>Grid snaps new/moved anchors to the nearest visible intersection; ties prefer lower x then y. Drawing alignment uses retained-item Points, segment endpoints, and Circle center: 6 px per-axis threshold, nearest distance then stable Point ID. Both axes may constrain simultaneously. Exclude every Point moved in this transaction; unchanged anchors of the target may still guide it.</li>
+          <li>Point/endpoint attachment (8 px) and segment insertion (6 px) remain independent of snapping. Highlighted attachment outranks alignment/grid. Point placement on an acquired segment stays projected on it; grid does not pull it away. Movement alignment never joins or merges identities.</li>
+          <li>For segment dragging use the endpoint nearest the initial press (ID tie-break); for polygon interior dragging use the nearest boundary Point. Preserve initial pointer offset and apply one snapped translation to the entire group. Circular groups use the center. Reference image gestures are unsnapped.</li>
+          <li>Disabled/unavailable tools remain selected but inert with a concise prerequisite prompt. Never silently switch Reference to Point. If a selected layer still exists but loses ancestor eligibility, keep selection for inspection and cancel its geometry candidate. Removal clears references.</li>
+          <li>Keyboard: platform primary modifier+Z Undo, primary+Shift+Z Redo; Ctrl+Y also Redo on Linux/Windows. Primary+S Save, primary+Shift+S Save As, primary+O Open, primary+N New in app context. Text fields retain their local editing shortcuts. Do not override browser/system shortcuts when the app cannot safely own them.</li>
+          <li>Escape is handled once: active modal/menu first, then focused draft, then canvas operation, then geometry selection. It never cascades through all levels or closes unrelated panels.</li>
+        </ul>
+      </section>
+      <section>
+        <h2 id="api-canvas-control-drawing">Tool operations</h2>
+        <h3>Point</h3>
+        <ul>
+          <li>First-use Move. Place previews a candidate, and primary click creates one Point. A Point within 6 px of an eligible segment projects onto it and inserts there; no fallback off-edge if projected placement fails validation.</li>
+          <li>New Point centers must be at least one displayed Point diameter apart within the selected layer. Render markers with an initial 6 px diameter. This is a screen-space placement rule, independent of Grid/Drawing snapping. It never retroactively invalidates geometry on zoom changes. Existing Point moves obey geometry validity instead, and deliberate endpoint reuse creates no Point and is exempt.</li>
+          <li>Inserting P in A–B removes the original segment and creates A–P/P–B with new segment IDs, updates boundary references, and preserves the region. One history action restores the original segment/ID on Undo. Points remain explicit even when collinear.</li>
+          <li>Move grabs a Point and previews all dependent edges/circles. Delete hover-highlights and clicks one Point, removing its incident segments and dependent Circles together; never reconnect neighbors. Functions remain selected for repeated use.</li>
+        </ul>
+        <h3>Line</h3>
+        <ul>
+          <li>Functions: Draw, Join, Move, Delete. First-use Draw. Each accepted Draw placement is committed immediately: first Point, then each new/reused endpoint plus its connecting segment. Failed placement creates neither partial endpoint nor segment.</li>
+          <li>A dashed segment runs from active_operation's anchor to the pointer. Hovering an eligible existing endpoint/isolated Point shows an outer ring; completing an attachment adds the union cursor cue. Reuse its identity. Joining is independent of Grid/Drawing snapping and has priority over those constraints.</li>
+          <li>Click the next corner to continue; click a highlighted endpoint to join and finish. Clicking the start closes only after full validity checks. No new segment may give a Point more than two incident segments. Same-point/duplicate Join requests add nothing and keep the pending first endpoint available.</li>
+          <li>Enter or Escape ends drawing and discards only the unplaced candidate. All accepted Points/segments remain, including a lone start. Finishing leaves Draw selected and ready for a fresh operation. No Backspace preview stepping or separate repair mode.</li>
+          <li>Join clicks two existing eligible same-layer Points, previews between clicks, validates, and commits just the connection. Success keeps Join selected and starts a fresh pair next time. Escape cancels the pending pair without changing geometry.</li>
+          <li>Line does not acquire segment interiors. Use Point → Place to split an edge first; a later connection still must obey no-branch rules. It never inserts/merges a Point silently.</li>
+          <li>Move translates both endpoints equally, preserving length/angle and updating connected neighbors. Select a polygon interior with Line → Move to translate its defining Points; descendants stay fixed. Delete removes only the clicked segment and retains both endpoints and other connections. Hover/click Delete functions do not expand to an unrelated selection.</li>
+          <li>Switching away clears the live anchor/dashed preview without deleting placements. Returning starts fresh. Continue explicitly by hovering/clicking the retained endpoint. Eligible Undo/Redo can restore context only as defined in B14.</li>
+        </ul>
+        <h3>Circles — milestone 2</h3>
+        <ul>
+          <li>Both tools expose Draw, Resize, Delete, first-use Draw. They produce the same center-reference/radius record; changing construction tool does not convert existing circles.</li>
+          <li>Center-diameter: click center, move to preview circumference, click circumference to finish. Pointer distance is radius; display diameter. A focused positive numeric diameter in current units plus Enter may complete after choosing center. Enter without such input does not commit a hover candidate.</li>
+          <li>Two-point: click opposite ends of a diameter. The midpoint becomes the center and half the distance the radius. Those clicked positions are temporary, not saved diameter Points.</li>
+          <li>First clicks are temporary. Commit Circle, any newly created center Point, and boundary designation atomically after validation. Escape/tool/layer changes discard the uncommitted circle, unlike already accepted Line placements. Explicit center acquisition may reuse a highlighted same-layer Point. Otherwise apply new-Point spacing to the actual center, including a computed midpoint; reject without hidden merging.</li>
+          <li>Apply the same one-boundary, parent containment, sibling non-overlap, and tangency policy as polygons. A new circle cannot silently replace surviving polygon boundary segments. Use ordinary deletion first.</li>
+          <li>Success selects the Circle and retains the function. Point → Move on its center translates it with all other dependencies. Resize drags its circumference with center fixed or accepts numeric diameter, with live validity/invalid-release rollback. Delete removes Circle/designation but keeps its center. Point deletion of that center removes its dependent Circle.</li>
+          <li>No line attachment to circumference, perimeter-point insertion, or arcs. Generated mounds are not editable Circle records.</li>
+        </ul>
+        <p>History and live-preview context use <a href="#api-canvas-actions-buffer">ActionsBuffer</a>. Properties and file operations use the explicit draft settlement contract, not incidental blur.</p>
+      </section>
+      <section>
+        <h2 id="api-canvas-control-example">Example</h2>
+        <p>Default control state, with the viewport at the origin and snapping disabled.</p>
+        <pre><code class="language-yaml" data-proposed-example="CanvasControl">zoom_min: 0.25
+zoom_max: 8
+zoom_current: 1
+zoom_steps: 4
+zoom_breakpoints: [0.25, 0.5, 1, 2, 4, 8]
+viewport_position:
+  current: {x: 0, y: 0}
+snapping_enabled: false
+snapping_to: grid
+interaction:
+  selected_layer: null
+  selected_geometry: []
+  active_tool: point
+  active_function: move
+  snap_target: null
+  active_operation: null</code></pre>
+      </section>
+    </article>
+
+    <article id="api-canvas-controller" data-parent="build-api" aria-labelledby="api-canvas-controller-title">
+      <header>
+        <p class="label">Build API</p>
+        <h1 id="api-canvas-controller-title">CanvasController</h1>
+        <p>Applies user actions to a workspace. It checks each change, updates the objects that own the values, and tells the affected views to refresh.</p>
+      </header>
+      <section>
+        <h2 id="api-canvas-controller-shape">Shape</h2>
+        <pre><code class="language-yaml" data-proposed-shape="CanvasController">CanvasController:
+  canvas: {type: reference, target: Canvas, required: true}</code></pre>
+        <table class="outline-table" aria-labelledby="api-canvas-controller-shape">
+          <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>canvas</code></th><td>The workspace this controller changes. Layer data stays in that workspace's Layers object.</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section>
+        <h2 id="api-canvas-controller-actions">Actions</h2>
+        <table class="outline-table" aria-labelledby="api-canvas-controller-actions">
+          <thead><tr><th scope="col">Action</th><th scope="col">What it changes</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Select a layer</th><td>For a different layer, settle prior-owner drafts, cancel unfinished context, clear geometry selection, change destination, and show Properties together. Reselecting the same layer only expands Properties.</td></tr>
+            <tr><th scope="row">Add a land layer</th><td>Check the selected-parent and completed-boundary requirements, create an empty Field, Plot, or Area, then apply the layer-switch rules and select it with matching Properties expanded. Retain the active tool; do not start drawing automatically. See <a href="#api-canvas-layer-creation">Adding land layers</a>.</td></tr>
+            <tr><th scope="row">Delete a layer</th><td>After confirmation, remove the selected layer and descendants together, clean up affected selection, previews, Properties, and snap targets, and retain the tool without selecting a replacement. Record one undoable action that restores the removed subtree. See <a href="#api-canvas-layer-deletion">Deleting layers</a>.</td></tr>
+            <tr><th scope="row">Choose a tool or function</th><td>Switching cancels unfinished context but preserves placed geometry and updates remembered function; reselecting the same tool/function does nothing.</td></tr>
+            <tr><th scope="row">Pan, zoom, or resize the view</th><td>Update view position and zoom using the viewport rules. Keep geometry unchanged.</td></tr>
+            <tr><th scope="row">Change a panel</th><td>Set it to hidden, minimized, or expanded without changing the selected layer.</td></tr>
+            <tr><th scope="row">Edit a property</th><td>Check the value and update its owning layer or workspace setting. Follow the <a href="#api-canvas-display-editing">input rules</a>.</td></tr>
+            <tr><th scope="row">Complete or cancel drawing</th><td>Validate each accepted Line placement immediately; Circle construction commits only on completion. A valid first cycle designates the boundary atomically. Cancellation discards only uncommitted candidates. Invalid construction retains failure feedback without adding records. See <a href="#api-geometry-boundary-completion">Completing a boundary</a>.</td></tr>
+            <tr><th scope="row">Insert a boundary point</th><td>Split the targeted segment at the new point while preserving the path and completed boundary. Point → Place acquires the edge within 6 px and clicks to insert; assign two new segment IDs, remove the original, and retain recovery data for one Undo group.</td></tr>
+            <tr><th scope="row">Delete a boundary point</th><td>Remove the point and its incident segments without reconnecting neighbors; update dependent references and mark the remaining outline incomplete together. This is intentional reopening, not an invalid move. Parent reopening retains children but invalidates their participation until valid ancestry is restored; update affected status/eligibility with the deletion. See <a href="#api-geometry-boundary-points">Inserting and deleting boundary points</a>.</td></tr>
+            <tr><th scope="row">Delete a boundary segment</th><td>Remove only the targeted segment, retaining both endpoint points and all other connections. Mark the boundary incomplete and update affected references and subtree eligibility together, without automatic reconnection. See <a href="#api-geometry-boundary-segment-deletion">Deleting a boundary segment</a>.</td></tr>
+          </tbody>
+        </table>
+        <p>Send change notices after all related values are ready. Views must not see a new selected layer paired with the previous layer's properties. If a check fails, do not apply part of the requested change. Geometry checks and editing calculations can live in separate drawing components.</p>
+      </section>
+      <section>
+        <h2 id="api-canvas-controller-updates">Drawing updates</h2>
+        <ol>
+          <li>A control or pointer action asks CanvasController for a change.</li>
+          <li>The controller checks and updates the owning objects.</li>
+          <li>Affected menus refresh and the drawing function repaints from those values.</li>
+        </ol>
+        <p>The drawing function reads the layer data, view settings, appearance, and temporary editing feedback. Painting does not change selection, create saved geometry, or manage menus.</p>
+        <table class="outline-table" aria-labelledby="api-canvas-controller-updates">
+          <thead><tr><th scope="col">Changed information</th><th scope="col">What to refresh</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Geometry</th><td>The scene and affected properties.</td></tr>
+            <tr><th scope="row">View position or zoom</th><td>The scene and scale readouts.</td></tr>
+            <tr><th scope="row">Selection</th><td>Selection highlighting and the Properties panel.</td></tr>
+            <tr><th scope="row">Panel visibility or menu theme</th><td>The affected controls, without recalculating geometry.</td></tr>
+            <tr><th scope="row">Pointer position</th><td>Only previews and feedback that depend on it.</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section>
+        <h2 id="api-canvas-controller-example">Example</h2>
+        <p>A controller attached to the workspace labelled garden-workspace. Selecting Carrot bed asks this controller to update selection and Properties together.</p>
+        <pre><code class="language-yaml" data-proposed-example="CanvasController">canvas: garden-workspace</code></pre>
+      </section>
+    </article>
+
+    <article id="api-canvas-display" data-parent="build-api" aria-labelledby="api-canvas-display-title">
+      <header>
+        <p class="label">Build API</p>
+        <h1 id="api-canvas-display-title">CanvasDisplay</h1>
+        <p>Holds the drawing's appearance, measurement units, and panel states. It lives in Canvas.display. Property menus refer to the selected layer's values.</p>
+      </header>
+      <section>
+        <h2 id="api-canvas-display-shape">Shape</h2>
+        <pre><code class="language-yaml" data-proposed-shape="CanvasDisplay">CanvasDisplay:
+  background_color: {type: string, default: "#f8f9f3"}
+  grid_color: {type: string, default: "#dce0d6"}
+  grid_thickness: {type: number, exclusive_minimum: 0, default: 1}
+  grid_opacity: {type: number, minimum: 0, maximum: 1, default: 1}
+  line_width: {type: number, exclusive_minimum: 0, default: 2}
+  canvas_units: {type: string, values: [ft, m], default: ft}
+  menu_scaling: {type: string, values: [small, medium, large], default: medium}
+  menu_primary_color: {type: string, default: "#faf9f5"}
+  menu_secondary_color: {type: string, default: "#e7ecdf"}
+  menu_text_color: {type: string, default: "#28372d"}
+  menu_icon_color: {type: string, default: "#28372d"}
+  property_menus:
+    type: list
+    items:
+      one_of: [FieldPropertiesMenu, PlotPropertiesMenu, AreaPropertiesMenu, ReferencePropertiesMenu]
+    default: []
+  panels:
+    type: map
+    keys: panel name
+    values: [hidden, minimized, expanded]
+    default:
+      drawing_tools: expanded
+      settings: expanded
+      layers: expanded
+      field_properties: hidden
+      plot_properties: hidden
+      area_properties: hidden
+      reference_properties: hidden
+      preferences: hidden
+  visible_menus:
+    type: list
+    derived: true
+    items:
+      type: string
+      values: [drawing_tools, settings, layers, field_properties, plot_properties, area_properties, reference_properties, preferences]</code></pre>
+        <table class="outline-table" aria-labelledby="api-canvas-display-shape">
+          <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>background_color</code></th><td>Canvas surface color behind the grid and drawing.</td></tr>
+            <tr><th scope="row"><code>grid_color</code></th><td>Grid-line color.</td></tr>
+            <tr><th scope="row"><code>grid_thickness</code></th><td>Positive grid-line width in logical screen pixels, independent of zoom.</td></tr>
+            <tr><th scope="row"><code>grid_opacity</code></th><td>Grid visibility from 0 (transparent) to 1 (opaque). Preferences displays this as 0–100%.</td></tr>
+            <tr><th scope="row"><code>line_width</code></th><td>Positive display width of field, plot, and area outlines in logical screen pixels. Does not change geometry.</td></tr>
+            <tr><th scope="row"><code>canvas_units</code></th><td>Units for displayed lengths and measurement entry: ft or m. Stored physical lengths use metres.</td></tr>
+            <tr><th scope="row"><code>menu_scaling</code></th><td>Small = 85%, Medium = 100%, Large = 115%. Resizes floating menus independently of canvas zoom.</td></tr>
+            <tr><th scope="row"><code>menu_primary_color</code></th><td>Base menu surface color.</td></tr>
+            <tr><th scope="row"><code>menu_secondary_color</code></th><td>Menu hover and selected-item background color.</td></tr>
+            <tr><th scope="row"><code>menu_text_color</code></th><td>Base menu label and control-text color.</td></tr>
+            <tr><th scope="row"><code>menu_icon_color</code></th><td>Base color of menu action icons, not drawing fills or pattern swatches.</td></tr>
+            <tr><th scope="row"><code>property_menus</code></th><td>Property menus, each with a unique name and a reference to its layer. Starts empty. Selecting a layer creates its menu or points the matching menu to that layer.</td></tr>
+            <tr><th scope="row"><code>panels</code></th><td>Each workspace panel's state, found by its fixed name: hidden, minimized, or expanded. Drawing tools, Settings, and Layers start expanded; the others start hidden.</td></tr>
+            <tr><th scope="row"><code>visible_menus</code></th><td>Read-only list of panel names whose state is minimized or expanded. Calculate it from panels. Its order does not set screen placement.</td></tr>
+          </tbody>
+        </table>
+        <p>Colors use six-digit hexadecimal notation. Widths are logical screen pixels, not device pixels. Grid and outline thicknesses stay fixed on screen as the zoom in <a href="#api-canvas-control">Canvas.control</a> changes.</p>
+      </section>
+      <section>
+        <h2 id="api-canvas-display-behavior">Display behavior</h2>
+        <p>Panels share a heading, close and minimize buttons, and a scrollable body. Closing hides the panel. Minimizing shows its heading. Reopening expands it. These actions leave selection and completed edits intact.</p>
+        <p>Selecting a layer opens or expands its Properties panel and hides any other Properties panel. Each menu refers to the selected layer, which owns the name, properties, and geometry. Switching between areas keeps the name <code>area_properties</code> and changes the layer the menu shows.</p>
+        <table class="outline-table" aria-labelledby="api-canvas-display-behavior">
+          <thead><tr><th scope="col">Menu name</th><th scope="col">Object and canvas title</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>field_properties</code></th><td><a href="#api-field-properties-menu">FieldPropertiesMenu</a> → Properties - Field</td></tr>
+            <tr><th scope="row"><code>plot_properties</code></th><td><a href="#api-plot-properties-menu">PlotPropertiesMenu</a> → Properties - Plot</td></tr>
+            <tr><th scope="row"><code>area_properties</code></th><td><a href="#api-area-properties-menu">AreaPropertiesMenu</a> → Properties - Area</td></tr>
+            <tr><th scope="row"><code>reference_properties</code></th><td><a href="#api-reference-properties-menu">ReferencePropertiesMenu</a> → Properties - Reference</td></tr>
+          </tbody>
+        </table>
+        <p>The panel names stay fixed when a layer is renamed. A visible property panel must have a matching menu in property_menus. At most one property panel may be minimized or expanded at a time.</p>
+      </section>
+      <section>
+        <h2 id="api-canvas-layout-accessibility">Layout and accessible feedback</h2>
+        <ul>
+          <li>Fixed overlay layout from the study: Drawing tools over Settings at left, Layers over Properties at right, Preferences centered. No dragging/docking. Headings remain reachable; each body scrolls. At crowded sizes, stack panels in scrollable side rails rather than moving camera bounds or overlaying unreachable controls.</li>
+          <li>Minimum full-editor size: 800×600 logical px. Below it show a resize notice and retain safe Save/Close access; do not pretend the desktop layout supports mobile editing. Menu scaling is independent of drawing zoom. Hidden/minimized bodies leave focus traversal.</li>
+          <li>Focus follows visible reading order. Selecting a layer keeps keyboard focus in Layers. Closing a panel returns focus to its opener or canvas. Menus/dialogs restore prior focus and do not replay the click beneath them.</li>
+          <li>Status area shows active tool/prerequisites, selection count, and invalid construction reasons. Unsaved marker appears beside document title. Movement keeps green/red and adds valid/blocked cursor or accessible state feedback, not a mandatory error toast.</li>
+          <li>Layers participation uses only the approved icon, with an accessible name; Properties keeps compact Active/Inactive. No status tooltip proliferation. Incomplete-parent Add tooltips use the approved text on hover and keyboard focus; wrong selection has its own message.</li>
+          <li>View includes Fit drawing and Reset view. Fit uses committed Points/segments/circles and usable reference bounds, excludes previews, accounts for overlay gutters, and respects zoom limits. An empty drawing resets. Reset uses 100% with origin at viewport top-left. Controls remain keyboard accessible; full keyboard-only geometry authoring is explicitly outside this mouse-first slice, not a claimed accessibility certification.</li>
+        </ul>
+      </section>
+      <section>
+        <h2 id="api-canvas-display-menus">Menu hierarchy</h2>
+        <pre aria-label="Menu and panel hierarchy">Top bar
+  File
+  View
+    Show or hide Drawing tools, Settings, and Layers
+  Preferences
+    Open Appearance &amp; behavior
+
+Workspace panels
+  Drawing tools
+    Functions or patterns for the active tool
+  Settings
+  Layers
+  Properties for the selected layer
+  Appearance &amp; behavior</pre>
+        <p>Top-bar dropdowns have their own open state. Tool functions and patterns are content inside Drawing tools. Neither needs a separate entry in panels. The <code>preferences</code> entry controls the Appearance &amp; behavior panel.</p>
+        <p>Panel sizing follows menu_scaling, independently of drawing zoom. Opening or resizing a floating panel does not change the drawing viewport or move the view.</p>
+      </section>
+      <section>
+        <h2 id="api-canvas-display-editing">Editing values</h2>
+        <ul>
+          <li>Menus reference owning layer data. Capture each draft's owner, field, original value, and display units. Apply at most once and never to a newly selected layer.</li>
+          <li>Ordinary valid text/numbers commit on Enter or blur. Blank optional values become null; unchanged displayed values do not rewrite stored precision. Invalid blur retains the draft/error while its panel remains available. Escape or Revert restores the committed value.</li>
+          <li>Immediate dropdown/color changes are one property action. Field/Plot colors and drainage keep documented enums. Names use B02 validation. Plot ground and Area crop are nullable text labels, not generation parameters or agronomic instructions.</li>
+          <li>Rename requires Save/Cancel; Preferences uses a separate draft and Apply/discard. Closing Preferences discards it; minimizing preserves it. Applied workspace settings persist separately from drawing data.</li>
+          <li>Switching layers or closing Properties keeps the approved behavior: commit valid ordinary fields to the old owner, discard invalid drafts/unsaved rename, then switch/close. Reselecting the same layer merely expands Properties.</li>
+          <li>Minimize commits valid ordinary drafts once, preserves invalid ordinary drafts and unsaved Rename for reopening. Changing planting type validates/settles outgoing fields first; invalid drafts block the type change until corrected/reverted. Preserve committed hidden settings for later reuse.</li>
+          <li>Unit changes examine all pending length drafts, including minimized/blurred fields. Commit valid drafts in their captured old units before conversion; any invalid length draft blocks the change. Do not reinterpret numbers. Store lengths in metres, display ft/m; one foot is 0.3048 m. Angles remain degrees; visual sizes remain logical pixels. Soil observations are not canvas lengths.</li>
+          <li>Opening layer-deletion confirmation suspends blur settlement. Cancel restores the exact draft/focus without document changes. Confirm discards drafts belonging to the removed subtree, then deletes committed records. Undo restores committed data, not discarded form drafts.</li>
+          <li>Drawing Undo/Redo controls are disabled while property drafts have unapplied changes; they cannot cause blur-commit then replay. Local field Undo/Redo still edits text, without fallback to document history. Save/leave use B13's explicit settlement, not arbitrary focus order.</li>
+        </ul>
+      </section>
+      <section>
+        <h2 id="api-canvas-display-measurements">Measurements</h2>
+        <p>Store physical lengths in metres, including geometry, area dimensions, and reference distances. Show and accept lengths in canvas_units, either ft or m. One foot is 0.3048 metres. Angles stay in degrees; line width and snapping distance stay in logical screen pixels.</p>
+        <p>Changing units changes displayed lengths and the scale label, not stored dimensions or zoom. Blank optional measurements remain null. Round values for display only; focusing and leaving an unchanged input must not write its rounded value back into the drawing.</p>
+        <p>If a length is being edited when units change, apply valid input using the old units first, then display the result in the new units. Invalid input blocks the unit change until the user corrects or discards it. Never give the same typed number a different physical meaning by changing its label.</p>
+      </section>
+      <section>
+        <h2 id="api-canvas-display-example">Example</h2>
+        <p>Default appearance with Drawing tools, Settings, and Layers visible, before a layer is selected.</p>
+        <pre><code class="language-yaml" data-proposed-example="CanvasDisplay">background_color: "#f8f9f3"
+grid_color: "#dce0d6"
+grid_thickness: 1
+grid_opacity: 1
+line_width: 2
+canvas_units: ft
+menu_scaling: medium
+menu_primary_color: "#faf9f5"
+menu_secondary_color: "#e7ecdf"
+menu_text_color: "#28372d"
+menu_icon_color: "#28372d"
+property_menus: []
+panels:
+  drawing_tools: expanded
+  settings: expanded
+  layers: expanded
+  field_properties: hidden
+  plot_properties: hidden
+  area_properties: hidden
+  reference_properties: hidden
+  preferences: hidden
+visible_menus: [drawing_tools, settings, layers]</code></pre>
+        <p>Selecting the area labelled carrot-bed opens its panel. This example shows the affected values; all other panel states keep their values. visible_menus is calculated from panels.</p>
+        <pre><code class="language-yaml" data-proposed-partial-example="CanvasDisplay">property_menus:
+  - name: area_properties
+    layer: carrot-bed
+panels:
+  area_properties: expanded
+visible_menus: [drawing_tools, settings, layers, area_properties]</code></pre>
+      </section>
+    </article>
+
     <article id="api-field" data-parent="build-api" aria-labelledby="api-field-title">
       <header>
         <p class="label">Build API</p>
         <h1 id="api-field-title">Field</h1>
-        <p>One major farming space, containing its outline and plots. The outline is proposed; the runtime model still stores only id, name, and Plots.</p>
+        <p>One major farming space. It owns its name, outline, field properties, and plots.</p>
       </header>
       <section>
         <h2 id="api-field-shape">Shape</h2>
         <pre><code class="language-yaml" data-proposed-shape="Field">Field:
   id: {type: string, required: true}
   name: {type: string, required: true}
-  outline: {type: FieldGeometry, required: true}
+  outline: {type: reference, target: FieldGeometry, required: true}
+  properties: {type: FieldProperties, required: true}
   Plots:
     type: list
-    items: Plot
+    items: {type: reference, target: Plot}
     default: []</code></pre>
         <table class="outline-table" aria-labelledby="api-field-shape">
           <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
           <tbody>
-            <tr><th scope="row"><code>id</code></th><td>A caller-supplied identifier.</td></tr>
+            <tr><th scope="row"><code>id</code></th><td>A generated UUID assigned by the controller, permanent and unique across layer types within the document. See <a href="#api-canvas-layer-ownership">Layer identity and ownership</a>.</td></tr>
             <tr><th scope="row"><code>name</code></th><td>The field’s display name.</td></tr>
             <tr><th scope="row"><code>outline</code></th><td>The <a href="#api-field-geometry">FieldGeometry</a> object holding the field’s outline geometry.</td></tr>
-            <tr><th scope="row"><code>Plots</code></th><td>The <a href="#api-plots">Plot</a> objects belonging to this field. Starts empty.</td></tr>
+            <tr><th scope="row"><code>properties</code></th><td>The field's <a href="#api-field-properties">FieldProperties</a>, including color and soil information. The Properties menu reads and edits this field's values.</td></tr>
+            <tr><th scope="row"><code>Plots</code></th><td>Ordered references to <a href="#api-plots">Plot</a> records belonging to this field. Starts empty; serialized as child IDs, not copied objects.</td></tr>
           </tbody>
         </table>
       </section>
       <section>
         <h2 id="api-field-geometry">Outline</h2>
-        <p><code>FieldGeometry</code> is stored in <code>Field.outline</code>. It inherits the geometry collections and ID counters from <a href="#api-geometry">Geometry</a>, with no additional fields yet. Collections start empty and counters start at zero. These YAML type blocks are documentation notation, not an executable schema.</p>
+        <p><code>Field.outline</code> references a <code>FieldGeometry</code> object and has the collections and ID counters defined by <a href="#api-geometry">Geometry</a>. Collections start empty and counters start at zero.</p>
         <pre><code class="language-yaml" data-proposed-shape="FieldGeometry">FieldGeometry:
   extends: Geometry</code></pre>
         <table class="outline-table" aria-labelledby="api-field-geometry">
@@ -248,31 +879,33 @@
       </section>
       <section>
         <h2 id="api-field-example">Example</h2>
-        <p>A proposed Field record with an empty outline, before drawing.</p>
+        <p>A named field before its boundary is drawn. It cannot receive plots until its boundary is completed.</p>
         <pre><code class="language-yaml" data-proposed-example="Field">id: north-field
 name: North field
+properties:
+  color: "#465b3c"
+  soil_drainage: null
+  soil_management:
+    ph: null
+    p: null
+    k: null
+    ca: null
+    mg: null
+    cec: null
+    ec: null
+    organic_matter: null
 outline:
   last_ids:
     points: 0
     lines: 0
     circles: 0
     shapes: 0
-  points: []
-  lines: []
-  circles: []
-  shapes: []
-Plots:
-  - id: vegetables
-    name: Vegetable plot
-    ground: null
-    outline:
-      last_ids: {points: 0, lines: 0, circles: 0, shapes: 0}
-      points: []
-      lines: []
-      circles: []
-      shapes: []
-    Areas: []</code></pre>
-        <p><a href="../src/build/field.js">View current Field source</a> (without outline).</p>
+  points: {}
+  lines: {}
+  circles: {}
+  shapes: {}
+Plots: []</code></pre>
+        <p><a href="../src/build/field.js">Field model source</a>.</p>
       </section>
     </article>
 
@@ -280,11 +913,16 @@ Plots:
       <header>
         <p class="label">Build API</p>
         <h1 id="api-geometry-title">Geometry</h1>
-        <p>Geometry is the base object holding points, lines, circles, closed shapes, and their ID counters. FieldGeometry, PlotGeometry, and AreaGeometry inherit this structure. These are proposed storage structures, not yet implemented.</p>
+        <p>Geometry objects hold authoritative points, line segments, circles, closed shapes, and their ID counters. Layers reference these objects and their geometry membership to express ownership; they do not embed duplicate geometry. FieldGeometry, PlotGeometry, and AreaGeometry share this role. Expanded geometry in the examples is an illustrative reference view, not a nested-storage requirement; the portable format uses keyed registries and explicit ID references under Saving and reopening.</p>
       </header>
       <section>
         <h2 id="api-geometry-shape">Shape</h2>
+        <p>Geometry objects store the authoritative geometry records. Points own their world coordinates; LineSegments reference Points rather than storing copies, and other geometry references its defining records in the same way. Layers reference geometry to express membership and ownership, rather than embedding a second copy of coordinates or geometry. Connections belong to the same layer as their defining points; reference-based storage does not authorize cross-layer joins or shared ownership. References identify records, not coordinate values: coincident coordinates do not merge identities. Use keyed Geometry registries with local IDs and external {layer_id, geometry_id, kind, item_id} references; the portable document serializes each record once.</p>
         <pre><code class="language-yaml" data-proposed-shape="Geometry">Geometry:
+  id: {type: string, required: true}
+  owner_layer_id: {type: string, required: true}
+  kind: {type: string, values: [field, plot, area], required: true}
+  boundary: {type: tagged_reference, kinds: [shape, circle], nullable: true, default: null}
   last_ids:
     type: object
     fields:
@@ -292,25 +930,95 @@ Plots:
       lines: {type: integer, minimum: 0, default: 0}
       circles: {type: integer, minimum: 0, default: 0}
       shapes: {type: integer, minimum: 0, default: 0}
-  points: {type: list, items: Point, default: []}
-  lines: {type: list, items: Line, default: []}
-  circles: {type: list, items: Circle, default: []}
-  shapes: {type: list, items: ClosedShape, default: []}</code></pre>
+  points: {type: map, keys: Point.id, values: Point, default: {}}
+  lines: {type: map, keys: LineSegment.id, values: LineSegment, default: {}}
+  circles: {type: map, keys: Circle.id, values: Circle, default: {}}
+  shapes: {type: map, keys: ClosedShape.id, values: ClosedShape, default: {}}</code></pre>
         <table class="outline-table" aria-labelledby="api-geometry-shape">
           <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
           <tbody>
-            <tr><th scope="row"><code>last_ids</code></th><td>Sequential ID counters for this geometry instance. Each counter starts at zero and retains the highest assigned number after deletion.</td></tr>
+            <tr><th scope="row"><code>id / owner_layer_id / kind</code></th><td>Stable geometry identity, exclusive owning layer, and typed land-geometry kind.</td></tr>
+            <tr><th scope="row"><code>boundary</code></th><td>Null or a tagged shape/circle reference. An open polygon retains its shape record and surviving membership; completeness is derived.</td></tr>
+            <tr><th scope="row"><code>last_ids</code></th><td>Sequential ID counters for this geometry instance. Each starts at zero, allocates only accepted transactions, and never rewinds on deletion or Undo. Saved and locally known maxima are merged on load.</td></tr>
             <tr><th scope="row"><code>last_ids.points</code></th><td>Highest assigned point ID number.</td></tr>
             <tr><th scope="row"><code>last_ids.lines</code></th><td>Highest assigned line ID number.</td></tr>
             <tr><th scope="row"><code>last_ids.circles</code></th><td>Highest assigned circle ID number.</td></tr>
             <tr><th scope="row"><code>last_ids.shapes</code></th><td>Highest assigned closed-shape ID number.</td></tr>
             <tr><th scope="row"><code>points</code></th><td><a href="#api-field-point">Point</a> records. Starts empty.</td></tr>
-            <tr><th scope="row"><code>lines</code></th><td><a href="#api-field-line">Line</a> records referencing points. Starts empty.</td></tr>
+            <tr><th scope="row"><code>lines</code></th><td><a href="#api-field-line">LineSegment</a> records referencing points. Starts empty.</td></tr>
             <tr><th scope="row"><code>circles</code></th><td><a href="#api-field-circle">Circle</a> records. Starts empty.</td></tr>
             <tr><th scope="row"><code>shapes</code></th><td><a href="#api-field-closed-shape">ClosedShape</a> records grouping lines into enclosed regions. Starts empty.</td></tr>
           </tbody>
         </table>
         <p>Every Geometry instance owns its own collections and counters; they are not shared between instances or subclasses.</p>
+        <h3 id="api-geometry-land-boundary">Land boundary</h3>
+        <h4>Concrete model</h4>
+        <ul>
+          <li>Point owns finite world x/y in metres. LineSegment owns id, start: Point.id, end: Point.id. No separate Segment wrapper, embedded endpoint objects, middle-point map, or authoritative multi-segment Line record.</li>
+          <li>Geometry owns points, lines (LineSegment records), circles, shapes, last_ids, and boundary: null or a tagged {kind: shape|circle, id} reference. A null boundary means none has been designated yet.</li>
+          <li>ClosedShape owns id, an ordered list of {segment_id, reversed} references, and a nullable decorative pattern. Its references may be incomplete/disconnected after deletion; completeness is derived, despite the type name. Never keep references to deleted segments.</li>
+          <li>A complete polygon is a connected simple cycle of at least three distinct Points and three noncollapsed segments. Adjacency and closure require shared Point identity, including the final corner, not coordinate equality. Reversing traversal does not reverse or duplicate the segment record.</li>
+          <li>Circle owns id, center: Point.id, finite positive radius in metres, and pattern. Both circle construction methods produce this representation. The center is authoritative; two-point construction positions are temporary, not extra persistent controls.</li>
+          <li>Pattern ownership for Plot versus Field/Area follows B07; do not create two independently writable effective fills.</li>
+        </ul>
+        <h4>Construction and lifecycle</h4>
+        <ul>
+          <li>Loose committed Points and open fragments are saved and editable but create no occupied land. The first valid closed loop or Circle becomes the authoritative boundary automatically. Reject a second independent closed region; use another layer.</li>
+          <li>Once a polygon boundary is designated, retain its ClosedShape ID through edits/reopening/repair. Deleting segments removes their references; surviving membership remains. Newly joined repair paths extend that boundary through identity-connected endpoints. Do not promote an unrelated construction loop when the designated boundary is open.</li>
+          <li>For a fully erased polygon, keep its empty boundary record so subsequent valid polygon construction repairs the same boundary. A Circle may replace it only after its surviving boundary segments are explicitly removed; that circle commit removes the empty shape designation atomically. No separate Replace-boundary mode or silent geometry deletion.</li>
+          <li>Deleting a circular boundary removes its Circle/designation, retaining its center. It leaves no invented polygon. Undo restores it. A new shape may then become the boundary through ordinary tools.</li>
+          <li>Do not automatically delete loose Points or paths on boundary completion. They remain ordinary layer-owned geometry subject to containment and same-layer crossing rules.</li>
+          <li>Boundary linework has no branches: reject a third incident line segment, duplicate unordered endpoint connection, retracing, or an unconnected intersection. Multiple open fragments are permitted for construction/repair. Point insertion on an edge splits it; Line cannot silently turn an edge interior into a branch.</li>
+        </ul>
+        <h3 id="api-geometry-boundary-validity">Validity and active boundaries</h3>
+        <ul>
+          <li>Each layer has one occupied region. Holes and disconnected regions are deferred. Parent/child and sibling boundaries may share a point or edge without a mandatory gap. Sibling interiors may not overlap, contain one another, or duplicate one another. Fields likewise cannot overlap each other's interiors.</li>
+          <li>No polygon self-crossing, retracing, nonadjacent self-contact/pinching, zero-length segment, or zero-area cycle. Ordinary adjacent joins and final closure are allowed. Retain collinear intermediate Points.</li>
+          <li>Same-layer construction segments must not cross or touch unrelated segments without a shared endpoint identity. Across layers, evaluate region containment/interior overlap rather than banning every line crossing; construction geometry has no occupied region.</li>
+          <li>A child edit requires valid ancestors. Its Points, entire segments, and circular region must stay within/on the parent, including across concavities. Open child fragments also follow containment.</li>
+          <li>Parent movement/reclosure must contain all retained descendant geometry, including incomplete children, isolated construction Points, and inactive children. Children remain fixed; do not move, trim, resize, or delete them to make a parent edit valid.</li>
+          <li>Moving connected geometry previews dotted affected neighbors; valid candidate green, invalid candidate red. Committed geometry is unchanged until valid release. Invalid release restores the original, not the last green candidate; no mandatory error notification. Invalid construction retains its rejected candidate plus a short reason and permits a new valid attempt or cancellation.</li>
+          <li>Point/segment/boundary deletion may intentionally reopen a layer with children. Retain all descendant data; deactivate the subtree, block descendant geometry editing/new children, and repair ancestors first. Do not treat an intentional open outline as a failed movement.</li>
+          <li>Active requires a valid complete own boundary and valid ancestors. Selection is independent. Inactive geometry is excluded from seed placement, boundary operations, crop/yield/harvest-window totals and calculations, not treated as valid zero-yield data. Repair/validation must still inspect its retained geometry. Recompute subtree participation after changes.</li>
+          <li>Closed inactive interiors use light-grey angled hatch; open outlines have no fill or implied closure. Closed inactive children stay hatched under an open parent. Layers show a status icon only; Properties shows compact read-only Active/Inactive near the top. No status tooltip/reason-text expansion.</li>
+          <li>Finite canvas extent is a display surface, not a clipping boundary. Drawing/panning beyond it is allowed; reducing extent never crops or deletes geometry.</li>
+          <li>Use one world-space distance tolerance, 1e-8 metres, for degeneracy/contact classification, independent of zoom. Nonzero region area must exceed tolerance times boundary perimeter; use robust orientation/intersection predicates and consistent distance tests. Never round stored coordinates, merge identities, or use screen pixels to decide topological equality. Equality policy and predicates must be shared by preview, commit, history, and load.</li>
+        </ul>
+        <h3 id="api-geometry-invalid-appearance">Invalid-boundary appearance</h3>
+        <p>Use a validity icon beside the layer without extra Layers status text or tooltips. Render closed invalid geometry interiors light grey with an angled hatch, including closed children made inactive by an invalid ancestor. Near the top of Field, Plot, and Area Properties, show a compact read-only Active/Inactive status for the selected layer. It reflects committed effective validity, including ancestors; it is not an editable property or activation toggle. Update it when selection or committed validity changes, not for transient red movement previews.</p>
+        <p>This derived invalid styling takes visual priority over ordinary decorative interior fills while inactive, without overwriting stored colors/patterns or changing geometry. Restore normal rendering when the boundary becomes active. It does not become a new user-selectable fill pattern. Keep green/red moving-piece feedback and dotted connected-edge previews legible; a temporary red candidate does not hatch otherwise-active committed geometry.</p>
+        <p>For an open/incomplete outline, show its remaining edges and Layers validity icon without interior fill. Do not draw an implied closing edge or retain the old filled footprint. An empty outline has no canvas geometry to fill. Closed inactive children still receive the light-grey angled hatch even when their parent's outline is open and unfilled. Exact icon, shade, hatch spacing/angle, nested-fill compositing, and nonvisual accessibility semantics remain presentation details.</p>
+        <p>The existing Add Plot/Add Area prerequisite tooltips remain as specifically approved. This status design does not add more tooltips or alter the separate initial-drawing correction flow.</p>
+        <h3 id="api-geometry-boundary-contact">Containment and touching</h3>
+        <p>A child region may touch its parent boundary at a point or run along an edge. Plots may touch their field boundary and areas may touch their plot boundary; no inset is required. All of the child must remain inside or on the parent boundary. Extending outside remains invalid.</p>
+        <p>Sibling regions may meet at a point or share an edge without requiring a gap: fields with fields, plots within the same field, and areas within the same plot. Boundary contact alone is not interior overlap. Fields, sibling plots, and sibling areas must not overlap one another's interiors. For areas, this prohibits partial overlap, one area wholly inside a sibling, and duplicate regions, even where edges do not cross. This does not prohibit the required containment of an area by its parent plot.</p>
+        <p>Use these rules for initial completion, live move validation, and final placement. Contact alone must not reject otherwise valid geometry or turn a move red. A move extending outside its parent, or causing prohibited interior overlap, is red and cannot commit. Contact does not automatically merge geometry or couple neighboring layers' edits. Endpoint joins are limited to the selected drawing layer; spatially coincident points on different layers remain separate.</p>
+        <h3 id="api-geometry-boundary-completion">Completing a boundary</h3>
+        <p>A first valid identity-connected cycle or Circle is designated automatically. Polygon boundary identity survives reopening and repair; no second independent region or Replace action. See <a href="#api-geometry-land-boundary">the full operation contract</a>.</p>
+        <h3 id="api-geometry-boundary-points">Inserting and deleting boundary points</h3>
+        <p>Point → Place projects within 6 logical px to an eligible segment, enforces new-Point spacing, and replaces it with two new segment records atomically. Point deletion removes its incident segments/dependent circles without reconnecting neighbors; surviving records persist. See <a href="#api-canvas-control-drawing">the full operation contract</a>.</p>
+        <h3 id="api-geometry-boundary-segment-deletion">Deleting a boundary segment</h3>
+        <p>Line → Delete hover-highlights/clicks one segment, retains both endpoints, updates boundary membership, and may reopen the boundary. Undo restores its original identity; no orphan cleanup or reconnection. See <a href="#api-connected-editing">the full operation contract</a>.</p>
+        <h3 id="api-geometry-boundary-joining">Joining endpoints and repairing boundaries</h3>
+        <p>Join only isolated Points/open-path endpoints on the selected layer. Use the nearest eligible Point within 8 logical px, numeric-ID tie-break, outer ring and union cue. Joining outranks Grid/Drawing snapping and reuses identity. No Line acquisition of edge interiors or branches. See <a href="#api-canvas-control-drawing">the full operation contract</a>.</p>
+        <h3 id="api-geometry-tool-functions">Tool functions and cancellation</h3>
+        <p>Point has Move/Place/Delete; Line has Draw/Join/Move/Delete. Both circle tools have Draw/Resize/Delete. Functions persist; switching away clears construction context but preserves committed Line placements. No Backspace correction workflow. See <a href="#api-canvas-control-drawing">the full operation contract</a>.</p>
+        <h3 id="api-geometry-line-click-flow">Line click sequence</h3>
+        <p>Each accepted Line placement commits immediately. Enter/Escape preserve placed Points/segments. Undo within the same uninterrupted operation can restore the previous anchor; returning after a tool switch starts fresh. See <a href="#api-canvas-actions-buffer">the full operation contract</a>.</p>
+        <h3 id="api-geometry-boundary-editing">Editing a boundary in place</h3>
+        <p>Translate segment endpoints and selected groups by one common displacement, with dotted connected-neighbor previews and fixed descendants. Valid release commits once; invalid release restores original coordinates. Point movement can change adjoining lengths/angles; segment translation does not. See <a href="#api-connected-editing">the full operation contract</a>.</p>
+      </section>
+      <section>
+        <h2 id="api-connected-editing">Connected edits and Fill</h2>
+        <ul>
+          <li>Common group translation applies one displacement to all distinct defining Points; validate atomically, including fixed descendants. No partial movement. Snap one anchor, never members independently. Whole-object rotation/scaling is deferred; Circle Resize is the explicit exception.</li>
+          <li>Canvas Delete removes the selected set and required dependencies as one action. Direct tool Delete clicks affect the hovered item only. Deleting a polygon boundary removes its boundary segments but retains Points and unrelated construction. There is no separate multi-segment Line record to delete.</li>
+          <li>Deleting a Point never reconnects its neighbors. Deleting a segment never removes orphan Points. Clean all affected record, boundary, selection, snap, and operation references in one coordinated change.</li>
+          <li>Decorative Fill ships in milestone 2. Functions/patterns are None, Dots, Crosshatch, Crosses; first-use None. Choose pattern and click the selected layer's closed boundary interior. No flood fill of arbitrary construction fragments or other layers. Keep Fill selected.</li>
+          <li>PlotProperties.pattern is the sole effective pattern for a Plot boundary; its shape/circle pattern remains null and is not independently editable. Fill and Plot Properties write that same field. Field/Area patterns live on their designated shape/circle record. No hidden competing overrides.</li>
+          <li>Closed inactive boundaries may store a changed decorative pattern, but invalid hatch overrides it visually. Reopened polygon records retain their pattern; open outlines display none. Circle deletion deletes that circle's pattern, restored by Undo.</li>
+          <li>Paint references first, then land parents before descendants, then outlines and selection/preview feedback. Mask ancestor interior decoration under descendant interiors to avoid stacked unreadable patterns. Persistent invalid styling is distinct from temporary green/red candidate feedback.</li>
+        </ul>
       </section>
       <section>
         <h2 id="api-geometry-subclasses">Subclasses</h2>
@@ -348,21 +1056,29 @@ AreaGeometry:
             <tr><th scope="row"><code>dimensions</code></th><td>AreaGeometry’s dimensions for each planting arrangement.</td></tr>
             <tr><th scope="row"><code>dimensions.flat</code></th><td>Flat arrangement settings. Starts as an empty object.</td></tr>
             <tr><th scope="row"><code>dimensions.row</code></th><td>Row width, spacing, and direction. Each value starts as null.</td></tr>
-            <tr><th scope="row"><code>dimensions.row.width</code></th><td>Width of a row.</td></tr>
-            <tr><th scope="row"><code>dimensions.row.spacing</code></th><td>Spacing between rows.</td></tr>
-            <tr><th scope="row"><code>dimensions.row.direction</code></th><td>Row direction in degrees, from 0 through 360 inclusive.</td></tr>
+            <tr><th scope="row"><code>dimensions.row.width</code></th><td>Width of a row in metres.</td></tr>
+            <tr><th scope="row"><code>dimensions.row.spacing</code></th><td>Clear edge-to-edge gap between rows in metres; pitch is width plus gap.</td></tr>
+            <tr><th scope="row"><code>dimensions.row.direction</code></th><td>Row long-axis direction in degrees, 0 rightward, clockwise positive, 0 through 360 inclusive.</td></tr>
             <tr><th scope="row"><code>dimensions.mound</code></th><td>Mound diameter and spacing. Each value starts as null.</td></tr>
-            <tr><th scope="row"><code>dimensions.mound.diameter</code></th><td>Diameter of a mound.</td></tr>
-            <tr><th scope="row"><code>dimensions.mound.spacing</code></th><td>Spacing between mounds.</td></tr>
+            <tr><th scope="row"><code>dimensions.mound.diameter</code></th><td>Diameter of a mound in metres.</td></tr>
+            <tr><th scope="row"><code>dimensions.mound.spacing</code></th><td>Clear edge-to-edge gap between mound disks in metres; pitch is diameter plus gap.</td></tr>
           </tbody>
         </table>
-        <p>The parent owns the geometry directly: <a href="#api-field-geometry">Field.outline</a> is FieldGeometry, <a href="#api-plots">Plot.outline</a> is PlotGeometry, and <a href="#api-area">Area.outline</a> is AreaGeometry. Properties objects hold non-geometric menu settings, not dimensions or geometry objects.</p>
+        <p>Each layer owns its outline: <a href="#api-field-geometry">Field.outline</a> references FieldGeometry, <a href="#api-plots">Plot.outline</a> references PlotGeometry, and <a href="#api-area">Area.outline</a> references AreaGeometry. Each layer also owns a properties object for its other settings.</p>
       </section>
       <section>
-        <h2 id="api-geometry-area-dimensions">Area dimensions</h2>
-        <p>The menu’s dimension inputs edit <code>Area.outline.dimensions</code>, even though they appear in the properties panel. <a href="#api-area-properties">AreaProperties.planting_type</a> selects which type’s controls are shown and which dimensions are active. Switching types preserves the other dimensions.</p>
-        <p>Blank numeric inputs become null; entered values are finite numbers. Direction accepts 0 through 360 degrees, inclusive. The nonnegative limits mirror the menu, not a guarantee that zero-sized features can be generated. Required dimensions and stricter drawing checks remain for the drawing functions.</p>
-        <p>The mockup does not label length units or define whether spacing is measured between edges or centers. Those conventions, and the reference axis for direction, remain open. No automatic unit conversion is specified.</p>
+        <h2 id="api-geometry-area-dimensions">Area dimensions and generated layout</h2>
+        <ul>
+          <li>Dimensions stay in Area.outline.dimensions, not menus/properties. Area.properties.planting_type selects Flat/Row/Mound. Flat remains empty. Preserve each type's committed settings when switching. Crop remains a nullable name, not a seed assignment.</li>
+          <li>Row spacing and mound spacing mean clear edge-to-edge gap in metres. Row pitch is width+spacing; mound pitch diameter+spacing. Zero spacing allows touching. Width/diameter must be positive for generation; null or stored zero means unfinished settings and yields no generated output. Negative/nonfinite values are invalid. Row also requires direction; no hidden default for null.</li>
+          <li>Row direction is its long axis: 0° right, clockwise positive in the downward-y canvas. Accept 0–360 inclusive; 360 renders as 0 without rewriting user data. Use an undirected axis for generation so opposite directions produce the same arrangement.</li>
+          <li>Rows: project the boundary into the row-aligned frame, place the first strip's outer edge at its minimum perpendicular bound, then repeat by pitch and clip strips to the occupied region. A concave boundary may produce several pieces of one strip; these are derived planting footprints, not extra land boundaries. Drop zero-area remnants. Nominal width stays the setting even at clipped ends.</li>
+          <li>Mounds: square axis-aligned lattice from minimum x/y bounds plus radius, repeating by pitch. Include only whole disks contained in the area; tangency allowed. Do not clip partial mounds or add stagger/rotation controls. No fitting features yields “No features fit,” not invalid land.</li>
+          <li>Output is read-only derived data, not Geometry points/lines/circles/shapes or individual history actions. Regenerate after committed boundary/type/dimension or eligibility changes, load, and Undo/Redo, not camera/unit changes or transient drags. Save inputs, not derived copies. Inactive boundaries retain settings but show no generated output or contributions.</li>
+          <li>Revision-key results by document, layer, boundary, parameters, and eligibility. Invalidate old output immediately; publish only the current revision. Failure/cancellation cannot leave stale output shown as current. Cap a generation request at 20,000 candidate strips/disks and ask for coarser dimensions rather than freezing or publishing partial geometry; use bounding estimates and incremental work.</li>
+          <li>Later Plant contracts must define seed identity, suitability, capacity, yield, and schedules separately; do not attach durable seed data to regeneration indexes.</li>
+          <li>Numerical soil fields keep existing nullable values as raw recorded laboratory observations in milestone 2. Label units/methods as unspecified, not validated for agronomic comparison; accept finite values or blank/null, perform no canvas-unit conversions, suitability scoring, or nutrient interpretation. Drainage is a categorical observation. Future soil comparisons require explicit unit/method/source metadata before being implemented, not guesses from these bare fields.</li>
+        </ul>
       </section>
       <section>
         <h2 id="api-geometry-ids">ID counters</h2>
@@ -373,7 +1089,7 @@ circles: circle-{number}
 shapes: shape-{number}</code></pre>
         <p>For example, when <code>last_ids.points</code> is 6, the next candidate is <code>point-7</code>. Once assigned, the point counter becomes 7; the other counters stay unchanged. Deleting a point does not lower its counter or make its number available again.</p>
         <p>Store the counters with the geometry so later editing continues the sequence. Each counter must be at least the highest assigned suffix of its type, including deleted records. IDs are local to a Geometry instance: separate instances may both contain <code>point-1</code>, so a reference outside the instance also needs its owning context.</p>
-        <p>This defines stored ID bookkeeping only. Collision checks, counter updates in drawing functions, and handling imported or concurrent edits will be designed later; a counter alone does not enforce uniqueness.</p>
+        <p>The controller allocates within accepted atomic transactions and rejects duplicate IDs on detached load. Persist counters and local high-water metadata; Undo never rewinds them and Redo uses original IDs. Collaboration is outside this scope, not implemented by these counters.</p>
       </section>
 
       <section>
@@ -390,30 +1106,14 @@ shapes: shape-{number}</code></pre>
             <tr><th scope="row"><code>y</code></th><td>Position along the canvas’s y axis.</td></tr>
           </tbody>
         </table>
-        <p>A point is a position with its own identity. Different IDs may have identical coordinates, so a line’s start and end can sit on top of each other without becoming the same point. Reusing an ID means sharing one point; moving it changes every line or circle that references it.</p>
+        <p>A point is a position with its own identity. Different IDs may have identical coordinates without being the same Point, but coincident segment endpoints are collapsed and cannot be committed as a valid segment. Reusing an ID means sharing one point; moving it changes every line or circle that references it.</p>
       </section>
       <section>
-        <h2 id="api-field-line">Line</h2>
-        <pre><code class="language-yaml" data-proposed-shape="Line">Line:
-  id: {type: string, required: true}
-  start: {type: Point.id, required: true}
-  middle:
-    type: map
-    keys: middle_1, middle_2, ...
-    values: Point.id
-    default: {}
-  end: {type: Point.id, required: true}</code></pre>
-        <table class="outline-table" aria-labelledby="api-field-line">
-          <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
-          <tbody>
-            <tr><th scope="row"><code>id</code></th><td>The line’s identifier within this geometry instance.</td></tr>
-            <tr><th scope="row"><code>start</code></th><td>ID of the first point.</td></tr>
-            <tr><th scope="row"><code>middle</code></th><td>Optional intermediate point IDs, keyed as middle_1, middle_2, and so on in traversal order. These are vertices rather than calculated halfway positions. Starts empty.</td></tr>
-            <tr><th scope="row"><code>end</code></th><td>ID of the final point.</td></tr>
-          </tbody>
-        </table>
-        <p>A line follows straight segments from start through its middle points to end. With no middle points, this is a single straight segment.</p>
-        <p>Number middle keys consecutively from 1 with no gaps, and read them by numeric suffix, not YAML key order or alphabetical order. Consecutive vertices must have different coordinates; the final endpoint may return to the start to close a shape. A line itself has no fill pattern.</p>
+        <h2 id="api-field-line">LineSegment</h2>
+        <p>A LineSegment represents a connection between two referenced Point records. It does not embed Point copies or store another copy of their coordinates. Geometry objects store the records; the owning layer references their membership. Connected segments in that layer reuse the same Point at a common corner.</p>
+        <p>Moving the segment translates both referenced endpoints equally, preserving length/angle and updating connected neighbors through those Points. Moving a Point updates its dependent geometry. References use identity, not coordinate equality; points on different layers remain distinct even when coincident.</p>
+        <p>Deleting a segment removes its connection while retaining both Points and other connections. Deleting a Point removes its incident segments without reconnecting its neighbors. A path therefore needs explicit connections, not an ordered-point list that silently bridges a deleted segment.</p>
+        <p>The earlier Line.start/middle/end sketch is superseded. A LineSegment has id, start: Point.id, and end: Point.id within its owning Geometry. Keep the lines registry and line-N ID prefix. No separate Segment wrapper is stored.</p>
       </section>
       <section>
         <h2 id="api-field-circle">Circle</h2>
@@ -440,63 +1140,56 @@ shapes: shape-{number}</code></pre>
         <h2 id="api-field-closed-shape">Closed shape</h2>
         <pre><code class="language-yaml" data-proposed-shape="ClosedShape">ClosedShape:
   id: {type: string, required: true}
-  lines: {type: list, items: Line.id, required: true, minimum_items: 1}
-  pattern:
-    type: string
-    nullable: true
-    default: null
-    allowed: [null, dots, crosshatch, crosses]</code></pre>
-        <table class="outline-table" aria-labelledby="api-field-closed-shape">
-          <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
-          <tbody>
-            <tr><th scope="row"><code>id</code></th><td>The closed shape’s identifier within this geometry instance.</td></tr>
-            <tr><th scope="row"><code>lines</code></th><td>One or more line IDs in boundary order. Each line is traversed from its start through its middle points to its end.</td></tr>
-            <tr><th scope="row"><code>pattern</code></th><td>Visual fill for the enclosed region: dots, crosshatch, or crosses. Defaults to null for an empty fill.</td></tr>
-          </tbody>
-        </table>
-        <p>A closed shape groups lines into one filled region. Its points are reached through those lines, so a second point list is unnecessary.</p>
-        <p>Each line’s end must meet the next line’s start by coordinates, and the final end must meet the first start. Matching coordinates close the boundary even when the point IDs differ; they do not merge the points. One line with middle points can form the whole boundary.</p>
-        <p>For this first version, the boundary must enclose nonzero area without crossing or retracing itself. The shape owns one pattern; its points and lines do not. Holes are left for a later pass.</p>
+  segments:
+    type: list
+    items:
+      segment_id: {type: LineSegment.id, required: true}
+      reversed: {type: boolean, default: false}
+    default: []
+  pattern: {type: string, nullable: true, default: null, allowed: [null, dots, crosshatch, crosses]}</code></pre>
+        <p>Segments are explicit references in traversal order; reversed controls traversal, not stored endpoint mutation. A complete cycle requires at least three distinct Points/segments with identity-connected adjacency and final closure. Coincident coordinates never close disconnected identities or merge Points.</p>
+        <p>The shape record and surviving membership remain when deletion opens it; completeness is derived. Remove deleted segment references, never invent a gap connection. Keep the boundary identity through repair and preserve its pattern. A Plot boundary uses PlotProperties.pattern instead, leaving this record's pattern null.</p>
+        <p>No self-crossing, retracing, pinching, collapsed edges, or zero-area cycles. Retain collinear vertices. Validation uses the shared world tolerance; holes are deferred. See <a href="#api-geometry-land-boundary">boundary lifecycle</a> and <a href="#api-geometry-boundary-validity">validity</a>.</p>
       </section>
       <section>
         <h2 id="api-field-geometry-example">Geometry example</h2>
-        <p>A proposed <a href="#api-field">Field</a> record whose outline contains a dotted region and a crosshatched circle. The region uses two lines; its final point has the same coordinates as its first but a different ID.</p>
-        <pre><code class="language-yaml" data-proposed-example="Field">id: north-field
-name: North field
-Plots: []
-outline:
-  last_ids:
-    points: 6
-    lines: 2
-    circles: 1
-    shapes: 1
-  points:
-    - {id: point-1, x: 0, y: 0}
-    - {id: point-2, x: 12, y: 0}
-    - {id: point-3, x: 12, y: 8}
-    - {id: point-4, x: 0, y: 8}
-    - {id: point-5, x: 0, y: 0}
-    - {id: point-6, x: 6, y: 4}
-  lines:
-    - id: line-1
-      start: point-1
-      middle:
-        middle_1: point-2
-        middle_2: point-3
-      end: point-4
-    - id: line-2
-      start: point-4
-      middle: {}
-      end: point-5
-  circles:
-    - id: circle-1
-      center: point-6
-      radius: 2
-      pattern: crosshatch
-  shapes:
-    - id: shape-1
-      lines: [line-1, line-2]
-      pattern: dots</code></pre>
+        <p>A portable document fragment illustrating identity-connected segments, an explicit boundary, and separate keyed geometry storage. Readable layer/geometry labels stand in for generated UUIDs. Other envelope fields follow the save contract.</p>
+        <pre><code class="language-yaml" data-proposed-example="Document">layers:
+  north-field:
+    id: north-field
+    kind: field
+    parent_id: null
+    name: North field
+    outline: north-geometry
+    children: []
+    properties: {color: "#465b3c", soil_drainage: null}
+geometries:
+  north-geometry:
+    id: north-geometry
+    owner_layer_id: north-field
+    kind: field
+    last_ids: {points: 4, lines: 4, circles: 0, shapes: 1}
+    boundary: {kind: shape, id: shape-1}
+    points:
+      point-1: {id: point-1, x: 0, y: 0}
+      point-2: {id: point-2, x: 12, y: 0}
+      point-3: {id: point-3, x: 12, y: 8}
+      point-4: {id: point-4, x: 0, y: 8}
+    lines:
+      line-1: {id: line-1, start: point-1, end: point-2}
+      line-2: {id: line-2, start: point-2, end: point-3}
+      line-3: {id: line-3, start: point-3, end: point-4}
+      line-4: {id: line-4, start: point-4, end: point-1}
+    circles: {}
+    shapes:
+      shape-1:
+        id: shape-1
+        segments:
+          - {segment_id: line-1, reversed: false}
+          - {segment_id: line-2, reversed: false}
+          - {segment_id: line-3, reversed: false}
+          - {segment_id: line-4, reversed: false}
+        pattern: dots</code></pre>
       </section>
     </article>
 
@@ -504,57 +1197,47 @@ outline:
       <header>
         <p class="label">Build API</p>
         <h1 id="api-plots-title">Plot</h1>
-        <p>One plot within a field, containing its outline and the areas to be planted. The outline is proposed; the runtime model still stores id, name, ground, and Areas. Ground layout is planned to move to Area.</p>
+        <p>One section of a field. It owns its name, outline, plot properties, ground description, and planting areas.</p>
       </header>
       <section>
         <h2 id="api-plots-shape">Shape</h2>
         <pre><code class="language-yaml" data-proposed-shape="Plot">Plot:
   id: {type: string, required: true}
   name: {type: string, required: true}
-  outline: {type: PlotGeometry, required: true}
+  outline: {type: reference, target: PlotGeometry, required: true}
+  properties: {type: PlotProperties, required: true}
   ground: {type: string, nullable: true, default: null}
   Areas:
     type: list
-    items: Area
+    items: {type: reference, target: Area}
     default: []</code></pre>
         <table class="outline-table" aria-labelledby="api-plots-shape">
           <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
           <tbody>
-            <tr><th scope="row"><code>id</code></th><td>A caller-supplied identifier.</td></tr>
+            <tr><th scope="row"><code>id</code></th><td>A generated UUID assigned by the controller, permanent and unique across layer types within the document. See <a href="#api-canvas-layer-ownership">Layer identity and ownership</a>.</td></tr>
             <tr><th scope="row"><code>name</code></th><td>The plot’s display name, such as “Vegetables.”</td></tr>
             <tr><th scope="row"><code>outline</code></th><td>The <a href="#api-geometry-subclasses">PlotGeometry</a> object holding geometry separately from <a href="#api-plot-properties">PlotProperties</a>.</td></tr>
+            <tr><th scope="row"><code>properties</code></th><td>The plot's <a href="#api-plot-properties">PlotProperties</a>, including outline color and fill pattern.</td></tr>
             <tr><th scope="row"><code>ground</code></th><td>A ground description or null.</td></tr>
-            <tr><th scope="row"><code>Areas</code></th><td>The <a href="#api-area">Area</a> objects within this plot. Starts empty.</td></tr>
+            <tr><th scope="row"><code>Areas</code></th><td>Ordered references to <a href="#api-area">Area</a> records within this plot. Starts empty; serialized as child IDs.</td></tr>
           </tbody>
         </table>
       </section>
       <section>
         <h2 id="api-plots-example">Example</h2>
-        <p>A proposed Plot record with an empty outline, before drawing.</p>
+        <p>A named plot created under a completed field boundary, before its own boundary is drawn. Its owning field is not shown in this standalone example. It cannot receive areas until its boundary is completed.</p>
         <pre><code class="language-yaml" data-proposed-example="Plot">id: vegetables
 name: Vegetable plot
+properties: {color: "#99a18f", pattern: null}
 outline:
   last_ids: {points: 0, lines: 0, circles: 0, shapes: 0}
-  points: []
-  lines: []
-  circles: []
-  shapes: []
+  points: {}
+  lines: {}
+  circles: {}
+  shapes: {}
 ground: rows
-Areas:
-  - id: carrot-bed
-    name: Carrot bed
-    outline:
-      last_ids: {points: 0, lines: 0, circles: 0, shapes: 0}
-      points: []
-      lines: []
-      circles: []
-      shapes: []
-      dimensions:
-        flat: {}
-        row: {width: null, spacing: null, direction: null}
-        mound: {diameter: null, spacing: null}
-    crop: Carrot</code></pre>
-        <p><a href="../src/build/plot.js">View current Plot source</a> (without outline).</p>
+Areas: []</code></pre>
+        <p><a href="../src/build/plot.js">Plot model source</a>.</p>
       </section>
 
     </article>
@@ -563,42 +1246,45 @@ Areas:
       <header>
         <p class="label">Build API</p>
         <h1 id="api-area-title">Area</h1>
-        <p>A space within a plot, designated for a crop rather than a scheduled planting. Its proposed outline holds AreaGeometry, including dimension data; the runtime model still stores only id, name, and crop.</p>
+        <p>A growing space within a plot. It owns its name, crop, planting type, and outline. The outline also holds row and mound dimensions.</p>
       </header>
       <section>
         <h2 id="api-area-shape">Shape</h2>
         <pre><code class="language-yaml" data-proposed-shape="Area">Area:
   id: {type: string, required: true}
   name: {type: string, required: true}
-  outline: {type: AreaGeometry, required: true}
+  outline: {type: reference, target: AreaGeometry, required: true}
+  properties: {type: AreaProperties, required: true}
   crop: {type: string, nullable: true, default: null}</code></pre>
         <table class="outline-table" aria-labelledby="api-area-shape">
           <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
           <tbody>
-            <tr><th scope="row"><code>id</code></th><td>A caller-supplied identifier.</td></tr>
+            <tr><th scope="row"><code>id</code></th><td>A generated UUID assigned by the controller, permanent and unique across layer types within the document. See <a href="#api-canvas-layer-ownership">Layer identity and ownership</a>.</td></tr>
             <tr><th scope="row"><code>name</code></th><td>The area’s display name.</td></tr>
             <tr><th scope="row"><code>outline</code></th><td>The <a href="#api-geometry-subclasses">AreaGeometry</a> object holding geometry and <a href="#api-geometry-area-dimensions">dimension data</a>, separately from <a href="#api-area-properties">AreaProperties</a>.</td></tr>
+            <tr><th scope="row"><code>properties</code></th><td>The area's <a href="#api-area-properties">AreaProperties</a>. Its planting_type selects the active arrangement and controls.</td></tr>
             <tr><th scope="row"><code>crop</code></th><td>A crop name, or null if unassigned.</td></tr>
           </tbody>
         </table>
       </section>
       <section>
         <h2 id="api-area-example">Example</h2>
-        <p>A proposed Area record before its outline is drawn or dimensions are entered.</p>
+        <p>An area with row planting selected, before its outline or dimensions are entered.</p>
         <pre><code class="language-yaml" data-proposed-example="Area">id: carrot-bed
 name: Carrot bed
+properties: {planting_type: row}
 outline:
   last_ids: {points: 0, lines: 0, circles: 0, shapes: 0}
-  points: []
-  lines: []
-  circles: []
-  shapes: []
+  points: {}
+  lines: {}
+  circles: {}
+  shapes: {}
   dimensions:
     flat: {}
     row: {width: null, spacing: null, direction: null}
     mound: {diameter: null, spacing: null}
 crop: Carrot</code></pre>
-        <p><a href="../src/build/area.js">View current Area source</a> (without outline).</p>
+        <p><a href="../src/build/area.js">Area model source</a>.</p>
       </section>
 
     </article>
@@ -694,7 +1380,7 @@ soil_management:
           <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
           <tbody>
             <tr><th scope="row"><code>color</code></th><td>Outline color: green, blue, brown, purple, or orange, in the listed order. Defaults to green.</td></tr>
-            <tr><th scope="row"><code>pattern</code></th><td>Fill pattern: dots, crosshatch, or crosses. Null leaves the fill empty.</td></tr>
+            <tr><th scope="row"><code>pattern</code></th><td>The sole effective Plot boundary pattern: dots, crosshatch, or crosses; null leaves it empty. Fill and Properties edit this same field, while the Plot shape/circle record pattern remains null.</td></tr>
           </tbody>
         </table>
       </section>
@@ -718,6 +1404,7 @@ pattern: null</code></pre>
   planting_type:
     type: string
     required: true
+    default: flat
     allowed: [flat, row, mound]</code></pre>
       </section>
       <section>
@@ -725,7 +1412,7 @@ pattern: null</code></pre>
         <table class="outline-table" aria-labelledby="api-area-properties-attributes">
           <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
           <tbody>
-            <tr><th scope="row"><code>planting_type</code></th><td>Planting arrangement: a flat surface, rows, or mounds.</td></tr>
+            <tr><th scope="row"><code>planting_type</code></th><td>Planting arrangement: a flat surface, rows, or mounds. New areas start with flat.</td></tr>
           </tbody>
         </table>
       </section>
@@ -736,35 +1423,321 @@ pattern: null</code></pre>
 
     </article>
 
+    <article id="api-reference-layer" data-parent="build-api" aria-labelledby="api-reference-layer-title">
+      <header><p class="label">Build API</p><h1 id="api-reference-layer-title">ReferenceLayer</h1></header>
+      <section><h2 id="api-reference-layer-shape">Reference records</h2>
+        <pre><code class="language-yaml" data-proposed-shape="ReferenceLayer">ReferenceLayer:
+  id: {type: string, required: true}
+  name: {type: string, required: true}
+  properties: {type: ReferenceProperties, required: true}
+  outline: {type: reference, target: ReferenceGeometry, required: true}
+ReferenceGeometry:
+  id: {type: string, required: true}
+  owner_layer_id: {type: string, required: true}
+  kind: {type: string, value: reference}
+  anchor: {type: Point.id, nullable: true, default: null}
+  points: {type: map, keys: Point.id, values: Point, default: {}}
+  last_ids: {points: 0}
+  metres_per_pixel: {type: number, nullable: true, exclusive_minimum: 0, default: null}
+  reference_line:
+    type: object
+    nullable: true
+    default: null
+    fields:
+      start: {type: image_local_xy, required: true}
+      end: {type: image_local_xy, required: true}</code></pre>
+        <p>Empty references have no anchor, image, or scale. A usable image requires an anchor Point and positive uniform scale. Image-local samples are transformed through that anchor/scale; they are not duplicate world-coordinate geometry.</p>
+      </section>
+      <section><h2 id="api-reference-operations">Reference operations and recovery</h2>
+        <h3>Records and importing</h3>
+        <ul>
+          <li>ReferenceLayer owns id/name/properties and references ReferenceGeometry. Keep existing ReferenceProperties color, opaque image asset ID, and known_distance (metres, null or nonnegative). Color styles guide/handle feedback, not image pixels.</li>
+          <li>ReferenceGeometry owns an anchor Point at world top-left, positive scale in metres per decoded image pixel, and optional calibration endpoints in image-local pixel coordinates. Its anchor is an authoritative geometry Point with local identity; no land layer shares it. Samples are image-local coordinates, not duplicated world Points. Asset metadata supplies normalized pixel width/height and content digest.</li>
+          <li>Add Reference creates empty selected layer/Properties, retaining tool. Import PNG/JPEG/WebP; normalize orientation before establishing dimensions. Animated input uses the first decoded frame and is saved as a static supported image, with notice. No remote URLs, SVG scripts, rotation, crop, skew, or nonuniform scaling.</li>
+          <li>First import fits within 80% of the visible viewport width/height, centered in world view without moving the camera. This is uncalibrated. Decode/prepare before commit; picker cancellation/failure leaves the layer unchanged.</li>
+          <li>Replacement keeps layer ID/name/color/order, world center, and world width; derive new height from aspect ratio. Clear calibration line and known distance. No land geometry moves. Bind asynchronous requests to document/layer/request generation; switching/deleting the layer, leaving the document, Undo removing it, or a newer import invalidates stale completion.</li>
+          <li>Limits: 20 MiB encoded and 40 megapixels per image; reject with a concrete explanation rather than silently downsampling. Bound decoded cache memory and evict unused textures; saved bytes remain intact.</li>
+        </ul>
+        <h3>Tools and calibration</h3>
+        <ul>
+          <li>Reference first-use Move. Move drags translation. Scale drags a corner about its opposite corner, preserving aspect ratio; forbid pivot crossing or zero/nonfinite scale. Both use read-only previews, commit once on valid release, and roll back on cancellation/invalid release. No Grid/Drawing snap or land endpoint attachment.</li>
+          <li>Move preserves calibration. Manual Scale keeps local samples but clears known_distance, visibly becoming uncalibrated.</li>
+          <li>Reference Line clicks two distinct locations inside the selected image. They are image-local samples, not land Points/segments. Completing a line replaces the old line and clears known distance in one action; cancelling preserves the old calibration.</li>
+          <li>Enter/blur a positive known distance with a valid line: scale so sample length equals that distance, holding the first sample's world position fixed. Update anchor, scale, and known distance atomically. Positive distance without samples may be retained as unfinished input; a newly completed line clears it rather than accidentally applying an old distance.</li>
+          <li>Null means unassigned; zero remains an unfinished setting. Neither changes transform, and both mark uncalibrated. Negative/nonfinite distances are invalid. An empty/missing-image Reference tool stays selected but inert.</li>
+          <li>Image assignment/replacement, each completed move/scale, each reference-line replacement, and distance+calibration are individual history actions. Retain immutable old assets while history references them.</li>
+        </ul>
+        <h3>Asset recovery</h3>
+        <ul>
+          <li>Save image bytes inside the portable document, not transient object URLs or local path assumptions. Same-content relink restores a missing asset without changing transform/calibration. Different content follows replacement rules.</li>
+          <li>Missing/corrupt assets retain land data, Reference records, transforms, samples, asset IDs, and any original bytes; show a placeholder and disable image tools. No silent removal/nulling on save. B13 distinguishes damaged images from structural document corruption.</li>
+        </ul>
+      </section>
+    </article>
+
+    <article id="api-reference-properties" data-parent="build-api" aria-labelledby="api-reference-properties-title">
+      <header>
+        <p class="label">Build API</p>
+        <h1 id="api-reference-properties-title">ReferenceProperties</h1>
+        <p>Stores a reference image’s color, durable asset reference, and known distance. Its owning ReferenceLayer separately references ReferenceGeometry for placement and calibration samples.</p>
+      </header>
+      <section>
+        <h2 id="api-reference-properties-shape">Shape</h2>
+        <pre><code class="language-yaml" data-proposed-shape="ReferenceProperties">ReferenceProperties:
+  color:
+    type: string
+    default: "#99a18f"
+    allowed: ["#99a18f", "#376b95", "#82603e", "#805891", "#b26930"]
+  image: {type: string, nullable: true, default: null}
+  known_distance: {type: number, nullable: true, minimum: 0, default: null}</code></pre>
+      </section>
+      <section>
+        <h2 id="api-reference-properties-attributes">Attributes</h2>
+        <table class="outline-table" aria-labelledby="api-reference-properties-attributes">
+          <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>color</code></th><td>Reference color: green, blue, brown, purple, or orange, in the listed order. Defaults to green.</td></tr>
+            <tr><th scope="row"><code>image</code></th><td>An immutable asset ID for saved PNG, JPEG, or WebP bytes, or null. The portable asset manifest resolves it; object URLs and decoded textures are runtime caches, not durable references.</td></tr>
+            <tr><th scope="row"><code>known_distance</code></th><td>Real distance represented by the reference line, in metres. Null means unassigned. Zero is allowed as an unfinished value; calibration requires a positive distance.</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section>
+        <h2 id="api-reference-properties-example">Example</h2>
+        <pre><code class="language-yaml" data-proposed-example="ReferenceProperties">color: "#99a18f"
+image: null
+known_distance: null</code></pre>
+      </section>
+    </article>
+
+    <article id="api-field-properties-menu" data-parent="build-api" aria-labelledby="api-field-properties-menu-title">
+      <header>
+        <p class="label">Build API</p>
+        <h1 id="api-field-properties-menu-title">FieldPropertiesMenu</h1>
+        <p>Shows the selected field's name, color, and soil information. Its panel title is Properties - Field.</p>
+      </header>
+      <section>
+        <h2 id="api-field-properties-menu-shape">Shape</h2>
+        <pre><code class="language-yaml" data-proposed-shape="FieldPropertiesMenu">FieldPropertiesMenu:
+  name: {type: string, allowed: [field_properties], default: field_properties}
+  layer: {type: reference, target: Field, required: true}
+  properties: {type: FieldProperties, derived: layer.properties}</code></pre>
+        <table class="outline-table" aria-labelledby="api-field-properties-menu-shape">
+          <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>name</code></th><td><code>field_properties</code> identifies this panel in <a href="#api-canvas-display">Canvas.display.panels</a>.</td></tr>
+            <tr><th scope="row"><code>layer</code></th><td>A reference to the selected <a href="#api-field">Field</a>. Its name, properties, and outline belong to that field.</td></tr>
+            <tr><th scope="row"><code>properties</code></th><td>Reads <code>layer.properties</code>, the field's <a href="#api-field-properties">FieldProperties</a>. This is access to the same values, not another stored copy.</td></tr>
+          </tbody>
+        </table>
+        <p>Canvas.display.property_menus holds this menu. Selecting a field points the menu to it and expands the panel. Rename edits the field's name; the other controls edit its properties through CanvasController. Follow the shared <a href="#api-canvas-display-editing">input rules</a>. <a href="#build-field-properties">View the property controls</a>.</p>
+      </section>
+      <section>
+        <h2 id="api-field-properties-menu-example">Example</h2>
+        <p>The menu refers to the field labelled north-field. Its properties are read from that field.</p>
+        <pre><code class="language-yaml" data-proposed-example="FieldPropertiesMenu">name: field_properties
+layer: north-field</code></pre>
+      </section>
+    </article>
+
+    <article id="api-plot-properties-menu" data-parent="build-api" aria-labelledby="api-plot-properties-menu-title">
+      <header>
+        <p class="label">Build API</p>
+        <h1 id="api-plot-properties-menu-title">PlotPropertiesMenu</h1>
+        <p>Shows the selected plot's name, outline color, and fill pattern. Its panel title is Properties - Plot.</p>
+      </header>
+      <section>
+        <h2 id="api-plot-properties-menu-shape">Shape</h2>
+        <pre><code class="language-yaml" data-proposed-shape="PlotPropertiesMenu">PlotPropertiesMenu:
+  name: {type: string, allowed: [plot_properties], default: plot_properties}
+  layer: {type: reference, target: Plot, required: true}
+  properties: {type: PlotProperties, derived: layer.properties}</code></pre>
+        <table class="outline-table" aria-labelledby="api-plot-properties-menu-shape">
+          <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>name</code></th><td><code>plot_properties</code> identifies this panel in <a href="#api-canvas-display">Canvas.display.panels</a>.</td></tr>
+            <tr><th scope="row"><code>layer</code></th><td>A reference to the selected <a href="#api-plots">Plot</a>. Its name, properties, and outline belong to that plot.</td></tr>
+            <tr><th scope="row"><code>properties</code></th><td>Reads <code>layer.properties</code>, the plot's <a href="#api-plot-properties">PlotProperties</a>. This is access to the same values, not another stored copy.</td></tr>
+          </tbody>
+        </table>
+        <p>Canvas.display.property_menus holds this menu. Selecting a plot points the menu to it and expands the panel. Rename edits the plot's name; color and pattern edit its properties through CanvasController. Follow the shared <a href="#api-canvas-display-editing">input rules</a>. <a href="#build-plot-properties">View the property controls</a>.</p>
+      </section>
+      <section>
+        <h2 id="api-plot-properties-menu-example">Example</h2>
+        <p>The menu refers to the plot labelled vegetables. Its properties are read from that plot.</p>
+        <pre><code class="language-yaml" data-proposed-example="PlotPropertiesMenu">name: plot_properties
+layer: vegetables</code></pre>
+      </section>
+    </article>
+
+    <article id="api-area-properties-menu" data-parent="build-api" aria-labelledby="api-area-properties-menu-title">
+      <header>
+        <p class="label">Build API</p>
+        <h1 id="api-area-properties-menu-title">AreaPropertiesMenu</h1>
+        <p>Shows the selected area's name, planting type, and dimensions. Its panel title is Properties - Area.</p>
+      </header>
+      <section>
+        <h2 id="api-area-properties-menu-shape">Shape</h2>
+        <pre><code class="language-yaml" data-proposed-shape="AreaPropertiesMenu">AreaPropertiesMenu:
+  name: {type: string, allowed: [area_properties], default: area_properties}
+  layer: {type: reference, target: Area, required: true}
+  properties: {type: AreaProperties, derived: layer.properties}</code></pre>
+        <table class="outline-table" aria-labelledby="api-area-properties-menu-shape">
+          <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>name</code></th><td><code>area_properties</code> identifies this panel in <a href="#api-canvas-display">Canvas.display.panels</a>.</td></tr>
+            <tr><th scope="row"><code>layer</code></th><td>A reference to the selected <a href="#api-area">Area</a>. Its name, properties, and outline belong to that area.</td></tr>
+            <tr><th scope="row"><code>properties</code></th><td>Reads <code>layer.properties</code>, the area's <a href="#api-area-properties">AreaProperties</a>. This is access to the same values, not another stored copy.</td></tr>
+          </tbody>
+        </table>
+        <p>Canvas.display.property_menus holds this menu. Selecting an area points the menu to it and expands the panel. Rename edits the area's name; planting type edits its properties. Row and mound inputs edit <a href="#api-geometry-area-dimensions">Area.outline.dimensions</a>. CanvasController applies these changes using the shared <a href="#api-canvas-display-editing">input rules</a>. <a href="#build-plot">View the property controls</a>.</p>
+      </section>
+      <section>
+        <h2 id="api-area-properties-menu-example">Example</h2>
+        <p>The menu refers to the area labelled carrot-bed. Changing planting type edits that area's properties; changing row width edits its outline dimensions.</p>
+        <pre><code class="language-yaml" data-proposed-example="AreaPropertiesMenu">name: area_properties
+layer: carrot-bed</code></pre>
+      </section>
+    </article>
+
+    <article id="api-reference-properties-menu" data-parent="build-api" aria-labelledby="api-reference-properties-menu-title">
+      <header>
+        <p class="label">Build API</p>
+        <h1 id="api-reference-properties-menu-title">ReferencePropertiesMenu</h1>
+        <p>Shows the selected reference layer's name, color, image, and known distance. Its panel title is Properties - Reference.</p>
+      </header>
+      <section>
+        <h2 id="api-reference-properties-menu-shape">Shape</h2>
+        <pre><code class="language-yaml" data-proposed-shape="ReferencePropertiesMenu">ReferencePropertiesMenu:
+  name: {type: string, allowed: [reference_properties], default: reference_properties}
+  layer: {type: reference, target: ReferenceLayer, required: true}
+  properties: {type: ReferenceProperties, derived: layer.properties}</code></pre>
+        <table class="outline-table" aria-labelledby="api-reference-properties-menu-shape">
+          <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>name</code></th><td><code>reference_properties</code> identifies this panel in <a href="#api-canvas-display">Canvas.display.panels</a>.</td></tr>
+            <tr><th scope="row"><code>layer</code></th><td>A reference to the selected image layer, called ReferenceLayer here. The layer owns its name and properties; its full structure belongs to the <a href="#api-canvas-open-questions">Layers design</a>.</td></tr>
+            <tr><th scope="row"><code>properties</code></th><td>Reads <code>layer.properties</code>, the layer's <a href="#api-reference-properties">ReferenceProperties</a>. This is access to the same values, not another stored copy.</td></tr>
+          </tbody>
+        </table>
+        <p>Canvas.display.property_menus holds this menu. Selecting a reference layer points the menu to it and expands the panel. Rename edits the layer's name; other inputs edit its properties through CanvasController. Known distance follows the shared <a href="#api-canvas-display-measurements">measurement rules</a>. The application uses the stored image reference to load the image. <a href="#build-reference-properties">View the property controls</a>.</p>
+      </section>
+      <section>
+        <h2 id="api-reference-properties-menu-example">Example</h2>
+        <p>The menu refers to the image layer labelled reference-1. Its properties belong to that layer.</p>
+        <pre><code class="language-yaml" data-proposed-example="ReferencePropertiesMenu">name: reference_properties
+layer: reference-1</code></pre>
+      </section>
+    </article>
+
     <article id="api-drawing-tools" data-parent="build-api" aria-labelledby="api-drawing-tools-title">
       <header>
         <p class="label">Build API</p>
         <h1 id="api-drawing-tools-title">DrawingTools</h1>
-        <p>Placeholders for the <a href="#build-tools">drawing tool</a> objects. Shapes are not yet defined or implemented.</p>
+        <p>Icons and labels for the <a href="#build-tools">drawing tools</a>. The selected tool and its function choices live in CanvasControl.interaction.</p>
       </header>
       <section>
+        <h2 id="api-drawing-tools-metadata">Icons and labels</h2>
+        <p>Each tool defines <code>icon</code>, <code>display_name</code>, and <code>context_menu_name</code>. Point and Line here name tools; the Geometry page defines the drawing items with those names.</p>
+        <p><code>icon</code> is a repository-relative path to a standalone SVG in <code>src/icons/</code>. Pages in <code>docs/</code> resolve it with a leading <code>../</code>. The documentation and prototype share these files, including function icons and pattern swatches.</p>
+        <p><code>display_name</code> labels the tool button. <code>context_menu_name</code> labels the controls beneath the tools: Functions for Point and Reference, Patterns for Fill. Null hides these controls. Switching tools shows the chosen tool's controls and restores its last-used function for this session. See <a href="#api-canvas-control-selection">tool choices</a>.</p>
+      </section>
+      <section>
         <h2 id="api-drawing-tools-point">Point</h2>
-        <pre><code class="language-yaml" data-shape="Point">Point: {}</code></pre>
+        <pre><code class="language-yaml" data-proposed-tool-shape="Point">Point:
+  icon: {type: string, required: true, default: src/icons/point.svg}
+  display_name: {type: string, required: true, default: Point}
+  context_menu_name: {type: string, nullable: true, default: Functions}</code></pre>
+        <table class="outline-table" aria-labelledby="api-drawing-tools-point">
+          <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>icon</code></th><td><a href="../src/icons/point.svg">src/icons/point.svg</a> is the tool’s icon.</td></tr>
+            <tr><th scope="row"><code>display_name</code></th><td>“Point” labels the tool button.</td></tr>
+            <tr><th scope="row"><code>context_menu_name</code></th><td>“Functions” labels the menu beneath the tools.</td></tr>
+          </tbody>
+        </table>
       </section>
       <section>
         <h2 id="api-drawing-tools-line">Line</h2>
-        <pre><code class="language-yaml" data-shape="Line">Line: {}</code></pre>
+        <pre><code class="language-yaml" data-proposed-tool-shape="Line">Line:
+  icon: {type: string, required: true, default: src/icons/line.svg}
+  display_name: {type: string, required: true, default: Line}
+  context_menu_name: {type: string, nullable: true, default: Functions}</code></pre>
+        <table class="outline-table" aria-labelledby="api-drawing-tools-line">
+          <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>icon</code></th><td><a href="../src/icons/line.svg">src/icons/line.svg</a> is the tool’s icon.</td></tr>
+            <tr><th scope="row"><code>display_name</code></th><td>“Line” labels the tool button.</td></tr>
+            <tr><th scope="row"><code>context_menu_name</code></th><td>“Functions” contains Draw, Join, Move, and Delete.</td></tr>
+          </tbody>
+        </table>
       </section>
       <section>
         <h2 id="api-drawing-tools-center-diameter-circle">CenterDiameterCircle</h2>
-        <pre><code class="language-yaml" data-shape="CenterDiameterCircle">CenterDiameterCircle: {}</code></pre>
+        <pre><code class="language-yaml" data-proposed-tool-shape="CenterDiameterCircle">CenterDiameterCircle:
+  icon: {type: string, required: true, default: src/icons/center-diameter-circle.svg}
+  display_name: {type: string, required: true, default: Center-diameter circle}
+  context_menu_name: {type: string, nullable: true, default: Functions}</code></pre>
+        <table class="outline-table" aria-labelledby="api-drawing-tools-center-diameter-circle">
+          <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>icon</code></th><td><a href="../src/icons/center-diameter-circle.svg">src/icons/center-diameter-circle.svg</a> is the tool’s icon.</td></tr>
+            <tr><th scope="row"><code>display_name</code></th><td>“Center-diameter circle” labels the tool button.</td></tr>
+            <tr><th scope="row"><code>context_menu_name</code></th><td>Functions contains Draw, Resize, and Delete; first-use Draw.</td></tr>
+          </tbody>
+        </table>
       </section>
       <section>
         <h2 id="api-drawing-tools-two-point-circle">TwoPointCircle</h2>
-        <pre><code class="language-yaml" data-shape="TwoPointCircle">TwoPointCircle: {}</code></pre>
+        <pre><code class="language-yaml" data-proposed-tool-shape="TwoPointCircle">TwoPointCircle:
+  icon: {type: string, required: true, default: src/icons/two-point-circle.svg}
+  display_name: {type: string, required: true, default: Two-point circle}
+  context_menu_name: {type: string, nullable: true, default: Functions}</code></pre>
+        <table class="outline-table" aria-labelledby="api-drawing-tools-two-point-circle">
+          <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>icon</code></th><td><a href="../src/icons/two-point-circle.svg">src/icons/two-point-circle.svg</a> is the tool’s icon.</td></tr>
+            <tr><th scope="row"><code>display_name</code></th><td>“Two-point circle” labels the tool button.</td></tr>
+            <tr><th scope="row"><code>context_menu_name</code></th><td>Functions contains Draw, Resize, and Delete; first-use Draw.</td></tr>
+          </tbody>
+        </table>
       </section>
       <section>
         <h2 id="api-drawing-tools-fill">Fill</h2>
-        <pre><code class="language-yaml" data-shape="Fill">Fill: {}</code></pre>
+        <pre><code class="language-yaml" data-proposed-tool-shape="Fill">Fill:
+  icon: {type: string, required: true, default: src/icons/fill.svg}
+  display_name: {type: string, required: true, default: Fill}
+  context_menu_name: {type: string, nullable: true, default: Patterns}</code></pre>
+        <table class="outline-table" aria-labelledby="api-drawing-tools-fill">
+          <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>icon</code></th><td><a href="../src/icons/fill.svg">src/icons/fill.svg</a> is the tool’s icon.</td></tr>
+            <tr><th scope="row"><code>display_name</code></th><td>“Fill” labels the tool button.</td></tr>
+            <tr><th scope="row"><code>context_menu_name</code></th><td>“Patterns” labels the menu beneath the tools.</td></tr>
+          </tbody>
+        </table>
       </section>
       <section>
         <h2 id="api-drawing-tools-reference">Reference</h2>
-        <pre><code class="language-yaml" data-shape="Reference">Reference: {}</code></pre>
+        <pre><code class="language-yaml" data-proposed-tool-shape="Reference">Reference:
+  icon: {type: string, required: true, default: src/icons/reference.svg}
+  display_name: {type: string, required: true, default: Reference}
+  context_menu_name: {type: string, nullable: true, default: Functions}</code></pre>
+        <table class="outline-table" aria-labelledby="api-drawing-tools-reference">
+          <thead><tr><th scope="col">Attribute</th><th scope="col">Meaning</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>icon</code></th><td><a href="../src/icons/reference.svg">src/icons/reference.svg</a> is the tool’s icon.</td></tr>
+            <tr><th scope="row"><code>display_name</code></th><td>“Reference” labels the tool button.</td></tr>
+            <tr><th scope="row"><code>context_menu_name</code></th><td>“Functions” labels the menu beneath the tools.</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section>
+        <h2 id="api-drawing-tools-example">Example</h2>
+        <p>Selecting Fill shows its icon and display name on the tool button, with Patterns above None, Dots, Crosshatch, and Crosses; first-use None.</p>
+        <pre><code class="language-yaml" data-proposed-tool-example="Fill">icon: src/icons/fill.svg
+display_name: Fill
+context_menu_name: Patterns</code></pre>
       </section>
     </article>
 
@@ -795,6 +1768,7 @@ pattern: null</code></pre>
       <section>
         <h2 id="plant-planting-tool">Planting tool</h2>
         <p>Choose from the grow engine or seed vault, then place seeds in plots and choose when to plant. Use row or flat spacing to estimate capacity and potential maximum yield.</p>
+        <p>Seed placement and boundary-based capacity/yield calculations require an <a href="#api-geometry-boundary-validity">active boundary</a>: its own geometry and every ancestor must be valid. Exclude inactive targets and contributions, including descendants blocked by an invalid parent; keep existing associated data without using it in current active calculations.</p>
         <figure>
           <div class="planting-sketch"><span>Seed selection</span><span aria-hidden="true">→</span><div class="seed-plot"><span>Plot</span><span class="seed-row" aria-hidden="true">○ &nbsp; ○ &nbsp; ○ &nbsp; ○</span><span class="seed-row" aria-hidden="true">○ &nbsp; ○ &nbsp; ○ &nbsp; ○</span></div></div>
         </figure>
@@ -809,6 +1783,7 @@ pattern: null</code></pre>
       <header>
         <h1 id="harvest-title">Harvest</h1>
         <p>A rolling view of expected harvests from planned and growing crops.</p>
+        <p>Harvest-window and yield calculations include only <a href="#api-geometry-boundary-validity">active boundaries</a>. Exclude a boundary and its descendants while invalid, including inherited invalidity; reevaluate eligibility when validity is restored. Retained data or older results must not bypass the active-only rule.</p>
       </header>
       <section>
         <h2 id="harvest-window">Harvest window</h2>

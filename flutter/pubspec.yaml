@@ -1,0 +1,28 @@
+name: garden_gnome
+description: Garden Gnome — plan fields, plots, and growing areas.
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.10.8
+
+dependencies:
+  flutter:
+    sdk: flutter
+  archive: ^4.3.0
+  file_selector: ^1.1.0
+  flutter_svg: ^2.3.0
+  idb_shim: ^2.9.2
+  shared_preferences: ^2.5.5
+  uuid: ^4.6.0
+  web: ^1.1.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/icons/

@@ -1,0 +1,230 @@
+import 'package:flutter/material.dart';
+
+import '../application/editor_controller.dart';
+import '../persistence/drawing_library.dart';
+import 'theme.dart';
+
+/// Asks before deleting a layer, naming everything that goes with it.
+Future<void> confirmDeleteLayer(
+  BuildContext context,
+  EditorController editor,
+  String layerId,
+) async {
+  final layer = editor.document.layers[layerId];
+  if (layer == null) return;
+  final inside = editor.document.subtree(layerId).length - 1;
+  editor.suspendDraftSettlement = true;
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text('Delete ${layer.name}?'),
+      content: Text(
+        inside == 0
+            ? 'This ${layer.kind.label.toLowerCase()} will be removed. '
+                  'You can undo this.'
+            : 'This ${layer.kind.label.toLowerCase()} and the $inside '
+                  '${inside == 1 ? 'layer' : 'layers'} inside it will be '
+                  'removed. You can undo this.',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          style: FilledButton.styleFrom(backgroundColor: Palette.invalid),
+          onPressed: () => Navigator.pop(context, true),
+          child: const Text('Delete'),
+        ),
+      ],
+    ),
+  );
+  editor.suspendDraftSettlement = false;
+  if (confirmed == true) editor.deleteLayer(layerId);
+}
+
+enum LeaveChoice { save, discard, cancel }
+
+/// Save / Don't save / Cancel before leaving a drawing with unsaved work.
+Future<LeaveChoice> askToSave(BuildContext context, String title) async {
+  final choice = await showDialog<LeaveChoice>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Save changes?'),
+      content: Text('“$title” has changes that are not saved.'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, LeaveChoice.cancel),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, LeaveChoice.discard),
+          child: const Text("Don't save"),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, LeaveChoice.save),
+          child: const Text('Save'),
+        ),
+      ],
+    ),
+  );
+  return choice ?? LeaveChoice.cancel;
+}
+
+/// Asks for a drawing name. Returns null when cancelled.
+Future<String?> askForName(BuildContext context, String initial) {
+  // Pre-select the suggestion so typing replaces it.
+  final text = TextEditingController(text: initial)
+    ..selection = TextSelection(baseOffset: 0, extentOffset: initial.length);
+  return showDialog<String>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Save in this browser'),
+      content: SizedBox(
+        width: 360,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: text,
+              autofocus: true,
+              decoration: const InputDecoration(labelText: 'Drawing name'),
+              onSubmitted: (value) => Navigator.pop(context, value),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Drawings are kept in this browser only. They are not backed '
+              'up; use File → Export to keep a copy.',
+              style: TextStyle(fontSize: 12, color: Palette.muted),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, text.text),
+          child: const Text('Save'),
+        ),
+      ],
+    ),
+  );
+}
+
+/// Asks for a shape's name. Returns null when cancelled; an empty string
+/// means "use the automatic name".
+Future<String?> askForShapeName(BuildContext context, String initial) {
+  final text = TextEditingController(text: initial)
+    ..selection = TextSelection(baseOffset: 0, extentOffset: initial.length);
+  return showDialog<String>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Rename shape'),
+      content: SizedBox(
+        width: 320,
+        child: TextField(
+          controller: text,
+          autofocus: true,
+          decoration: const InputDecoration(
+            labelText: 'Shape name',
+            helperText: 'Leave blank for the automatic name',
+          ),
+          onSubmitted: (value) => Navigator.pop(context, value),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, text.text),
+          child: const Text('Rename'),
+        ),
+      ],
+    ),
+  );
+}
+
+/// What the user chose in the Open dialog.
+sealed class OpenChoice {
+  const OpenChoice();
+}
+
+class OpenSaved extends OpenChoice {
+  const OpenSaved(this.entry);
+
+  final LibraryEntry entry;
+}
+
+class OpenFromFile extends OpenChoice {
+  const OpenFromFile();
+}
+
+/// Lists drawings saved in this browser, with an option to import a file.
+Future<OpenChoice?> chooseDrawing(
+  BuildContext context,
+  DrawingLibrary library,
+) {
+  return showDialog<OpenChoice>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Open drawing'),
+      content: SizedBox(
+        width: 420,
+        height: 320,
+        child: FutureBuilder<List<LibraryEntry>>(
+          future: library.list(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return Text('${snapshot.error}');
+            }
+            final entries = snapshot.data;
+            if (entries == null) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (entries.isEmpty) {
+              return const Center(
+                child: Text(
+                  'No drawings saved in this browser yet.',
+                  style: TextStyle(color: Palette.muted),
+                ),
+              );
+            }
+            return ListView(
+              children: [
+                for (final entry in entries)
+                  ListTile(
+                    dense: true,
+                    title: Text(entry.title),
+                    subtitle: Text(_when(entry.savedAt)),
+                    onTap: () => Navigator.pop(context, OpenSaved(entry)),
+                  ),
+              ],
+            );
+          },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, const OpenFromFile()),
+          child: const Text('Import .ggnome file…'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+      ],
+    ),
+  );
+}
+
+String _when(DateTime time) {
+  String two(int n) => n.toString().padLeft(2, '0');
+  return 'Saved ${time.year}-${two(time.month)}-${two(time.day)} '
+      '${two(time.hour)}:${two(time.minute)}';
+}

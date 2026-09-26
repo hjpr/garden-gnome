@@ -85,6 +85,8 @@ for (const button of document.querySelectorAll('[data-panel-toggle]')) {
 
 const tools = document.querySelectorAll('[data-tool]');
 const optionPanels = document.querySelectorAll('[data-tool-options]');
+const toolContextMenu = document.querySelector('.tool-options');
+const toolContextHeading = toolContextMenu.querySelector('legend');
 
 for (const tool of tools) {
   tool.addEventListener('click', () => {
@@ -94,6 +96,9 @@ for (const tool of tools) {
     for (const panel of optionPanels) {
       panel.hidden = panel.dataset.toolOptions !== tool.dataset.tool;
     }
+    const contextMenuName = tool.dataset.contextMenuName;
+    toolContextHeading.textContent = contextMenuName ?? '';
+    toolContextMenu.hidden = !contextMenuName;
   });
 }
 
@@ -121,7 +126,6 @@ const renameForm = document.querySelector('#rename-form');
 const nameInput = document.querySelector('#layer-name');
 const fieldColor = document.querySelector('#field-color');
 const canvasUnits = document.querySelector('#canvas-units');
-const canvasScale = document.querySelector('#canvas-scale');
 const canvasSnapping = document.querySelector('#canvas-snapping');
 const canvasSnapTarget = document.querySelector('#canvas-snap-target');
 const plotColor = document.querySelector('#plot-color');
@@ -206,18 +210,13 @@ fieldColor.addEventListener('change', () => {
   document.querySelector('#field-boundary').setAttribute('stroke', fieldColor.value);
 });
 
-function updateCanvasScale() {
-  canvasScale.labels[0].textContent = `Scale (${canvasUnits.value})`;
+function updateCanvasUnits() {
   referenceDistance.labels[0].textContent = `Known distance (${canvasUnits.value})`;
-  const positive = Number.isFinite(canvasScale.valueAsNumber) && canvasScale.valueAsNumber > 0;
-  canvasScale.setCustomValidity(canvasScale.value !== '' && !positive ? 'Enter a scale greater than zero.' : '');
-  const scale = positive ? canvasScale.value : '—';
-  document.querySelector('#grid-scale-label').textContent = `1 grid length = ${scale} ${canvasUnits.value}`;
+  document.querySelector('#grid-scale-label').textContent = `1 grid length = — ${canvasUnits.value}`;
 }
 
-canvasUnits.addEventListener('change', updateCanvasScale);
-canvasScale.addEventListener('input', updateCanvasScale);
-updateCanvasScale();
+canvasUnits.addEventListener('change', updateCanvasUnits);
+updateCanvasUnits();
 
 canvasSnapping.addEventListener('change', () => {
   canvasSnapTarget.disabled = !canvasSnapping.checked;
