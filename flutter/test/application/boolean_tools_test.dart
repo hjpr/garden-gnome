@@ -48,8 +48,8 @@ void circle(CanvasInput input, double x, double y, double radius) {
   click(input, x + radius, y);
 }
 
-(EditorController, CanvasInput, String) field() {
-  final editor = EditorController()..addLayer(LayerKind.field);
+(EditorController, CanvasInput, String) property() {
+  final editor = EditorController()..addLayer(LayerKind.property);
   addTearDown(editor.dispose);
   return (editor, CanvasInput(editor), editor.selectedLayerId!);
 }
@@ -79,7 +79,7 @@ void arc(CanvasInput input) {
 void main() {
   group('Boolean operations', () {
     test('Union merges the selected shapes, one Undo/Redo', () {
-      final (editor, input, layer) = field();
+      final (editor, input, layer) = property();
       rectangle(input, 0, 0, 10, 10);
       rectangle(input, 5, 0, 10, 10);
       final before = editor.document;
@@ -114,7 +114,7 @@ void main() {
     });
 
     test('Union merges only the selected shapes', () {
-      final (editor, input, layer) = field();
+      final (editor, input, layer) = property();
       rectangle(input, 0, 0, 10, 10);
       rectangle(input, 5, 0, 10, 10);
       rectangle(input, 12, 0, 10, 10);
@@ -129,7 +129,7 @@ void main() {
     });
 
     test('Subtract cuts the top selected shape out of the others', () {
-      final (editor, input, layer) = field();
+      final (editor, input, layer) = property();
       rectangle(input, 0, 0, 10, 10);
       circle(input, 5, 5, 2);
       final before = editor.document;
@@ -166,7 +166,7 @@ void main() {
     test(
       'circle Union commits editable arcs rather than chord approximations',
       () {
-        final (editor, input, layer) = field();
+        final (editor, input, layer) = property();
         circle(input, 5, 5, 4);
         circle(input, 9, 5, 4);
         selectShapes(input, [const Vec(2, 5), const Vec(12, 5)]);
@@ -182,7 +182,7 @@ void main() {
 
     for (final operation in BooleanOperation.values) {
       test('${operation.name} refusal is atomic with a useful red preview', () {
-        final (editor, input, layer) = field();
+        final (editor, input, layer) = property();
         rectangle(input, 0, 0, 10, 10);
         rectangle(input, 20, 0, 4, 4);
         final message = operation == BooleanOperation.union
@@ -211,7 +211,7 @@ void main() {
     }
 
     test('one selected shape is not enough', () {
-      final (editor, input, _) = field();
+      final (editor, input, _) = property();
       rectangle(input, 0, 0, 10, 10);
       rectangle(input, 5, 0, 10, 10);
       selectShapes(input, [const Vec(2, 5)]);
@@ -223,7 +223,7 @@ void main() {
     });
 
     test('Subtract that would empty the land does not consume anything', () {
-      final (editor, input, _) = field();
+      final (editor, input, _) = property();
       rectangle(input, 0, 0, 10, 10);
       rectangle(input, -2, -2, 14, 14);
       final before = editor.document;
@@ -238,7 +238,7 @@ void main() {
     });
 
     test('a locked layer refuses Boolean operations', () {
-      final (editor, input, layer) = field();
+      final (editor, input, layer) = property();
       rectangle(input, 0, 0, 10, 10);
       circle(input, 5, 5, 1);
       selectShapes(input, [const Vec(1, 1), const Vec(5, 5)]);
@@ -255,13 +255,13 @@ void main() {
       expect(editor.notice, contains('locked'));
     });
 
-    test('preview is red when Subtract removes land underneath a child', () {
-      final (editor, input, fieldId) = field();
+    test('preview is red when Subtract cuts land from under a zone', () {
+      final (editor, input, propertyId) = property();
       rectangle(input, 0, 0, 20, 20);
-      editor.addLayer(LayerKind.plot);
-      final plotId = editor.selectedLayerId!;
+      editor.addLayer(LayerKind.zone);
+      final zoneId = editor.selectedLayerId!;
       circle(input, 10, 10, 3);
-      editor.selectLayer(fieldId);
+      editor.selectLayer(propertyId);
       circle(input, 10, 10, 2);
       selectShapes(input, [const Vec(1, 1), const Vec(10, 10)]);
       editor.previewBoolean(BooleanOperation.subtract);
@@ -269,29 +269,32 @@ void main() {
       expect(preview.document, isNotNull);
       expect(preview.valid, isFalse);
       editor.runBoolean(BooleanOperation.subtract);
-      expect(editor.document.geometryOf(fieldId).boundary!.holes, hasLength(1));
-      expect(editor.document.problemOf(plotId), contains('not inside a field'));
+      expect(
+        editor.document.geometryOf(propertyId).boundary!.holes,
+        hasLength(1),
+      );
+      expect(editor.document.problemOf(zoneId), contains('not inside'));
       editor.undo();
-      expect(editor.document.ruleProblemOf(plotId), isNull);
+      expect(editor.document.ruleProblemOf(zoneId), isNull);
     });
 
     test('moving one shape carries only the land inside that shape', () {
-      final (editor, input, fieldId) = field();
+      final (editor, input, propertyId) = property();
       rectangle(input, 0, 0, 20, 20);
-      editor.addLayer(LayerKind.plot);
+      editor.addLayer(LayerKind.zone);
       final child = editor.selectedLayerId!;
       rectangle(input, 2, 2, 3, 3);
       final childBefore = editor.document.geometryOf(child);
-      editor.selectLayer(fieldId);
+      editor.selectLayer(propertyId);
       rectangle(input, 12, 12, 4, 4);
-      final before = editor.document.geometryOf(fieldId);
+      final before = editor.document.geometryOf(propertyId);
       editor.selectTool(Tool.select);
       input.press(at(14, 14), shift: false);
       input.move(at(15, 14));
       input.release(at(15, 14));
       expect(editor.selection.single, isNot(before.boundaryId));
       expect(
-        editor.document.geometryOf(fieldId).region!.area,
+        editor.document.geometryOf(propertyId).region!.area,
         closeTo(400, 1e-8),
       );
       expect(editor.document.geometryOf(child).points, childBefore.points);
@@ -302,7 +305,7 @@ void main() {
     test(
       'first two clicks are temporary, third commits one arc and one Undo',
       () {
-        final (editor, input, layer) = field();
+        final (editor, input, layer) = property();
         editor.selectTool(Tool.arc);
         final before = editor.document;
         click(input, 2, 8);
@@ -337,7 +340,7 @@ void main() {
     test(
       'arc hit testing and Point insertion use the curve, not its chord',
       () {
-        final (editor, input, layer) = field();
+        final (editor, input, layer) = property();
         arc(input);
         final geometry = editor.document.geometryOf(layer);
         final original = geometry.lines.values.single;
@@ -366,7 +369,7 @@ void main() {
     );
 
     test('Select moves the actual arc and keeps its bulge through Undo', () {
-      final (editor, input, layer) = field();
+      final (editor, input, layer) = property();
       arc(input);
       final before = editor.document;
       final source = before.geometryOf(layer).lines.values.single;
@@ -387,10 +390,9 @@ void main() {
     test(
       'existing endpoints can enclose a circular segment with a straight return',
       () {
-        final (editor, input, layer) = field();
+        final (editor, input, layer) = property();
         arc(input);
         editor.selectTool(Tool.line);
-        editor.selectFunction(ToolFunction.join);
         click(input, 10, 8);
         click(input, 2, 8);
         final geometry = editor.document.geometryOf(layer);
@@ -403,7 +405,7 @@ void main() {
     );
 
     test('Arc reuses the open ends of an existing straight line', () {
-      final (editor, input, layer) = field();
+      final (editor, input, layer) = property();
       editor.selectTool(Tool.line);
       click(input, 2, 8);
       click(input, 10, 8);
@@ -420,7 +422,7 @@ void main() {
     test(
       'collinear Arc is refused without a partial commit, then can be retried',
       () {
-        final (editor, input, layer) = field();
+        final (editor, input, layer) = property();
         editor.selectTool(Tool.arc);
         final before = editor.document;
         final history = editor.undoLabel;
@@ -439,9 +441,95 @@ void main() {
       },
     );
 
+    group('Start-end', () {
+      void startEnd(EditorController editor) {
+        editor.selectTool(Tool.arc);
+        editor.selectFunction(ToolFunction.startEndArc);
+      }
+
+      test('start, end, then the middle commits one arc', () {
+        final (editor, input, layer) = property();
+        startEnd(editor);
+        final before = editor.document;
+        click(input, 2, 8);
+        click(input, 10, 8);
+        expect(identical(editor.document, before), isTrue);
+        expect(editor.arcPoints, hasLength(2));
+        input.hover(at(6, 4));
+        final preview = editor.preview as ArcPreview;
+        expect(preview.valid, isTrue);
+        expect(
+          preview.curve!.pointAt(0.5).distanceTo(const Vec(6, 4)),
+          lessThan(1e-8),
+        );
+        click(input, 6, 4);
+        final geometry = editor.document.geometryOf(layer);
+        expect(geometry.points, hasLength(2));
+        expect(geometry.lines.values.single.bulge, closeTo(1, 1e-8));
+        expect(editor.arcPoints, isEmpty);
+      });
+
+      test('the third click sets the bend and keeps the arc symmetric', () {
+        final (editor, input, layer) = property();
+        startEnd(editor);
+        click(input, 2, 8);
+        click(input, 10, 8);
+        // Off to the side: only the distance from the chord counts.
+        click(input, 9, 6);
+        final geometry = editor.document.geometryOf(layer);
+        final curve = geometry.lines.values.single.curve(geometry.points);
+        expect(curve.pointAt(0.5).distanceTo(const Vec(6, 6)), lessThan(1e-8));
+      });
+
+      test('the end reuses an open end point', () {
+        final (editor, input, layer) = property();
+        editor.selectTool(Tool.line);
+        click(input, 2, 8);
+        click(input, 10, 8);
+        startEnd(editor);
+        click(input, 2, 8);
+        click(input, 10, 8);
+        click(input, 6, 4);
+        final geometry = editor.document.geometryOf(layer);
+        expect(geometry.points, hasLength(2));
+        expect(geometry.isClosed, isTrue);
+      });
+
+      test('a middle on the chord is refused and can be retried', () {
+        final (editor, input, layer) = property();
+        startEnd(editor);
+        click(input, 2, 8);
+        click(input, 10, 8);
+        input.hover(at(6, 8));
+        expect((editor.preview as ArcPreview).valid, isFalse);
+        click(input, 6, 8);
+        expect(editor.notice, contains('straight line'));
+        expect(editor.arcPoints, hasLength(2));
+        click(input, 6, 12);
+        expect(editor.document.geometryOf(layer).lines, hasLength(1));
+      });
+
+      test('an end on the start is refused', () {
+        final (editor, input, _) = property();
+        startEnd(editor);
+        click(input, 2, 8);
+        click(input, 2, 8);
+        expect(editor.arcPoints, hasLength(1));
+        expect(editor.notice, contains('end of the Arc'));
+      });
+
+      test('switching function clears the clicks', () {
+        final (editor, input, _) = property();
+        startEnd(editor);
+        click(input, 2, 8);
+        editor.selectFunction(ToolFunction.threePointArc);
+        expect(editor.arcPoints, isEmpty);
+      });
+    });
+
     for (final cancel in ['escape', 'tool', 'enter', 'layer', 'undo', 'lock']) {
       test('$cancel clears both temporary Arc clicks', () {
-        final (editor, input, layer) = field();
+        final (editor, input, layer) = property();
         editor.selectTool(Tool.arc);
         click(input, 2, 8);
         click(input, 6, 4);
@@ -468,7 +556,7 @@ void main() {
     }
 
     test('locked layers refuse the first Arc and circle clicks', () {
-      final (editor, input, layer) = field();
+      final (editor, input, layer) = property();
       editor.setLayerLocked(layer, true);
       final before = editor.document;
       editor.selectTool(Tool.arc);
@@ -482,7 +570,7 @@ void main() {
     });
 
     test('Fit drawing includes arc extrema away from both endpoints', () {
-      final (editor, input, _) = field();
+      final (editor, input, _) = property();
       arc(input);
       editor.setViewportSize(const Size(600, 400));
       editor.fitDrawing();
@@ -492,12 +580,40 @@ void main() {
         expect(screen.dy, inInclusiveRange(39.0, 361.0));
       }
     });
+
+    test('a drawing opened with no remembered view is framed once', () {
+      final (drawn, input, _) = property();
+      rectangle(input, 5000, 5000, 10, 10);
+      final opened = EditorController(
+        document: drawn.document,
+        fitOnFirstView: true,
+      )..setViewportSize(const Size(600, 400));
+      final screen = opened.camera.toScreen(const Vec(5005, 5005));
+      expect(screen.dx, closeTo(300, 1));
+      expect(screen.dy, closeTo(200, 1));
+      // Later resizes keep the view instead of fitting again.
+      final after = opened.camera;
+      opened.setViewportSize(const Size(700, 500));
+      expect(opened.camera.height, after.height);
+    });
+
+    test('a drawing opened with a remembered view keeps it', () {
+      final (drawn, input, _) = property();
+      rectangle(input, 5000, 5000, 10, 10);
+      const remembered = Camera(topLeft: Vec(3, 4), height: 20);
+      final opened = EditorController(
+        document: drawn.document,
+        camera: remembered,
+      )..setViewportSize(const Size(600, 400));
+      expect(opened.camera.topLeft, remembered.topLeft);
+      expect(opened.camera.height, remembered.height);
+    });
   });
 
   test(
     'saved content comparison includes bulges, holes and shape/circle patterns',
     () {
-      final (editor, input, layer) = field();
+      final (editor, input, layer) = property();
       rectangle(input, 0, 0, 10, 10);
       final before = editor.document;
       final geometry = before.geometryOf(layer);

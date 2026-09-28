@@ -57,7 +57,7 @@ void main() {
   ) async {
     await tester.binding.setSurfaceSize(const Size(1200, 800));
     addTearDown(() => tester.binding.setSurfaceSize(null));
-    final editor = EditorController()..addLayer(LayerKind.field);
+    final editor = EditorController()..addLayer(LayerKind.property);
     addTearDown(editor.dispose);
     await tester.pumpWidget(workbench(editor));
     await tester.pumpAndSettle();
@@ -83,7 +83,13 @@ void main() {
 
     await tester.tap(find.text('Line'));
     await tester.pumpAndSettle();
-    expect(find.text('Draw'), findsOneWidget);
+    expect(editor.function, ToolFunction.draw);
+    expect(find.text('LINE FUNCTIONS'), findsOneWidget);
+    expect(find.text('Straight'), findsOneWidget);
+    expect(find.text('Join'), findsNothing);
+    await tester.tap(find.text('Curve'));
+    await tester.pumpAndSettle();
+    expect(editor.function, ToolFunction.curve);
     expect(
       find.text('Arc'),
       findsOneWidget,
@@ -93,8 +99,12 @@ void main() {
     await tester.tap(find.text('Arc'));
     await tester.pumpAndSettle();
     expect(editor.tool, Tool.arc);
-    expect(editor.function, ToolFunction.arc);
-    expect(find.text('ARC FUNCTIONS'), findsNothing);
+    expect(editor.function, ToolFunction.threePointArc);
+    expect(find.text('ARC FUNCTIONS'), findsOneWidget);
+    expect(find.text('3-point'), findsOneWidget);
+    await tester.tap(find.text('Start-end'));
+    await tester.pumpAndSettle();
+    expect(editor.function, ToolFunction.startEndArc);
 
     await tester.tap(find.text('Polygon'));
     await tester.pumpAndSettle();
@@ -116,7 +126,7 @@ void main() {
     (tester) async {
       await tester.binding.setSurfaceSize(const Size(1200, 800));
       addTearDown(() => tester.binding.setSurfaceSize(null));
-      final editor = EditorController()..addLayer(LayerKind.field);
+      final editor = EditorController()..addLayer(LayerKind.property);
       addTearDown(editor.dispose);
       final layer = editor.selectedLayerId!;
       await tester.pumpWidget(workbench(editor));
@@ -146,7 +156,7 @@ void main() {
     (tester) async {
       await tester.binding.setSurfaceSize(const Size(1200, 800));
       addTearDown(() => tester.binding.setSurfaceSize(null));
-      final editor = EditorController()..addLayer(LayerKind.field);
+      final editor = EditorController()..addLayer(LayerKind.property);
       addTearDown(editor.dispose);
       final layer = editor.selectedLayerId!;
       final (next, _) = editor.tryGeometryEdit(layer, (e) {
@@ -214,7 +224,7 @@ void main() {
   testWidgets('open boundaries show a dash, not an invented area', (
     tester,
   ) async {
-    final editor = EditorController()..addLayer(LayerKind.field);
+    final editor = EditorController()..addLayer(LayerKind.property);
     addTearDown(editor.dispose);
     await tester.pumpWidget(
       MaterialApp(
@@ -251,7 +261,10 @@ void main() {
       'Crosses',
     ]);
     expect(Tool.line.functions.map((f) => f.label), isNot(contains('Arc')));
-    expect(Tool.arc.functions, [ToolFunction.arc]);
+    expect(Tool.arc.functions, [
+      ToolFunction.threePointArc,
+      ToolFunction.startEndArc,
+    ]);
     expect(Tool.polygon.functions.map((f) => f.label), [
       'Regular',
       'Rectangle',

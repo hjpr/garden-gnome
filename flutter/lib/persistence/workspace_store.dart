@@ -57,9 +57,9 @@ class WorkspaceStore {
           gridThickness: (a['grid_thickness'] as num).toDouble(),
           gridColor: a['grid_color'] as int,
           gridOpacity: (a['grid_opacity'] as num).toDouble(),
-          zoomLimits: ZoomLimits(
-            min: (a['zoom_min'] as num).toDouble(),
-            max: (a['zoom_max'] as num).toDouble(),
+          heightLimits: HeightLimits(
+            lowest: (a['height_lowest'] as num).toDouble(),
+            highest: (a['height_highest'] as num).toDouble(),
           ),
           historyCapacity: a['history_capacity'] as int,
           toastPosition:
@@ -72,8 +72,8 @@ class WorkspaceStore {
       final c = json['camera'] as Map<String, Object?>;
       final camera = Camera(
         topLeft: Vec((c['x'] as num).toDouble(), (c['y'] as num).toDouble()),
-        zoom: settings.appearance.zoomLimits.clamp(
-          (c['zoom'] as num).toDouble(),
+        height: settings.appearance.heightLimits.clamp(
+          (c['height'] as num).toDouble(),
         ),
       );
       return (settings, camera);
@@ -111,15 +111,15 @@ class WorkspaceStore {
           'grid_thickness': a.gridThickness,
           'grid_color': a.gridColor,
           'grid_opacity': a.gridOpacity,
-          'zoom_min': a.zoomLimits.min,
-          'zoom_max': a.zoomLimits.max,
+          'height_lowest': a.heightLimits.lowest,
+          'height_highest': a.heightLimits.highest,
           'history_capacity': a.historyCapacity,
           'toast_position': a.toastPosition.name,
         },
         'camera': {
           'x': camera.topLeft.x,
           'y': camera.topLeft.y,
-          'zoom': camera.zoom,
+          'height': camera.height,
         },
         'counters': {
           'names': {for (final e in ledger.names.entries) e.key.name: e.value},

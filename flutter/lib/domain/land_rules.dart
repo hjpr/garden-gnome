@@ -11,10 +11,12 @@ import 'region.dart';
 /// active. The status is worked out from the drawing itself, so it is
 /// always current after any edit, Undo, or file open.
 ///
-/// A layer is a group of shapes. The group is valid only when every shape
-/// is: each is closed, no two overlap, each sits inside a layer of the
-/// kind above (any field for a plot, any plot for an area), and none
-/// overlaps another layer of the same kind.
+/// A layer is a group of shapes, and every layer must be finished: each
+/// outline closed and sound, with no loose lines or points. A property must
+/// also stand alone: no two of its shapes overlap, and it overlaps no other
+/// property. A zone must stay within the property it belongs to, drawing
+/// in progress included. Inside it, zone shapes may overlap and touch each
+/// other and other zones.
 extension LandStatus on GardenDocument {
   /// Why [layerId] is not valid land, or null when it is. Unfinished
   /// drawing (open outlines, loose lines or points) counts as a problem.
@@ -31,46 +33,42 @@ extension LandStatus on GardenDocument {
   bool isValid(String layerId) => problemOf(layerId) == null;
 
   /// Why the layer does not count as real land yet, or null when it does.
-  ///
-  /// Land counts once it has a closed shape, it breaks no rule, and every
-  /// layer its shapes sit inside counts too.
+  /// Land counts once it has a closed shape and is valid, and a zone only
+  /// while its property counts too.
   String? inactiveReason(String layerId) {
-    final cache = _inactiveCache[this] ??= {};
-    return cache.containsKey(layerId)
-        ? cache[layerId]
-        : cache[layerId] = _findInactiveReason(layerId);
-  }
-
-  String? _findInactiveReason(String layerId) {
-    if (!layers.containsKey(layerId)) return 'Layer not found';
+    final layer = layers[layerId];
+    if (layer == null) return 'Layer not found';
     final problem = problemOf(layerId);
     if (problem != null) return problem;
-    final geometry = geometryOf(layerId);
-    if (!geometry.isClosed) return 'No closed shape yet';
-    for (final shapeId in geometry.closedIds) {
-      final container = containerOf(layerId, shapeId);
-      if (container != null && !isActive(container)) {
-        return '${layers[container]!.name} is not active';
-      }
+    if (!geometryOf(layerId).isClosed) return 'No closed shape yet';
+    final property = layers[layer.parentId];
+    if (property != null && !isActive(property.id)) {
+      return '${property.name} is not active';
     }
     return null;
   }
 
   bool isActive(String layerId) => inactiveReason(layerId) == null;
 
-  /// The layer of the kind above whose land holds [shapeId], or null for
-  /// a field or a shape that is outside every such layer.
-  String? containerOf(String layerId, String shapeId) {
-    final kind = layers[layerId]?.kind.parentKind;
-    if (kind == null) return null;
-    final region = geometryOf(layerId).regionOf(shapeId);
-    if (region == null) return null;
-    for (final id in drawingOrder) {
-      if (layers[id]!.kind != kind) continue;
-      final land = geometryOf(id).region;
-      if (land != null && land.contains(region)) return id;
-    }
-    return null;
+  /// The layer's land area in square metres, or null while it has none.
+  /// A zone's shapes may overlap, so shared land is counted once. On a
+  /// property an overlap is a mistake: each shape counts in full until the
+  /// shapes are combined.
+  double? netAreaOf(String layerId) {
+    final geometry = geometryOf(layerId);
+    return layers[layerId]!.kind.exclusive
+        ? geometry.area
+        : geometry.coveredArea;
+  }
+
+  /// Whether closed shape [shapeId] of zone [layerId] lies outside the
+  /// property the zone belongs to. Always false for a property's shapes.
+  bool isOutsideProperty(String layerId, String shapeId) {
+    final property = layers[layers[layerId]?.parentId];
+    final shape = geometryOf(layerId).regionOf(shapeId);
+    if (property == null || shape == null) return false;
+    final land = geometryOf(property.id).region;
+    return land == null || !land.contains(shape);
   }
 
   /// Layers that are invalid here but were valid (or absent) in [before],
@@ -93,16 +91,14 @@ extension LandStatus on GardenDocument {
 /// life of the document it was worked out for.
 final _problemCache = Expando<Map<String, String?>>('layer problems');
 
-/// The same for whether each layer is active, which the canvas asks for
-/// every layer on every frame.
-final _inactiveCache = Expando<Map<String, String?>>('inactive reasons');
-
 String? _findProblem(GardenDocument document, String layerId) {
   if (!document.layers.containsKey(layerId)) return null;
   final layer = document.layers[layerId]!;
   final geometry = document.geometryOf(layerId);
-  final ownProblem = geometryProblem(geometry);
+  final exclusive = layer.kind.exclusive;
+  final ownProblem = geometryProblem(geometry, shapesMayMeet: !exclusive);
   if (ownProblem != null) return ownProblem;
+  if (!exclusive) return _outsideProblem(document, layer, geometry);
 
   final ids = geometry.closedIds;
   final regions = {for (final id in ids) id: geometry.regionOf(id)!};
@@ -112,19 +108,6 @@ String? _findProblem(GardenDocument document, String layerId) {
         return '${geometry.labelOf(ids[i])} overlaps '
             '${geometry.labelOf(ids[j])}. Union them, or move one';
       }
-    }
-  }
-
-  final parentKind = layer.kind.parentKind;
-  if (parentKind != null) {
-    for (final id in ids) {
-      if (_holderOf(document, parentKind, regions[id]!) == null) {
-        return '${geometry.labelOf(id)} is not inside a '
-            '${parentKind.label.toLowerCase()}';
-      }
-    }
-    if (!_constructionInside(document, parentKind, geometry)) {
-      return 'Drawing is not inside a ${parentKind.label.toLowerCase()}';
     }
   }
 
@@ -142,19 +125,32 @@ String? _findProblem(GardenDocument document, String layerId) {
   return null;
 }
 
-/// Whether unfinished drawing (lines and points not yet part of a closed
-/// shape) lies inside land of [kind], so a stroke outside the field turns
-/// red while it is drawn. Where there is no such land yet, nothing is out.
-bool _constructionInside(
+/// Why a zone's drawing strays outside the property it belongs to, or null
+/// when it all lies within. Unfinished drawing counts too, so a stroke that
+/// leaves the property turns red while it is drawn.
+String? _outsideProblem(
   GardenDocument document,
-  LayerKind kind,
+  Layer zone,
   Geometry geometry,
 ) {
-  final holders = [
-    for (final id in document.drawingOrder)
-      if (document.layers[id]!.kind == kind) ?document.geometryOf(id).region,
-  ];
-  if (holders.isEmpty) return true;
+  final property = document.layers[zone.parentId];
+  if (property == null) return null;
+  for (final id in geometry.closedIds) {
+    if (document.isOutsideProperty(zone.id, id)) {
+      return '${geometry.labelOf(id)} is not inside ${property.name}';
+    }
+  }
+  // Until the property has land, there is nothing for a stroke to leave.
+  final land = document.geometryOf(property.id).region;
+  if (land != null && !_constructionInside(land, geometry)) {
+    return 'Drawing is not inside ${property.name}';
+  }
+  return null;
+}
+
+/// Whether unfinished drawing (lines and points not yet part of a closed
+/// shape) lies inside [land].
+bool _constructionInside(Region land, Geometry geometry) {
   final closed = geometry.closedIds.toSet();
   final covered = geometry.definingPoints(closed);
   final coveredEdges = {
@@ -164,26 +160,12 @@ bool _constructionInside(
   };
   for (final line in geometry.lines.values) {
     if (coveredEdges.contains(line.id)) continue;
-    final edge = line.curve(geometry.points);
-    if (!holders.any((land) => land.containsEdge(edge))) return false;
+    if (!line.edges(geometry.points).every(land.containsEdge)) return false;
     covered.addAll([line.start, line.end]);
   }
   for (final entry in geometry.points.entries) {
     if (covered.contains(entry.key)) continue;
-    if (!holders.any(
-      (land) => land.locate(entry.value) != PointLocation.outside,
-    )) {
-      return false;
-    }
+    if (land.locate(entry.value) == PointLocation.outside) return false;
   }
   return true;
-}
-
-String? _holderOf(GardenDocument document, LayerKind kind, Region region) {
-  for (final id in document.drawingOrder) {
-    if (document.layers[id]!.kind != kind) continue;
-    final land = document.geometryOf(id).region;
-    if (land != null && land.contains(region)) return id;
-  }
-  return null;
 }

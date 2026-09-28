@@ -169,7 +169,7 @@ class Appearance {
     this.gridThickness = 1,
     this.gridColor = 0xFFDCE0D6,
     this.gridOpacity = 1,
-    this.zoomLimits = const ZoomLimits(),
+    this.heightLimits = const HeightLimits(),
     this.historyCapacity = 50,
     this.toastPosition = ToastPosition.bottom,
   });
@@ -181,7 +181,7 @@ class Appearance {
 
   /// 0 (invisible) to 1 (opaque).
   final double gridOpacity;
-  final ZoomLimits zoomLimits;
+  final HeightLimits heightLimits;
 
   /// Undo and Redo steps kept together.
   final int historyCapacity;
@@ -194,7 +194,7 @@ class Appearance {
     gridThickness: gridThickness,
     gridColor: gridColor,
     gridOpacity: gridOpacity,
-    zoomLimits: zoomLimits,
+    heightLimits: heightLimits,
     historyCapacity: historyCapacity,
     toastPosition: position,
   );
@@ -210,11 +210,12 @@ class Appearance {
     if (!(gridOpacity >= 0 && gridOpacity <= 1)) {
       return 'Grid opacity must be between 0 and 100%';
     }
-    if (!(zoomLimits.min > 0 && zoomLimits.min <= 1)) {
-      return 'Minimum zoom must be above 0% and no more than 100%';
+    if (!(heightLimits.lowest > 0)) {
+      return 'Lowest camera height must be more than 0';
     }
-    if (!(zoomLimits.max >= 1) || !zoomLimits.max.isFinite) {
-      return 'Maximum zoom must be at least 100%';
+    if (!(heightLimits.highest > heightLimits.lowest) ||
+        !heightLimits.highest.isFinite) {
+      return 'Highest camera height must be above the lowest';
     }
     if (historyCapacity < 1 || historyCapacity > 1000) {
       return 'Undo steps must be between 1 and 1000';

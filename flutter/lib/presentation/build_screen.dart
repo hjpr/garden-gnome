@@ -703,20 +703,30 @@ class _StatusBar extends StatelessWidget {
             onPressed: () => editor.zoomAt(centre, -1),
           ),
           Tooltip(
-            message: 'Fit drawing',
+            message: 'Camera height. Click to fit drawing',
             child: InkWell(
               onTap: editor.fitDrawing,
               borderRadius: BorderRadius.circular(4),
               child: SizedBox(
-                width: 44,
+                width: 72,
                 child: ListenableBuilder(
                   listenable: editor.viewChanges,
-                  builder: (context, _) => Text(
-                    '${(editor.camera.zoom * 100).round()}%',
-                    textAlign: TextAlign.center,
-                    style: small.copyWith(
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                    ),
+                  builder: (context, _) => Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.photo_camera_outlined,
+                        size: 14,
+                        color: Palette.muted,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        _cameraHeight(editor),
+                        style: small.copyWith(
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -732,6 +742,17 @@ class _StatusBar extends StatelessWidget {
       ),
     );
   }
+}
+
+/// The camera's height above the ground in the user's units, such as
+/// "100 ft" or "7.4 ft".
+String _cameraHeight(EditorController editor) {
+  final units = editor.settings.units;
+  final value = units.fromMetres(editor.camera.height);
+  final text = value
+      .toStringAsFixed(value < 9.95 ? 1 : 0)
+      .replaceFirst(RegExp(r'\.0$'), '');
+  return '$text ${units.symbol}';
 }
 
 /// A bar one grid cell wide, labelled with the length it represents.

@@ -236,7 +236,7 @@ void main() {
 
     test('land drawn over the image is picked before the image', () {
       final (editor, input) = withImage();
-      editor.addLayer(LayerKind.field);
+      editor.addLayer(LayerKind.property);
       editor.selectTool(Tool.polygon);
       editor.selectFunction(ToolFunction.rectangle);
       final image = editor.document.references.single;
@@ -306,7 +306,7 @@ void main() {
     expect(reopened.knownDistance, 7.5);
     expect(reopened.opacity, 0.4);
     expect(reopened.locked, isTrue);
-    expect(documentToJson(editor.document)['schema_version'], 5);
+    expect(documentToJson(editor.document)['schema_version'], schemaVersion);
   });
 
   test('a file whose reference picture is missing is refused', () {
@@ -463,27 +463,6 @@ void main() {
         'Survey',
       ]);
       expect(reopened.imageCounter, 2);
-    });
-
-    test('a version 4 drawing with one image opens as Image 1', () {
-      final (editor, _) = withImage();
-      final image = editor.selectedImage!;
-      final json = documentToJson(editor.document);
-      final old = {...json}
-        ..['schema_version'] = 4
-        ..remove('references')
-        ..remove('image_counter')
-        ..['reference'] = {
-          ...(json['references'] as List).single as Map<String, Object?>,
-          'asset': 'assets/reference.png',
-        }
-        ..remove('id');
-      final opened = documentFromJson(
-        old,
-        readAsset: (name) => name == 'assets/reference.png' ? png : null,
-      );
-      expect(opened.references.single.id, 'image-1');
-      expect(opened.references.single.topLeft, image.topLeft);
     });
   });
 }

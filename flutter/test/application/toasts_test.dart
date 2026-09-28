@@ -8,6 +8,7 @@ import 'package:garden_gnome/application/workspace_settings.dart';
 import 'package:garden_gnome/presentation/panels/layers_panel.dart';
 import 'package:garden_gnome/presentation/panels/preferences_panel.dart';
 import 'package:garden_gnome/presentation/panels/properties_panel.dart';
+import 'package:garden_gnome/presentation/widgets/panel.dart';
 import 'package:garden_gnome/presentation/widgets/toaster.dart';
 
 void main() {
@@ -64,7 +65,7 @@ void main() {
       ..press(const Offset(100, 100), shift: false)
       ..release(const Offset(100, 100));
     final toast = editor.toasts.toasts.single;
-    expect(toast.message, 'Add a Field layer to start drawing.');
+    expect(toast.message, 'Add a Property layer to start drawing.');
     expect(toast.kind, ToastKind.error);
     expect(editor.document.layers, isEmpty);
   });
@@ -85,7 +86,7 @@ void main() {
       ),
     );
     expect(find.text('Nothing selected.'), findsOneWidget);
-    expect(find.text('Add a field to start.'), findsOneWidget);
+    expect(find.text('Add a property to start.'), findsOneWidget);
   });
 
   testWidgets('the toaster sits at the chosen edge with an error icon', (
@@ -101,9 +102,12 @@ void main() {
       ),
     );
     await pump(ToastPosition.bottom);
-    toasts.show('Add a Field layer to start drawing.', kind: ToastKind.error);
+    toasts.show(
+      'Add a Property layer to start drawing.',
+      kind: ToastKind.error,
+    );
     await tester.pumpAndSettle();
-    final text = find.text('Add a Field layer to start drawing.');
+    final text = find.text('Add a Property layer to start drawing.');
     expect(text, findsOneWidget);
     expect(find.byIcon(Icons.error), findsOneWidget);
     final screen = tester.getSize(find.byType(Scaffold));
@@ -140,7 +144,7 @@ void main() {
     for (final label in ['Canvas', 'Style', 'Notifications']) {
       expect(find.text(label), findsOneWidget);
     }
-    expect(find.text('Minimum (%)'), findsOneWidget);
+    expect(find.text('Lowest (ft)'), findsOneWidget);
     expect(find.text('Menu size'), findsOneWidget);
     expect(find.text('Line width (px)'), findsNothing);
 
@@ -182,5 +186,39 @@ void main() {
     await tester.tap(find.text('Apply'));
     await tester.pumpAndSettle();
     expect(editor.settings.appearance.lineWidth, 4);
+  });
+
+  testWidgets('camera heights are typed in the drawing\'s units', (
+    tester,
+  ) async {
+    final editor = EditorController();
+    addTearDown(editor.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 600,
+            height: 360,
+            child: PreferencesBody(editor: editor),
+          ),
+        ),
+      ),
+    );
+    Finder box(String label) => find.descendant(
+      of: find.widgetWithText(PropertyRow, label),
+      matching: find.byType(TextField),
+    );
+    expect(tester.widget<TextField>(box('Lowest (ft)')).controller!.text, '5');
+    expect(
+      tester.widget<TextField>(box('Highest (ft)')).controller!.text,
+      '500',
+    );
+    await tester.enterText(box('Lowest (ft)'), '2');
+    await tester.enterText(box('Highest (ft)'), '2000');
+    await tester.tap(find.text('Apply'));
+    await tester.pumpAndSettle();
+    final limits = editor.settings.appearance.heightLimits;
+    expect(limits.lowest, closeTo(2 * 0.3048, 1e-9));
+    expect(limits.highest, closeTo(2000 * 0.3048, 1e-9));
   });
 }

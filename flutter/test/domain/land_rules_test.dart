@@ -20,13 +20,30 @@ String newId() => 'id-${_next++}';
     parentId: parentId,
     newId: newId,
   );
-  final geometry = withLayer.geometryOf(id).edit((e) {
+  return (addLoop(withLayer, id, corners), id);
+}
+
+/// Draws one more closed loop through [corners] onto an existing layer.
+GardenDocument addLoop(
+  GardenDocument document,
+  String layerId,
+  List<Vec> corners,
+) {
+  final geometry = document.geometryOf(layerId).edit((e) {
     final ids = corners.map(e.addPoint).toList();
     for (var i = 0; i < ids.length; i++) {
       e.connect(ids[i], ids[(i + 1) % ids.length]);
     }
   });
-  return (withLayer.withGeometry(geometry), id);
+  return document.withGeometry(geometry);
+}
+
+/// Draws an open line from [a] to [b] onto an existing layer.
+GardenDocument addLine(GardenDocument document, String layerId, Vec a, Vec b) {
+  final geometry = document
+      .geometryOf(layerId)
+      .edit((e) => e.connect(e.addPoint(a), e.addPoint(b)));
+  return document.withGeometry(geometry);
 }
 
 List<Vec> rect(double x, double y, double w, double h) => [
@@ -40,186 +57,389 @@ void main() {
   final empty = GardenDocument(id: 'doc');
 
   test('new layers get sequential names that are not recycled', () {
-    var (doc, first) = empty.addLayer(LayerKind.field, newId: newId);
-    expect(doc.layers[first]!.name, 'Field 1');
+    var (doc, first) = empty.addLayer(LayerKind.property, newId: newId);
+    expect(doc.layers[first]!.name, 'Property 1');
     doc = doc.removeLayer(first);
-    final (next, second) = doc.addLayer(LayerKind.field, newId: newId);
-    expect(next.layers[second]!.name, 'Field 2');
-  });
-
-  test('fields may share an edge but not overlap', () {
-    var (doc, a) = addLand(empty, LayerKind.field, rect(0, 0, 10, 10));
-    final (touching, b) = addLand(doc, LayerKind.field, rect(10, 0, 10, 10));
-    expect(touching.problemOf(b), isNull);
-
-    final (overlapping, c) = addLand(doc, LayerKind.field, rect(5, 5, 10, 10));
-    expect(overlapping.problemOf(c), contains('Overlaps'));
-    expect(a, isNotEmpty);
-  });
-
-  test('identical sibling regions overlap', () {
-    final (doc, _) = addLand(empty, LayerKind.field, rect(0, 0, 10, 10));
-    final (same, b) = addLand(doc, LayerKind.field, rect(0, 0, 10, 10));
-    expect(same.problemOf(b), contains('Overlaps'));
-  });
-
-  test('one region wholly inside a sibling overlaps', () {
-    final (doc, _) = addLand(empty, LayerKind.field, rect(0, 0, 10, 10));
-    final (inner, b) = addLand(doc, LayerKind.field, rect(2, 2, 3, 3));
-    expect(inner.problemOf(b), contains('Overlaps'));
-  });
-
-  test('a plot must stay inside its field, touching is fine', () {
-    final (doc, field) = addLand(empty, LayerKind.field, rect(0, 0, 10, 10));
-    final (inside, plot) = addLand(
-      doc,
-      LayerKind.plot,
-      rect(0, 0, 5, 5),
-      parentId: field,
-    );
-    expect(inside.problemOf(plot), isNull);
-
-    final (outside, stray) = addLand(
-      doc,
-      LayerKind.plot,
-      rect(8, 8, 5, 5),
-      parentId: field,
-    );
-    expect(outside.problemOf(stray), contains('inside'));
-  });
-
-  test('a line crossing a concave notch is outside the parent', () {
-    final uShape = const [
-      Vec(0, 0),
-      Vec(10, 0),
-      Vec(10, 10),
-      Vec(7, 10),
-      Vec(7, 3),
-      Vec(3, 3),
-      Vec(3, 10),
-      Vec(0, 10),
-    ];
-    final (doc, field) = addLand(empty, LayerKind.field, uShape);
-    final (withPlot, plot) = doc.addLayer(
-      LayerKind.plot,
-      parentId: field,
+    final (next, second) = doc.addLayer(LayerKind.property, newId: newId);
+    expect(next.layers[second]!.name, 'Property 2');
+    final (withZone, zone) = next.addLayer(
+      LayerKind.zone,
+      parentId: second,
       newId: newId,
     );
-    final geometry = withPlot.geometryOf(plot).edit((e) {
-      e.connect(e.addPoint(const Vec(1, 8)), e.addPoint(const Vec(9, 8)));
+    expect(withZone.layers[zone]!.name, 'Zone 1');
+    expect(withZone.layers[zone]!.parentId, second);
+  });
+
+  test('a zone must be listed under a property', () {
+    expect(
+      () => empty.addLayer(LayerKind.zone, newId: newId),
+      throwsArgumentError,
+    );
+  });
+
+  group('properties', () {
+    test('may share an edge but not overlap', () {
+      final (doc, _) = addLand(empty, LayerKind.property, rect(0, 0, 10, 10));
+      final (touching, b) = addLand(
+        doc,
+        LayerKind.property,
+        rect(10, 0, 10, 10),
+      );
+      expect(touching.problemOf(b), isNull);
+
+      final (overlapping, c) = addLand(
+        doc,
+        LayerKind.property,
+        rect(5, 5, 10, 10),
+      );
+      expect(overlapping.problemOf(c), contains('Overlaps'));
     });
-    expect(withPlot.withGeometry(geometry).problemOf(plot), contains('inside'));
+
+    test('identical properties overlap', () {
+      final (doc, _) = addLand(empty, LayerKind.property, rect(0, 0, 10, 10));
+      final (same, b) = addLand(doc, LayerKind.property, rect(0, 0, 10, 10));
+      expect(same.problemOf(b), contains('Overlaps'));
+    });
+
+    test('one property wholly inside another overlaps', () {
+      final (doc, _) = addLand(empty, LayerKind.property, rect(0, 0, 10, 10));
+      final (inner, b) = addLand(doc, LayerKind.property, rect(2, 2, 3, 3));
+      expect(inner.problemOf(b), contains('Overlaps'));
+    });
+
+    test('two shapes of one property may not overlap', () {
+      final (doc, property) = addLand(
+        empty,
+        LayerKind.property,
+        rect(0, 0, 10, 10),
+      );
+      final overlapping = addLoop(doc, property, rect(5, 5, 10, 10));
+      expect(overlapping.problemOf(property), contains('overlaps'));
+      // Each shape counts in full until they are combined.
+      expect(overlapping.netAreaOf(property), closeTo(200, 1e-6));
+      expect(overlapping.isActive(property), isFalse);
+    });
+
+    test('a loose line may not cross a finished property shape', () {
+      final (doc, property) = addLand(
+        empty,
+        LayerKind.property,
+        rect(0, 0, 10, 10),
+      );
+      final crossing = addLine(
+        doc,
+        property,
+        const Vec(5, 5),
+        const Vec(15, 5),
+      );
+      expect(crossing.ruleProblemOf(property), contains('cross'));
+    });
+
+    test('crossing lines make a layer invalid instead of being refused', () {
+      final (doc, property) = addLand(empty, LayerKind.property, const []);
+      final crossed = doc.withGeometry(
+        doc.geometryOf(property).edit((e) {
+          e.connect(e.addPoint(const Vec(0, 0)), e.addPoint(const Vec(10, 10)));
+          e.connect(e.addPoint(const Vec(0, 10)), e.addPoint(const Vec(10, 0)));
+        }),
+      );
+      expect(crossed.problemOf(property), contains('cross'));
+    });
+
+    test('only layers that newly broke a rule are reported', () {
+      var (doc, a) = addLand(empty, LayerKind.property, rect(0, 0, 10, 10));
+      (doc, _) = addLand(doc, LayerKind.property, rect(0, 40, 10, 10));
+      final (apart, moving) = addLand(
+        doc,
+        LayerKind.property,
+        rect(20, 0, 10, 10),
+      );
+      final geometry = apart.geometryOf(moving);
+      final moved = apart.withGeometry(
+        geometry.edit((e) {
+          for (final entry in geometry.points.entries) {
+            e.movePoint(entry.key, entry.value - const Vec(15, 0));
+          }
+        }),
+      );
+      // Both properties in the overlap break the rule; the one far away
+      // does not.
+      expect(moved.newProblemsSince(apart).keys, [a, moving]);
+      expect(moved.newProblemsSince(moved), isEmpty);
+    });
   });
 
-  test('moving a parent must keep its children inside', () {
-    final (doc, field) = addLand(empty, LayerKind.field, rect(0, 0, 10, 10));
-    final (withPlot, plot) = addLand(
-      doc,
-      LayerKind.plot,
-      rect(1, 1, 8, 8),
-      parentId: field,
-    );
-    final shrunk = withPlot.withGeometry(
-      withPlot
-          .geometryOf(field)
-          .edit((e) => e.movePoint('point-3', const Vec(5, 5))),
-    );
-    expect(shrunk.problemOf(field), isNull, reason: 'the field itself is fine');
-    expect(shrunk.problemOf(plot), contains('inside'));
-    expect(shrunk.isActive(plot), isFalse);
+  group('zones', () {
+    late GardenDocument doc;
+    late String property;
+    setUp(() {
+      (doc, property) = addLand(empty, LayerKind.property, rect(0, 0, 100, 50));
+    });
+
+    test('must stay inside their property; touching its edge is fine', () {
+      for (final corners in [rect(10, 10, 10, 10), rect(0, 0, 5, 5)]) {
+        final (withZone, zone) = addLand(
+          doc,
+          LayerKind.zone,
+          corners,
+          parentId: property,
+        );
+        expect(withZone.problemOf(zone), isNull);
+        expect(withZone.isActive(zone), isTrue);
+      }
+      for (final corners in [rect(90, 10, 20, 10), rect(200, 200, 10, 10)]) {
+        final (withZone, zone) = addLand(
+          doc,
+          LayerKind.zone,
+          corners,
+          parentId: property,
+        );
+        expect(withZone.problemOf(zone), 'Shape 1 is not inside Property 1');
+        expect(withZone.isActive(zone), isFalse);
+      }
+    });
+
+    test('must sit inside their own property, not a neighbour', () {
+      final (withNeighbour, _) = addLand(
+        doc,
+        LayerKind.property,
+        rect(100, 0, 50, 50),
+      );
+      final (withZone, zone) = addLand(
+        withNeighbour,
+        LayerKind.zone,
+        rect(110, 10, 10, 10),
+        parentId: property,
+      );
+      expect(withZone.problemOf(zone), contains('not inside Property 1'));
+    });
+
+    test('turn red as soon as a stroke leaves the property', () {
+      final (withZone, zone) = doc.addLayer(
+        LayerKind.zone,
+        parentId: property,
+        newId: newId,
+      );
+      final inside = addLine(withZone, zone, const Vec(5, 5), const Vec(50, 5));
+      expect(inside.ruleProblemOf(zone), isNull);
+      final leaving = addLine(
+        withZone,
+        zone,
+        const Vec(5, 5),
+        const Vec(150, 5),
+      );
+      expect(leaving.ruleProblemOf(zone), 'Drawing is not inside Property 1');
+      expect(leaving.newProblemsSince(withZone).keys, [zone]);
+    });
+
+    test('a line crossing a concave notch is outside the property', () {
+      final (uShaped, owner) = addLand(empty, LayerKind.property, const [
+        Vec(0, 0),
+        Vec(10, 0),
+        Vec(10, 10),
+        Vec(7, 10),
+        Vec(7, 3),
+        Vec(3, 3),
+        Vec(3, 10),
+        Vec(0, 10),
+      ]);
+      final (withZone, zone) = uShaped.addLayer(
+        LayerKind.zone,
+        parentId: owner,
+        newId: newId,
+      );
+      final across = addLine(withZone, zone, const Vec(1, 8), const Vec(9, 8));
+      expect(across.problemOf(zone), contains('not inside'));
+    });
+
+    test('may overlap and touch other zones', () {
+      var (next, a) = addLand(
+        doc,
+        LayerKind.zone,
+        rect(10, 10, 20, 20),
+        parentId: property,
+      );
+      final String b, c, d;
+      (next, b) = addLand(
+        next,
+        LayerKind.zone,
+        rect(20, 20, 20, 20),
+        parentId: property,
+      );
+      (next, c) = addLand(
+        next,
+        LayerKind.zone,
+        rect(10, 10, 20, 20),
+        parentId: property,
+      );
+      (next, d) = addLand(
+        next,
+        LayerKind.zone,
+        rect(30, 10, 5, 5),
+        parentId: property,
+      );
+      for (final id in [a, b, c, d]) {
+        expect(next.problemOf(id), isNull, reason: next.layers[id]!.name);
+        expect(next.isActive(id), isTrue);
+      }
+      expect(next.problemOf(property), isNull);
+    });
+
+    test('may have shapes that overlap and touch each other', () {
+      var (next, zone) = addLand(
+        doc,
+        LayerKind.zone,
+        rect(0, 0, 10, 10),
+        parentId: property,
+      );
+      next = addLoop(next, zone, rect(5, 5, 10, 10));
+      next = addLoop(next, zone, rect(15, 0, 5, 5));
+      next = addLoop(next, zone, rect(2, 2, 2, 2));
+      expect(next.problemOf(zone), isNull);
+      expect(next.isActive(zone), isTrue);
+      // Shared land is counted once: 100 + 100 - 25 where the first two
+      // overlap, + 25 for the square touching them. The 2 m square lies
+      // inside the first. Shape by shape, the sum would be 229.
+      expect(next.netAreaOf(zone), closeTo(200, 1e-6));
+      expect(next.geometryOf(zone).area, closeTo(229, 1e-6));
+    });
+
+    test('may have a corner resting on another of its shapes', () {
+      var (next, zone) = addLand(
+        doc,
+        LayerKind.zone,
+        rect(0, 0, 10, 10),
+        parentId: property,
+      );
+      next = addLoop(next, zone, const [Vec(10, 10), Vec(20, 10), Vec(20, 20)]);
+      next = addLoop(next, zone, const [Vec(5, 10), Vec(8, 15), Vec(2, 15)]);
+      expect(next.problemOf(zone), isNull);
+    });
+
+    test('may draw a new outline across a finished shape', () {
+      final (withZone, zone) = addLand(
+        doc,
+        LayerKind.zone,
+        rect(0, 0, 10, 10),
+        parentId: property,
+      );
+      final crossing = addLine(
+        withZone,
+        zone,
+        const Vec(5, 5),
+        const Vec(15, 5),
+      );
+      expect(crossing.ruleProblemOf(zone), isNull);
+      expect(crossing.newProblemsSince(withZone), isEmpty);
+      // Unfinished until the new outline closes.
+      expect(crossing.problemOf(zone), isNotNull);
+      expect(crossing.isActive(zone), isFalse);
+    });
+
+    test('are invalid while drawing is unfinished', () {
+      final (withZone, zone) = addLand(
+        doc,
+        LayerKind.zone,
+        rect(0, 0, 10, 10),
+        parentId: property,
+      );
+      final loosePoint = withZone.withGeometry(
+        withZone.geometryOf(zone).edit((e) => e.addPoint(const Vec(50, 5))),
+      );
+      expect(loosePoint.problemOf(zone), contains('point'));
+      final opened = withZone.withGeometry(
+        withZone.geometryOf(zone).edit((e) => e.delete(['line-1'])),
+      );
+      expect(opened.problemOf(zone), contains('not closed'));
+      expect(opened.isActive(zone), isFalse);
+    });
+
+    test('still may not have an outline that crosses itself', () {
+      final (withZone, zone) = doc.addLayer(
+        LayerKind.zone,
+        parentId: property,
+        newId: newId,
+      );
+      final bowtie = addLoop(withZone, zone, const [
+        Vec(0, 0),
+        Vec(10, 10),
+        Vec(10, 0),
+        Vec(0, 10),
+      ]);
+      expect(bowtie.problemOf(zone), contains('cross'));
+    });
+
+    test('must stay inside when their property changes', () {
+      final (withZone, zone) = addLand(
+        doc,
+        LayerKind.zone,
+        rect(10, 10, 10, 10),
+        parentId: property,
+      );
+      final shrunk = withZone.withGeometry(
+        withZone
+            .geometryOf(property)
+            .edit((e) => e.movePoint('point-3', const Vec(5, 5))),
+      );
+      expect(shrunk.problemOf(property), isNull, reason: 'it is fine itself');
+      expect(shrunk.problemOf(zone), contains('not inside'));
+      expect(shrunk.newProblemsSince(withZone).keys, [zone]);
+
+      final opened = withZone.withGeometry(
+        withZone.geometryOf(property).edit((e) => e.delete(['line-1'])),
+      );
+      expect(opened.isActive(property), isFalse);
+      expect(opened.isActive(zone), isFalse);
+      expect(opened.geometryOf(zone).isClosed, isTrue);
+    });
+
+    test('are inactive while their property is', () {
+      final (withZone, zone) = addLand(
+        doc,
+        LayerKind.zone,
+        rect(10, 10, 10, 10),
+        parentId: property,
+      );
+      final (overlapped, _) = addLand(
+        withZone,
+        LayerKind.property,
+        rect(90, 0, 20, 20),
+      );
+      expect(overlapped.problemOf(property), contains('Overlaps'));
+      expect(overlapped.problemOf(zone), isNull);
+      expect(overlapped.inactiveReason(zone), 'Property 1 is not active');
+    });
   });
 
-  test('children become inactive when their parent opens', () {
-    final (doc, field) = addLand(empty, LayerKind.field, rect(0, 0, 10, 10));
-    final (withPlot, plot) = addLand(
+  test('removing a property removes its zones', () {
+    final (doc, property) = addLand(
+      empty,
+      LayerKind.property,
+      rect(0, 0, 10, 10),
+    );
+    final (withZone, _) = addLand(
       doc,
-      LayerKind.plot,
+      LayerKind.zone,
       rect(1, 1, 5, 5),
-      parentId: field,
+      parentId: property,
     );
-    expect(withPlot.isActive(plot), isTrue);
-    final opened = withPlot.withGeometry(
-      withPlot.geometryOf(field).edit((e) => e.delete(['line-1'])),
-    );
-    expect(opened.isActive(field), isFalse);
-    expect(opened.isActive(plot), isFalse);
-    expect(opened.geometryOf(plot).isClosed, isTrue);
-  });
-
-  test('removing a field removes its plots and areas', () {
-    final (doc, field) = addLand(empty, LayerKind.field, rect(0, 0, 10, 10));
-    final (withPlot, plot) = addLand(
-      doc,
-      LayerKind.plot,
-      rect(1, 1, 5, 5),
-      parentId: field,
-    );
-    final (withArea, _) = addLand(
-      withPlot,
-      LayerKind.area,
-      rect(2, 2, 2, 2),
-      parentId: plot,
-    );
-    final removed = withArea.removeLayer(field);
+    final removed = withZone.removeLayer(property);
     expect(removed.layers, isEmpty);
     expect(removed.geometries, isEmpty);
-    expect(removed.fields, isEmpty);
+    expect(removed.propertyIds, isEmpty);
   });
 
   test('counters merge upward and never go back', () {
-    final (doc, field) = addLand(empty, LayerKind.field, rect(0, 0, 10, 10));
+    final (doc, property) = addLand(
+      empty,
+      LayerKind.property,
+      rect(0, 0, 10, 10),
+    );
     final earlier = doc.withGeometry(
-      doc.geometryOf(field).copyWith(counters: const IdCounters()),
+      doc.geometryOf(property).copyWith(counters: const IdCounters()),
     );
     final merged = earlier.withCountersFrom(doc);
-    expect(merged.geometryOf(field).counters.points, 4);
-  });
-
-  test('a plot outside its field is kept but invalid and inactive', () {
-    final (doc, field) = addLand(empty, LayerKind.field, rect(0, 0, 10, 10));
-    final (outside, plot) = addLand(
-      doc,
-      LayerKind.plot,
-      rect(8, 8, 5, 5),
-      parentId: field,
-    );
-    expect(outside.geometryOf(plot).isClosed, isTrue);
-    expect(outside.isValid(plot), isFalse);
-    expect(outside.isActive(plot), isFalse);
-    expect(outside.inactiveReason(plot), contains('not inside a field'));
-    expect(outside.isActive(field), isTrue, reason: 'the field is unaffected');
-  });
-
-  test('only layers that newly broke a rule are reported', () {
-    final (doc, field) = addLand(empty, LayerKind.field, rect(0, 0, 10, 10));
-    final (inside, plot) = addLand(
-      doc,
-      LayerKind.plot,
-      rect(1, 1, 3, 3),
-      parentId: field,
-    );
-    final moved = inside.withGeometry(
-      inside.geometryOf(plot).edit((e) {
-        for (final id in inside.geometryOf(plot).points.keys) {
-          e.movePoint(
-            id,
-            inside.geometryOf(plot).points[id]! + const Vec(20, 0),
-          );
-        }
-      }),
-    );
-    expect(moved.newProblemsSince(inside).keys, [plot]);
-    expect(moved.newProblemsSince(moved), isEmpty);
-  });
-
-  test('crossing lines make a layer invalid instead of being refused', () {
-    final (doc, field) = addLand(empty, LayerKind.field, const []);
-    final crossed = doc.withGeometry(
-      doc.geometryOf(field).edit((e) {
-        e.connect(e.addPoint(const Vec(0, 0)), e.addPoint(const Vec(10, 10)));
-        e.connect(e.addPoint(const Vec(0, 10)), e.addPoint(const Vec(10, 0)));
-      }),
-    );
-    expect(crossed.problemOf(field), contains('cross'));
+    expect(merged.geometryOf(property).counters.points, 4);
   });
 }

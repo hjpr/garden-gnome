@@ -62,7 +62,7 @@ List<Hit> hitsAt(Geometry geometry, Camera camera, Offset screen) {
     if (d <= PointerReach.point) hits.add(Hit(HitKind.point, entry.key, d));
   }
   for (final line in geometry.lines.values) {
-    final d = _pixels(camera, line.curve(geometry.points).distanceTo(world));
+    final d = _pixels(camera, line.distanceTo(geometry.points, world));
     if (d <= PointerReach.line) hits.add(Hit(HitKind.line, line.id, d));
   }
   for (final circle in geometry.circles.values) {
@@ -94,15 +94,18 @@ List<Hit> hitsAt(Geometry geometry, Camera camera, Offset screen) {
 
 /// Everything under [screen] on every layer, best match first.
 ///
-/// Points rank above lines, and lines above insides. Within a kind the
-/// innermost layer wins (an area before its plot, a plot before its
-/// field), so a click inside nested land picks the smallest piece. After
-/// that, the nearest wins.
+/// Points rank above lines, and lines above insides. Within a kind a zone
+/// wins over its property, so a click inside a zone picks the zone. After
+/// that the nearest wins, and then the layer drawn on top, so a click
+/// where zones overlap picks the later one.
 List<LayerHit> hitsAcrossLayers(
   GardenDocument document,
   Camera camera,
   Offset screen,
 ) {
+  final order = {
+    for (final (index, id) in document.drawingOrder.indexed) id: index,
+  };
   final hits = [
     for (final layerId in document.drawingOrder)
       for (final hit in hitsAt(document.geometryOf(layerId), camera, screen))
@@ -114,7 +117,9 @@ List<LayerHit> hitsAcrossLayers(
     if (byKind != 0) return byKind;
     final byDepth = depth(b).compareTo(depth(a));
     if (byDepth != 0) return byDepth;
-    return a.hit.distance.compareTo(b.hit.distance);
+    final byDistance = a.hit.distance.compareTo(b.hit.distance);
+    if (byDistance != 0) return byDistance;
+    return order[b.layerId]!.compareTo(order[a.layerId]!);
   });
   return hits;
 }

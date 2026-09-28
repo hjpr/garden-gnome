@@ -3,6 +3,11 @@ part of 'canvas_input.dart';
 /// Multi-click construction. Builds through the controller so hover and
 /// click share the commit rules.
 extension _ConstructionInput on CanvasInput {
+  /// Both Arc functions take three clicks; only their order differs.
+  /// 3-point: start, a point on the curve, end. Start-end: start, end,
+  /// then the arc's middle, which sets the bend.
+  bool get _endSecond => editor.function == ToolFunction.startEndArc;
+
   void _arcClick(String layerId, Geometry geometry, Offset screen) {
     final points = editor.arcPoints;
     if (points.isEmpty) {
@@ -10,21 +15,20 @@ extension _ConstructionInput on CanvasInput {
       return editor.showNotice(null);
     }
     if (points.length == 1) {
-      final through = _snapped(screen).position;
-      if (through.distanceTo(points.first.position) <= tolerance) {
+      final second = _endSecond
+          ? _arcEndpointAt(geometry, screen, from: points.first.pointId)
+          : ArcPoint(_snapped(screen).position);
+      if (second.position.distanceTo(points.first.position) <= tolerance) {
         return editor.showNotice(
-          'Choose a different point for the Arc to pass through',
+          _endSecond
+              ? 'Choose a different point for the end of the Arc'
+              : 'Choose a different point for the Arc to pass through',
         );
       }
-      editor.addArcPoint(ArcPoint(through));
+      editor.addArcPoint(second);
       return editor.showNotice(null);
     }
-    final end = _arcEndpointAt(geometry, screen, from: points.first.pointId);
-    final curve = CurveEdge.through(
-      points[0].position,
-      points[1].position,
-      end.position,
-    );
+    final (end, curve) = _arcFromThirdClick(geometry, screen);
     if (curve == null) {
       return editor.showNotice(
         'An Arc needs three distinct points that are not on one straight line',
@@ -37,6 +41,37 @@ extension _ConstructionInput on CanvasInput {
     if (next == null) return editor.showNotice(problem);
     editor.commit('Draw Arc', next);
     editor.selectItem(lineId);
+  }
+
+  /// The end and the curve given two clicks so far and the pointer as the
+  /// third. The curve is null when the three points make no circle.
+  (ArcPoint end, CurveEdge? curve) _arcFromThirdClick(
+    Geometry geometry,
+    Offset screen,
+  ) {
+    final points = editor.arcPoints;
+    final start = points[0];
+    if (_endSecond) {
+      final end = points[1];
+      final middle = _arcMiddle(start.position, end.position, screen);
+      return (end, CurveEdge.through(start.position, middle, end.position));
+    }
+    final end = _arcEndpointAt(geometry, screen, from: start.pointId);
+    return (
+      end,
+      CurveEdge.through(start.position, points[1].position, end.position),
+    );
+  }
+
+  /// Start-end: the middle of the arc, kept on the line square to the
+  /// chord through its centre so the arc stays symmetric. Only the
+  /// pointer's distance from the chord counts; it sets the bend.
+  Vec _arcMiddle(Vec start, Vec end, Offset screen) {
+    final chord = end - start;
+    final centre = (start + end) / 2;
+    final square = Vec(-chord.y, chord.x) / chord.length;
+    final height = (_snapped(screen).position - centre).dot(square);
+    return centre + square * height;
   }
 
   /// Arc endpoints can close a two-edge circular segment. Unlike straight
@@ -74,29 +109,38 @@ extension _ConstructionInput on CanvasInput {
     }
     final snap = _snapped(screen);
     if (points.length == 1) {
+      if (!_endSecond) {
+        return ArcPreview(
+          start: points.first.position,
+          through: snap.position,
+          valid: true,
+          guides: snap.guides,
+        );
+      }
+      final end = _arcEndpointAt(geometry, screen, from: points.first.pointId);
       return ArcPreview(
         start: points.first.position,
-        through: snap.position,
-        valid: true,
-        guides: snap.guides,
+        end: end.position,
+        joinTarget: end.pointId,
+        valid: end.position.distanceTo(points.first.position) > tolerance,
+        guides: end.pointId == null ? snap.guides : SnapGuides.none,
       );
     }
-    final end = _arcEndpointAt(geometry, screen, from: points.first.pointId);
-    final curve = CurveEdge.through(
-      points[0].position,
-      points[1].position,
-      end.position,
-    );
+    final (end, curve) = _arcFromThirdClick(geometry, screen);
+    // Start-end's third click is a free point on the curve, never a join.
+    final joins = !_endSecond && end.pointId != null;
     return ArcPreview(
       start: points[0].position,
-      through: points[1].position,
+      through: _endSecond
+          ? _arcMiddle(points[0].position, end.position, screen)
+          : points[1].position,
       end: end.position,
       curve: curve,
-      joinTarget: end.pointId,
+      joinTarget: _endSecond ? null : end.pointId,
       valid:
           curve != null &&
           _staysValid(layerId, (e) => _addArc(e, points.first, end, curve)),
-      guides: end.pointId == null ? snap.guides : SnapGuides.none,
+      guides: joins ? SnapGuides.none : snap.guides,
     );
   }
 

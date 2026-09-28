@@ -8,8 +8,8 @@ String toolPrompt(EditorController editor) {
   if (editor.tool == Tool.select) return '';
   if (editor.tool == Tool.reference) return _referencePrompt(editor);
   if (editor.selectedLayer == null) {
-    return editor.document.fields.isEmpty
-        ? 'Add a field in Layers to start drawing'
+    return editor.document.propertyIds.isEmpty
+        ? 'Add a property in Layers to start drawing'
         : 'Select a layer in Layers to draw on it';
   }
 
@@ -25,8 +25,16 @@ String toolPrompt(EditorController editor) {
       'Click to start a line, or click an open end point to continue one',
     (Tool.line, ToolFunction.draw) =>
       'Click the next corner. Click a ringed point to join it. Enter or Esc to finish',
+    (Tool.line, ToolFunction.curve) when editor.lineAnchor == null =>
+      'Click for a corner or drag to pull out handles. Click an open end point to continue a line',
+    (Tool.line, ToolFunction.curve) =>
+      'Click for a corner or drag to curve. Click a ringed point to join it. Enter or Esc to finish',
     (Tool.arc, _) when editor.arcPoints.isEmpty =>
       'Click the start of the Arc. Open end points can be reused',
+    (Tool.arc, ToolFunction.startEndArc) when editor.arcPoints.length == 1 =>
+      'Click the end of the Arc. Esc to cancel',
+    (Tool.arc, ToolFunction.startEndArc) =>
+      'Click to set the middle of the Arc. Esc to cancel',
     (Tool.arc, _) when editor.arcPoints.length == 1 =>
       'Click a point the Arc passes through. Esc to cancel',
     (Tool.arc, _) => 'Click the end of the Arc. Esc to cancel',
@@ -39,10 +47,6 @@ String toolPrompt(EditorController editor) {
       'Click one corner of the rectangle',
     (Tool.polygon, ToolFunction.rectangle) =>
       'Click the opposite corner. Esc to cancel',
-    (Tool.line, ToolFunction.join) when editor.joinStart == null =>
-      'Click the first of two points to join',
-    (Tool.line, ToolFunction.join) =>
-      'Click the next point to join. Esc to finish',
     (Tool.circle, ToolFunction.centerCircle) when editor.circleStart == null =>
       'Click the center of the circle, or a ringed point to use it',
     (Tool.circle, ToolFunction.centerCircle) =>
@@ -60,8 +64,6 @@ String toolPrompt(EditorController editor) {
       'Click inside a shape to remove the layer\'s pattern',
     (Tool.pattern, final function) =>
       'Click inside a shape to fill the layer with ${function.label}',
-    (Tool.line, ToolFunction.delete) =>
-      'Click a line to delete it. Its points stay',
     _ => '',
   };
 }

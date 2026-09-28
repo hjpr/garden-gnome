@@ -5,7 +5,8 @@ import 'package:garden_gnome/application/previews.dart';
 import 'package:garden_gnome/application/tools.dart';
 import 'package:garden_gnome/domain/layer.dart';
 
-/// At 100% zoom with the camera at the origin, one metre is 30 pixels.
+/// With the camera at its starting height over the origin, one metre is 30
+/// pixels.
 Offset at(double x, double y) => Offset(x * 30, y * 30);
 
 void click(CanvasInput input, Offset where) {
@@ -25,10 +26,10 @@ void dragThrough(CanvasInput input, List<Offset> path, {bool shift = false}) {
   input.release(path.last);
 }
 
-/// A field with two 2 × 2 m rectangles, at (2, 2)–(4, 4) and
+/// A property with two 2 × 2 m rectangles, at (2, 2)–(4, 4) and
 /// (8, 2)–(10, 4), and the Select tool chosen.
 (EditorController, CanvasInput, String) twoRectangles() {
-  final editor = EditorController()..addLayer(LayerKind.field);
+  final editor = EditorController()..addLayer(LayerKind.property);
   addTearDown(editor.dispose);
   final input = CanvasInput(editor);
   final layer = editor.selectedLayerId!;
@@ -141,7 +142,7 @@ void main() {
   });
 
   test('a marquee picks loose points and lines, not the corners of shapes', () {
-    final editor = EditorController()..addLayer(LayerKind.field);
+    final editor = EditorController()..addLayer(LayerKind.property);
     addTearDown(editor.dispose);
     final input = CanvasInput(editor);
     final layer = editor.selectedLayerId!;
@@ -160,11 +161,11 @@ void main() {
     });
   });
 
-  test('on nested land the innermost layer is picked', () {
-    final (editor, input, field) = twoRectangles();
-    editor.addLayer(LayerKind.plot);
-    final plot = editor.selectedLayerId!;
-    expect(plot, isNot(field));
+  test('over a property, the zone is picked', () {
+    final (editor, input, property) = twoRectangles();
+    editor.addLayer(LayerKind.zone);
+    final zone = editor.selectedLayerId!;
+    expect(zone, isNot(property));
     editor.selectTool(Tool.polygon);
     editor.selectFunction(ToolFunction.rectangle);
     click(input, at(2.5, 2.5));
@@ -172,12 +173,14 @@ void main() {
     editor.selectTool(Tool.select);
     editor.selectLayer(null);
     dragThrough(input, [at(0, 0), at(1, 1), at(3, 3)]);
-    expect(editor.selectedLayerId, plot);
-    expect(editor.selection, shapes(editor, plot));
-    // With the field chosen first, the marquee picks from the field.
-    editor.selectLayer(field);
+    expect(editor.selectedLayerId, zone);
+    expect(editor.selection, shapes(editor, zone));
+    // With the property chosen first, the marquee picks from the property.
+    editor.selectLayer(property);
     dragThrough(input, [at(0, 0), at(1, 1), at(3, 3)]);
-    expect(editor.selectedLayerId, field);
-    expect(editor.selection, {editor.document.geometryOf(field).stack.first});
+    expect(editor.selectedLayerId, property);
+    expect(editor.selection, {
+      editor.document.geometryOf(property).stack.first,
+    });
   });
 }

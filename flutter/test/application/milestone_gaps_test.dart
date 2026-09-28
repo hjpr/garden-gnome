@@ -15,8 +15,8 @@ void click(CanvasInput input, double x, double y) {
   input.release(screen);
 }
 
-(EditorController, CanvasInput, String) field() {
-  final editor = EditorController()..addLayer(LayerKind.field);
+(EditorController, CanvasInput, String) property() {
+  final editor = EditorController()..addLayer(LayerKind.property);
   addTearDown(editor.dispose);
   return (editor, CanvasInput(editor), editor.selectedLayerId!);
 }
@@ -24,29 +24,29 @@ void click(CanvasInput input, double x, double y) {
 void main() {
   group('soil sample', () {
     test('each value can be set or cleared, one Undo step each, and saved', () {
-      final (editor, _, layer) = field();
-      var p = editor.document.layers[layer]!.properties as FieldProperties;
+      final (editor, _, layer) = property();
+      var p = editor.document.layers[layer]!.properties as PropertyProperties;
       editor.updateProperties(
         layer,
         p.copyWith(soil: p.soil.withValue('ph', 6.4)),
       );
-      p = editor.document.layers[layer]!.properties as FieldProperties;
+      p = editor.document.layers[layer]!.properties as PropertyProperties;
       editor.updateProperties(
         layer,
         p.copyWith(soil: p.soil.withValue('organicMatter', 3.2)),
       );
-      p = editor.document.layers[layer]!.properties as FieldProperties;
+      p = editor.document.layers[layer]!.properties as PropertyProperties;
       expect(p.soil.ph, 6.4);
       expect(p.soil.organicMatter, 3.2);
       expect(p.soil.potassium, isNull);
 
       final reopened = decodeGgnome(encodeGgnome(editor.document));
-      final saved = reopened.layers[layer]!.properties as FieldProperties;
+      final saved = reopened.layers[layer]!.properties as PropertyProperties;
       expect(saved.soil.ph, 6.4);
       expect(saved.soil.organicMatter, 3.2);
 
       editor.undo();
-      p = editor.document.layers[layer]!.properties as FieldProperties;
+      p = editor.document.layers[layer]!.properties as PropertyProperties;
       expect(p.soil.organicMatter, isNull);
       expect(p.soil.ph, 6.4);
       expect(
@@ -69,7 +69,7 @@ void main() {
 
   group('point spacing', () {
     test('a new point too close to another is refused with a reason', () {
-      final (editor, input, layer) = field();
+      final (editor, input, layer) = property();
       editor.selectTool(Tool.point);
       click(input, 5, 5);
       final before = editor.document;

@@ -77,7 +77,7 @@ void main() {
       isFalse,
       reason: 'clearing the layer does not',
     );
-    editor.addLayer(LayerKind.field);
+    editor.addLayer(LayerKind.property);
     expect(editor.propertiesOpen, isTrue);
   });
 

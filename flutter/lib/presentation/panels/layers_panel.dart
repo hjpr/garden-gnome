@@ -9,8 +9,8 @@ import '../dialogs.dart';
 import '../theme.dart';
 import '../widgets/panel.dart';
 
-/// Each field with its plots and areas listed under it. A layer expands
-/// to show its shapes, top of the stack first.
+/// Each property with its zones listed under it. A layer expands to show
+/// its shapes, top of the stack first.
 class LayersBody extends StatefulWidget {
   const LayersBody({super.key, required this.editor});
 
@@ -48,10 +48,13 @@ class _LayersBodyState extends State<LayersBody> {
                   _ImageRow(editor: editor, imageId: image.id),
             ],
           );
-    if (document.fields.isEmpty) {
+    if (document.propertyIds.isEmpty) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [const EmptyPanelText('Add a field to start.'), ?reference],
+        children: [
+          const EmptyPanelText('Add a property to start.'),
+          ?reference,
+        ],
       );
     }
     return Column(
@@ -364,7 +367,7 @@ class _LayerRowState extends State<_LayerRow> {
         !editor.referenceLayerSelected;
     final active = editor.document.isActive(layer.id);
     final problem = editor.document.problemOf(layer.id);
-    final depth = layer.kind == LayerKind.field ? 0 : 1;
+    final depth = layer.kind == LayerKind.property ? 0 : 1;
     final shapeCount = editor.document.geometryOf(layer.id).stack.length;
     // Locked by a layer around this one: shown, but toggled on that layer.
     final lockedAbove = !layer.locked && editor.document.isLocked(layer.id);
@@ -540,21 +543,19 @@ class _ShapeRowState extends State<_ShapeRow> {
     final id = widget.shapeId;
     final label = geometry.labelOf(id);
     final closed = geometry.regionOf(id) != null;
-    final container = document.containerOf(layer.id, id);
+    final outside = document.isOutsideProperty(layer.id, id);
     final where = !closed
         ? 'not closed'
-        : layer.kind == LayerKind.field
-        ? null
-        : container == null
-        ? 'outside every ${layer.kind.parentKind!.label.toLowerCase()}'
-        : 'in ${document.layers[container]!.name}';
+        : outside
+        ? 'outside ${document.layers[layer.parentId]!.name}'
+        : null;
     final stack = geometry.stack;
     final index = stack.indexOf(id);
     final selected =
         editor.selectedLayerId == layer.id && editor.selection.contains(id);
     final editable = editor.lockNotice(layer.id) == null;
     final showActions = _hovered || selected;
-    final problem = !closed || (where != null && where.startsWith('outside'));
+
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
@@ -575,13 +576,15 @@ class _ShapeRowState extends State<_ShapeRow> {
             height: 26,
             child: Row(
               children: [
-                SizedBox(width: (layer.kind == LayerKind.field ? 0 : 14) + 26),
+                SizedBox(
+                  width: (layer.kind == LayerKind.property ? 0 : 14) + 26,
+                ),
                 Icon(
                   geometry.circles.containsKey(id)
                       ? Icons.circle_outlined
                       : Icons.pentagon_outlined,
                   size: 12,
-                  color: problem ? Palette.invalid : Palette.muted,
+                  color: where == null ? Palette.muted : Palette.invalid,
                 ),
                 const SizedBox(width: 6),
                 Expanded(
@@ -592,8 +595,8 @@ class _ShapeRowState extends State<_ShapeRow> {
                         if (where != null)
                           TextSpan(
                             text: '  $where',
-                            style: TextStyle(
-                              color: problem ? Palette.invalid : Palette.muted,
+                            style: const TextStyle(
+                              color: Palette.invalid,
                               fontSize: 11,
                             ),
                           ),
@@ -650,7 +653,7 @@ class _ShapeRowState extends State<_ShapeRow> {
   }
 }
 
-/// Add field / plot / area buttons shown under the layer tree.
+/// Add property / zone buttons shown under the layer tree.
 class LayerActions extends StatelessWidget {
   const LayerActions({super.key, required this.editor});
 
@@ -658,7 +661,7 @@ class LayerActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget add(LayerKind kind, String icon) {
+    Widget add(LayerKind kind) {
       final blocker = editor.addLayerBlocker(kind);
       final enabled = blocker == null;
       final colour = enabled ? Palette.ink : Palette.faint;
@@ -696,13 +699,7 @@ class LayerActions extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-      child: Row(
-        children: [
-          add(LayerKind.field, 'add-plot.svg'),
-          add(LayerKind.plot, 'add-plot.svg'),
-          add(LayerKind.area, 'add-area.svg'),
-        ],
-      ),
+      child: Row(children: [add(LayerKind.property), add(LayerKind.zone)]),
     );
   }
 }

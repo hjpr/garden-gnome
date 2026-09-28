@@ -12,19 +12,19 @@ Future<void> confirmDeleteLayer(
 ) async {
   final layer = editor.document.layers[layerId];
   if (layer == null) return;
-  final inside = editor.document.subtree(layerId).length - 1;
+  final zones = layer.children.length;
   editor.suspendDraftSettlement = true;
   final confirmed = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
       title: Text('Delete ${layer.name}?'),
       content: Text(
-        inside == 0
+        zones == 0
             ? 'This ${layer.kind.label.toLowerCase()} will be removed. '
                   'You can undo this.'
-            : 'This ${layer.kind.label.toLowerCase()} and the $inside '
-                  '${inside == 1 ? 'layer' : 'layers'} inside it will be '
-                  'removed. You can undo this.',
+            : 'This ${layer.kind.label.toLowerCase()} and its $zones '
+                  '${zones == 1 ? 'zone' : 'zones'} will be removed. '
+                  'You can undo this.',
       ),
       actions: [
         TextButton(

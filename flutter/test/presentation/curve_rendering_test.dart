@@ -31,7 +31,6 @@ Future<Uint8List> raster(
       selection: selection,
       preview: preview,
       lineAnchor: null,
-      joinStart: null,
     ),
   ).paint(Canvas(recorder), const Size(360, 360));
   final picture = recorder.endRecording();
@@ -50,7 +49,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test('invalid dashed curves do not fall back to endpoint chords', () async {
-    final editor = EditorController()..addLayer(LayerKind.field);
+    final editor = EditorController()..addLayer(LayerKind.property);
     addTearDown(editor.dispose);
     final layer = editor.selectedLayerId!;
     final (next, _) = editor.tryGeometryEdit(layer, (e) {
@@ -70,10 +69,10 @@ void main() {
   });
 
   test('inactive land hatching is clipped away from holes', () async {
-    final editor = EditorController()..addLayer(LayerKind.field);
+    final editor = EditorController()..addLayer(LayerKind.property);
     addTearDown(editor.dispose);
-    final field = editor.selectedLayerId!;
-    final (closed, _) = editor.tryGeometryEdit(field, (e) {
+    final property = editor.selectedLayerId!;
+    final (closed, _) = editor.tryGeometryEdit(property, (e) {
       final ids = [
         for (final point in [
           const Vec(0, 0),
@@ -87,17 +86,17 @@ void main() {
         e.connect(ids[i], ids[(i + 1) % ids.length]);
       }
     });
-    editor.commit('Field', closed!);
-    editor.addLayer(LayerKind.plot);
-    final plot = editor.selectedLayerId!;
-    final (withHole, _) = editor.tryGeometryEdit(plot, (e) {
+    editor.commit('Property', closed!);
+    editor.addLayer(LayerKind.zone);
+    final zone = editor.selectedLayerId!;
+    final (withHole, _) = editor.tryGeometryEdit(zone, (e) {
       e.addCircle(e.addPoint(const Vec(6, 6)), 5);
       final cutter = e.addCircle(e.addPoint(const Vec(6, 6)), 2);
       e.boolean(cutter, BooleanOperation.subtract);
     });
-    editor.commit('Plot', withHole!);
+    editor.commit('Zone', withHole!);
     final (opened, _) = editor.tryGeometryEdit(
-      field,
+      property,
       (e) => e.delete(['line-1']),
     );
     final blank = await raster(GardenDocument(id: 'blank'));
@@ -136,7 +135,7 @@ void main() {
   );
 
   test('arc normal, selected and hover strokes do not draw a chord', () async {
-    final editor = EditorController()..addLayer(LayerKind.field);
+    final editor = EditorController()..addLayer(LayerKind.property);
     addTearDown(editor.dispose);
     final layer = editor.selectedLayerId!;
     final (next, _) = editor.tryGeometryEdit(layer, (e) {
@@ -170,7 +169,7 @@ void main() {
   });
 
   test('move and Arc previews keep true curvature', () async {
-    final editor = EditorController()..addLayer(LayerKind.field);
+    final editor = EditorController()..addLayer(LayerKind.property);
     addTearDown(editor.dispose);
     final layer = editor.selectedLayerId!;
     final before = editor.document;
@@ -213,7 +212,7 @@ void main() {
   test(
     'fill, selection, hover and Boolean previews leave hole pixels untouched',
     () async {
-      final editor = EditorController()..addLayer(LayerKind.field);
+      final editor = EditorController()..addLayer(LayerKind.property);
       addTearDown(editor.dispose);
       final layer = editor.selectedLayerId!;
       String? operand;

@@ -9,11 +9,21 @@ enum ToolFunction {
   /// touches.
   lasso('Lasso', 'lasso.svg'),
   place('Place', 'point-place.svg'),
-  draw('Draw', 'line.svg'),
-  join('Join', 'point-connect.svg'),
+
+  /// Click corners one after another. Clicking an existing point joins
+  /// it, so there is no separate Join.
+  draw('Straight', 'line.svg'),
+
+  /// Pen style: click for a sharp corner, or press and drag to pull out
+  /// Bézier handles that curve the line through that point.
+  curve('Curve', 'line-curve.svg'),
 
   /// Click the start, a point the arc passes through, then the end.
-  arc('Arc', 'arc.svg'),
+  threePointArc('3-point', 'arc.svg'),
+
+  /// Click the start, then the end, then the arc's middle, which sets how
+  /// far it bends.
+  startEndArc('Start-end', 'arc-start-end.svg'),
   delete('Delete', 'point-delete.svg'),
 
   /// Click the centre, then a point on the edge.
@@ -72,14 +82,13 @@ enum Tool {
   /// Picks, moves, and resizes anything on any unlocked layer.
   select('Select', 'select.svg', [ToolFunction.marquee, ToolFunction.lasso]),
   point('Point', 'point.svg', [ToolFunction.place, ToolFunction.delete]),
-  line('Line', 'line.svg', [
-    ToolFunction.draw,
-    ToolFunction.join,
-    ToolFunction.delete,
-  ]),
 
-  /// Draws one circular-arc edge through three clicks.
-  arc('Arc', 'arc.svg', [ToolFunction.arc]),
+  /// Removing lines is done with Select and Delete.
+  line('Line', 'line.svg', [ToolFunction.draw, ToolFunction.curve]),
+
+  /// Draws one circular-arc edge in three clicks. The functions differ
+  /// only in click order.
+  arc('Arc', 'arc.svg', [ToolFunction.threePointArc, ToolFunction.startEndArc]),
 
   /// Draws a circle. Both functions make the same kind of
   /// circle: a centre point and a radius.

@@ -2,10 +2,11 @@ part of 'previews.dart';
 
 /// Three-click arc feedback. Before the third position exists, only the
 /// construction guide is drawn; a valid third position previews the real arc.
+/// Either function can leave [through] or [end] unknown until its click.
 class ArcPreview extends Preview {
   const ArcPreview({
     required this.start,
-    required this.through,
+    this.through,
     this.end,
     this.curve,
     required this.valid,
@@ -14,10 +15,39 @@ class ArcPreview extends Preview {
   });
 
   final Vec start;
-  final Vec through;
+  final Vec? through;
   final Vec? end;
   final CurveEdge? curve;
   final bool valid;
+
+  /// The existing point [end] would reuse, if any.
+  final String? joinTarget;
+}
+
+/// The next piece of a Line → Curve drawing: from the last point ([from],
+/// null before the first) to the pointer ([to]). [toHandle] and
+/// [outHandle] are the handle tips being pulled out at [to]; they equal
+/// [to] for a sharp corner.
+class CurvePreview extends Preview {
+  const CurvePreview({
+    required this.from,
+    required this.fromHandle,
+    required this.to,
+    required this.toHandle,
+    required this.outHandle,
+    required this.valid,
+    this.joinTarget,
+    super.guides,
+  });
+
+  final Vec? from;
+  final Vec? fromHandle;
+  final Vec to;
+  final Vec toHandle;
+  final Vec outHandle;
+  final bool valid;
+
+  /// The existing point [to] would join, if any.
   final String? joinTarget;
 }
 

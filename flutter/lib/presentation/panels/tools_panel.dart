@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../application/editor_controller.dart';
 import '../../application/tools.dart';
 import '../theme.dart';
+import '../widgets/button_grid.dart';
 import '../widgets/panel.dart';
 
 /// The drawing tools as a grid of buttons, then the chosen tool's functions.
@@ -16,7 +17,7 @@ class ToolsBody extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _ButtonGrid(
+        ButtonGrid(
           children: [
             for (final tool in Tool.values)
               _ToolButton(
@@ -33,11 +34,14 @@ class ToolsBody extends StatelessWidget {
           PropertyGroup(
             title: '${editor.tool.label} functions'.toUpperCase(),
             children: [
-              _ButtonGrid(
+              ButtonGrid(
                 children: [
                   for (final function in editor.tool.functions)
                     _ToolButton(
-                      icon: _functionIcon(editor.tool, function),
+                      // A new tool's buttons start fresh rather than
+                      // animating from the old tool's button in that slot.
+                      key: ValueKey(function),
+                      icon: function.icon,
                       label: function.label,
                       selected: editor.function == function,
                       onTap: () => editor.selectFunction(function),
@@ -54,11 +58,6 @@ class ToolsBody extends StatelessWidget {
       ],
     );
   }
-
-  static String _functionIcon(Tool tool, ToolFunction function) =>
-      tool == Tool.line && function == ToolFunction.delete
-      ? 'point-delete.svg'
-      : function.icon;
 }
 
 /// Minus and plus buttons around the number of sides for Polygon → Regular.
@@ -98,47 +97,10 @@ class _SidesStepper extends StatelessWidget {
   }
 }
 
-/// Buttons in a light tray, [columns] to a row. Further buttons wrap onto
-/// new rows; every button keeps the same width, so a short last row lines
-/// up with the rows above.
-class _ButtonGrid extends StatelessWidget {
-  const _ButtonGrid({required this.children});
-
-  static const columns = 3;
-  static const _gap = 3.0;
-
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(3),
-    decoration: BoxDecoration(
-      color: Palette.field,
-      borderRadius: BorderRadius.circular(Metrics.radius + 2),
-    ),
-    child: Column(
-      children: [
-        for (var start = 0; start < children.length; start += columns) ...[
-          if (start > 0) const SizedBox(height: _gap),
-          Row(
-            children: [
-              for (var i = start; i < start + columns; i++) ...[
-                if (i > start) const SizedBox(width: _gap),
-                Expanded(
-                  child: i < children.length ? children[i] : const SizedBox(),
-                ),
-              ],
-            ],
-          ),
-        ],
-      ],
-    ),
-  );
-}
-
 /// An icon over a short label; raised on white when chosen.
 class _ToolButton extends StatelessWidget {
   const _ToolButton({
+    super.key,
     required this.icon,
     required this.label,
     required this.selected,
@@ -163,7 +125,9 @@ class _ToolButton extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 120),
         decoration: BoxDecoration(
-          color: selected ? Palette.paper : Colors.transparent,
+          // Fade to see-through WHITE: Colors.transparent is see-through
+          // black, and the fade between it and white passes through grey.
+          color: selected ? Palette.paper : Palette.paper.withValues(alpha: 0),
           borderRadius: BorderRadius.circular(Metrics.radius),
           boxShadow: selected
               ? const [
@@ -180,7 +144,11 @@ class _ToolButton extends StatelessWidget {
           child: InkWell(
             onTap: onTap,
             borderRadius: BorderRadius.circular(Metrics.radius),
-            hoverColor: selected ? Colors.transparent : Palette.hover,
+            // A selected button hovers in its own white, never in
+            // Colors.transparent: that is transparent BLACK, and a hover
+            // already showing when the button is clicked keeps its
+            // opacity and turns solid black.
+            hoverColor: selected ? Palette.paper : Palette.hover,
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 7),
               child: Column(

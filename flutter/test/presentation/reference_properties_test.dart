@@ -96,7 +96,7 @@ void main() {
       );
       await tester.pumpWidget(layers());
       expect(find.textContaining('Reference'), findsNothing);
-      editor.addLayer(LayerKind.field);
+      editor.addLayer(LayerKind.property);
       editor.addReferenceImage(
         bytes: png,
         mimeType: 'image/png',
@@ -109,7 +109,7 @@ void main() {
         pixelWidth: 100,
         pixelHeight: 100,
       );
-      editor.selectLayer(editor.document.fields.single);
+      editor.selectLayer(editor.document.propertyIds.single);
       await tester.pumpAndSettle();
       // The layer row, then one row per image, top image first.
       final row = find.text('Reference  ·  2');
@@ -118,7 +118,7 @@ void main() {
       final first = find.textContaining('Image 1');
       expect(
         tester.getCenter(row).dy,
-        greaterThan(tester.getCenter(find.text('Field 1')).dy),
+        greaterThan(tester.getCenter(find.text('Property 1')).dy),
       );
       expect(
         tester.getCenter(second).dy,

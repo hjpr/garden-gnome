@@ -83,6 +83,8 @@ List<CurveEdge> _normalizeContour(List<List<CurveEdge>> contours, int index) {
 
 PointLocation _locate(Vec p, List<List<CurveEdge>> contours) {
   for (final edge in contours.expand((c) => c)) {
+    final (x0, y0, x1, y1) = looseBox(edge);
+    if (p.x < x0 || p.x > x1 || p.y < y0 || p.y > y1) continue;
     if (edge.distanceTo(p) <= tolerance) return PointLocation.onBoundary;
   }
   return _inside(p, contours) ? PointLocation.inside : PointLocation.outside;
@@ -102,6 +104,10 @@ bool _inside(Vec p, List<List<CurveEdge>> contours) {
       if (b.y <= p.y && a.y > p.y && side < 0) winding--;
       continue;
     }
+    // The rightward ray cannot reach an arc wholly above, below or left
+    // of the point.
+    final (_, y0, x1, y1) = looseBox(edge);
+    if (p.y < y0 || p.y > y1 || p.x > x1) continue;
     final c = edge.centre;
     final r = edge.radius;
     final cuts = <double>[0, 1];
@@ -224,6 +230,7 @@ bool _containsEdge(List<List<CurveEdge>> contours, CurveEdge edge) {
 bool _containsRegion(List<List<CurveEdge>> a, List<List<CurveEdge>> b) {
   if (b.isEmpty) return true;
   if (a.isEmpty) return false;
+  if (_boxesApart(a, b)) return false;
   final aEdges = a.expand((c) => c).toList();
   final bEdges = b.expand((c) => c).toList();
   for (final edge in bEdges) {
@@ -245,8 +252,36 @@ bool _containsRegion(List<List<CurveEdge>> a, List<List<CurveEdge>> b) {
   return true;
 }
 
+/// A box holding every edge of [contours]; see [looseBox].
+(double, double, double, double) _looseBounds(List<List<CurveEdge>> contours) {
+  var box = (
+    double.infinity,
+    double.infinity,
+    double.negativeInfinity,
+    double.negativeInfinity,
+  );
+  for (final edge in contours.expand((c) => c)) {
+    final (x0, y0, x1, y1) = looseBox(edge);
+    box = (
+      math.min(box.$1, x0),
+      math.min(box.$2, y0),
+      math.max(box.$3, x1),
+      math.max(box.$4, y1),
+    );
+  }
+  return box;
+}
+
+bool _boxesApart(List<List<CurveEdge>> a, List<List<CurveEdge>> b) {
+  final (ax0, ay0, ax1, ay1) = _looseBounds(a);
+  final (bx0, by0, bx1, by1) = _looseBounds(b);
+  return ax1 < bx0 || bx1 < ax0 || ay1 < by0 || by1 < ay0;
+}
+
 bool _regionsOverlap(List<List<CurveEdge>> a, List<List<CurveEdge>> b) {
   if (a.isEmpty || b.isEmpty) return false;
+  // Land far apart cannot overlap.
+  if (_boxesApart(a, b)) return false;
   bool enters(List<List<CurveEdge>> first, List<List<CurveEdge>> second) {
     final others = second.expand((c) => c).toList();
     for (final edge in first.expand((c) => c)) {

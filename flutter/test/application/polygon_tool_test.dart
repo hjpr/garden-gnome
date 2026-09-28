@@ -23,8 +23,8 @@ void click(CanvasInput input, double x, double y) {
   input.release(screen);
 }
 
-(EditorController, CanvasInput, String) field() {
-  final editor = EditorController()..addLayer(LayerKind.field);
+(EditorController, CanvasInput, String) property() {
+  final editor = EditorController()..addLayer(LayerKind.property);
   addTearDown(editor.dispose);
   return (editor, CanvasInput(editor), editor.selectedLayerId!);
 }
@@ -62,7 +62,7 @@ void main() {
   group('Polygon tool', () {
     test('Regular: first click is temporary, second adds a closed hexagon '
         'as one Undo step', () {
-      final (editor, input, layer) = field();
+      final (editor, input, layer) = property();
       editor.selectTool(Tool.polygon);
       expect(editor.function, ToolFunction.regularPolygon);
       expect(toolPrompt(editor), contains('6-sided'));
@@ -93,7 +93,7 @@ void main() {
     });
 
     test('the number of sides is kept between uses and clamped', () {
-      final (editor, input, layer) = field();
+      final (editor, input, layer) = property();
       editor.selectTool(Tool.polygon);
       editor.setPolygonSides(3);
       click(input, 5, 5);
@@ -107,7 +107,7 @@ void main() {
     });
 
     test('Rectangle: two opposite corners', () {
-      final (editor, input, layer) = field();
+      final (editor, input, layer) = property();
       editor.selectTool(Tool.polygon);
       editor.selectFunction(ToolFunction.rectangle);
       click(input, 1, 2);
@@ -120,7 +120,7 @@ void main() {
     });
 
     test('a second polygon on the layer adds land and can cut the first', () {
-      final (editor, input, layer) = field();
+      final (editor, input, layer) = property();
       editor.selectTool(Tool.polygon);
       editor.selectFunction(ToolFunction.rectangle);
       click(input, 0, 0);
@@ -145,7 +145,7 @@ void main() {
 
     for (final cancel in ['escape', 'tool', 'function', 'undo']) {
       test('$cancel forgets the first Polygon click', () {
-        final (editor, input, layer) = field();
+        final (editor, input, layer) = property();
         editor.selectTool(Tool.polygon);
         click(input, 5, 5);
         expect(editor.polygonStart, isNotNull);
@@ -160,7 +160,7 @@ void main() {
             editor.undo();
         }
         expect(editor.polygonStart, isNull);
-        // Undo with nothing drawn removes the new field itself.
+        // Undo with nothing drawn removes the new property itself.
         if (editor.document.layers.containsKey(layer)) {
           expect(editor.document.geometryOf(layer).points, isEmpty);
         }
@@ -168,7 +168,7 @@ void main() {
     }
 
     test('a locked layer refuses the first click', () {
-      final (editor, input, layer) = field();
+      final (editor, input, layer) = property();
       editor.setLayerLocked(layer, true);
       editor.selectTool(Tool.polygon);
       click(input, 5, 5);

@@ -62,10 +62,11 @@ extension _AreaSelectInput on CanvasInput {
   /// The layer an outline selects on, and the items it would pick there.
   ///
   /// Selections live on one layer. The selected layer wins when the
-  /// outline touches it, so choosing a field in Layers first lets a
-  /// marquee pick field shapes under plots. Otherwise the innermost kind
-  /// of layer wins, as with a click. Shift only adds to the selected
-  /// layer. Locked layers are skipped.
+  /// outline touches it, so choosing a property in Layers first lets a
+  /// marquee pick property shapes under zones. Otherwise a zone wins over
+  /// a property, and the zone drawn on top over the others, as with a
+  /// click. Shift only adds to the selected layer. Locked layers are
+  /// skipped.
   (String?, Set<String>) _areaPick(List<Vec> outline, {required bool shift}) {
     final document = editor.document;
     final touched = itemsTouchedAcrossLayers(
@@ -76,13 +77,13 @@ extension _AreaSelectInput on CanvasInput {
     final selected = editor.selectedLayerId;
     if (touched[selected] case final items?) return (selected, items);
     if (shift || touched.isEmpty) return (null, const {});
-    final innermost = touched.keys.reduce(
+    final top = touched.keys.reduce(
       (best, id) =>
-          document.layers[id]!.kind.index > document.layers[best]!.kind.index
+          document.layers[id]!.kind.index >= document.layers[best]!.kind.index
           ? id
           : best,
     );
-    return (innermost, touched[innermost]!);
+    return (top, touched[top]!);
   }
 }
 

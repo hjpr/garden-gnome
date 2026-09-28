@@ -13,22 +13,22 @@ class GardenDocument {
     required this.id,
     Map<String, Layer> layers = const {},
     Map<String, Geometry> geometries = const {},
-    List<String> fields = const [],
+    List<String> propertyIds = const [],
     Map<LayerKind, int> nameCounters = const {},
     List<ReferenceImage> references = const [],
     this.imageCounter = 0,
   }) : references = List.unmodifiable(references),
        layers = Map.unmodifiable(layers),
        geometries = Map.unmodifiable(geometries),
-       fields = List.unmodifiable(fields),
+       propertyIds = List.unmodifiable(propertyIds),
        nameCounters = Map.unmodifiable(nameCounters);
 
   final String id;
   final Map<String, Layer> layers;
   final Map<String, Geometry> geometries;
 
-  /// Field layer IDs in creation order.
-  final List<String> fields;
+  /// Property layer IDs in creation order.
+  final List<String> propertyIds;
 
   /// Highest automatic name number used for each layer kind.
   final Map<LayerKind, int> nameCounters;
@@ -81,7 +81,7 @@ class GardenDocument {
         id: id,
         layers: layers,
         geometries: geometries,
-        fields: fields,
+        propertyIds: propertyIds,
         nameCounters: nameCounters,
         references: references,
         imageCounter: number,
@@ -94,7 +94,7 @@ class GardenDocument {
     id: id,
     layers: layers,
     geometries: geometries,
-    fields: fields,
+    propertyIds: propertyIds,
     nameCounters: nameCounters,
     references: list,
     imageCounter: imageCounter,
@@ -103,12 +103,12 @@ class GardenDocument {
   Geometry geometryOf(String layerId) =>
       geometries[layers[layerId]!.geometryId]!;
 
-  /// The field this layer is listed under, or null for a field.
+  /// The property this layer is listed under, or null for a property.
   Layer? parentOf(String layerId) => layers[layers[layerId]?.parentId];
 
   /// The layer whose lock keeps [layerId] from being edited: the layer
-  /// itself, or the nearest locked layer it sits inside. Null when the
-  /// layer can be edited.
+  /// itself, or the property it is listed under. Null when the layer can
+  /// be edited.
   Layer? lockedBy(String layerId) {
     for (
       Layer? layer = layers[layerId];
@@ -122,16 +122,17 @@ class GardenDocument {
 
   bool isLocked(String layerId) => lockedBy(layerId) != null;
 
-  /// The layer and every layer inside it, parents before children.
+  /// The layer and, for a property, its zones: the property first.
   List<String> subtree(String layerId) => [
     layerId,
     for (final child in layers[layerId]!.children) ...subtree(child),
   ];
 
-  /// Layers in drawing order: each field, then its plots, then its areas.
-  /// Worked out once, as the painter and land rules ask for it often.
+  /// Layers in drawing order: each property, then its zones in creation
+  /// order, so a later zone is drawn over an earlier one. Worked out once,
+  /// as the painter and land rules ask for it often.
   late final List<String> drawingOrder = List.unmodifiable([
-    for (final id in fields) ...[
+    for (final id in propertyIds) ...[
       for (final kind in LayerKind.values)
         for (final member in subtree(id))
           if (layers[member]!.kind == kind) member,
@@ -143,7 +144,7 @@ class GardenDocument {
     id: newId,
     layers: layers,
     geometries: geometries,
-    fields: fields,
+    propertyIds: propertyIds,
     nameCounters: nameCounters,
     references: references,
     imageCounter: imageCounter,
@@ -152,13 +153,13 @@ class GardenDocument {
   GardenDocument copyWith({
     Map<String, Layer>? layers,
     Map<String, Geometry>? geometries,
-    List<String>? fields,
+    List<String>? propertyIds,
     Map<LayerKind, int>? nameCounters,
   }) => GardenDocument(
     id: id,
     layers: layers ?? this.layers,
     geometries: geometries ?? this.geometries,
-    fields: fields ?? this.fields,
+    propertyIds: propertyIds ?? this.propertyIds,
     nameCounters: nameCounters ?? this.nameCounters,
     references: references,
     imageCounter: imageCounter,
@@ -178,12 +179,8 @@ class GardenDocument {
     String? parentId,
     required IdGenerator newId,
   }) {
-    // An area asked for under a plot is listed under that plot's field.
-    if (kind == LayerKind.area && layers[parentId]?.kind == LayerKind.plot) {
-      parentId = layers[parentId]!.parentId;
-    }
-    if (kind.homeKind != layers[parentId]?.kind) {
-      throw ArgumentError('A ${kind.label} needs a ${kind.homeKind?.label}');
+    if (kind.parentKind != layers[parentId]?.kind) {
+      throw ArgumentError('A ${kind.label} needs a ${kind.parentKind?.label}');
     }
     var counter = nameCounters[kind] ?? 0;
     String name;
@@ -203,7 +200,7 @@ class GardenDocument {
     final geometry = Geometry(
       id: layer.geometryId,
       ownerLayerId: layer.id,
-      dimensions: kind == LayerKind.area ? const AreaDimensions() : null,
+      dimensions: kind == LayerKind.zone ? const PlantingDimensions() : null,
     );
     final updatedLayers = {...layers, layer.id: layer};
     if (parentId != null) {
@@ -215,13 +212,13 @@ class GardenDocument {
     final document = copyWith(
       layers: updatedLayers,
       geometries: {...geometries, geometry.id: geometry},
-      fields: parentId == null ? [...fields, layer.id] : fields,
+      propertyIds: parentId == null ? [...propertyIds, layer.id] : propertyIds,
       nameCounters: {...nameCounters, kind: counter},
     );
     return (document, layer.id);
   }
 
-  /// Removes a layer together with every layer inside it.
+  /// Removes a layer, and a property's zones with it.
   GardenDocument removeLayer(String layerId) {
     final removed = subtree(layerId).toSet();
     final layer = layers[layerId]!;
@@ -242,7 +239,7 @@ class GardenDocument {
         for (final entry in geometries.entries)
           if (!removedGeometry.contains(entry.key)) entry.key: entry.value,
       },
-      fields: fields.where((id) => id != layerId).toList(),
+      propertyIds: propertyIds.where((id) => id != layerId).toList(),
     );
   }
 
@@ -281,7 +278,7 @@ class GardenDocument {
       id: id,
       layers: layers,
       geometries: updated,
-      fields: fields,
+      propertyIds: propertyIds,
       nameCounters: names,
       references: references,
       imageCounter: images,

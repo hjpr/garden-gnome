@@ -27,7 +27,7 @@ extension _BoxInput on CanvasInput {
 
     // Rotating turns the whole piece of land, so the smaller land inside
     // it turns too, as it does when moved. Scaling resizes only the
-    // selection: plots keep their size when a field grows.
+    // selection: zones keep their size when a property grows.
     final moving = <String, Set<String>>{
       layerId: geometry.definingPoints(selection),
     };
@@ -43,7 +43,7 @@ extension _BoxInput on CanvasInput {
             !geometry.circles.containsKey(id)) {
           continue;
         }
-        _shapesInside(document, layerId, id).forEach((other, points) {
+        landInside(document, layerId, id).forEach((other, points) {
           (moving[other] ??= {}).addAll(points);
         });
       }
@@ -144,6 +144,18 @@ extension _BoxInput on CanvasInput {
           before.edit((e) {
             for (final id in points) {
               e.movePoint(id, transform(before.points[id]!));
+            }
+            // Bézier handles turn and stretch with their points, so a
+            // curve keeps its shape. The transform is affine, so moving
+            // the handle's tip and point is exact.
+            for (final line in before.lines.values) {
+              if (!line.isBezier) continue;
+              for (final end in [line.start, line.end]) {
+                if (!points.contains(end)) continue;
+                final anchor = before.points[end]!;
+                final tip = anchor + line.handleAt(end)!;
+                e.setHandle(line.id, end, transform(tip) - transform(anchor));
+              }
             }
             if (radiusFactor != 1) {
               for (final id in circles) {

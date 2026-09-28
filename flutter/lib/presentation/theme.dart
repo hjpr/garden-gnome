@@ -23,8 +23,6 @@ abstract final class Palette {
   // Drawing.
   static const canvas = Color(0xFFF7F8F5);
 
-  /// Outline colour for areas, which have no colour setting.
-  static const area = Color(0xFF6B7F4F);
   static const valid = Color(0xFF2E7D32);
   static const invalid = Color(0xFFC62828);
   static const hatch = Color(0xFFB8BCB4);

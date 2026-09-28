@@ -9,17 +9,9 @@ import '../domain/layer.dart';
 import '../domain/reference_image.dart';
 import '../domain/vec.dart';
 
-// Version 2 adds curved edges and hole rings. Older readers must refuse it
-// rather than silently opening a chord-only drawing with filled-in holes.
-// Version 3 makes every closed shape on a layer part of its land, keeps
-// the shape stack order and labels, moves patterns into layer properties,
-// and lists areas under their field. Version 2 files are converted on open.
-// Version 4 adds the reference image, stored as its own file in the ZIP.
-// A version 3 reader would silently drop it, so it must refuse the file.
-// Version 5 holds any number of reference images in the Reference layer,
-// each with its own ID, name, scale and reference line. Version 4 files
-// (one image) are converted on open.
-const int schemaVersion = 5;
+// Only this version opens. Raise it whenever an older reader would lose or
+// misread something, so it refuses the file instead of re-saving it lossy.
+const int schemaVersion = 1;
 const String formatName = 'garden-gnome';
 const String documentEntry = 'document.json';
 
@@ -29,10 +21,6 @@ const int _maxDocumentBytes = 16 * 1024 * 1024;
 /// Where a reference picture is kept inside the ZIP, by ID and type.
 String _referenceEntry(String id, String mimeType) =>
     'assets/$id.${mimeType.split('/').last}';
-
-/// Where a version 4 file kept its one picture.
-String _oldReferenceEntry(String mimeType) =>
-    'assets/reference.${mimeType.split('/').last}';
 
 /// Raised when a file cannot be opened. The message is shown to the user.
 class DocumentFormatError implements Exception {
@@ -112,7 +100,7 @@ Map<String, Object?> documentToJson(GardenDocument d) => {
   'format': formatName,
   'schema_version': schemaVersion,
   'document_id': d.id,
-  'fields': d.fields,
+  'property_ids': d.propertyIds,
   'name_counters': {
     for (final entry in d.nameCounters.entries) entry.key.name: entry.value,
   },
@@ -151,7 +139,7 @@ Map<String, Object?> _layerToJson(Layer layer) => {
   'geometry_id': layer.geometryId,
   'locked': layer.locked,
   'properties': switch (layer.properties) {
-    FieldProperties p => {
+    PropertyProperties p => {
       'color': p.color.name,
       'pattern': p.pattern?.name,
       'drainage': p.drainage?.name,
@@ -166,15 +154,12 @@ Map<String, Object?> _layerToJson(Layer layer) => {
         'organic_matter': p.soil.organicMatter,
       },
     },
-    PlotProperties p => {
+    ZoneProperties p => {
       'color': p.color.name,
       'pattern': p.pattern?.name,
       'ground': p.ground,
-    },
-    AreaProperties p => {
-      'planting_type': p.plantingType.name,
       'crop': p.crop,
-      'pattern': p.pattern?.name,
+      'planting_type': p.plantingType.name,
     },
   },
 };
@@ -186,7 +171,13 @@ Map<String, Object?> _geometryToJson(Geometry g) => {
   },
   'lines': {
     for (final l in g.lines.values)
-      l.id: {'start': l.start, 'end': l.end, 'bulge': l.bulge},
+      l.id: {
+        'start': l.start,
+        'end': l.end,
+        'bulge': l.bulge,
+        if (l.startHandle case final h?) 'start_handle': {'x': h.x, 'y': h.y},
+        if (l.endHandle case final h?) 'end_handle': {'x': h.x, 'y': h.y},
+      },
   },
   'circles': {
     for (final c in g.circles.values)
@@ -232,8 +223,8 @@ Map<String, Object?> _geometryToJson(Geometry g) => {
 ///
 /// Nothing is repaired or dropped: a file either opens exactly as saved or
 /// is refused with a reason. Land that breaks a drawing rule (for example
-/// a plot outside its field) is not damage; it opens and is shown invalid,
-/// just as it was when saved.
+/// two overlapping properties) is not damage; it opens and is shown
+/// invalid, just as it was when saved.
 ///
 /// [readAsset] returns the bytes of a file stored beside the drawing in
 /// the ZIP, or null when it is missing.
@@ -246,51 +237,29 @@ GardenDocument documentFromJson(
     throw const DocumentFormatError('This is not a Garden Gnome file');
   }
   final version = root['schema_version'];
-  if (version is! int || version > schemaVersion) {
+  if (version is int && version > schemaVersion) {
     throw const DocumentFormatError(
       'This file was made by a newer version of Garden Gnome',
     );
   }
-
-  if (version < 1) {
+  if (version != schemaVersion) {
     throw const DocumentFormatError('Damaged file: unsupported schema version');
   }
 
-  var layers = <String, Layer>{};
+  final layers = <String, Layer>{};
   _map(root['layers'], 'layers').forEach((id, value) {
     layers[id] = _layerFromJson(id, _map(value, 'layer'));
   });
   final geometries = <String, Geometry>{};
-  final oldPatterns = <String, String>{};
   _map(root['geometries'], 'geometries').forEach((id, value) {
-    final json = _map(value, 'geometry');
-    geometries[id] = _geometryFromJson(id, json, version);
-    if (version < 3) {
-      if (_oldBoundaryPattern(json) case final pattern?) {
-        oldPatterns[id] = pattern;
-      }
-    }
+    geometries[id] = _geometryFromJson(id, _map(value, 'geometry'));
   });
-  if (version < 3) layers = _upgradeLayers(layers, oldPatterns);
 
-  final references = <ReferenceImage>[];
-  var imageCounter = 0;
-  if (version >= 5) {
-    for (final item in _list(root['references'] ?? const [], 'references')) {
-      references.add(_referenceFromJson(_map(item, 'reference'), readAsset));
-    }
-    imageCounter = _count(root['image_counter'] ?? 0);
-  } else if (root['reference'] != null) {
-    // A version 4 drawing had one picture; it becomes Image 1.
-    references.add(
-      _referenceFromJson(
-        _map(root['reference'], 'reference'),
-        readAsset,
-        legacyId: 'image-1',
-      ),
-    );
-    imageCounter = 1;
-  }
+  final references = [
+    for (final item in _list(root['references'], 'references'))
+      _referenceFromJson(_map(item, 'reference'), readAsset),
+  ];
+  final imageCounter = _count(root['image_counter']);
   final imageIds = <String>{};
   for (final image in references) {
     if (!imageIds.add(image.id)) {
@@ -307,7 +276,7 @@ GardenDocument documentFromJson(
   }
 
   final nameCounters = <LayerKind, int>{};
-  _map(root['name_counters'] ?? const {}, 'name counters').forEach((k, v) {
+  _map(root['name_counters'], 'name counters').forEach((k, v) {
     nameCounters[_enum(LayerKind.values, k, 'layer kind')] = _count(v);
   });
 
@@ -315,7 +284,7 @@ GardenDocument documentFromJson(
     id: _string(root['document_id'], 'document ID'),
     layers: layers,
     geometries: geometries,
-    fields: _strings(root['fields'], 'fields'),
+    propertyIds: _strings(root['property_ids'], 'properties'),
     nameCounters: nameCounters,
     references: references,
     imageCounter: imageCounter,
@@ -326,7 +295,7 @@ GardenDocument documentFromJson(
 
 Layer _layerFromJson(String id, Map<String, Object?> json) {
   final kind = _enum(LayerKind.values, json['kind'], 'layer kind');
-  final props = _map(json['properties'] ?? const {}, 'properties');
+  final props = _map(json['properties'], 'properties');
   final String name;
   try {
     name = validLayerName(_string(json['name'], 'layer name'));
@@ -337,33 +306,29 @@ Layer _layerFromJson(String id, Map<String, Object?> json) {
     id: id,
     kind: kind,
     name: name,
-    parentId: _optionalString(json['parent_id']),
-    children: _strings(json['children'] ?? const [], 'children'),
+    parentId: _optionalString(json['parent_id'], 'parent ID'),
+    children: _strings(json['children'], 'children'),
     geometryId: _string(json['geometry_id'], 'geometry ID'),
-    // Files saved before locking existed have no value: unlocked.
-    locked: _optionalBool(json['locked'], 'layer lock') ?? false,
+    locked: _bool(json['locked'], 'layer lock'),
     properties: switch (kind) {
-      LayerKind.field => FieldProperties(
-        color: _enum(OutlineColor.values, props['color'] ?? 'green', 'color'),
+      LayerKind.property => PropertyProperties(
+        color: _enum(OutlineColor.values, props['color'], 'color'),
         pattern: _pattern(props['pattern']),
         drainage: props['drainage'] == null
             ? null
             : _enum(SoilDrainage.values, props['drainage'], 'drainage'),
-        soil: _soilFromJson(_map(props['soil'] ?? const {}, 'soil')),
+        soil: _soilFromJson(_map(props['soil'], 'soil')),
       ),
-      LayerKind.plot => PlotProperties(
-        color: _enum(OutlineColor.values, props['color'] ?? 'sage', 'color'),
+      LayerKind.zone => ZoneProperties(
+        color: _enum(OutlineColor.values, props['color'], 'color'),
         pattern: _pattern(props['pattern']),
-        ground: _optionalString(props['ground']),
-      ),
-      LayerKind.area => AreaProperties(
+        ground: _optionalString(props['ground'], 'ground'),
+        crop: _optionalString(props['crop'], 'crop'),
         plantingType: _enum(
           PlantingType.values,
-          props['planting_type'] ?? 'flat',
+          props['planting_type'],
           'planting type',
         ),
-        crop: _optionalString(props['crop']),
-        pattern: _pattern(props['pattern']),
       ),
     },
   );
@@ -371,58 +336,6 @@ Layer _layerFromJson(String id, Map<String, Object?> json) {
 
 FillPattern? _pattern(Object? name) =>
     name == null ? null : _enum(FillPattern.values, name, 'pattern');
-
-/// A version 2 layer kept its Field or Area pattern on its boundary.
-String? _oldBoundaryPattern(Map<String, Object?> json) {
-  final boundary = json['boundary'];
-  if (boundary == null) return null;
-  final b = _map(boundary, 'boundary');
-  final registry = b['kind'] == 'circle' ? 'circles' : 'shapes';
-  final records = _map(json[registry] ?? const {}, registry);
-  final record = records[b['id']];
-  if (record == null) return null;
-  return _optionalString(_map(record, 'boundary')['pattern']);
-}
-
-/// Converts version 2 layers: patterns move into Properties, and areas
-/// are listed under their plot's field rather than under the plot.
-Map<String, Layer> _upgradeLayers(
-  Map<String, Layer> layers,
-  Map<String, String> patterns,
-) {
-  final result = {...layers};
-  for (final layer in layers.values) {
-    final pattern = FillPattern.fromName(patterns[layer.geometryId]);
-    if (pattern != null && layer.properties is! PlotProperties) {
-      result[layer.id] = result[layer.id]!.copyWith(
-        properties: layer.properties.withPattern(pattern),
-      );
-    }
-  }
-  for (final area in layers.values.where((l) => l.kind == LayerKind.area)) {
-    final plot = layers[area.parentId];
-    final fieldId = plot?.parentId;
-    if (plot == null || fieldId == null || result[fieldId] == null) continue;
-    final current = result[area.id]!;
-    result[area.id] = Layer(
-      id: current.id,
-      kind: current.kind,
-      name: current.name,
-      parentId: fieldId,
-      children: current.children,
-      geometryId: current.geometryId,
-      properties: current.properties,
-      locked: current.locked,
-    );
-    final oldParent = result[plot.id]!;
-    result[plot.id] = oldParent.copyWith(
-      children: oldParent.children.where((id) => id != area.id).toList(),
-    );
-    final field = result[fieldId]!;
-    result[fieldId] = field.copyWith(children: [...field.children, area.id]);
-  }
-  return result;
-}
 
 SoilSample _soilFromJson(Map<String, Object?> json) => SoilSample(
   ph: _optionalNumber(json['ph']),
@@ -435,7 +348,14 @@ SoilSample _soilFromJson(Map<String, Object?> json) => SoilSample(
   organicMatter: _optionalNumber(json['organic_matter']),
 );
 
-Geometry _geometryFromJson(String id, Map<String, Object?> json, int version) {
+/// A Bézier handle offset, or null when the line has none.
+Vec? _optionalHandle(Object? value) {
+  if (value == null) return null;
+  final h = _map(value, 'curve handle');
+  return Vec(_number(h['x']), _number(h['y']));
+}
+
+Geometry _geometryFromJson(String id, Map<String, Object?> json) {
   final points = <String, Vec>{};
   _map(json['points'], 'points').forEach((pointId, value) {
     final p = _map(value, 'point');
@@ -448,11 +368,13 @@ Geometry _geometryFromJson(String id, Map<String, Object?> json, int version) {
       lineId,
       _string(l['start'], 'line start'),
       _string(l['end'], 'line end'),
-      bulge: l['bulge'] == null ? 0 : _number(l['bulge']),
+      bulge: _number(l['bulge']),
+      startHandle: _optionalHandle(l['start_handle']),
+      endHandle: _optionalHandle(l['end_handle']),
     );
   });
   final circles = <String, Circle>{};
-  _map(json['circles'] ?? const {}, 'circles').forEach((circleId, value) {
+  _map(json['circles'], 'circles').forEach((circleId, value) {
     final c = _map(value, 'circle');
     final radius = _number(c['radius']);
     if (radius <= 0) {
@@ -462,7 +384,7 @@ Geometry _geometryFromJson(String id, Map<String, Object?> json, int version) {
       circleId,
       _string(c['center'], 'circle center'),
       radius,
-      label: _optionalString(c['label']),
+      label: _optionalString(c['label'], 'circle label'),
     );
   });
   final shapes = <String, ClosedShape>{};
@@ -472,47 +394,25 @@ Geometry _geometryFromJson(String id, Map<String, Object?> json, int version) {
       shapeId,
       _ringFromJson(s['segments']),
       holes: [
-        for (final ring in _list(s['holes'] ?? const [], 'holes'))
-          _ringFromJson(ring),
+        for (final ring in _list(s['holes'], 'holes')) _ringFromJson(ring),
       ],
-      label: _optionalString(s['label']),
+      label: _optionalString(s['label'], 'shape label'),
     );
   });
-  final order = <String>[];
-  if (version >= 3) {
-    order.addAll(_strings(json['order'] ?? const [], 'shape order'));
-    for (final item in order) {
-      if (!shapes.containsKey(item) && !circles.containsKey(item)) {
-        throw const DocumentFormatError('Damaged file: a shape is missing');
-      }
+  // The stack lists every shape and circle exactly once, bottom first.
+  final order = _strings(json['order'], 'shape order');
+  for (final item in order) {
+    if (!shapes.containsKey(item) && !circles.containsKey(item)) {
+      throw const DocumentFormatError('Damaged file: a shape is missing');
     }
-    if (order.toSet().length != order.length) {
-      throw const DocumentFormatError('Damaged file: a shape appears twice');
-    }
-  } else if (json['boundary'] != null) {
-    // The old boundary goes to the bottom; former Boolean operands sit
-    // above it, in the order they were drawn.
-    final b = _map(json['boundary'], 'boundary');
-    final boundaryId = _string(b['id'], 'boundary ID');
-    final registry = switch (b['kind']) {
-      'shape' => shapes,
-      'circle' => circles,
-      _ => throw const DocumentFormatError('Unsupported boundary type'),
-    };
-    if (!registry.containsKey(boundaryId)) {
-      throw const DocumentFormatError('Damaged file: a boundary is missing');
-    }
-    order.add(boundaryId);
   }
-  // A version 2 layer kept an empty record where a boundary was deleted.
-  shapes.removeWhere(
-    (shapeId, shape) =>
-        version < 3 && shape.rings.every((ring) => ring.isEmpty),
-  );
-  order.removeWhere(
-    (item) => !shapes.containsKey(item) && !circles.containsKey(item),
-  );
-  final last = _map(json['last_ids'] ?? const {}, 'counters');
+  if (order.toSet().length != order.length) {
+    throw const DocumentFormatError('Damaged file: a shape appears twice');
+  }
+  if (order.length != shapes.length + circles.length) {
+    throw const DocumentFormatError('Damaged file: a shape is not stacked');
+  }
+  final last = _map(json['last_ids'], 'counters');
   final dims = json['dimensions'] == null
       ? null
       : _map(json['dimensions'], 'dimensions');
@@ -525,14 +425,14 @@ Geometry _geometryFromJson(String id, Map<String, Object?> json, int version) {
     shapes: shapes,
     order: order,
     counters: IdCounters(
-      points: _count(last['points'] ?? 0),
-      lines: _count(last['lines'] ?? 0),
-      circles: _count(last['circles'] ?? 0),
-      shapes: _count(last['shapes'] ?? 0),
+      points: _count(last['points']),
+      lines: _count(last['lines']),
+      circles: _count(last['circles']),
+      shapes: _count(last['shapes']),
     ),
     dimensions: dims == null
         ? null
-        : AreaDimensions(
+        : PlantingDimensions(
             rowWidth: _optionalNumber(dims['row_width']),
             rowSpacing: _optionalNumber(dims['row_spacing']),
             rowDirection: _optionalNumber(dims['row_direction']),
@@ -546,12 +446,7 @@ List<SegmentRef> _ringFromJson(Object? value) => [
   for (final entry in _list(value, 'segments'))
     SegmentRef(
       _string(_map(entry, 'segment')['segment_id'], 'segment ID'),
-      reversed:
-          _optionalBool(
-            _map(entry, 'segment')['reversed'],
-            'segment direction',
-          ) ??
-          false,
+      reversed: _bool(_map(entry, 'segment')['reversed'], 'segment direction'),
     ),
 ];
 
@@ -565,13 +460,13 @@ void _checkStructure(GardenDocument d) {
     if (!placed.add(id)) fail('a layer appears twice');
   }
 
-  for (final fieldId in d.fields) {
-    final field = d.layers[fieldId];
-    if (field == null) fail('a field is missing');
-    if (field.kind != LayerKind.field || field.parentId != null) {
-      fail('a top-level layer is not a field');
+  for (final propertyId in d.propertyIds) {
+    final property = d.layers[propertyId];
+    if (property == null) fail('a property is missing');
+    if (property.kind != LayerKind.property || property.parentId != null) {
+      fail('a top-level layer is not a property');
     }
-    place(fieldId);
+    place(propertyId);
   }
   for (final layer in d.layers.values) {
     if (layer.parentId != null) {
@@ -579,10 +474,10 @@ void _checkStructure(GardenDocument d) {
       if (parent == null || !parent.children.contains(layer.id)) {
         fail('a layer is missing its parent');
       }
-      if (layer.kind.homeKind != parent.kind) {
+      if (layer.kind.parentKind != parent.kind) {
         fail('a layer is in the wrong place');
       }
-    } else if (!d.fields.contains(layer.id)) {
+    } else if (!d.propertyIds.contains(layer.id)) {
       fail('a layer is not in the drawing');
     }
     for (final childId in layer.children) {
@@ -594,6 +489,9 @@ void _checkStructure(GardenDocument d) {
     final geometry = d.geometries[layer.geometryId];
     if (geometry == null || geometry.ownerLayerId != layer.id) {
       fail('a layer is missing its drawing');
+    }
+    if ((layer.kind == LayerKind.zone) != (geometry.dimensions != null)) {
+      fail('planting sizes are on the wrong layer');
     }
   }
   if (placed.length != d.layers.length) fail('a layer is not in the drawing');
@@ -645,19 +543,15 @@ void _checkStructure(GardenDocument d) {
 
 ReferenceImage _referenceFromJson(
   Map<String, Object?> json,
-  List<int>? Function(String name)? readAsset, {
-  String? legacyId,
-}) {
-  final id = legacyId ?? _string(json['id'], 'image ID');
+  List<int>? Function(String name)? readAsset,
+) {
+  final id = _string(json['id'], 'image ID');
   final mimeType = _string(json['mime_type'], 'reference image type');
   if (!['image/png', 'image/jpeg', 'image/webp'].contains(mimeType)) {
     throw const DocumentFormatError('Unsupported reference image type');
   }
   final asset = _string(json['asset'], 'reference image name');
-  final expected = legacyId == null
-      ? _referenceEntry(id, mimeType)
-      : _oldReferenceEntry(mimeType);
-  if (asset != expected) {
+  if (asset != _referenceEntry(id, mimeType)) {
     throw const DocumentFormatError('Damaged file: reference image name');
   }
   final bytes = readAsset?.call(asset);
@@ -675,7 +569,7 @@ ReferenceImage _referenceFromJson(
   final width = _count(json['pixel_width']);
   final height = _count(json['pixel_height']);
   final scale = _number(json['metres_per_pixel']);
-  final opacity = _number(json['opacity'] ?? 0.6);
+  final opacity = _number(json['opacity']);
   final distance = _optionalNumber(json['known_distance']);
   if (width == 0 || height == 0 || width * height > maxReferencePixels) {
     throw const DocumentFormatError('Damaged file: reference image size');
@@ -690,8 +584,8 @@ ReferenceImage _referenceFromJson(
   }
   return ReferenceImage(
     id: id,
-    label: _optionalString(json['label']),
-    fileName: _optionalString(json['file_name']),
+    label: _optionalString(json['label'], 'image name'),
+    fileName: _optionalString(json['file_name'], 'image file name'),
     bytes: data,
     mimeType: mimeType,
     pixelWidth: width,
@@ -702,7 +596,7 @@ ReferenceImage _referenceFromJson(
     lineEnd: end,
     knownDistance: distance,
     opacity: opacity,
-    locked: _optionalBool(json['locked'], 'reference lock') ?? false,
+    locked: _bool(json['locked'], 'reference lock'),
   );
 }
 
@@ -735,10 +629,13 @@ String _string(Object? value, String what) {
   throw DocumentFormatError('Damaged file: $what is not readable');
 }
 
-String? _optionalString(Object? value) => value is String ? value : null;
+String? _optionalString(Object? value, String what) {
+  if (value == null || value is String) return value as String?;
+  throw DocumentFormatError('Damaged file: $what is not readable');
+}
 
-bool? _optionalBool(Object? value, String what) {
-  if (value == null || value is bool) return value as bool?;
+bool _bool(Object? value, String what) {
+  if (value is bool) return value;
   throw DocumentFormatError('Damaged file: $what is not readable');
 }
 

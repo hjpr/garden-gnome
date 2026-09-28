@@ -246,11 +246,46 @@ class CurveEdge {
   }
 }
 
+/// A box, in metres, that surely holds the whole edge, grown by [tolerance].
+/// Cheap (no trigonometry), so it can rule pairs out before exact maths. A
+/// minor arc stays within its sagitta of its chord; a major arc within its
+/// circle's box.
+(double, double, double, double) looseBox(CurveEdge e) {
+  var minX = math.min(e.start.x, e.end.x);
+  var minY = math.min(e.start.y, e.end.y);
+  var maxX = math.max(e.start.x, e.end.x);
+  var maxY = math.max(e.start.y, e.end.y);
+  var grow = tolerance;
+  if (e.isArc) {
+    final b = e.bulge.abs();
+    if (b <= 1) {
+      grow += b * e.start.distanceTo(e.end) / 2;
+    } else {
+      final c = e.centre;
+      final r = e.radius;
+      minX = c.x - r;
+      minY = c.y - r;
+      maxX = c.x + r;
+      maxY = c.y + r;
+    }
+  }
+  return (minX - grow, minY - grow, maxX + grow, maxY + grow);
+}
+
+/// False when [a] and [b] certainly cannot meet.
+bool mayMeet(CurveEdge a, CurveEdge b) {
+  final (ax0, ay0, ax1, ay1) = looseBox(a);
+  final (bx0, by0, bx1, by1) = looseBox(b);
+  return ax0 <= bx1 && bx0 <= ax1 && ay0 <= by1 && by0 <= ay1;
+}
+
 /// Analytic intersections of finite edges, including tangent contacts and the
 /// endpoints of coincident overlaps. A coincident interval is represented by
 /// its ends, not by an arbitrary point cloud.
 List<Vec> intersections(CurveEdge a, CurveEdge b) {
   final result = <Vec>[];
+  // Most pairs checked in a drawing lie far apart; skip the exact maths.
+  if (!mayMeet(a, b)) return result;
   void add(Vec p) {
     if (p.isFinite &&
         a._includes(p) &&

@@ -195,7 +195,7 @@ void main() {
           ),
         },
         counters: base.counters,
-        dimensions: const AreaDimensions(rowWidth: 2),
+        dimensions: const PlantingDimensions(rowWidth: 2),
       );
       final before = _loop(styled, _rect(2, 2, 3, 3));
       final result = before.edit(

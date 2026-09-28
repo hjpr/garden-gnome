@@ -1,41 +1,46 @@
 # Build screen: quick guide
 
-The Build screen is where you draw your land. You draw three kinds of shapes,
-each one inside the last:
+The Build screen is where you draw your land. There are two kinds of
+layer:
 
-- Field: the whole piece of land you are working with.
-- Plot: a growing space inside a field.
-- Area: a smaller part inside a plot.
+- Property: land you hold. Properties may not overlap one another.
+- Zone: how part of a property is used, such as beds, an orchard or a
+  shady corner. A zone must stay inside the property it belongs to, but
+  within it zones may overlap and touch each other freely.
 
 A shape only counts once its outline is closed. When it closes, it gets a
 light fill and shows as Active. An open outline is Inactive.
 
 Nothing you draw is refused for breaking a drawing rule. Instead the shape
 is marked Invalid: it turns red with dashed lines, gets a red ! in Layers,
-and Properties says what is wrong. Rules include:
+and Properties says what is wrong.
 
-- a plot must sit inside its field, and an area inside its plot
-- lines must not cross each other
-- fields must not overlap other fields (the same for plots and areas)
+Every layer must be finished: each outline closed, no outline crossing
+itself, and no loose lines or points left over. Beyond that:
 
-An invalid shape is also Inactive, and so is everything inside it. Fix it
-(for example, move the plot back into its field) and it becomes Active
-again.
+- a zone must sit inside its own property (touching the property line is
+  fine); its shapes may overlap and cross each other and other zones
+- a property must not overlap another property
+- the shapes of one property must not overlap or cross each other
+
+An invalid layer is also Inactive, and so are the zones of an inactive
+property. Fix it (for example, move the zone back inside its property)
+and it becomes Active again.
 
 
 ## Getting started
 
-1. In Layers (right side), press + Field. A new field appears in the list.
+1. In Layers (right side), press + Property. A new property appears in
+   the list.
 2. In Drawing tools (left side), choose Line, then Draw.
 3. Click on the grid to place the first corner, then click again for each
    next corner.
 4. Click the first corner again to close the shape. It turns Active.
-   (Or choose Circle and click twice for a round field.)
-5. To add a plot, press Plot in Layers, then draw inside the field the
-   same way.
+   (Or choose Circle and click twice for a round property.)
+5. To add a zone, press Zone in Layers, then draw it the same way.
 
-A plot can only be added once there is an active field, and an area only
-once there is an active plot.
+A zone goes under the selected property, or under the property of the
+selected zone. It can only be added once that property is Active.
 
 
 ## The screen
@@ -73,9 +78,12 @@ tool shows a crosshair: clicks add or remove geometry.
 Select (black arrow, the starting tool)
 - Click a point, a line, or the inside of a closed shape to select it.
   This works on any layer; the layer it belongs to is selected too.
-- Drag to move it. Moving a whole shape also moves everything inside it.
-- Where shapes are stacked, the innermost wins: an area before its plot,
-  a plot before its field. Points win over lines, and lines over insides.
+- Drag to move it. Moving a whole property shape also moves its zones'
+  shapes that lie inside it. Moving a zone never moves another zone,
+  even one it overlaps.
+- Where shapes are stacked, a zone wins over its property, and where
+  zones overlap, the one drawn later (lower in Layers) wins. Points win
+  over lines, and lines over insides.
 - Press and hold without moving to open a small menu listing everything
   under the pointer. Pick the one you mean.
 - Shift-click adds to the selection within the same layer.
@@ -87,8 +95,8 @@ Select (black arrow, the starting tool)
   - Anything the outline touches is selected, even if only part of it
     is inside. Things about to be picked light up while you drag.
   - A selection stays on one layer. The selected layer is used if the
-    outline touches it; otherwise the innermost land wins (an area before
-    its plot), as with a click. Locked layers are skipped.
+    outline touches it; otherwise a zone wins over a property, as with a
+    click. Locked layers are skipped.
   - Hold Shift as you start to add to the selection. An outline that
     touches nothing clears the selection.
 - On a circle: drag its edge to resize it, or its inside (or centre
@@ -111,23 +119,32 @@ Point (a dot)
   to split it with a new point. Splitting an arc preserves its curve.
 - New points must be at least one point marker apart on screen. A click
   too close to another point is refused; click the point itself to use it,
-  or zoom in to place points closer together.
+  or zoom in to place points closer together. On a zone, a new point may
+  land right on the corner of a finished shape, as zone shapes may touch.
 - Delete: click a point to remove it along with its lines.
 
 Line
-- Draw: click to add corners one after another. Click an open end point to
-  carry on an earlier line. Press Enter or Esc to stop.
-- Join: click two existing points to connect them with a line. The point
-  you just joined becomes the start of the next join, so keep clicking
-  points to join them in a run. Esc, Enter or another tool ends the run;
-  closing a loop ends it too.
-- Delete: click a straight or curved edge to remove it. Its points stay.
+- Straight: click to add corners one after another. Click an existing
+  point to draw to it: a loose point carries the line on, and an open end
+  or the first corner ends it. Start on a point to join points in a run.
+  Press Enter or Esc to stop.
+- Curve: works like Straight, pen style. Click for a sharp corner, or
+  press and drag to pull out two handles that bend the line smoothly
+  through that point. The next piece leaves along the handle you pulled.
+- To reshape a curve, select it (or one of its points) with Select and
+  drag a handle dot. At a smooth point the opposite handle swings round
+  with it. Area and land checks follow the curve to within half a
+  millimetre.
+- To remove a line, pick it with Select and press Delete. Its points stay.
 
 Arc
-- Click the start, a point on the curve, then the end. The first two
-  clicks are temporary; Esc cancels them. You can reuse open endpoints to
-  join an arc to straight edges. Three points in a straight line cannot
-  make an arc.
+- 3-point: click the start, a point on the curve, then the end.
+- Start-end: click the start, then the end, then move out and click to
+  set the middle of the arc. The arc stays symmetric; how far you move
+  from the straight line between the ends sets how far it bends.
+- The first two clicks are temporary; Esc cancels them. You can reuse
+  open endpoints to join an arc to straight edges. Three points in a
+  straight line cannot make an arc.
 
 Circle
 - Center: click the centre, then click to set the size. Clicking a ringed
@@ -147,7 +164,8 @@ Polygon
   Undo removes it whole and Point, Line and Select can edit it afterwards.
   Esc forgets the first click.
 - A polygon drawn on a layer that already has a shape is added as another
-  shape. Combine them with Operations > Boolean.
+  shape. On a property, shapes that overlap must be combined with
+  Operations > Boolean; on a zone they may stay as they are.
 
 Operations > Boolean (a panel on the left, under Drawing tools)
 - Select the shapes first: with Select, click one shape and Shift-click
@@ -171,8 +189,22 @@ Operations > Boolean (a panel on the left, under Drawing tools)
 - Use Select to move result edges or points. Moving an arc endpoint keeps
   its sweep angle; moving the whole shape carries its holes along too.
 - Holes are not land: clicking inside a hole does not select the surrounding
-  shape. A plot covering a field's hole is Invalid, even when its corners
-  are all inside the outer outline. The same rule applies to areas in plots.
+  shape. A zone covering its property's hole is Invalid, even when its
+  corners are all inside the outer outline. A property that spills out
+  of another property's hole overlaps it and is Invalid.
+
+Operations > Align (under Boolean)
+- Select exactly two items on one layer with Select: click the one to
+  align to, then Shift-click the one to move. Order matters; the first
+  stays put.
+- Left, Right, Top and Bottom line up that edge of the second item's
+  bounds with the same edge of the first. Center puts the second item's
+  centre on the first's centre, in both directions.
+- Point at a button to preview the move. Aligning is kept even when it
+  makes a property's shapes overlap; the property is then marked
+  Invalid. One Undo puts the item back.
+- Moving a whole property shape carries its zones' shapes inside it
+  along, as a drag does. Items that share points cannot be aligned.
 
 Pattern
 - Choose None or one of six patterns (Diagonal, Rows, Crosshatch, Grid,
@@ -180,8 +212,8 @@ Pattern
   Clicks in a hole or outside do nothing. The tool stays chosen.
 - Patterns are for looks only: area and land checks are unchanged. They
   show on Active land; Invalid or Inactive land shows its grey hatch
-  instead, and an open outline shows no pattern. A parent's pattern is
-  cut away under the plots or areas inside it.
+  instead, and an open outline shows no pattern. A property's pattern is
+  cut away under its zones. Where zones overlap, both patterns show.
 - The Pattern menu in Properties (LOOK) changes the same setting. Each
   change is one Undo step and is saved with the drawing.
 
@@ -196,7 +228,7 @@ Reference (pictures to trace over)
   and a blank name goes back to the file name. The bin removes the
   picture.
 - Every picture goes in one Reference layer at the bottom of Layers. Each
-  picture is its own row under it, like the shapes under a field; "no
+  picture is its own row under it, like the shapes under a property; "no
   scale" marks ones not yet calibrated. Later pictures sit on top.
 - Picture rows: click to select it and open its Properties; hover for up
   and down (which picture lies on top), lock and delete. The Reference
@@ -226,9 +258,10 @@ Reference (pictures to trace over)
 
 While you draw or drag, the dashed preview is green when the result will
 be valid and red when it will leave something invalid (for example, a
-line that crosses another, or a plot outside its field). The click still
-works; the status bar at the bottom says what became invalid, and Undo
-takes it back.
+line that crosses another in a property, or a zone line leaving its
+property). On a zone a new outline may cross finished shapes. The click
+still works; the status bar at the bottom says what became invalid, and
+Undo takes it back.
 
 A few things are still refused because they cannot make sense, such as a
 point joining a third line. The status bar says why.
@@ -236,32 +269,39 @@ point joining a third line. The status bar says why.
 
 ## Moving around
 
-- Zoom: mouse wheel, or the − and + buttons in the bottom-right corner.
-  Click the zoom percentage to fit the whole drawing.
+- The view is a camera looking straight down. The bottom-right corner
+  shows its height above the ground: 5 ft to 500 ft unless you change
+  the range in Edit > Preferences > Canvas.
+- Zoom: mouse wheel, or the − and + buttons in the bottom-right corner,
+  which lower and raise the camera. Click the camera height to fit the
+  whole drawing.
 - Pan: drag with the middle mouse button, or hold Space and drag.
 - View > Fit drawing: shows the whole drawing.
-- View > Reset view: back to 100%.
+- View > Reset view: back to 100 ft over the origin (or the nearest
+  height your range allows).
 
-The bar next to the zoom shows how long one grid square is, in your
-chosen units.
+The bar next to the camera height shows how long one grid square is, in
+your chosen units.
 
 
 ## Layers and Properties
 
 - Click a layer in Layers to work on it. Its details show in Properties.
 - In Properties you can rename the layer (pencil button) and set its
-  options, such as colour or soil drainage. Fields also record a soil
+  options, such as colour or soil drainage. A zone can note its ground
+  (such as raised beds) and crop. Properties also record a soil
   sample (pH, phosphorus, potassium, calcium, magnesium, CEC,
   conductivity, organic matter): type a number, or leave it blank. Values
   are kept exactly as typed; units and lab method are not recorded, so
   the app does not convert or judge them. Net area excludes holes and
-  includes curved edges; it is displayed in m² or ft² with your chosen units.
-- The bin icon (shown when you point at a layer) deletes it, and
-  everything inside it. You are asked first.
+  includes curved edges; it is displayed in m² or ft² with your chosen
+  units. Where a zone's shapes overlap, the shared ground counts once.
+- The bin icon (shown when you point at a layer) deletes it. Deleting a
+  property deletes its zones too. You are asked first.
 - The padlock next to the bin locks a layer once it is finished. A
-  locked layer, and everything inside it, cannot be drawn on, moved,
-  renamed, changed, or deleted, and Select clicks pass through it to the
-  land underneath. You can still select it in Layers to read its
+  locked layer, and every zone under a locked property, cannot be drawn
+  on, moved, renamed, changed, or deleted, and Select clicks pass through
+  it to the land underneath. You can still select it in Layers to read its
   details. Click the padlock again (or Unlock in Properties) to unlock.
   Locking is saved with the drawing and can be undone.
 
@@ -308,9 +348,8 @@ To keep a copy outside the browser, or move a drawing to another computer:
 
 Files that are damaged are refused, with a message explaining why, and
 your current drawing is left as it was. A file with invalid shapes opens
-normally, with those shapes marked Invalid. New files preserve arc edges,
-holes and unfinished Boolean operands using schema 2. Older schema 1
-drawings still open, but older app versions cannot read schema 2 files.
+normally, with those shapes marked Invalid. A file made by a newer
+version of Garden Gnome is refused rather than opened with parts missing.
 
 
 ## Controls and preferences
@@ -338,13 +377,15 @@ When moving a whole shape or circle, whichever of its corners (or a
 circle's outermost points) is closest lines up. With Snapping also on, a
 guide wins on its axis and the grid places the other.
 - Edit > Preferences, in three categories down the left:
-  - Canvas: zoom limits, how many undo steps to keep, and menu size.
+  - Canvas: the lowest and highest camera height, in your chosen units
+    (lower for a small plot, higher for a large property), how many
+    undo steps to keep, and menu size.
   - Style: line width, and grid thickness, colour and opacity.
   - Notifications: whether messages pop up at the top or bottom.
   Typed values are kept while you switch categories; press Apply to use
   them. The toast position takes effect straight away.
 
-Short messages (saved, exported, errors such as "Add a Field layer to
+Short messages (saved, exported, errors such as "Add a Property layer to
 start drawing.") pop up as toasts and go away on their own. Point at them
 to spread them out and keep them on screen; the × dismisses one.
 

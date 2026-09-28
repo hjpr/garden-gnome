@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../application/camera.dart';
 import '../../application/editor_controller.dart';
 import '../../application/workspace_settings.dart';
+import '../../domain/units.dart';
 import '../theme.dart';
 import '../widgets/panel.dart';
 
@@ -37,8 +38,8 @@ class _PreferencesBodyState extends State<PreferencesBody> {
     'gridThickness': 'Thickness (px)',
     'gridColor': 'Color',
     'gridOpacity': 'Opacity (%)',
-    'zoomMin': 'Minimum (%)',
-    'zoomMax': 'Maximum (%)',
+    'heightLowest': 'Lowest',
+    'heightHighest': 'Highest',
     'history': 'Undo steps',
   };
 
@@ -54,7 +55,7 @@ class _PreferencesBodyState extends State<PreferencesBody> {
     super.initState();
     final values =
         _editor.preferencesDraft ??
-        _fromAppearance(_editor.settings.appearance);
+        _fromAppearance(_editor.settings.appearance, _editor.settings.units);
     _text = {
       for (final key in _fields.keys)
         key: TextEditingController(text: values[key]),
@@ -69,19 +70,26 @@ class _PreferencesBodyState extends State<PreferencesBody> {
     super.dispose();
   }
 
-  static Map<String, String> _fromAppearance(Appearance a) => {
+  static Map<String, String> _fromAppearance(Appearance a, Units units) => {
     'lineWidth': _number(a.lineWidth),
     'gridThickness': _number(a.gridThickness),
     'gridColor':
         '#${(a.gridColor & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}',
     'gridOpacity': _number(a.gridOpacity * 100),
-    'zoomMin': _number(a.zoomLimits.min * 100),
-    'zoomMax': _number(a.zoomLimits.max * 100),
+    'heightLowest': _length(a.heightLimits.lowest, units),
+    'heightHighest': _length(a.heightLimits.highest, units),
     'history': '${a.historyCapacity}',
   };
 
   static String _number(double v) =>
       v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toString();
+
+  /// [metres] in [units], to three places at most: 5 ft converted to
+  /// metres and back is not quite 5.
+  static String _length(double metres, Units units) => units
+      .fromMetres(metres)
+      .toStringAsFixed(3)
+      .replaceFirst(RegExp(r'\.?0+$'), '');
 
   void _onChanged() {
     _editor.preferencesDraft = {
@@ -98,12 +106,13 @@ class _PreferencesBodyState extends State<PreferencesBody> {
       r'^#?([0-9a-fA-F]{6})$',
     ).firstMatch(_text['gridColor']!.text.trim());
     final history = int.tryParse(_text['history']!.text.trim());
+    final units = _editor.settings.units;
     final values = [
       n('lineWidth'),
       n('gridThickness'),
       n('gridOpacity'),
-      n('zoomMin'),
-      n('zoomMax'),
+      n('heightLowest'),
+      n('heightHighest'),
     ];
     String? problem;
     if (values.contains(null) || history == null) {
@@ -118,7 +127,10 @@ class _PreferencesBodyState extends State<PreferencesBody> {
         gridThickness: values[1]!,
         gridOpacity: values[2]! / 100,
         gridColor: 0xFF000000 | int.parse(colour!.group(1)!, radix: 16),
-        zoomLimits: ZoomLimits(min: values[3]! / 100, max: values[4]! / 100),
+        heightLimits: HeightLimits(
+          lowest: units.toMetres(values[3]!),
+          highest: units.toMetres(values[4]!),
+        ),
         historyCapacity: history!,
         toastPosition: _editor.settings.appearance.toastPosition,
       );
@@ -138,26 +150,33 @@ class _PreferencesBodyState extends State<PreferencesBody> {
     });
   }
 
-  Widget _field(String key) => PropertyRow(
-    label: _fields[key]!,
-    child: Semantics(
-      label: _fields[key],
-      child: TextField(
-        controller: _text[key],
-        style: const TextStyle(fontSize: 13),
-        onChanged: (_) => _onChanged(),
-        onSubmitted: (_) => _apply(),
+  Widget _field(String key) {
+    final label = switch (key) {
+      'heightLowest' ||
+      'heightHighest' => '${_fields[key]} (${_editor.settings.units.symbol})',
+      _ => _fields[key]!,
+    };
+    return PropertyRow(
+      label: label,
+      child: Semantics(
+        label: label,
+        child: TextField(
+          controller: _text[key],
+          style: const TextStyle(fontSize: 13),
+          onChanged: (_) => _onChanged(),
+          onSubmitted: (_) => _apply(),
+        ),
       ),
-    ),
-  );
+    );
+  }
 
   List<Widget> _options(PreferencesCategory category) {
     final s = _editor.settings;
     return switch (category) {
       PreferencesCategory.canvas => [
         PropertyGroup(
-          title: 'ZOOM LIMITS',
-          children: [_field('zoomMin'), _field('zoomMax')],
+          title: 'CAMERA HEIGHT',
+          children: [_field('heightLowest'), _field('heightHighest')],
         ),
         PropertyGroup(title: 'HISTORY', children: [_field('history')]),
         PropertyGroup(

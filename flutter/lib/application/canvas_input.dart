@@ -10,6 +10,8 @@ import '../domain/polygon_shapes.dart';
 import '../domain/reference_image.dart';
 import '../domain/vec.dart';
 import 'area_selection.dart';
+import 'carried_land.dart';
+import 'curve_handles.dart';
 import 'editor_controller.dart';
 import 'guides.dart';
 import 'hit_testing.dart';
@@ -22,6 +24,7 @@ import 'transform_box.dart';
 
 part 'canvas_area_select.dart';
 part 'canvas_construction.dart';
+part 'canvas_curve.dart';
 part 'canvas_reference.dart';
 part 'canvas_transform.dart';
 
@@ -46,6 +49,7 @@ class CanvasInput {
   _ReferenceDrag? _referenceDrag;
   _BoxDrag? _boxDrag;
   _AreaDrag? _areaDrag;
+  _HandleDrag? _handleDrag;
 
   /// The selection-box grip under the pointer while hovering, if any.
   BoxGrip? _hoverGrip;
@@ -55,7 +59,9 @@ class CanvasInput {
       _drag != null ||
       _referenceDrag != null ||
       _boxDrag != null ||
-      _areaDrag != null;
+      _areaDrag != null ||
+      _handleDrag != null ||
+      (_press?.curveStop != null && _press!.travelled);
 
   /// The selection-box grip being dragged, or else the one under the
   /// pointer. The canvas picks its cursor from it.
@@ -73,6 +79,7 @@ class CanvasInput {
     }
     _hoverGrip = editor.tool == Tool.select ? _boxGripAt(screen) : null;
     if (_hoverGrip != null) return editor.setPreview(null);
+    if (_curveHandleUnder(screen) != null) return editor.setPreview(null);
     if (editor.tool == Tool.select) {
       final top = _selectHits(screen).firstOrNull;
       return editor.setPreview(
@@ -94,7 +101,7 @@ class CanvasInput {
         screen,
       ),
       (Tool.line, ToolFunction.draw) => _drawPreview(layerId, geometry, screen),
-      (Tool.line, ToolFunction.join) => _joinPreview(layerId, geometry, screen),
+      (Tool.line, ToolFunction.curve) => _curveHover(layerId, geometry, screen),
       (Tool.arc, _) => _arcPreview(layerId, geometry, screen),
       (Tool.polygon, _) => _polygonPreview(layerId, screen),
       (Tool.pattern, _) => _patternHover(geometry, screen),
@@ -103,21 +110,22 @@ class CanvasInput {
         screen,
         HitKind.point,
       ),
-      (Tool.line, ToolFunction.delete) => _deleteHover(
-        geometry,
-        screen,
-        HitKind.line,
-      ),
       (Tool.circle, _) => _circlePreview(layerId, geometry, screen),
       _ => null,
     });
   }
 
   void press(Offset screen, {required bool shift}) {
+    // A curve handle sits on top of everything else Select could grab.
+    final handle = _curveHandleUnder(screen);
     _press = _Press(
       screen,
       shift: shift,
-      grip: editor.tool == Tool.select ? _boxGripAt(screen) : null,
+      grip: editor.tool == Tool.select && handle == null
+          ? _boxGripAt(screen)
+          : null,
+      handle: handle,
+      curveStop: _curvePressStop(screen),
     );
   }
 
@@ -129,13 +137,23 @@ class CanvasInput {
     if (_drag == null &&
         _boxDrag == null &&
         _areaDrag == null &&
+        _handleDrag == null &&
         !press.travelled) {
       if ((screen - press.origin).distance <= PointerReach.dragThreshold) {
         return;
       }
       press.travelled = true;
+      if (press.handle case final handle?) {
+        final layerId = editor.selectedLayerId!;
+        _handleDrag = _HandleDrag(
+          original: editor.document,
+          layerId: layerId,
+          handle: handle,
+          partner: smoothPartner(editor.document.geometryOf(layerId), handle),
+        );
+      }
       if (editor.tool == Tool.reference) _startReferenceLineDrag(press);
-      if (editor.function.drags) {
+      if (editor.function.drags && _handleDrag == null) {
         _boxDrag = _startBoxDrag(press);
         if (_boxDrag == null && press.grip == null) {
           _referenceDrag = _startReferenceDrag(press);
@@ -147,6 +165,11 @@ class CanvasInput {
           }
         }
       }
+    }
+    final handleDrag = _handleDrag;
+    if (handleDrag != null) return _updateHandleDrag(handleDrag, screen);
+    if (press.curveStop case final stop?) {
+      return _updateCurveDrag(stop, screen);
     }
     final areaDrag = _areaDrag;
     if (areaDrag != null) return _updateAreaDrag(areaDrag, screen);
@@ -170,12 +193,24 @@ class CanvasInput {
     final referenceDrag = _referenceDrag;
     final boxDrag = _boxDrag;
     final areaDrag = _areaDrag;
+    final handleDrag = _handleDrag;
     _press = null;
     _drag = null;
     _referenceDrag = null;
     _boxDrag = null;
     _areaDrag = null;
+    _handleDrag = null;
     if (press == null) return;
+    if (handleDrag != null) {
+      _finishHandleDrag(handleDrag);
+      return hover(screen);
+    }
+    if (press.curveStop case final stop? when press.travelled) {
+      _finishCurveDrag(stop, screen);
+      return hover(screen);
+    }
+    // A click on a curve handle keeps the selection as it is.
+    if (press.handle != null) return hover(screen);
     if (areaDrag != null) {
       _finishAreaDrag(areaDrag);
       return hover(screen);
@@ -226,7 +261,7 @@ class CanvasInput {
   /// Selects a choice made from the list returned by [takeHoldChoices].
   void choose(LayerHit hit) => editor.selectObject(hit.layerId, hit.itemId);
 
-  /// A short name for a choice, such as "Plot 1 · Line".
+  /// A short name for a choice, such as "Zone 1 · Line".
   String describe(LayerHit hit) {
     final name = editor.document.layers[hit.layerId]?.name ?? 'Unknown';
     final kind = switch (hit.kind) {
@@ -244,6 +279,7 @@ class CanvasInput {
     _referenceDrag = null;
     _boxDrag = null;
     _areaDrag = null;
+    _handleDrag = null;
     _hoverGrip = null;
   }
 
@@ -255,7 +291,7 @@ class CanvasInput {
 
     final layerId = editor.selectedLayerId;
     if (layerId == null) {
-      if (editor.document.fields.isEmpty) {
+      if (editor.document.propertyIds.isEmpty) {
         return editor.toasts.show(noLayersToast, kind: ToastKind.error);
       }
       return editor.showNotice('Select or add a layer to draw on');
@@ -268,12 +304,15 @@ class CanvasInput {
         _placePoint(layerId, geometry, screen);
       case (Tool.point, ToolFunction.delete):
         _deleteAt(layerId, geometry, screen, HitKind.point);
-      case (Tool.line, ToolFunction.delete):
-        _deleteAt(layerId, geometry, screen, HitKind.line);
       case (Tool.line, ToolFunction.draw):
         _drawClick(layerId, geometry, screen);
-      case (Tool.line, ToolFunction.join):
-        _joinClick(layerId, geometry, screen);
+      case (Tool.line, ToolFunction.curve):
+        _curvePlace(
+          layerId,
+          geometry,
+          _curveStopAt(geometry, screen),
+          Vec.zero,
+        );
       case (Tool.circle, _):
         _circleClick(layerId, geometry, screen);
       case (Tool.arc, _):
@@ -344,7 +383,8 @@ class CanvasInput {
     editor.commit(kind == HitKind.point ? 'Delete point' : 'Delete line', next);
   }
 
-  /// Line → Draw: each click commits a corner, or joins an existing point.
+  /// Line → Straight: each click commits a corner, or joins an existing
+  /// point.
   void _drawClick(String layerId, Geometry geometry, Offset screen) {
     final anchor = editor.lineAnchor;
     final target = _joinableAt(geometry, screen, from: anchor);
@@ -381,12 +421,22 @@ class CanvasInput {
         (e) => lineId = e.connect(anchor, target),
       );
       if (next == null) return editor.showNotice(problem);
+      // Joining a loose point carries on from it, so existing points can be
+      // joined in a run. A point that now has two lines (a closed loop, or
+      // the open end of another line) ends the drawing.
+      final carryOn = next.geometryOf(layerId).degreeOf(target) < 2
+          ? target
+          : null;
       editor.commit(
         'Join line',
         next,
-        lineContext: LineContext(operation: token, anchorBefore: anchor),
+        lineContext: LineContext(
+          operation: token,
+          anchorBefore: anchor,
+          anchorAfter: carryOn,
+        ),
       );
-      editor.setLineAnchor(null);
+      editor.setLineAnchor(carryOn);
       editor.setPreview(null);
       return editor.selectItem(lineId);
     }
@@ -411,32 +461,6 @@ class CanvasInput {
     );
     editor.setLineAnchor(pointId);
     editor.selectItem(lineId);
-  }
-
-  /// Line → Join: click two existing points to connect them.
-  ///
-  /// Joins usually come in runs, so the point just joined becomes the start
-  /// of the next join. The run ends when that point can take no more lines
-  /// (e.g. the loop closed), or on Esc, Enter, or another tool.
-  void _joinClick(String layerId, Geometry geometry, Offset screen) {
-    final first = editor.joinStart;
-    final target = _joinableAt(geometry, screen, from: first);
-    if (target == null) return;
-    if (first == null) {
-      editor.setJoinStart(target);
-      return editor.showNotice(null);
-    }
-    late String lineId;
-    final (next, problem) = editor.tryGeometryEdit(
-      layerId,
-      (e) => lineId = e.connect(first, target),
-    );
-    if (next == null) return editor.showNotice(problem);
-    editor.commit('Join points', next);
-    editor.selectItem(lineId);
-    if (editor.document.geometryOf(layerId).degreeOf(target) < 2) {
-      editor.setJoinStart(target);
-    }
   }
 
   /// Circle: the first click is kept aside, not added to the drawing; the
@@ -518,16 +542,24 @@ class CanvasInput {
 
   // ---------------------------------------------------------------- previews
 
-  static const noLayersToast = 'Add a Field layer to start drawing.';
+  static const noLayersToast = 'Add a Property layer to start drawing.';
 
   static const tooClose =
       'Too close to another point. Place it farther away, or click the point to use it';
 
   /// New points must sit at least one drawn point marker apart from the
   /// layer's existing points, measured on screen. Reusing a point is fine.
+  /// A zone's shapes may touch, so there only unfinished drawing counts:
+  /// a new corner may land on a finished shape's corner.
   bool _crowded(Geometry geometry, Vec position) {
     final reach = editor.camera.metres(PointerReach.pointDiameter);
-    return geometry.points.values.any((p) => p.distanceTo(position) < reach);
+    final kind = editor.document.layers[geometry.ownerLayerId]?.kind;
+    final touchable = kind == null || kind.exclusive
+        ? const <String>{}
+        : geometry.definingPoints(geometry.closedIds);
+    return geometry.points.entries.any(
+      (p) => !touchable.contains(p.key) && p.value.distanceTo(position) < reach,
+    );
   }
 
   PointPreview _placePreview(String layerId, Geometry geometry, Offset screen) {
@@ -535,9 +567,10 @@ class CanvasInput {
     final lineId = lineAt(geometry, camera, screen);
     if (lineId != null && pointAt(geometry, camera, screen) == null) {
       final line = geometry.lines[lineId]!;
-      final position = line
-          .curve(geometry.points)
-          .closestPoint(camera.toWorld(screen));
+      final position = line.closestPoint(
+        geometry.points,
+        camera.toWorld(screen),
+      );
       return PointPreview(
         position,
         valid: _staysValid(layerId, (e) => e.insertPoint(lineId, position)),
@@ -574,10 +607,9 @@ class CanvasInput {
   String? _lineThrough(Geometry geometry, Vec position) {
     final reach = editor.camera.metres(PointerReach.pointDiameter);
     for (final line in geometry.lines.values) {
-      final curve = line.curve(geometry.points);
-      if (curve.distanceTo(position) < 1e-9 &&
-          curve.start.distanceTo(position) >= reach &&
-          curve.end.distanceTo(position) >= reach) {
+      if (line.distanceTo(geometry.points, position) < 1e-9 &&
+          geometry.points[line.start]!.distanceTo(position) >= reach &&
+          geometry.points[line.end]!.distanceTo(position) >= reach) {
         return line.id;
       }
     }
@@ -611,22 +643,6 @@ class CanvasInput {
     );
   }
 
-  Preview? _joinPreview(String layerId, Geometry geometry, Offset screen) {
-    final first = editor.joinStart;
-    final target = _joinableAt(geometry, screen, from: first);
-    if (first == null) {
-      return target == null ? null : HoverPreview(target, joinable: true);
-    }
-    return SegmentPreview(
-      geometry.points[first]!,
-      target == null ? editor.camera.toWorld(screen) : geometry.points[target]!,
-      valid:
-          target != null &&
-          _staysValid(layerId, (e) => e.connect(first, target)),
-      joinTarget: target,
-    );
-  }
-
   Preview? _deleteHover(Geometry geometry, Offset screen, HitKind kind) {
     final itemId = kind == HitKind.point
         ? pointAt(geometry, editor.camera, screen)
@@ -653,7 +669,7 @@ class CanvasInput {
             geometry.degreeOf(id) < 2 &&
             (from == null ||
                 !geometry.lines.values.any(
-                  (l) => l.connects(from, id) && l.bulge == 0,
+                  (l) => l.connects(from, id) && l.isStraight,
                 )),
       );
 
@@ -677,11 +693,10 @@ class CanvasInput {
 
     final document = editor.document;
     final geometry = document.geometryOf(layerId);
-    // Moving a whole shape carries the smaller land inside it along too:
-    // plot shapes in a field shape, area shapes in a plot shape, from any
-    // layer.
+    // Moving a whole property shape carries its zones' shapes inside it
+    // along too.
     final carried = target.kind == HitKind.interior
-        ? _shapesInside(document, layerId, itemId)
+        ? landInside(document, layerId, itemId)
         : const <String, Set<String>>{};
     final lockedInside = carried.keys.where(document.isLocked);
     if (lockedInside.isNotEmpty) {
@@ -729,31 +744,6 @@ class CanvasInput {
       anchorStart: geometry.points[anchor]!,
       grabOffset: pressWorld - geometry.points[anchor]!,
     );
-  }
-
-  /// The points of every shape on a smaller kind of layer that lies inside
-  /// [shapeId], by layer.
-  Map<String, Set<String>> _shapesInside(
-    GardenDocument document,
-    String layerId,
-    String shapeId,
-  ) {
-    final outer = document.geometryOf(layerId).regionOf(shapeId);
-    if (outer == null) return const {};
-    final depth = document.layers[layerId]!.kind.index;
-    final result = <String, Set<String>>{};
-    for (final other in document.drawingOrder) {
-      if (document.layers[other]!.kind.index <= depth) continue;
-      final inner = document.geometryOf(other);
-      final points = <String>{};
-      for (final id in inner.closedIds) {
-        if (outer.contains(inner.regionOf(id)!)) {
-          points.addAll(inner.definingPoints([id]));
-        }
-      }
-      if (points.isNotEmpty) result[other] = points;
-    }
-    return result;
   }
 
   /// What a Select drag starting at [screen] would pick up.
@@ -919,7 +909,13 @@ List<Vec> _moveHandles(
 }
 
 class _Press {
-  _Press(this.origin, {required this.shift, this.grip});
+  _Press(
+    this.origin, {
+    required this.shift,
+    this.grip,
+    this.handle,
+    this.curveStop,
+  });
 
   final Offset origin;
   final bool shift;
@@ -927,6 +923,13 @@ class _Press {
   /// The selection-box grip the press landed on, if any. It then scales
   /// or rotates the selection instead of picking what is underneath.
   final BoxGrip? grip;
+
+  /// The Bézier handle the press landed on (Select), if any.
+  final CurveHandle? handle;
+
+  /// Line → Curve: where the press put its point. Dragging from here
+  /// pulls out that point's handles.
+  final _CurveStop? curveStop;
 
   /// Set once the pointer moves past the drag threshold; the press is then
   /// no longer a click.

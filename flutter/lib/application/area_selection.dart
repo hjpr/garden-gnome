@@ -35,7 +35,7 @@ Set<String> itemsTouched(Geometry geometry, List<Vec> outline) {
         if (geometry.lines[id] case final line?)
           if (geometry.points.containsKey(line.start) &&
               geometry.points.containsKey(line.end))
-            line.curve(geometry.points),
+            ...line.edges(geometry.points),
     ];
     if (edges.any(area.touches)) result.add(shape.id);
   }
@@ -51,7 +51,7 @@ Set<String> itemsTouched(Geometry geometry, List<Vec> outline) {
   for (final line in geometry.lines.values) {
     anchored.addAll([line.start, line.end]);
     if (shapeLines.contains(line.id)) continue;
-    if (area.touches(line.curve(geometry.points))) result.add(line.id);
+    if (line.edges(geometry.points).any(area.touches)) result.add(line.id);
   }
   for (final circle in geometry.circles.values) {
     anchored.add(circle.center);

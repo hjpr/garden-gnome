@@ -7,7 +7,7 @@ import 'package:garden_gnome/presentation/panels/layers_panel.dart';
 
 void main() {
   testWidgets('a layer expands to list its shapes, top first', (tester) async {
-    final editor = EditorController()..addLayer(LayerKind.field);
+    final editor = EditorController()..addLayer(LayerKind.property);
     addTearDown(editor.dispose);
     final layer = editor.selectedLayerId!;
     final (next, _) = editor.tryGeometryEdit(layer, (e) {
@@ -35,7 +35,7 @@ void main() {
       ),
     );
     expect(find.text('Shape 1'), findsNothing);
-    await tester.tap(find.bySemanticsLabel('Show shapes of Field 1'));
+    await tester.tap(find.bySemanticsLabel('Show shapes of Property 1'));
     await tester.pumpAndSettle();
     expect(find.textContaining('Shape 1'), findsOneWidget);
     expect(find.textContaining('Circle 1'), findsOneWidget);

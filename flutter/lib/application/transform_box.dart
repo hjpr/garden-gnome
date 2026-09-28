@@ -97,7 +97,7 @@ class TransformBox {
         hasShape = true;
         include(region.bounds);
       } else if (geometry.lines[id] case final line?) {
-        include(line.curve(geometry.points).bounds);
+        include(line.bounds(geometry.points));
       } else if (geometry.points[id] case final point?) {
         include((point, point));
       }

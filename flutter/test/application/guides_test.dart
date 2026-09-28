@@ -8,8 +8,8 @@ import 'package:garden_gnome/application/tools.dart';
 import 'package:garden_gnome/domain/layer.dart';
 import 'package:garden_gnome/domain/vec.dart';
 
-/// At 100% zoom with the camera at the origin, one metre is 30 pixels, so
-/// guides reach 6 px = 0.2 m.
+/// With the camera at its starting height over the origin, one metre is 30
+/// pixels, so guides reach 6 px = 0.2 m.
 Offset at(double x, double y) => Offset(x * 30, y * 30);
 
 void click(CanvasInput input, Offset where) {
@@ -37,7 +37,7 @@ Preview? drag(
 
 class _Setup {
   _Setup() {
-    editor = EditorController()..addLayer(LayerKind.field);
+    editor = EditorController()..addLayer(LayerKind.property);
     addTearDown(editor.dispose);
     editor.guideMemory.clock = () => now;
     editor.updateSettings(editor.settings.copyWith(guidesEnabled: true));
@@ -87,7 +87,7 @@ bool showsLine(SnapGuides guides, Vec through, Vec direction) =>
           g.direction.cross(direction).abs() < 1e-9,
     );
 
-/// A field with one straight line from (2, 2) to (6, 4), hovered long
+/// A property with one straight line from (2, 2) to (6, 4), hovered long
 /// enough to guide, and the Point tool chosen.
 _Setup _hoveredSlopedLine() {
   final s = _Setup();

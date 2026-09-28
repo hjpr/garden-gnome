@@ -5,11 +5,13 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 import '../../application/camera.dart';
+import '../../application/curve_handles.dart';
 import '../../application/hit_testing.dart';
 import '../../application/previews.dart';
 import '../../application/snapping.dart';
 import '../../application/transform_box.dart';
 import '../../application/workspace_settings.dart';
+import '../../domain/bezier.dart';
 import '../../domain/document.dart';
 import '../../domain/fill_patterns.dart';
 import '../../domain/geometry.dart';
@@ -36,7 +38,6 @@ class SceneState {
     required this.selection,
     required this.preview,
     required this.lineAnchor,
-    required this.joinStart,
     this.units = Units.feet,
     this.referencePictures = const {},
     this.referenceOpacity,
@@ -46,6 +47,7 @@ class SceneState {
     this.devicePixelRatio = 1,
     this.selectionBox,
     this.guideMarkers = const [],
+    this.showCurveHandles = false,
   });
 
   final GardenDocument document;
@@ -55,7 +57,6 @@ class SceneState {
   final Set<String> selection;
   final Preview? preview;
   final String? lineAnchor;
-  final String? joinStart;
 
   /// How lengths such as a circle's diameter are labelled.
   final Units units;
@@ -86,6 +87,10 @@ class SceneState {
   /// Where guides come from right now (the geometry last hovered), marked
   /// so the user can see what a move or new point will line up with.
   final List<Vec> guideMarkers;
+
+  /// Whether the selected curves show their Bézier handles (Select, on an
+  /// unlocked layer).
+  final bool showCurveHandles;
 }
 
 /// Draws the grid, every layer, and the current tool feedback.
@@ -118,6 +123,9 @@ class ScenePainter extends CustomPainter {
     final selectedId = scene.selectedLayerId;
     if (selectedId != null && document.layers.containsKey(selectedId)) {
       _paintSelectedLayerDetail(canvas, document.geometryOf(selectedId), move);
+      if (scene.showCurveHandles) {
+        _paintCurveHandles(canvas, document.geometryOf(selectedId));
+      }
     }
     if (move != null) _paintMovedLines(canvas, document, move);
     if (scene.selectionBox case final box?) _paintSelectionBox(canvas, box);
@@ -218,7 +226,7 @@ class ScenePainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
     for (final line in geometry.lines.values) {
-      final path = curvePath(line.curve(geometry.points), _camera);
+      final path = linePath(line, geometry.points, _camera);
       if (invalid) {
         dashedPath(canvas, path, color, dash: 8, gap: 4, width: width);
       } else {
@@ -238,10 +246,10 @@ class ScenePainter extends CustomPainter {
     // say what is selected, and colour and pattern tell layers apart.
   }
 
-  /// The layer's decorative pattern. Land of smaller layers (plots in a
-  /// field, areas in a plot) is cut out, so a pattern never shows through
-  /// under another. Invalid or inactive land shows its hatch instead (see
-  /// [_paintLayer]).
+  /// The layer's decorative pattern. Zone land is cut out of a property's
+  /// pattern, so it never shows through under a zone. Overlapping zones
+  /// each keep their own pattern. Invalid or inactive land shows its hatch
+  /// instead (see [_paintLayer]).
   void _paintPattern(
     Canvas canvas,
     GardenDocument document,
@@ -260,7 +268,8 @@ class ScenePainter extends CustomPainter {
     );
   }
 
-  /// The layer's land minus the land of smaller layers, in world metres.
+  /// The layer's land minus the land of zones inside a property, in world
+  /// metres.
   /// Cutting paths is slow, so it is done once per document, not per frame.
   Path _patternArea(GardenDocument document, String layerId) {
     final cache = _patternAreas[document] ??= {};
@@ -325,10 +334,7 @@ class ScenePainter extends CustomPainter {
       }
       final line = geometry.lines[id];
       if (line != null) {
-        canvas.drawPath(
-          curvePath(line.curve(geometry.points), _camera),
-          highlight,
-        );
+        canvas.drawPath(linePath(line, geometry.points, _camera), highlight);
       }
     }
 
@@ -354,7 +360,7 @@ class ScenePainter extends CustomPainter {
       );
     }
 
-    for (final id in [scene.lineAnchor, scene.joinStart]) {
+    for (final id in [scene.lineAnchor]) {
       final point = geometry.points[id];
       if (point != null) {
         canvas.drawCircle(
@@ -394,7 +400,7 @@ class ScenePainter extends CustomPainter {
         if (points.contains(line.start) || points.contains(line.end)) {
           dashedPath(
             canvas,
-            curvePath(line.curve(geometry.points), _camera),
+            linePath(line, geometry.points, _camera),
             colour,
             dash: 3,
             gap: 3,
@@ -499,6 +505,8 @@ class ScenePainter extends CustomPainter {
         _paintArcFeedback(canvas, preview);
       case PolygonPreview():
         _paintPolygonFeedback(canvas, preview);
+      case CurvePreview():
+        _paintCurveFeedback(canvas, preview);
       case BooleanPreview():
         _paintBooleanFeedback(canvas, preview);
       case ReferenceLinePreview(:final from, :final to, :final valid):
@@ -552,7 +560,7 @@ class ScenePainter extends CustomPainter {
       );
     } else if (line != null) {
       canvas.drawPath(
-        curvePath(line.curve(geometry.points), _camera),
+        linePath(line, geometry.points, _camera),
         Paint()
           ..color = colour.withValues(alpha: 0.6)
           ..strokeWidth = scene.appearance.lineWidth + 4
@@ -797,7 +805,6 @@ final _patternAreas = Expando<Map<String, Path>>('pattern areas');
 
 /// The outline colour used for a layer on the canvas and in Layers.
 Color layerColor(Layer layer) => switch (layer.properties) {
-  FieldProperties p => Color(p.color.argb),
-  PlotProperties p => Color(p.color.argb),
-  AreaProperties() => Palette.area,
+  PropertyProperties p => Color(p.color.argb),
+  ZoneProperties p => Color(p.color.argb),
 };

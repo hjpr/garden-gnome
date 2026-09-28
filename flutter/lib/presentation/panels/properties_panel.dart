@@ -51,9 +51,7 @@ class PropertiesBody extends StatelessWidget {
         PropertyRow(
           label: 'Net area',
           child: Text(
-            editor.settings.areaUnits.format(
-              document.geometryOf(layer.id).area,
-            ),
+            editor.settings.areaUnits.format(document.netAreaOf(layer.id)),
             key: const ValueKey('net-area'),
             style: const TextStyle(fontSize: 13),
           ),
@@ -66,23 +64,26 @@ class PropertiesBody extends StatelessWidget {
                 : null,
           ),
         ...switch (layer.properties) {
-          FieldProperties p => _fieldOptions(layer, p, editable),
-          PlotProperties p => _plotOptions(layer, p, editable),
-          AreaProperties p => _areaOptions(layer, p, editable),
+          PropertyProperties p => _propertyOptions(layer, p, editable),
+          ZoneProperties p => _zoneOptions(layer, p, editable),
         },
         PropertyGroup(title: 'LOOK', children: [_patternRow(layer, editable)]),
       ],
     );
   }
 
-  List<Widget> _fieldOptions(Layer layer, FieldProperties p, bool editable) => [
+  List<Widget> _propertyOptions(
+    Layer layer,
+    PropertyProperties p,
+    bool editable,
+  ) => [
     PropertyGroup(
       title: 'OPTIONS',
       children: [
         _colorRow(
           layer,
           p.color,
-          OutlineColor.fieldChoices,
+          OutlineColor.propertyChoices,
           (c) => p.copyWith(color: c),
           editable,
         ),
@@ -125,7 +126,7 @@ class PropertiesBody extends StatelessWidget {
   /// number. Values are stored as typed, with no unit conversion.
   Widget _soilRow(
     Layer layer,
-    FieldProperties p,
+    PropertyProperties p,
     String field,
     String label,
     bool editable,
@@ -141,7 +142,7 @@ class PropertiesBody extends StatelessWidget {
       check: _soilProblem,
       apply: (text) {
         final current = editor.document.layers[layer.id]?.properties;
-        if (current is! FieldProperties) return;
+        if (current is! PropertyProperties) return;
         final value = _parseSoil(text);
         if (value == current.soil.valueOf(field)) return;
         editor.updateProperties(
@@ -170,76 +171,67 @@ class PropertiesBody extends StatelessWidget {
         : null;
   }
 
-  List<Widget> _plotOptions(Layer layer, PlotProperties p, bool editable) => [
+  List<Widget> _zoneOptions(Layer layer, ZoneProperties p, bool editable) => [
     PropertyGroup(
       title: 'OPTIONS',
       children: [
         _colorRow(
           layer,
           p.color,
-          OutlineColor.plotChoices,
+          OutlineColor.zoneChoices,
           (c) => p.copyWith(color: c),
           editable,
         ),
-        PropertyRow(
+        _zoneText(
+          layer,
           label: 'Ground',
-          child: DraftTextField(
-            editor: editor,
-            draftKey: '${layer.id}/ground',
-            layerId: layer.id,
-            committedText: p.ground ?? '',
-            label: 'Ground',
-            hint: 'e.g. raised beds',
-            enabled: editable,
-            apply: (text) {
-              final current = editor.document.layers[layer.id]?.properties;
-              if (current is! PlotProperties) return;
-              final value = text.trim().isEmpty ? null : text.trim();
-              if (value == current.ground) return;
-              editor.updateProperties(
-                layer.id,
-                current.copyWith(ground: () => value),
-              );
-            },
-          ),
+          hint: 'e.g. raised beds',
+          value: p.ground,
+          editable: editable,
+          change: (current, value) => current.copyWith(ground: () => value),
+          read: (current) => current.ground,
+        ),
+        _zoneText(
+          layer,
+          label: 'Crop',
+          hint: 'e.g. tomatoes',
+          value: p.crop,
+          editable: editable,
+          change: (current, value) => current.copyWith(crop: () => value),
+          read: (current) => current.crop,
         ),
       ],
     ),
   ];
 
-  List<Widget> _areaOptions(Layer layer, AreaProperties p, bool editable) => [
-    PropertyGroup(
-      title: 'OPTIONS',
-      children: [
-        const PropertyRow(
-          label: 'Planting type',
-          child: Text('Flat', style: TextStyle(fontSize: 13)),
-        ),
-        PropertyRow(
-          label: 'Crop',
-          child: DraftTextField(
-            editor: editor,
-            draftKey: '${layer.id}/crop',
-            layerId: layer.id,
-            committedText: p.crop ?? '',
-            label: 'Crop',
-            hint: 'e.g. tomatoes',
-            enabled: editable,
-            apply: (text) {
-              final current = editor.document.layers[layer.id]?.properties;
-              if (current is! AreaProperties) return;
-              final value = text.trim().isEmpty ? null : text.trim();
-              if (value == current.crop) return;
-              editor.updateProperties(
-                layer.id,
-                current.copyWith(crop: () => value),
-              );
-            },
-          ),
-        ),
-      ],
+  /// One of a zone's free-text settings. Blank clears it.
+  Widget _zoneText(
+    Layer layer, {
+    required String label,
+    required String hint,
+    required String? value,
+    required bool editable,
+    required ZoneProperties Function(ZoneProperties, String?) change,
+    required String? Function(ZoneProperties) read,
+  }) => PropertyRow(
+    label: label,
+    child: DraftTextField(
+      editor: editor,
+      draftKey: '${layer.id}/${label.toLowerCase()}',
+      layerId: layer.id,
+      committedText: value ?? '',
+      label: label,
+      hint: hint,
+      enabled: editable,
+      apply: (text) {
+        final current = editor.document.layers[layer.id]?.properties;
+        if (current is! ZoneProperties) return;
+        final next = text.trim().isEmpty ? null : text.trim();
+        if (next == read(current)) return;
+        editor.updateProperties(layer.id, change(current, next));
+      },
     ),
-  ];
+  );
 
   /// The same pattern the Pattern tool sets. It needs a closed boundary.
   Widget _patternRow(Layer layer, bool editable) {

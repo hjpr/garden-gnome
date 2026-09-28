@@ -1,39 +1,38 @@
-/// The kinds of land a layer can describe, from largest to smallest.
+/// The kinds of land a layer can describe.
+///
+/// A property is land you hold: properties may not overlap one another.
+/// A zone marks how part of it is used, such as beds or an orchard. A zone
+/// must stay within the property it is listed under, but zones may overlap
+/// and touch each other there.
 enum LayerKind {
-  field('Field'),
-  plot('Plot'),
-  area('Area');
+  property('Property'),
+  zone('Zone');
 
   const LayerKind(this.label);
 
   final String label;
 
-  /// The kind a layer of this kind must sit inside, if any.
+  /// The kind of layer this one is listed under in Layers and must stay
+  /// within, if any.
   LayerKind? get parentKind => switch (this) {
-    LayerKind.field => null,
-    LayerKind.plot => LayerKind.field,
-    LayerKind.area => LayerKind.plot,
+    LayerKind.property => null,
+    LayerKind.zone => LayerKind.property,
   };
 
-  /// The kind of layer this one is listed under in Layers: plots and
-  /// areas both belong to a field, so an area can reach into any plot.
-  LayerKind? get homeKind => this == LayerKind.field ? null : LayerKind.field;
-
-  LayerKind? get childKind => switch (this) {
-    LayerKind.field => LayerKind.plot,
-    LayerKind.plot => LayerKind.area,
-    LayerKind.area => null,
-  };
+  /// Whether land of this kind must stand alone: none of its shapes may
+  /// overlap each other or another layer of the same kind.
+  bool get exclusive => this == LayerKind.property;
 }
 
-/// Outline colours offered for fields and plots, in menu order.
+/// Outline colours offered for properties and zones, in menu order.
 enum OutlineColor {
   green('Green', 0xFF465B3C),
   blue('Blue', 0xFF376B95),
   brown('Brown', 0xFF82603E),
   purple('Purple', 0xFF805891),
   orange('Orange', 0xFFB26930),
-  sage('Green', 0xFF99A18F);
+  sage('Green', 0xFF99A18F),
+  olive('Olive', 0xFF6B7F4F);
 
   const OutlineColor(this.label, this.argb);
 
@@ -49,8 +48,8 @@ enum OutlineColor {
     return null;
   }
 
-  static const fieldChoices = [green, blue, brown, purple, orange];
-  static const plotChoices = [sage, blue, brown, purple, orange];
+  static const propertyChoices = [green, blue, brown, purple, orange];
+  static const zoneChoices = [sage, olive, blue, brown, purple, orange];
 }
 
 enum SoilDrainage {
@@ -94,7 +93,7 @@ enum PlantingType {
   final String label;
 }
 
-/// Soil sample values recorded for a field. Every value is optional.
+/// Soil sample values recorded for a property. Every value is optional.
 class SoilSample {
   const SoilSample({
     this.ph,
@@ -169,14 +168,14 @@ sealed class LayerProperties {
   LayerProperties withPattern(FillPattern? pattern);
 
   static LayerProperties defaultsFor(LayerKind kind) => switch (kind) {
-    LayerKind.field => const FieldProperties(),
-    LayerKind.plot => const PlotProperties(),
-    LayerKind.area => const AreaProperties(),
+    LayerKind.property => const PropertyProperties(),
+    LayerKind.zone => const ZoneProperties(),
   };
 }
 
-class FieldProperties extends LayerProperties {
-  const FieldProperties({
+/// Settings for a property layer.
+class PropertyProperties extends LayerProperties {
+  const PropertyProperties({
     this.color = OutlineColor.green,
     this.drainage,
     this.soil = const SoilSample(),
@@ -189,12 +188,12 @@ class FieldProperties extends LayerProperties {
   @override
   final FillPattern? pattern;
 
-  FieldProperties copyWith({
+  PropertyProperties copyWith({
     OutlineColor? color,
     SoilDrainage? Function()? drainage,
     SoilSample? soil,
     FillPattern? Function()? pattern,
-  }) => FieldProperties(
+  }) => PropertyProperties(
     color: color ?? this.color,
     drainage: drainage == null ? this.drainage : drainage(),
     soil: soil ?? this.soil,
@@ -202,15 +201,18 @@ class FieldProperties extends LayerProperties {
   );
 
   @override
-  FieldProperties withPattern(FillPattern? pattern) =>
+  PropertyProperties withPattern(FillPattern? pattern) =>
       copyWith(pattern: () => pattern);
 }
 
-class PlotProperties extends LayerProperties {
-  const PlotProperties({
+/// Settings for a zone layer.
+class ZoneProperties extends LayerProperties {
+  const ZoneProperties({
     this.color = OutlineColor.sage,
     this.pattern,
     this.ground,
+    this.crop,
+    this.plantingType = PlantingType.flat,
   });
 
   final OutlineColor color;
@@ -220,50 +222,31 @@ class PlotProperties extends LayerProperties {
   /// A short description of the ground, such as "raised beds".
   final String? ground;
 
-  PlotProperties copyWith({
+  /// The crop growing here, as a label.
+  final String? crop;
+
+  /// How the crop is planted. Kept for the planting layouts to come.
+  final PlantingType plantingType;
+
+  ZoneProperties copyWith({
     OutlineColor? color,
     String? Function()? ground,
+    String? Function()? crop,
     FillPattern? Function()? pattern,
-  }) => PlotProperties(
+  }) => ZoneProperties(
     color: color ?? this.color,
     pattern: pattern == null ? this.pattern : pattern(),
     ground: ground == null ? this.ground : ground(),
-  );
-
-  @override
-  PlotProperties withPattern(FillPattern? pattern) =>
-      copyWith(pattern: () => pattern);
-}
-
-class AreaProperties extends LayerProperties {
-  const AreaProperties({
-    this.plantingType = PlantingType.flat,
-    this.crop,
-    this.pattern,
-  });
-
-  final PlantingType plantingType;
-
-  /// The crop growing here, as a label.
-  final String? crop;
-  @override
-  final FillPattern? pattern;
-
-  AreaProperties copyWith({
-    String? Function()? crop,
-    FillPattern? Function()? pattern,
-  }) => AreaProperties(
-    plantingType: plantingType,
     crop: crop == null ? this.crop : crop(),
-    pattern: pattern == null ? this.pattern : pattern(),
+    plantingType: plantingType,
   );
 
   @override
-  AreaProperties withPattern(FillPattern? pattern) =>
+  ZoneProperties withPattern(FillPattern? pattern) =>
       copyWith(pattern: () => pattern);
 }
 
-/// One field, plot, or area in the drawing.
+/// One property or zone in the drawing.
 class Layer {
   Layer({
     required this.id,
@@ -280,11 +263,10 @@ class Layer {
   final LayerKind kind;
   final String name;
 
-  /// The field this layer is listed under; null for fields. Where its
-  /// land may sit is set by [LayerKind.parentKind], not by this.
+  /// The property this layer is listed under; null for properties.
   final String? parentId;
 
-  /// Layers listed under this field, in creation order.
+  /// Layers listed under this property, in creation order.
   final List<String> children;
   final String geometryId;
   final LayerProperties properties;

@@ -96,7 +96,7 @@ ItemRef? guideItemAt(GardenDocument document, Camera camera, Offset screen) {
     }
     if (bestKind == 0) continue;
     for (final line in geometry.lines.values) {
-      final gap = line.curve(geometry.points).distanceTo(world) * perMetre;
+      final gap = line.distanceTo(geometry.points, world) * perMetre;
       if (gap <= PointerReach.line) consider(layerId, line.id, 1, gap);
     }
     for (final circle in geometry.circles.values) {

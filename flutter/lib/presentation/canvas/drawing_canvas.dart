@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../application/canvas_input.dart';
+import '../../application/curve_handles.dart';
 import '../../application/editor_controller.dart';
 import '../../application/hit_testing.dart';
 import '../../application/previews.dart';
@@ -111,7 +112,7 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
   Timer? _holdTimer;
 
   /// Lists everything under a held press so the user can pick the one
-  /// they mean, e.g. a field edge hidden under a plot.
+  /// they mean, e.g. a property edge hidden under a zone.
   Future<void> _showHoldMenu(Offset globalPosition) async {
     final choices = _input.takeHoldChoices();
     if (choices.isEmpty || !mounted) return;
@@ -257,7 +258,6 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
                       selection: editor.selection,
                       preview: editor.preview,
                       lineAnchor: editor.lineAnchor,
-                      joinStart: editor.joinStart,
                       units: editor.settings.units,
                       referencePictures: _pictures.sync([
                         for (final image in editor.document.references)
@@ -270,6 +270,7 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
                       devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
                       selectionBox: selectionBoxOf(editor),
                       guideMarkers: _input.activeGuideSet().markers,
+                      showCurveHandles: visibleCurveHandles(editor).isNotEmpty,
                     ),
                   ),
                 );

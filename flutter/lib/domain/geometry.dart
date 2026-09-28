@@ -1,11 +1,22 @@
+import 'dart:math' as math;
+
+import 'bezier.dart';
 import 'curve_edge.dart';
 import 'planar.dart';
 import 'region.dart';
 import 'vec.dart';
 
-/// An editable straight or circular connection between two owned points.
+/// An editable connection between two owned points: straight, a circular
+/// arc ([bulge]), or a cubic Bézier curve ([startHandle], [endHandle]).
 class LineSegment {
-  const LineSegment(this.id, this.start, this.end, {this.bulge = 0});
+  const LineSegment(
+    this.id,
+    this.start,
+    this.end, {
+    this.bulge = 0,
+    this.startHandle,
+    this.endHandle,
+  });
 
   final String id;
   final String start;
@@ -14,8 +25,102 @@ class LineSegment {
   /// tan(signed sweep / 4); zero keeps existing straight segments unchanged.
   final double bulge;
 
-  CurveEdge curve(Map<String, Vec> points) =>
-      CurveEdge(points[start]!, points[end]!, bulge: bulge);
+  /// Bézier control points, each stored as an offset from its own end
+  /// point so it moves with that point. Both null for a straight line or
+  /// an arc.
+  final Vec? startHandle;
+  final Vec? endHandle;
+
+  bool get isBezier => startHandle != null || endHandle != null;
+  bool get isStraight => bulge == 0 && !isBezier;
+
+  /// The same line with new Bézier handles.
+  LineSegment withHandles(Vec startHandle, Vec endHandle) => LineSegment(
+    id,
+    start,
+    end,
+    startHandle: startHandle,
+    endHandle: endHandle,
+  );
+
+  /// The handle offset at [pointId], one of this line's ends.
+  Vec? handleAt(String pointId) => pointId == start ? startHandle : endHandle;
+
+  /// The single straight or arc edge. Bézier lines have no single edge:
+  /// use [edges], [bezier] or the measuring helpers below instead.
+  CurveEdge curve(Map<String, Vec> points) {
+    if (isBezier) {
+      throw StateError('A Bézier line is not a single straight or arc edge.');
+    }
+    return CurveEdge(points[start]!, points[end]!, bulge: bulge);
+  }
+
+  /// The Bézier curve in world metres, or null for a straight line or arc.
+  CubicBezier? bezier(Map<String, Vec> points) {
+    if (!isBezier) return null;
+    final a = points[start]!;
+    final b = points[end]!;
+    return CubicBezier(
+      a,
+      a + (startHandle ?? Vec.zero),
+      b + (endHandle ?? Vec.zero),
+      b,
+    );
+  }
+
+  /// Straight and arc edges tracing this line end to end. A Bézier line
+  /// gives the arcs standing in for it; see [bezierTolerance].
+  List<CurveEdge> edges(Map<String, Vec> points) {
+    final curve = bezier(points);
+    if (curve == null) return [this.curve(points)];
+    final cached = _fits[this];
+    if (cached != null && cached.$1.sameAs(curve)) return cached.$2;
+    final fitted = List<CurveEdge>.unmodifiable(curve.toEdges());
+    _fits[this] = (curve, fitted);
+    return fitted;
+  }
+
+  static final _fits = Expando<(CubicBezier, List<CurveEdge>)>('bezier fits');
+
+  double distanceTo(Map<String, Vec> points, Vec p) =>
+      closestPoint(points, p).distanceTo(p);
+
+  /// The point on this line nearest [p]. Exact for Bézier lines too.
+  Vec closestPoint(Map<String, Vec> points, Vec p) {
+    final curve = bezier(points);
+    if (curve == null) return this.curve(points).closestPoint(p);
+    return curve.pointAt(curve.closestParameter(p));
+  }
+
+  /// The point halfway along the curve's parameter.
+  Vec midpoint(Map<String, Vec> points) =>
+      bezier(points)?.pointAt(0.5) ?? curve(points).pointAt(0.5);
+
+  (Vec, Vec) bounds(Map<String, Vec> points) {
+    var low = const Vec(double.infinity, double.infinity);
+    var high = const Vec(double.negativeInfinity, double.negativeInfinity);
+    for (final edge in edges(points)) {
+      final (a, b) = edge.bounds;
+      low = Vec(math.min(low.x, a.x), math.min(low.y, a.y));
+      high = Vec(math.max(high.x, b.x), math.max(high.y, b.y));
+    }
+    return (low, high);
+  }
+
+  /// Whether [other] draws the same curve between the same two points,
+  /// in either direction.
+  bool sameCurveAs(LineSegment other) {
+    if (other.start == start && other.end == end) {
+      return other.bulge == bulge &&
+          other.startHandle == startHandle &&
+          other.endHandle == endHandle;
+    }
+    return other.start == end &&
+        other.end == start &&
+        other.bulge == -bulge &&
+        other.startHandle == endHandle &&
+        other.endHandle == startHandle;
+  }
 
   bool touches(String pointId) => start == pointId || end == pointId;
   String otherEnd(String pointId) => start == pointId ? end : start;
@@ -75,12 +180,12 @@ class Circle {
   Circle withRadius(double radius) => Circle(id, center, radius, label: label);
 }
 
-/// Row and mound settings stored with an area's geometry.
+/// Row and mound settings stored with a zone's geometry.
 ///
 /// Planting layout controls arrive in a later milestone; the values are kept
 /// so saved drawings round-trip without loss.
-class AreaDimensions {
-  const AreaDimensions({
+class PlantingDimensions {
+  const PlantingDimensions({
     this.rowWidth,
     this.rowSpacing,
     this.rowDirection,
@@ -159,7 +264,7 @@ class Geometry {
   /// covers any object missing from this list.
   final List<String> order;
   final IdCounters counters;
-  final AreaDimensions? dimensions;
+  final PlantingDimensions? dimensions;
 
   bool get isEmpty => points.isEmpty;
 
@@ -175,17 +280,24 @@ class Geometry {
 
   /// All of the layer's land: every closed shape and circle together, or
   /// null while there is none.
-  late final Region? region = _region();
+  Region? get region => _land.$1;
 
   /// Whether the layer has any closed land yet.
   bool get isClosed => region != null;
 
   /// Total land area in square metres: the sum of every closed shape, or
-  /// null while there is none. Overlapping shapes (an invalid layer) are
-  /// counted once each, so the figure stays predictable.
+  /// null while there is none. Overlapping shapes are counted once each,
+  /// so the figure stays predictable. See [coveredArea].
   double? get area => closedIds.isEmpty
       ? null
       : closedIds.fold<double>(0, (sum, id) => sum + regionOf(id)!.area);
+
+  /// The ground the layer covers in square metres, or null while there is
+  /// none. Where shapes overlap, the shared land is counted once.
+  double? get coveredArea => _land.merged ? region!.area : area;
+
+  /// The land, and whether overlapping shapes were merged to make it.
+  late final (Region?, {bool merged}) _land = _region();
 
   /// The shape's own name, or an automatic one such as "Shape 2".
   String labelOf(String id) {
@@ -250,7 +362,7 @@ class Geometry {
     return editor.build();
   }
 
-  Geometry copyWith({IdCounters? counters, AreaDimensions? dimensions}) =>
+  Geometry copyWith({IdCounters? counters, PlantingDimensions? dimensions}) =>
       Geometry(
         id: id,
         ownerLayerId: ownerLayerId,
@@ -274,10 +386,10 @@ class Geometry {
     return [...listed, ...missing];
   }
 
-  Region? _region() {
+  (Region?, {bool merged}) _region() {
     final ids = closedIds;
-    if (ids.isEmpty) return null;
-    if (ids.length == 1) return regionOf(ids.single);
+    if (ids.isEmpty) return (null, merged: false);
+    if (ids.length == 1) return (regionOf(ids.single), merged: false);
     final regions = [for (final id in ids) regionOf(id)!];
     var overlapping = false;
     for (var i = 0; i < regions.length && !overlapping; i++) {
@@ -289,21 +401,24 @@ class Geometry {
       }
     }
     if (overlapping) {
-      // An invalid layer: still show and test its land as the union, so
-      // an overlap does not read as a hole.
+      // Show and test overlapping land (a zone's, or an invalid property's)
+      // as the union, so an overlap does not read as a hole.
       try {
         Region merged = regions.first;
         for (final next in regions.skip(1)) {
           merged = merged.combine(next, BooleanOperation.union);
         }
-        return merged;
+        return (merged, merged: true);
       } on StateError {
         // Fall through to the gathered pieces below.
       }
     }
     // Separate pieces can simply be gathered; nesting sorts out islands
     // inside another shape's hole.
-    return CurveRegion([for (final region in regions) ...region.contours]);
+    return (
+      CurveRegion([for (final region in regions) ...region.contours]),
+      merged: false,
+    );
   }
 
   String? _unfinished() {
@@ -409,12 +524,15 @@ class Geometry {
     return corners.toSet().length == corners.length ? corners : const [];
   }
 
+  /// A ring's edges in traversal order. A Bézier line gives the arcs
+  /// that stand in for it.
   List<CurveEdge> _ringEdges(List<SegmentRef> ring) => [
     for (final ref in ring)
       if (ref.reversed)
-        lines[ref.segmentId]!.curve(points).reversed()
+        for (final edge in lines[ref.segmentId]!.edges(points).reversed)
+          edge.reversed()
       else
-        lines[ref.segmentId]!.curve(points),
+        ...lines[ref.segmentId]!.edges(points),
   ];
 
   (String, String)? _directed(SegmentRef ref) {
@@ -490,19 +608,39 @@ class GeometryEditor {
     _points[id] = position;
   }
 
-  /// Joins two points with a straight segment or circular arc.
-  String connect(String a, String b, {double bulge = 0}) {
+  /// Joins two points with a straight segment, a circular arc ([bulge]),
+  /// or a Bézier curve (handles as offsets from [a] and [b]). Zero-length
+  /// handles on both ends make a straight line.
+  String connect(
+    String a,
+    String b, {
+    double bulge = 0,
+    Vec? startHandle,
+    Vec? endHandle,
+  }) {
     if (a == b || !_points.containsKey(a) || !_points.containsKey(b)) {
       throw const GeometryRuleError('Choose two different points');
     }
     if (!bulge.isFinite) {
       throw const GeometryRuleError('An arc must have a finite sweep');
     }
-    if (_lines.values.any(
-      (line) =>
-          line.connects(a, b) &&
-          (line.start == a ? line.bulge : -line.bulge) == bulge,
-    )) {
+    final curved =
+        (startHandle != null && startHandle != Vec.zero) ||
+        (endHandle != null && endHandle != Vec.zero);
+    if (curved &&
+        (!(startHandle ?? Vec.zero).isFinite ||
+            !(endHandle ?? Vec.zero).isFinite)) {
+      throw const GeometryRuleError('A curve handle must be finite');
+    }
+    final proposed = LineSegment(
+      '',
+      a,
+      b,
+      bulge: curved ? 0 : bulge,
+      startHandle: curved ? startHandle ?? Vec.zero : null,
+      endHandle: curved ? endHandle ?? Vec.zero : null,
+    );
+    if (_lines.values.any(proposed.sameCurveAs)) {
       throw const GeometryRuleError('These points are already joined');
     }
     if (_degree(a) >= 2 || _degree(b) >= 2) {
@@ -511,9 +649,29 @@ class GeometryEditor {
       );
     }
     final id = _nextLineId();
-    _lines[id] = LineSegment(id, a, b, bulge: bulge);
+    _lines[id] = LineSegment(
+      id,
+      a,
+      b,
+      bulge: proposed.bulge,
+      startHandle: proposed.startHandle,
+      endHandle: proposed.endHandle,
+    );
     _refreshBoundary();
     return id;
+  }
+
+  /// Sets a Bézier line's handle at [pointId], one of its ends, as an
+  /// offset from that point.
+  void setHandle(String lineId, String pointId, Vec offset) {
+    final line = _lines[lineId];
+    if (line == null || !line.isBezier || !line.touches(pointId)) return;
+    if (!offset.isFinite) {
+      throw const GeometryRuleError('A curve handle must be finite');
+    }
+    _lines[lineId] = pointId == line.start
+        ? line.withHandles(offset, line.endHandle!)
+        : line.withHandles(line.startHandle!, offset);
   }
 
   /// Draws a circle on top of the layer's other shapes.
@@ -587,29 +745,51 @@ class GeometryEditor {
     if (!position.isFinite) {
       throw const GeometryRuleError('Point coordinates must be finite');
     }
-    final curve = original.curve(_points);
-    final projected = curve.closestPoint(position);
-    if (projected.distanceTo(curve.start) <= tolerance ||
-        projected.distanceTo(curve.end) <= tolerance) {
+    final bezier = original.bezier(_points);
+    final projected = original.closestPoint(_points, position);
+    final startPoint = _points[original.start]!;
+    final endPoint = _points[original.end]!;
+    if (projected.distanceTo(startPoint) <= tolerance ||
+        projected.distanceTo(endPoint) <= tolerance) {
       throw const GeometryRuleError('Choose a point between the edge ends');
     }
-    final t = curve.parameterOf(projected).clamp(0.0, 1.0);
     final pointId = addPoint(projected);
     final first = _nextLineId();
     final second = _nextLineId();
     _lines.remove(lineId);
-    _lines[first] = LineSegment(
-      first,
-      original.start,
-      pointId,
-      bulge: curve.portion(0, t).bulge,
-    );
-    _lines[second] = LineSegment(
-      second,
-      pointId,
-      original.end,
-      bulge: curve.portion(t, 1).bulge,
-    );
+    if (bezier != null) {
+      // Splitting a Bézier curve gives two that trace it exactly.
+      final (a, b) = bezier.split(bezier.closestParameter(projected));
+      _lines[first] = LineSegment(
+        first,
+        original.start,
+        pointId,
+        startHandle: a.p1 - a.p0,
+        endHandle: a.p2 - projected,
+      );
+      _lines[second] = LineSegment(
+        second,
+        pointId,
+        original.end,
+        startHandle: b.p1 - projected,
+        endHandle: b.p2 - b.p3,
+      );
+    } else {
+      final curve = original.curve(_points);
+      final t = curve.parameterOf(projected).clamp(0.0, 1.0);
+      _lines[first] = LineSegment(
+        first,
+        original.start,
+        pointId,
+        bulge: curve.portion(0, t).bulge,
+      );
+      _lines[second] = LineSegment(
+        second,
+        pointId,
+        original.end,
+        bulge: curve.portion(t, 1).bulge,
+      );
+    }
     for (final shape in _shapes.values.toList()) {
       final rings = [
         for (final ring in shape.rings)
@@ -1168,7 +1348,13 @@ int compareItemIds(String a, String b) {
 /// Checks topology within each object, not intersections between operands.
 /// Ordinary edits retain invalid drawings; Boolean operations use the same
 /// rules on each operand separately before consuming anything.
-String? geometryProblem(Geometry geometry) {
+///
+/// Separate shapes may already cross and touch. With [shapesMayMeet], as in
+/// a zone, so may unfinished drawing: each connected run of lines is
+/// checked only against itself, so a new outline can be drawn across an
+/// existing shape. Without it, loose lines and points may not meet
+/// anything.
+String? geometryProblem(Geometry geometry, {bool shapesMayMeet = false}) {
   for (final p in geometry.points.values) {
     if (!p.isFinite) return 'Point coordinates must be finite';
   }
@@ -1179,6 +1365,18 @@ String? geometryProblem(Geometry geometry) {
     if (a == null || b == null) return 'A line is missing an end point';
     if (a.distanceTo(b) <= tolerance) return 'A line must have length';
     if (!line.bulge.isFinite) return 'An arc must have a finite sweep';
+    if (line.bezier(geometry.points) case final bezier?) {
+      if (!bezier.isFinite) return 'A curve handle must be finite';
+      final pieces = line.edges(geometry.points);
+      for (var i = 0; i < pieces.length; i++) {
+        for (var j = 0; j < i - 1; j++) {
+          if (intersections(pieces[i], pieces[j]).isNotEmpty) {
+            return 'A curve cannot cross itself';
+          }
+        }
+      }
+      continue;
+    }
     final curve = line.curve(geometry.points);
     if (!curve.length.isFinite || !curve.signedArea.isFinite) {
       return 'An arc must have a finite size';
@@ -1211,7 +1409,7 @@ String? geometryProblem(Geometry geometry) {
     }
   }
 
-  final owners = _ownersOf(geometry);
+  final owners = _ownersOf(geometry, byRun: shapesMayMeet);
   bool separate(String a, String b) {
     final first = owners[a];
     final second = owners[b];
@@ -1231,33 +1429,36 @@ String? geometryProblem(Geometry geometry) {
   }
   for (var i = 0; i < lines.length; i++) {
     final line = lines[i];
-    final edge = line.curve(geometry.points);
+    final pieces = line.edges(geometry.points);
     for (final entry in points) {
       if (line.touches(entry.key) || separate(line.id, entry.key)) continue;
-      if (edge.distanceTo(entry.value) <= tolerance) {
+      if (pieces.any((edge) => edge.distanceTo(entry.value) <= tolerance)) {
         return 'A point cannot rest on an edge it is not part of';
       }
     }
     for (var j = 0; j < i; j++) {
       final other = lines[j];
       if (separate(line.id, other.id)) continue;
-      final otherEdge = other.curve(geometry.points);
       final shared = {
         line.start,
         line.end,
       }.intersection({other.start, other.end});
-      final meetings = intersections(edge, otherEdge);
-      if (meetings.any(
-        (p) => !shared.any(
-          (id) => geometry.points[id]!.distanceTo(p) <= tolerance,
-        ),
-      )) {
-        return 'Edges cannot cross or touch except at shared points';
-      }
-      if (meetings.isNotEmpty &&
-          (edge.distanceTo(otherEdge.pointAt(0.5)) <= tolerance ||
-              otherEdge.distanceTo(edge.pointAt(0.5)) <= tolerance)) {
-        return 'Edges cannot double back over each other';
+      for (final edge in pieces) {
+        for (final otherEdge in other.edges(geometry.points)) {
+          final meetings = intersections(edge, otherEdge);
+          if (meetings.any(
+            (p) => !shared.any(
+              (id) => geometry.points[id]!.distanceTo(p) <= tolerance,
+            ),
+          )) {
+            return 'Edges cannot cross or touch except at shared points';
+          }
+          if (meetings.isNotEmpty &&
+              (edge.distanceTo(otherEdge.pointAt(0.5)) <= tolerance ||
+                  otherEdge.distanceTo(edge.pointAt(0.5)) <= tolerance)) {
+            return 'Edges cannot double back over each other';
+          }
+        }
       }
     }
   }
@@ -1269,8 +1470,9 @@ String? geometryProblem(Geometry geometry) {
       if (disc.contours
           .expand((ring) => ring)
           .any(
-            (edge) =>
-                intersections(edge, line.curve(geometry.points)).isNotEmpty,
+            (edge) => line
+                .edges(geometry.points)
+                .any((piece) => intersections(edge, piece).isNotEmpty),
           )) {
         return 'Edges cannot cross or touch the circle';
       }
@@ -1314,10 +1516,33 @@ String? _shapeProblem(Geometry geometry, ClosedShape shape) {
   return null;
 }
 
-Map<String, Set<String>> _ownersOf(Geometry geometry) {
+/// The shapes and circles each item belongs to. With [byRun], every point
+/// and line also belongs to its connected run of lines, so loose drawing
+/// has an owner too. A shape's holes are runs of their own, but still share
+/// the shape with its outline.
+Map<String, Set<String>> _ownersOf(Geometry geometry, {bool byRun = false}) {
   final owners = <String, Set<String>>{};
   void add(String item, String shape) =>
       owners.putIfAbsent(item, () => {}).add(shape);
+  if (byRun) {
+    final roots = {for (final id in geometry.points.keys) id: id};
+    String root(String id) {
+      while (roots[id] != id) {
+        id = roots[id] = roots[roots[id]!]!;
+      }
+      return id;
+    }
+
+    for (final line in geometry.lines.values) {
+      roots[root(line.start)] = root(line.end);
+    }
+    for (final id in geometry.points.keys) {
+      add(id, 'run:${root(id)}');
+    }
+    for (final line in geometry.lines.values) {
+      add(line.id, 'run:${root(line.start)}');
+    }
+  }
   for (final shape in geometry.shapes.values) {
     for (final ring in shape.rings) {
       for (final ref in ring) {

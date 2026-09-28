@@ -163,6 +163,7 @@ class DocumentSession extends ChangeNotifier {
       document: raised,
       settings: stored?.$1 ?? const WorkspaceSettings(),
       camera: stored?.$2 ?? const Camera(),
+      fitOnFirstView: stored == null,
       title: title,
       libraryId: libraryId,
       toasts: toasts,

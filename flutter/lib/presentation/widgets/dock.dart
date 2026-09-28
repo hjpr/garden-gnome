@@ -248,7 +248,7 @@ class _ResizeEdgeState extends State<_ResizeEdge> {
               width: 2,
               color: _active || _dragging
                   ? Palette.accent.withValues(alpha: 0.6)
-                  : Colors.transparent,
+                  : Palette.accent.withValues(alpha: 0),
             ),
           ),
         ),

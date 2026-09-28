@@ -3,8 +3,11 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import '../../application/camera.dart';
+import '../../domain/bezier.dart';
 import '../../domain/curve_edge.dart';
+import '../../domain/geometry.dart';
 import '../../domain/region.dart';
+import '../../domain/vec.dart';
 
 /// One path builder for land fills, hole clipping, selection and labels.
 /// Arcs stay circular at every zoom; even-odd fill leaves every hole empty.
@@ -60,6 +63,25 @@ void _appendWorldEdge(Path path, CurveEdge edge) {
     edge.sweep,
     false,
   );
+}
+
+/// A whole line in screen coordinates: straight, arc, or a true cubic
+/// Bézier curve (drawn exactly, not from its stand-in arcs).
+Path linePath(LineSegment line, Map<String, Vec> points, Camera camera) {
+  final bezier = line.bezier(points);
+  if (bezier == null) return curvePath(line.curve(points), camera);
+  return bezierPath(bezier, camera);
+}
+
+/// A cubic Bézier curve in screen coordinates.
+Path bezierPath(CubicBezier bezier, Camera camera) {
+  final a = camera.toScreen(bezier.p0);
+  final b = camera.toScreen(bezier.p1);
+  final c = camera.toScreen(bezier.p2);
+  final d = camera.toScreen(bezier.p3);
+  return Path()
+    ..moveTo(a.dx, a.dy)
+    ..cubicTo(b.dx, b.dy, c.dx, c.dy, d.dx, d.dy);
 }
 
 /// An individual straight or circular edge in screen coordinates.

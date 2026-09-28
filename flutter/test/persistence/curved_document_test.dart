@@ -15,11 +15,11 @@ int _next = 0;
 String newId() => 'curved-${_next++}';
 
 GardenDocument squareDocument() {
-  final (doc, field) = GardenDocument(
+  final (doc, property) = GardenDocument(
     id: 'curved-document',
-  ).addLayer(LayerKind.field, newId: newId);
+  ).addLayer(LayerKind.property, newId: newId);
   return doc.withGeometry(
-    doc.geometryOf(field).edit((e) {
+    doc.geometryOf(property).edit((e) {
       final ids = [
         e.addPoint(const Vec(0, 0)),
         e.addPoint(const Vec(10, 0)),
@@ -34,9 +34,9 @@ GardenDocument squareDocument() {
 }
 
 GardenDocument cutCircle(GardenDocument doc, Vec centre, double radius) {
-  final field = doc.fields.single;
+  final property = doc.propertyIds.single;
   return doc.withGeometry(
-    doc.geometryOf(field).edit((e) {
+    doc.geometryOf(property).edit((e) {
       final circle = e.addCircle(e.addPoint(centre), radius);
       e.boolean(circle, BooleanOperation.subtract);
     }),
@@ -50,14 +50,14 @@ void main() {
   test('editable circular holes and their net area survive saving', () {
     final original = cutCircle(squareDocument(), const Vec(5, 5), 2);
     final opened = decodeGgnome(encodeGgnome(original));
-    final geometry = opened.geometryOf(opened.fields.single);
+    final geometry = opened.geometryOf(opened.propertyIds.single);
 
     expect(documentToJson(opened)['schema_version'], schemaVersion);
     expect(geometry.boundary!.holes, hasLength(1));
     expect(geometry.lines.values.any((edge) => edge.bulge != 0), isTrue);
     expect(geometry.region!.area, closeTo(100 - math.pi * 4, 1e-8));
     expect(geometry.region!.locate(const Vec(5, 5)), PointLocation.outside);
-    expect(opened.isActive(opened.fields.single), isTrue);
+    expect(opened.isActive(opened.propertyIds.single), isTrue);
     expect(
       jsonEncode(documentToJson(opened)),
       jsonEncode(documentToJson(original)),
@@ -67,7 +67,7 @@ void main() {
   test('a circular notch round-trips as arc edges, not chords', () {
     final original = cutCircle(squareDocument(), const Vec(10, 5), 2);
     final opened = decodeGgnome(encodeGgnome(original));
-    final region = opened.geometryOf(opened.fields.single).region!;
+    final region = opened.geometryOf(opened.propertyIds.single).region!;
     expect(region.area, closeTo(100 - math.pi * 2, 1e-8));
     expect(region.locate(const Vec(9, 5)), PointLocation.outside);
     expect(region.locate(const Vec(7, 5)), PointLocation.inside);
@@ -79,56 +79,20 @@ void main() {
 
   test('several shapes, their order and labels survive saving', () {
     var doc = squareDocument();
-    final field = doc.fields.single;
-    final boundary = doc.geometryOf(field).boundaryId;
+    final property = doc.propertyIds.single;
+    final boundary = doc.geometryOf(property).boundaryId;
     doc = doc.withGeometry(
-      doc.geometryOf(field).edit((e) {
+      doc.geometryOf(property).edit((e) {
         e.addCircle(e.addPoint(const Vec(20, 5)), 2);
         final small = e.addCircle(e.addPoint(const Vec(30, 3)), 1);
         e.setLabel(small, 'Tomatoes');
         e.moveInStack(small, 0);
       }),
     );
-    final geometry = decodeGgnome(encodeGgnome(doc)).geometryOf(field);
+    final geometry = decodeGgnome(encodeGgnome(doc)).geometryOf(property);
     expect(geometry.stack, ['circle-2', boundary, 'circle-1']);
     expect(geometry.labelOf('circle-2'), 'Tomatoes');
     expect(geometry.area, closeTo(100 + math.pi * 5, 1e-8));
-  });
-
-  test('a schema 2 boundary becomes the bottom shape; operands sit above', () {
-    final doc = squareDocument();
-    final field = doc.fields.single;
-    final staged = doc.withGeometry(
-      doc
-          .geometryOf(field)
-          .edit((e) => e.addCircle(e.addPoint(const Vec(30, 5)), 2)),
-    );
-    final json = documentToJson(staged)..['schema_version'] = 2;
-    final source = firstGeometry(json);
-    final bottom = (source['order'] as List).first as String;
-    source
-      ..remove('order')
-      ..['boundary'] = {'kind': 'shape', 'id': bottom};
-    final opened = documentFromJson(json).geometryOf(field);
-    expect(opened.stack, [bottom, 'circle-1']);
-    expect(opened.area, closeTo(100 + math.pi * 4, 1e-8));
-  });
-
-  test('legacy schema 1 lines and shapes default to straight and no holes', () {
-    final json = documentToJson(squareDocument())..['schema_version'] = 1;
-    final source = firstGeometry(json);
-    for (final line in (source['lines'] as Map).values) {
-      (line as Map).remove('bulge');
-    }
-    for (final shape in (source['shapes'] as Map).values) {
-      (shape as Map).remove('holes');
-    }
-    final doc = documentFromJson(json);
-    final geometry = doc.geometryOf(doc.fields.single);
-    expect(geometry.lines.values.every((edge) => edge.bulge == 0), isTrue);
-    expect(geometry.boundary!.holes, isEmpty);
-    expect(geometry.region!.area, closeTo(100, 1e-8));
-    expect(doc.isActive(doc.fields.single), isTrue);
   });
 
   test('missing hole edges are damage, not silently filled-in holes', () {
@@ -171,22 +135,22 @@ void main() {
   test(
     'opening invalid curved land preserves the drawing and invalid status',
     () {
+      // A second property spilling out of the first one's round hole.
       var doc = cutCircle(squareDocument(), const Vec(5, 5), 2);
-      final field = doc.fields.single;
-      final (withPlot, plot) = doc.addLayer(
-        LayerKind.plot,
-        parentId: field,
+      final property = doc.propertyIds.single;
+      final (withSecond, second) = doc.addLayer(
+        LayerKind.property,
         newId: newId,
       );
-      doc = withPlot.withGeometry(
-        withPlot.geometryOf(plot).edit((e) {
-          e.addCircle(e.addPoint(const Vec(5, 5)), 1);
+      doc = withSecond.withGeometry(
+        withSecond.geometryOf(second).edit((e) {
+          e.addCircle(e.addPoint(const Vec(5, 5)), 3);
         }),
       );
       final opened = decodeGgnome(encodeGgnome(doc));
-      expect(opened.isActive(field), isTrue);
-      expect(opened.problemOf(plot), contains('inside'));
-      expect(opened.isActive(plot), isFalse);
+      expect(opened.problemOf(property), contains('Overlaps'));
+      expect(opened.problemOf(second), contains('Overlaps'));
+      expect(opened.isActive(second), isFalse);
       expect(
         jsonEncode(documentToJson(opened)),
         jsonEncode(documentToJson(doc)),

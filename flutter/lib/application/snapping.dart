@@ -303,6 +303,18 @@ GuideSet guidesOf(Geometry geometry, String itemId) {
     );
   }
   if (geometry.lines[itemId] case final line?) {
+    // A Bézier curve offers its middle and the line square to it there.
+    if (line.bezier(geometry.points) case final bezier?) {
+      final mid = bezier.pointAt(0.5);
+      final along = bezier.tangentAt(0.5);
+      return GuideSet(
+        targets: [mid],
+        guides: [
+          if (along != Vec.zero) ?GuideLine.along(mid, Vec(-along.y, along.x)),
+        ],
+        markers: [mid],
+      );
+    }
     final curve = line.curve(geometry.points);
     final mid = curve.pointAt(0.5);
     if (curve.start == curve.end) {

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -12,6 +13,7 @@ import '../domain/layer.dart';
 import '../domain/reference_image.dart';
 import '../domain/region.dart';
 import '../domain/vec.dart';
+import 'alignment.dart';
 import 'camera.dart';
 import 'drafts.dart';
 import 'guides.dart';
@@ -41,10 +43,12 @@ class EditorController extends ChangeNotifier {
     this.title = 'Untitled',
     this.libraryId,
     ToastCenter? toasts,
+    bool fitOnFirstView = false,
   }) : toasts = toasts ?? ToastCenter(),
        _document = document ?? GardenDocument(id: newUuid()),
        _settings = settings,
-       _camera = camera {
+       _camera = camera,
+       _fitOnFirstView = fitOnFirstView {
     drafts.onChanged = draftsChanged;
     _savedDocument = _document;
     _savedTitle = title;
@@ -121,20 +125,29 @@ class EditorController extends ChangeNotifier {
   void updateSettings(WorkspaceSettings settings) {
     _settings = settings;
     _history.resize(settings.appearance.historyCapacity);
-    final limits = settings.appearance.zoomLimits;
-    if (limits.clamp(_camera.zoom) != _camera.zoom) {
-      _camera = _camera.zoomTo(
-        limits.clamp(_camera.zoom),
+    final limits = settings.appearance.heightLimits;
+    if (limits.clamp(_camera.height) != _camera.height) {
+      _camera = _camera.atHeight(
+        limits.clamp(_camera.height),
         anchor: _viewport.center(Offset.zero),
       );
     }
     notifyListeners();
   }
 
+  /// A drawing opened without a remembered view (e.g. a file imported on
+  /// another computer) is framed once the canvas knows its size, so a
+  /// drawing far from the origin does not open on an empty screen.
+  bool _fitOnFirstView;
+
   void setViewportSize(Size size) {
     if (size == _viewport) return;
     if (_viewport != Size.zero) _camera = _camera.resized(_viewport, size);
     _viewport = size;
+    if (_fitOnFirstView && !size.isEmpty) {
+      _fitOnFirstView = false;
+      return fitDrawing();
+    }
     notifyListeners();
   }
 
@@ -162,17 +175,23 @@ class EditorController extends ChangeNotifier {
     final next = _camera.zoomAt(
       anchor,
       steps,
-      limits: _settings.appearance.zoomLimits,
+      limits: _settings.appearance.heightLimits,
     );
-    // Wheeling past a zoom limit changes nothing, so draws nothing.
-    if (next.zoom == _camera.zoom && next.topLeft == _camera.topLeft) return;
+    // Wheeling past the lowest or highest camera changes nothing, so draws
+    // nothing.
+    if (next.height == _camera.height && next.topLeft == _camera.topLeft) {
+      return;
+    }
     _camera = next;
     _viewChanges.fire();
   }
 
-  /// 100% zoom with the world origin at the viewport's top-left.
+  /// The starting camera height, within the height limits, with the world
+  /// origin at the viewport's top-left.
   void resetView() {
-    _camera = const Camera();
+    _camera = Camera(
+      height: _settings.appearance.heightLimits.clamp(Camera.startHeight),
+    );
     notifyListeners();
   }
 
@@ -182,8 +201,8 @@ class EditorController extends ChangeNotifier {
       for (final geometry in _document.geometries.values) ...[
         ...geometry.points.values,
         for (final line in geometry.lines.values) ...[
-          line.curve(geometry.points).bounds.$1,
-          line.curve(geometry.points).bounds.$2,
+          line.bounds(geometry.points).$1,
+          line.bounds(geometry.points).$2,
         ],
         for (final circle in geometry.circles.values)
           for (final corner in [Vec(-1, -1), Vec(1, 1)])
@@ -204,20 +223,29 @@ class EditorController extends ChangeNotifier {
     final usableWidth = _viewport.width - leftGutter - rightGutter - 2 * margin;
     final usableHeight = _viewport.height - 2 * margin;
     final width = maxX - minX, height = maxY - minY;
-    var zoom = _settings.appearance.zoomLimits.max;
-    if (width > 0) zoom = zoom.clamp(0, usableWidth / (width * pixelsPerMetre));
-    if (height > 0) {
-      zoom = zoom.clamp(0, usableHeight / (height * pixelsPerMetre));
+    final limits = _settings.appearance.heightLimits;
+    var cameraHeight = limits.lowest;
+    if (width > 0) {
+      cameraHeight = math.max(
+        cameraHeight,
+        Camera.heightFor(metres: width, pixels: usableWidth),
+      );
     }
-    zoom = _settings.appearance.zoomLimits.clamp(zoom);
+    if (height > 0) {
+      cameraHeight = math.max(
+        cameraHeight,
+        Camera.heightFor(metres: height, pixels: usableHeight),
+      );
+    }
+    final camera = Camera(height: limits.clamp(cameraHeight));
     final centre = Vec((minX + maxX) / 2, (minY + maxY) / 2);
     final screenCentre = Vec(
       leftGutter + (_viewport.width - leftGutter - rightGutter) / 2,
       _viewport.height / 2,
     );
     _camera = Camera(
-      topLeft: centre - screenCentre / (pixelsPerMetre * zoom),
-      zoom: zoom,
+      topLeft: centre - screenCentre / camera.pixelsPerMetreNow,
+      height: camera.height,
     );
     notifyListeners();
   }
@@ -458,7 +486,6 @@ class EditorController extends ChangeNotifier {
   /// Handles Escape: ends the current operation, or else clears selection.
   void escape() {
     if (_lineAnchor != null ||
-        _joinStart != null ||
         _lineToken != null ||
         _circleStart != null ||
         _polygonStart != null ||
@@ -479,10 +506,20 @@ class EditorController extends ChangeNotifier {
   int _tokenCounter = 0;
   int? _lineToken;
   String? _lineAnchor;
-  String? _joinStart;
 
   /// The point the dashed Line preview starts from, if drawing.
   String? get lineAnchor => _lineAnchor;
+
+  Vec _curveHandle = Vec.zero;
+
+  /// Line → Curve: the handle pulled out at the last point placed, as an
+  /// offset from it. The next curve piece leaves that point along it.
+  Vec get curveHandle => _curveHandle;
+
+  void setCurveHandle(Vec offset) {
+    _curveHandle = offset;
+    notifyListeners();
+  }
 
   final List<ArcPoint> _arcPoints = [];
 
@@ -532,9 +569,6 @@ class EditorController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// The first point chosen in Line → Join, if waiting for the second.
-  String? get joinStart => _joinStart;
-
   int? get lineToken => _lineToken;
 
   /// Starts a new Line drawing operation and returns its token.
@@ -545,16 +579,11 @@ class EditorController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setJoinStart(String? pointId) {
-    _joinStart = pointId;
-    notifyListeners();
-  }
-
   /// Ends any drawing in progress. Placed points and lines stay.
   void _cancelOperation() {
     _lineToken = null;
     _lineAnchor = null;
-    _joinStart = null;
+    _curveHandle = Vec.zero;
     _circleStart = null;
     _polygonStart = null;
     _referenceLineStart = null;
@@ -608,7 +637,7 @@ class EditorController extends ChangeNotifier {
     if (lineContext == null) {
       _lineToken = null;
       _lineAnchor = null;
-      _joinStart = null;
+      _curveHandle = Vec.zero;
       _circleStart = null;
       _polygonStart = null;
       _referenceLineStart = null;
@@ -653,9 +682,10 @@ class EditorController extends ChangeNotifier {
 
   /// Locks or unlocks a layer, as an undoable step.
   ///
-  /// A locked layer and everything inside it cannot be drawn on, moved,
-  /// renamed, changed, or deleted, and clicks on the canvas pass through
-  /// it. It can still be selected in Layers to read its details.
+  /// A locked layer, and every zone of a locked property, cannot be drawn
+  /// on, moved, renamed, changed, or deleted, and clicks on the canvas
+  /// pass through it. It can still be selected in Layers to read its
+  /// details.
   void setLayerLocked(String layerId, bool locked) {
     final layer = _document.layers[layerId];
     if (layer == null || layer.locked == locked) return;
@@ -673,14 +703,14 @@ class EditorController extends ChangeNotifier {
     );
   }
 
-  /// Adds a field, plot, or area under the selected layer.
+  /// Adds a property, or a zone under the selected property.
   void addLayer(LayerKind kind) {
     final blocker = addLayerBlocker(kind);
     if (blocker != null) return showNotice(blocker);
     drafts.settleForLayerSwitch();
     final (next, layerId) = documentForEditing.addLayer(
       kind,
-      parentId: kind == LayerKind.field ? null : _homeFieldId,
+      parentId: kind == LayerKind.property ? null : _homePropertyId,
       newId: newUuid,
     );
     commit('Add ${kind.label}', next);
@@ -692,41 +722,36 @@ class EditorController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// The field the selected layer is listed under (or is).
-  String? get _homeFieldId {
+  /// The property the selected layer is listed under (or is).
+  String? get _homePropertyId {
     final selected = selectedLayer;
     if (selected == null) return null;
-    return selected.kind == LayerKind.field ? selected.id : selected.parentId;
+    return selected.kind == LayerKind.property
+        ? selected.id
+        : selected.parentId;
   }
 
   /// Why a layer of [kind] cannot be added right now, or null if it can.
   ///
-  /// Plots and areas are listed under the selected field (or the field of
-  /// the selected layer). Their shapes may then sit in any active layer of
-  /// the kind above, so a plot needs an active field and an area needs at
-  /// least one active plot.
+  /// A zone is listed under the selected property (or the property of the
+  /// selected zone) and must stay within it, so that property must be
+  /// unlocked and complete first.
   String? addLayerBlocker(LayerKind kind) {
-    final parentKind = kind.parentKind;
-    if (parentKind == null) return null;
-    final fieldId = _homeFieldId;
-    final article = kind == LayerKind.area ? 'an' : 'a';
-    if (fieldId == null) {
-      return 'Select a field to add $article ${kind.label.toLowerCase()}';
-    }
-    final locked = lockNotice(fieldId);
+    if (kind.parentKind == null) return null;
+    final label = kind.label.toLowerCase();
+    final propertyId = _homePropertyId;
+    if (propertyId == null) return 'Select a property to add a $label';
+    final locked = lockNotice(propertyId);
     if (locked != null) return locked;
-    final anyActive = _document.layers.values.any(
-      (layer) => layer.kind == parentKind && _document.isActive(layer.id),
-    );
-    if (!anyActive) {
-      return 'complete ${parentKind.label.toLowerCase()} before adding new '
-          '${kind.label.toLowerCase()}';
+    if (!_document.isActive(propertyId)) {
+      return 'Complete ${_document.layers[propertyId]!.name} before adding '
+          'a $label';
     }
     return null;
   }
 
-  /// Why [layerId] cannot be deleted: it, a layer around it, or a layer
-  /// inside it is locked. Null if it can be.
+  /// Why [layerId] cannot be deleted: it, its property, or one of its
+  /// zones is locked. Null if it can be.
   String? deleteLayerBlocker(String layerId) {
     for (final id in _document.subtree(layerId)) {
       final locked = lockNotice(id);
@@ -735,7 +760,8 @@ class EditorController extends ChangeNotifier {
     return null;
   }
 
-  /// Removes a layer and everything inside it as one undoable step.
+  /// Removes a layer, and a property's zones with it, as one undoable
+  /// step.
   void deleteLayer(String layerId) {
     if (!_document.layers.containsKey(layerId)) return;
     final blocker = deleteLayerBlocker(layerId);
@@ -884,6 +910,79 @@ class EditorController extends ChangeNotifier {
       ..clear()
       ..addAll(attempt.resultIds);
     notifyListeners();
+  }
+
+  // ------------------------------------------------------------------ align
+
+  /// Why Align cannot run on the selection, or null when it can. Align
+  /// takes exactly two items on one layer: the first selected stays put,
+  /// the second moves into line with it.
+  String? get alignBlocker {
+    final layerId = _selectedLayerId;
+    if (layerId == null || _selection.length != 2) {
+      return 'Select two items: the one to align to, then the one to move';
+    }
+    return lockNotice(layerId);
+  }
+
+  /// Builds the result of aligning the second selected item to the first,
+  /// without committing it.
+  ({AlignResult? result, String? problem}) tryAlign(AlignEdge edge) {
+    final blocker = alignBlocker;
+    if (blocker != null) return (result: null, problem: blocker);
+    final [anchorId, movingId] = _selection.toList();
+    try {
+      final result = alignItems(
+        documentForEditing,
+        _selectedLayerId!,
+        anchorId,
+        movingId,
+        edge,
+      );
+      return (result: result, problem: null);
+    } on GeometryRuleError catch (error) {
+      return (result: null, problem: error.message);
+    }
+  }
+
+  bool _alignPreviewing = false;
+
+  /// Shows where the second item would go while the pointer is over an
+  /// Align button, drawn like a drag in progress. Null clears it.
+  void previewAlign(AlignEdge? edge) {
+    if (edge == null) {
+      if (_alignPreviewing) {
+        _alignPreviewing = false;
+        _preview = null;
+        _notice = null;
+        notifyListeners();
+      }
+      return;
+    }
+    final attempt = tryAlign(edge);
+    final result = attempt.result;
+    _alignPreviewing = true;
+    _preview = result == null
+        ? null
+        : MovePreview(
+            document: result.document,
+            moved: result.moved,
+            valid: result.document.newProblemsSince(_document).isEmpty,
+          );
+    _notice = attempt.problem;
+    notifyListeners();
+  }
+
+  /// Moves the second selected item into line with the first as one Undo
+  /// step. A refusal leaves the drawing unchanged and says why.
+  void runAlign(AlignEdge edge) {
+    final attempt = tryAlign(edge);
+    final result = attempt.result;
+    if (result == null) return showNotice(attempt.problem);
+    _alignPreviewing = false;
+    _preview = null;
+    if (sameContent(result.document, _document)) return notifyListeners();
+    commit('Align ${edge.label.toLowerCase()}', result.document);
   }
 
   // -------------------------------------------------------- reference layer
@@ -1127,10 +1226,12 @@ class EditorController extends ChangeNotifier {
         context != null &&
         context.operation == _lineToken &&
         _tool == Tool.line &&
-        _function == ToolFunction.draw;
+        (_function == ToolFunction.draw || _function == ToolFunction.curve);
     _lineAnchor = live ? anchor : null;
+    // The pulled-out handle is not kept in history; the piece after an
+    // Undo starts straight from its point.
+    _curveHandle = Vec.zero;
     if (!live) _lineToken = null;
-    _joinStart = null;
     _circleStart = null;
     _polygonStart = null;
     _referenceLineStart = null;
@@ -1175,16 +1276,15 @@ class EditorController extends ChangeNotifier {
     if (_lineAnchor != null && layerGeometry?.points[_lineAnchor] == null) {
       _lineAnchor = null;
     }
-    if (_joinStart != null && layerGeometry?.points[_joinStart] == null) {
-      _joinStart = null;
-    }
   }
 }
 
 /// Whether two documents hold the same drawing, ignoring ID counters.
 bool sameContent(GardenDocument a, GardenDocument b) {
   if (identical(a, b)) return true;
-  if (a.id != b.id || !listEquals(a.fields, b.fields)) return false;
+  if (a.id != b.id || !listEquals(a.propertyIds, b.propertyIds)) {
+    return false;
+  }
   if (!listEquals(a.references, b.references)) return false;
   if (a.layers.length != b.layers.length) return false;
   for (final entry in a.layers.entries) {
@@ -1219,7 +1319,9 @@ bool _sameLines(Map<String, LineSegment> a, Map<String, LineSegment> b) {
     if (other == null ||
         other.start != entry.value.start ||
         other.end != entry.value.end ||
-        other.bulge != entry.value.bulge) {
+        other.bulge != entry.value.bulge ||
+        other.startHandle != entry.value.startHandle ||
+        other.endHandle != entry.value.endHandle) {
       return false;
     }
   }

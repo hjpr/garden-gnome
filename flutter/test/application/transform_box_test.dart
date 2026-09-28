@@ -11,10 +11,12 @@ import 'package:garden_gnome/domain/land_rules.dart';
 import 'package:garden_gnome/domain/layer.dart';
 import 'package:garden_gnome/domain/vec.dart';
 
-/// At 100% zoom with the camera at the origin, one metre is 30 pixels.
+/// With the camera at its starting height over the origin, one metre is 30
+/// pixels.
 Offset at(double x, double y) => Offset(x * 30, y * 30);
 
-/// The selection box pads the shape by this many metres at 100% zoom.
+/// The selection box pads the shape by this many metres at the starting
+/// camera height.
 const pad = BoxReach.padding / 30;
 
 void click(CanvasInput input, Offset where) {
@@ -31,10 +33,10 @@ void drag(CanvasInput input, Offset from, Offset to, {bool shift = false}) {
   input.release(to);
 }
 
-/// A field with one 4 × 2 m rectangle from (2, 2) to (6, 4), selected
+/// A property with one 4 × 2 m rectangle from (2, 2) to (6, 4), selected
 /// with Select.
 (EditorController, CanvasInput, String) selectedRectangle() {
-  final editor = EditorController()..addLayer(LayerKind.field);
+  final editor = EditorController()..addLayer(LayerKind.property);
   addTearDown(editor.dispose);
   final input = CanvasInput(editor);
   final layer = editor.selectedLayerId!;
@@ -148,7 +150,7 @@ void main() {
   });
 
   test('a circle scales evenly and keeps being a circle', () {
-    final editor = EditorController()..addLayer(LayerKind.field);
+    final editor = EditorController()..addLayer(LayerKind.property);
     addTearDown(editor.dispose);
     final input = CanvasInput(editor);
     final layer = editor.selectedLayerId!;
@@ -215,18 +217,18 @@ void main() {
     input.cancel();
   });
 
-  test('rotating a field carries the plot inside it', () {
-    final (editor, input, field) = selectedRectangle();
-    editor.addLayer(LayerKind.plot);
-    final plot = editor.selectedLayerId!;
+  test('rotating a property carries the zone inside it', () {
+    final (editor, input, property) = selectedRectangle();
+    editor.addLayer(LayerKind.zone);
+    final zone = editor.selectedLayerId!;
     editor.selectTool(Tool.polygon);
     editor.selectFunction(ToolFunction.rectangle);
     click(input, at(2.5, 2.5));
     click(input, at(3.5, 3.5));
     editor.selectTool(Tool.select);
-    // Pick the field by its edge-free inside, away from the plot.
+    // Pick the property by its edge-free inside, away from the zone.
     click(input, at(5, 3));
-    expect(editor.selectedLayerId, field);
+    expect(editor.selectedLayerId, property);
     final start = at(6 + pad, 2 - pad) + const Offset(8, -8);
     final centre = at(4, 3);
     final d = start - centre;
@@ -236,10 +238,10 @@ void main() {
     input.move(start + const Offset(0, 6));
     input.move(end);
     input.release(end);
-    final plotBox = editor.document.geometryOf(plot).region!.bounds;
-    expect(plotBox.$1.x, closeTo(4.5, 1e-9));
-    expect(plotBox.$1.y, closeTo(2.5, 1e-9));
-    expect(editor.document.isActive(plot), isTrue);
+    final zoneBox = editor.document.geometryOf(zone).region!.bounds;
+    expect(zoneBox.$1.x, closeTo(4.5, 1e-9));
+    expect(zoneBox.$1.y, closeTo(2.5, 1e-9));
+    expect(editor.document.isActive(zone), isTrue);
   });
 
   test('a click on a handle is not an edit', () {
