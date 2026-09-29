@@ -262,8 +262,10 @@ void main() {
     final s = _Setup()..point(2, 2.5);
     s.editor.updateSettings(s.editor.settings.copyWith(snappingEnabled: true));
     s.rest(at(2, 2.5));
-    s.input.hover(at(5.3, 2.6));
+    // The start view's grid is 5 ft, so x snaps to 15 ft.
+    s.input.hover(at(4.4, 2.6));
     final preview = s.editor.preview! as PointPreview;
-    expect(preview.position, const Vec(5, 2.5));
+    expect(preview.position.x, closeTo(15 * 0.3048, 1e-9));
+    expect(preview.position.y, 2.5);
   });
 }

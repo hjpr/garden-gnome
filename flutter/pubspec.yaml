@@ -26,3 +26,6 @@ flutter:
   uses-material-design: true
   assets:
     - assets/icons/
+    - assets/render/
+  shaders:
+    - shaders/ground.frag

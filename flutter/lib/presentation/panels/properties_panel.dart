@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../../application/drafts.dart';
 import '../../application/editor_controller.dart';
-import '../../domain/fill_patterns.dart';
 import '../../domain/land_rules.dart';
 import '../../domain/layer.dart';
+import '../../domain/zone_ground.dart';
 import '../theme.dart';
 import '../widgets/draft_text_field.dart';
 import '../widgets/panel.dart';
+import 'feature_properties.dart';
+import 'measure_field.dart';
 import 'reference_properties.dart';
 
 /// Settings for the selected layer: its name, status, and options.
@@ -18,6 +20,13 @@ class PropertiesBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (editor.showsFeature) {
+      return FeatureProperties(
+        key: ValueKey(('feature-properties', editor.selectedFeature!.id)),
+        editor: editor,
+        feature: editor.selectedFeature!,
+      );
+    }
     if (editor.showsReference) {
       return ReferenceProperties(
         key: const ValueKey('reference-properties'),
@@ -67,7 +76,6 @@ class PropertiesBody extends StatelessWidget {
           PropertyProperties p => _propertyOptions(layer, p, editable),
           ZoneProperties p => _zoneOptions(layer, p, editable),
         },
-        PropertyGroup(title: 'LOOK', children: [_patternRow(layer, editable)]),
       ],
     );
   }
@@ -184,15 +192,6 @@ class PropertiesBody extends StatelessWidget {
         ),
         _zoneText(
           layer,
-          label: 'Ground',
-          hint: 'e.g. raised beds',
-          value: p.ground,
-          editable: editable,
-          change: (current, value) => current.copyWith(ground: () => value),
-          read: (current) => current.ground,
-        ),
-        _zoneText(
-          layer,
           label: 'Crop',
           hint: 'e.g. tomatoes',
           value: p.crop,
@@ -202,7 +201,108 @@ class PropertiesBody extends StatelessWidget {
         ),
       ],
     ),
+    _groundGroup(layer, p, editable),
   ];
+
+  /// The zone's ground, as the Ground tool sets it, and its rows. The row
+  /// boxes are always shown and greyed out unless the ground is Row, so
+  /// the panel keeps one layout.
+  Widget _groundGroup(Layer layer, ZoneProperties p, bool editable) {
+    final document = editor.document;
+    final closed = document.geometryOf(layer.id).isClosed;
+    final units = editor.settings.units;
+    final rowsOn = p.ground == GroundType.row;
+    final rowsEditable = editable && rowsOn;
+    final layout = document.rowLayoutOf(layer.id);
+    void setRows(RowSpec Function(RowSpec) change) {
+      final current = editor.document.layers[layer.id]?.properties;
+      if (current is ZoneProperties) {
+        editor.setRows(layer.id, change(current.rows));
+      }
+    }
+
+    return PropertyGroup(
+      title: 'GROUND',
+      children: [
+        PropertyRow(
+          label: 'Ground',
+          child: CompactDropdown<GroundType?>(
+            label: 'Ground',
+            value: p.ground,
+            items: {
+              null: 'Dirt',
+              for (final g in GroundType.values) g: g.label,
+            },
+            onChanged: editable && closed
+                ? (g) => editor.setGround(layer.id, g)
+                : null,
+          ),
+        ),
+        MeasureField(
+          editor: editor,
+          ownerId: layer.id,
+          field: 'row-width',
+          label: 'Row width',
+          unit: units.symbol,
+          metres: p.rows.width,
+          toDisplay: units.fromMetres,
+          fromDisplay: units.toMetres,
+          enabled: rowsEditable,
+          minimum: Minimum.aboveZero,
+          apply: (w) => setRows((r) => r.copyWith(width: w)),
+        ),
+        MeasureField(
+          editor: editor,
+          ownerId: layer.id,
+          field: 'row-spacing',
+          label: 'Spacing',
+          unit: units.symbol,
+          metres: p.rows.spacing,
+          toDisplay: units.fromMetres,
+          fromDisplay: units.toMetres,
+          enabled: rowsEditable,
+          minimum: Minimum.zero,
+          apply: (s) => setRows((r) => r.copyWith(spacing: s)),
+        ),
+        MeasureField(
+          editor: editor,
+          ownerId: layer.id,
+          field: 'row-direction',
+          label: 'Direction',
+          unit: '°',
+          metres: p.rows.direction,
+          enabled: rowsEditable,
+          minimum: Minimum.none,
+          // 180° wraps back to 0°, since rows run both ways.
+          step: 1,
+          bigStep: 15,
+          apply: (d) => setRows((r) => r.copyWith(direction: d)),
+        ),
+        _readout('Rows', layout == null ? '—' : '${layout.rowCount}', rowsOn),
+        _readout(
+          'Row length',
+          layout == null ? '—' : units.format(layout.totalLength),
+          rowsOn,
+        ),
+      ],
+    );
+  }
+
+  /// A worked-out value, greyed out when it does not apply.
+  Widget _readout(String label, String value, bool active) => PropertyRow(
+    label: label,
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 2),
+      child: Text(
+        value,
+        key: ValueKey('readout-$label'),
+        style: TextStyle(
+          fontSize: 13,
+          color: active ? Palette.ink : Palette.faint,
+        ),
+      ),
+    ),
+  );
 
   /// One of a zone's free-text settings. Blank clears it.
   Widget _zoneText(
@@ -232,23 +332,6 @@ class PropertiesBody extends StatelessWidget {
       },
     ),
   );
-
-  /// The same pattern the Pattern tool sets. It needs a closed boundary.
-  Widget _patternRow(Layer layer, bool editable) {
-    final document = editor.document;
-    final closed = document.geometryOf(layer.id).isClosed;
-    return PropertyRow(
-      label: 'Pattern',
-      child: CompactDropdown<FillPattern?>(
-        label: 'Pattern',
-        value: document.storedPatternOf(layer.id),
-        items: {null: 'None', for (final f in FillPattern.values) f: f.label},
-        onChanged: editable && closed
-            ? (f) => editor.setPattern(layer.id, f)
-            : null,
-      ),
-    );
-  }
 
   Widget _colorRow(
     Layer layer,

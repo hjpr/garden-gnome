@@ -1,5 +1,6 @@
 import '../domain/curve_edge.dart';
 import '../domain/document.dart';
+import '../domain/feature.dart';
 import '../domain/reference_image.dart';
 import '../domain/vec.dart';
 import 'snapping.dart';
@@ -156,4 +157,27 @@ class ReferenceLinePreview extends Preview {
   final Vec from;
   final Vec to;
   final bool valid;
+}
+
+/// A feature under the Select pointer that a click would pick.
+class FeatureHoverPreview extends Preview {
+  const FeatureHoverPreview(this.featureId);
+
+  final String featureId;
+
+  @override
+  bool operator ==(Object other) =>
+      other is FeatureHoverPreview && other.featureId == featureId;
+
+  @override
+  int get hashCode => featureId.hashCode;
+}
+
+/// A feature being dragged, drawn where it would land, or ([placing]) the
+/// footprint the Feature tool's next click would place.
+class FeatureMovePreview extends Preview {
+  const FeatureMovePreview(this.feature, {this.placing = false, super.guides});
+
+  final Feature feature;
+  final bool placing;
 }

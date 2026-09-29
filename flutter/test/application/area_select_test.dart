@@ -87,6 +87,7 @@ void main() {
     editor.selectItems(layer, shapes(editor, layer));
     dragThrough(input, [at(5, 6), at(5.5, 7), at(7, 9)]);
     expect(editor.selection, isEmpty);
+    expect(editor.selectedLayerId, isNull);
   });
 
   test('Shift adds a marquee to the selection', () {

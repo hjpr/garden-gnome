@@ -22,6 +22,7 @@ class DraftTextField extends StatefulWidget {
     this.check = _anyText,
     this.hint,
     this.enabled = true,
+    this.onStep,
   });
 
   final EditorController editor;
@@ -33,6 +34,11 @@ class DraftTextField extends StatefulWidget {
   final bool enabled;
   final String? Function(String text) check;
   final void Function(String text) apply;
+
+  /// When set, the box shows small up and down arrows at its right, and
+  /// the Up and Down keys work too. Called with the text as typed so far
+  /// and +1 or -1; Shift steps further (the owner decides how far).
+  final void Function(String text, int direction, {required bool big})? onStep;
 
   static String? _anyText(String _) => null;
 
@@ -105,7 +111,31 @@ class _DraftTextFieldState extends State<DraftTextField> {
     if (!_focus.hasFocus && !widget.editor.suspendDraftSettlement) _commit();
   }
 
+  /// Steps the value from what is in the box now. The typed draft is
+  /// dropped first, so the stepped value shows once it is applied.
+  void _step(int direction) {
+    final text = _text.text;
+    _drafts.discard(widget.draftKey);
+    setState(() => _error = null);
+    widget.onStep!(
+      text,
+      direction,
+      big: HardwareKeyboard.instance.isShiftPressed,
+    );
+  }
+
   KeyEventResult _onKey(FocusNode node, KeyEvent event) {
+    if (widget.onStep != null &&
+        (event is KeyDownEvent || event is KeyRepeatEvent)) {
+      if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+        _step(1);
+        return KeyEventResult.handled;
+      }
+      if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+        _step(-1);
+        return KeyEventResult.handled;
+      }
+    }
     if (event is KeyDownEvent &&
         event.logicalKey == LogicalKeyboardKey.escape &&
         _drafts[widget.draftKey] != null) {
@@ -127,9 +157,108 @@ class _DraftTextFieldState extends State<DraftTextField> {
         errorText: _error,
         errorMaxLines: 3,
         errorStyle: const TextStyle(fontSize: 11, color: Palette.invalid),
+        suffixIcon: widget.onStep == null
+            ? null
+            : _StepArrows(
+                label: widget.label,
+                onStep: widget.enabled ? _step : null,
+              ),
+        suffixIconConstraints: const BoxConstraints(minWidth: 22, maxWidth: 22),
       ),
       onChanged: _onChanged,
       onSubmitted: (_) => _commit(),
     );
   }
+}
+
+/// Two small stacked arrows at the right of a number box: up adds one
+/// step, down takes one away. Greyed out when the box is.
+///
+/// The triangles are drawn rather than taken from icon glyphs, whose ink
+/// is not centred in the glyph box and sat the pair a few pixels low.
+class _StepArrows extends StatelessWidget {
+  const _StepArrows({required this.label, required this.onStep});
+
+  final String label;
+  final void Function(int direction)? onStep;
+
+  /// Height of each arrow's click area; the pair is centred in the box.
+  static const _half = 11.0;
+
+  /// Space between the two click areas.
+  static const _gap = 3.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final colour = onStep == null ? Palette.faint : Palette.muted;
+    Widget arrow(int direction, String name) => SizedBox(
+      width: 18,
+      height: _half,
+      child: Semantics(
+        button: true,
+        label: '$name $label',
+        excludeSemantics: true,
+        child: InkWell(
+          onTap: onStep == null ? null : () => onStep!(direction),
+          borderRadius: BorderRadius.circular(3),
+          hoverColor: Palette.hover,
+          child: CustomPaint(
+            painter: _TrianglePainter(up: direction > 0, colour: colour),
+          ),
+        ),
+      ),
+    );
+    return Padding(
+      padding: const EdgeInsets.only(right: 3),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            arrow(1, 'Increase'),
+            // A small dead strip between them, so a click near the middle
+            // does not land on the wrong arrow.
+            const SizedBox(height: _gap),
+            arrow(-1, 'Decrease'),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A small filled triangle, pointing up or down, placed so the up and
+/// down pair mirror each other about the line between them.
+class _TrianglePainter extends CustomPainter {
+  const _TrianglePainter({required this.up, required this.colour});
+
+  final bool up;
+  final Color colour;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const half = 3.5; // half the base width
+    const height = 3.5;
+    const gap = 1.5; // from the pair's centre line to each triangle's base
+    final cx = size.width / 2;
+    final path = Path();
+    if (up) {
+      // Base near the bottom edge (the pair's centre), tip above it.
+      final base = size.height - gap;
+      path
+        ..moveTo(cx - half, base)
+        ..lineTo(cx + half, base)
+        ..lineTo(cx, base - height);
+    } else {
+      final base = gap;
+      path
+        ..moveTo(cx - half, base)
+        ..lineTo(cx + half, base)
+        ..lineTo(cx, base + height);
+    }
+    canvas.drawPath(path..close(), Paint()..color = colour);
+  }
+
+  @override
+  bool shouldRepaint(_TrianglePainter old) =>
+      old.up != up || old.colour != colour;
 }

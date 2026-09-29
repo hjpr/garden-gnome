@@ -12,6 +12,20 @@ enum MenuScale {
   final double factor;
 }
 
+/// How the canvas shows the drawing.
+enum ViewMode {
+  /// Outlines, points and handles on a plain grid, for drawing.
+  wireframe('Wireframe', 'wireframe.svg'),
+
+  /// A picture of the farm from above: grass, soil, rows and features.
+  render('Render', 'render.svg');
+
+  const ViewMode(this.label, this.icon);
+
+  final String label;
+  final String icon;
+}
+
 /// The two docks at the window edges that hold the panels.
 enum DockSide { left, right }
 
@@ -231,6 +245,7 @@ class WorkspaceSettings {
     this.areaUnits = AreaUnits.squareFeet,
     this.snappingEnabled = false,
     this.guidesEnabled = false,
+    this.viewMode = ViewMode.wireframe,
     this.menuScale = MenuScale.medium,
     this.appearance = const Appearance(),
     this.hiddenPanels = const {},
@@ -249,6 +264,9 @@ class WorkspaceSettings {
 
   /// Line positions up with the geometry last hovered; see guides.dart.
   final bool guidesEnabled;
+
+  /// Wireframe for drawing, or the Render view of the farm.
+  final ViewMode viewMode;
   final MenuScale menuScale;
   final Appearance appearance;
   final Set<PanelId> hiddenPanels;
@@ -262,6 +280,7 @@ class WorkspaceSettings {
     AreaUnits? areaUnits,
     bool? snappingEnabled,
     bool? guidesEnabled,
+    ViewMode? viewMode,
     MenuScale? menuScale,
     Appearance? appearance,
     Set<PanelId>? hiddenPanels,
@@ -272,6 +291,7 @@ class WorkspaceSettings {
     areaUnits: areaUnits ?? this.areaUnits,
     snappingEnabled: snappingEnabled ?? this.snappingEnabled,
     guidesEnabled: guidesEnabled ?? this.guidesEnabled,
+    viewMode: viewMode ?? this.viewMode,
     menuScale: menuScale ?? this.menuScale,
     appearance: appearance ?? this.appearance,
     hiddenPanels: hiddenPanels ?? this.hiddenPanels,

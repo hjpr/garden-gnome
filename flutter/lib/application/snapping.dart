@@ -1,4 +1,5 @@
 import '../domain/geometry.dart';
+import '../domain/units.dart';
 import '../domain/vec.dart';
 import 'camera.dart';
 
@@ -132,8 +133,8 @@ class GuideFit {
 }
 
 /// Moves [position] to the nearest visible grid intersection.
-SnapResult snapToGrid(Vec position, Camera camera) {
-  final cell = camera.gridCellMetres;
+SnapResult snapToGrid(Vec position, Camera camera, Units units) {
+  final cell = camera.gridCellMetres(units);
   double nearest(double value) => (value / cell).round() * cell;
   return SnapResult(Vec(nearest(position.x), nearest(position.y)));
 }

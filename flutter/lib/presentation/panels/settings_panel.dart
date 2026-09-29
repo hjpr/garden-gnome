@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../application/editor_controller.dart';
+import '../../application/workspace_settings.dart';
 import '../../domain/units.dart';
+import '../theme.dart';
 import '../widgets/panel.dart';
 
-/// The Controls panel: units, snapping and guides. Changes apply at once
-/// and are not part of the drawing's Undo history.
+/// The Controls panel: view, units, snapping and guides. Changes apply at
+/// once and are not part of the drawing's Undo history.
 class SettingsBody extends StatelessWidget {
   const SettingsBody({super.key, required this.editor});
 
@@ -17,6 +19,12 @@ class SettingsBody extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        PropertyGroup(
+          title: 'VIEW',
+          children: [
+            _ViewModeSwitch(value: s.viewMode, onChanged: editor.setViewMode),
+          ],
+        ),
         PropertyGroup(
           title: 'UNITS',
           children: [
@@ -92,4 +100,101 @@ class _SwitchRow extends StatelessWidget {
       ),
     ),
   );
+}
+
+/// Wireframe or Render, as two halves of one segmented button, styled like
+/// the tool buttons: the chosen half raised on white.
+class _ViewModeSwitch extends StatelessWidget {
+  const _ViewModeSwitch({required this.value, required this.onChanged});
+
+  final ViewMode value;
+  final ValueChanged<ViewMode> onChanged;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(3),
+    decoration: BoxDecoration(
+      color: Palette.field,
+      borderRadius: BorderRadius.circular(Metrics.radius + 2),
+    ),
+    child: Row(
+      children: [
+        for (final mode in ViewMode.values) ...[
+          if (mode.index > 0) const SizedBox(width: 3),
+          Expanded(
+            child: _ViewModeButton(
+              mode: mode,
+              selected: mode == value,
+              onTap: () => onChanged(mode),
+            ),
+          ),
+        ],
+      ],
+    ),
+  );
+}
+
+class _ViewModeButton extends StatelessWidget {
+  const _ViewModeButton({
+    required this.mode,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final ViewMode mode;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colour = selected ? Palette.accent : Palette.ink;
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: mode.label,
+      excludeSemantics: true,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 120),
+        decoration: BoxDecoration(
+          color: selected ? Palette.paper : Palette.paper.withValues(alpha: 0),
+          borderRadius: BorderRadius.circular(Metrics.radius),
+          boxShadow: selected
+              ? const [
+                  BoxShadow(
+                    color: Color(0x1F000000),
+                    blurRadius: 3,
+                    offset: Offset(0, 1),
+                  ),
+                ]
+              : null,
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(Metrics.radius),
+            hoverColor: selected ? Palette.paper : Palette.hover,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  AppIcon(mode.icon, size: 15, color: colour),
+                  const SizedBox(width: 5),
+                  Text(
+                    mode.label,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                      color: colour,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

@@ -14,6 +14,7 @@ import '../../application/transform_box.dart';
 import '../../platform/canvas_cursor.dart';
 import '../widgets/text_focus.dart';
 import 'reference_image_cache.dart';
+import 'render_assets.dart';
 import 'scene_painter.dart';
 
 /// The drawing viewport: routes pointer input and paints the scene.
@@ -40,7 +41,39 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
     widget.editor,
     widget.editor.viewChanges,
     _pictures,
+    RenderAssets.instance,
+    _viewSettled,
   ]);
+
+  /// The camera at the last paint, to tell a pan or zoom from other
+  /// redraws.
+  Object? _lastCamera;
+
+  /// Whether the camera has changed within [_settleDelay].
+  bool _viewMoving = false;
+  Timer? _settleTimer;
+
+  /// Fires once the view has stopped moving, to draw the full-quality
+  /// Render ground again.
+  final _viewSettled = ChangeNotifier();
+
+  static const _settleDelay = Duration(milliseconds: 180);
+
+  /// Notes a pan or zoom: Render draws cheap ground edges until the
+  /// camera has been still for [_settleDelay].
+  void _trackViewMotion(Object camera) {
+    if (identical(camera, _lastCamera)) return;
+    final first = _lastCamera == null;
+    _lastCamera = camera;
+    if (first) return;
+    _viewMoving = true;
+    _settleTimer?.cancel();
+    _settleTimer = Timer(_settleDelay, () {
+      _viewMoving = false;
+      // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
+      _viewSettled.notifyListeners();
+    });
+  }
 
   /// The pointer currently panning the view, if any.
   int? _panPointer;
@@ -54,6 +87,9 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
   @override
   void initState() {
     super.initState();
+    // Textures and feature pictures load in the background; Wireframe
+    // uses the feature pictures' sizes only in Render, so load both now.
+    RenderAssets.instance.ensureLoaded();
     widget.editor.addListener(_updateCursor);
   }
 
@@ -185,6 +221,8 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
     widget.editor.removeListener(_updateCursor);
     showCanvasCursor(CanvasCursor.system);
     _holdTimer?.cancel();
+    _settleTimer?.cancel();
+    _viewSettled.dispose();
     _pictures.dispose();
     super.dispose();
   }
@@ -247,6 +285,7 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
               listenable: _repaint,
               builder: (context, _) {
                 final editor = widget.editor;
+                _trackViewMotion(editor.camera);
                 return CustomPaint(
                   size: size,
                   painter: ScenePainter(
@@ -271,6 +310,10 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
                       selectionBox: selectionBoxOf(editor),
                       guideMarkers: _input.activeGuideSet().markers,
                       showCurveHandles: visibleCurveHandles(editor).isNotEmpty,
+                      viewMode: editor.settings.viewMode,
+                      renderAssets: RenderAssets.instance,
+                      selectedFeatureId: editor.selectedFeature?.id,
+                      viewMoving: _viewMoving,
                     ),
                   ),
                 );

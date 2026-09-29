@@ -40,7 +40,7 @@ extension _AreaSelectInput on CanvasInput {
     final (layerId, items) = _areaPick(_areaOutline(drag), shift: drag.shift);
     if (layerId == null) {
       // Nothing touched: like a click on empty ground.
-      if (!drag.shift) editor.selectItem(null);
+      if (!drag.shift) editor.deselectAll();
       return;
     }
     editor.selectItems(layerId, items, add: drag.shift);

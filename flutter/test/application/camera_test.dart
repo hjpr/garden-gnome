@@ -14,13 +14,40 @@ void main() {
     const camera = Camera();
     expect(feet(camera.height), closeTo(100, 1e-9));
     expect(camera.pixelsPerMetreNow, pixelsPerMetre);
-    expect(camera.gridCellMetres, 1);
+    expect(feet(camera.gridCellMetres(Units.feet)), closeTo(5, 1e-9));
+    expect(camera.gridCellMetres(Units.metres), 1);
   });
 
   test('half the height shows the ground twice as large', () {
     const camera = Camera(height: Camera.startHeight / 2);
     expect(camera.pixelsPerMetreNow, closeTo(2 * pixelsPerMetre, 1e-9));
-    expect(camera.gridCellMetres, 0.5);
+    expect(camera.gridCellMetres(Units.metres), 0.5);
+  });
+
+  test('closer in, the feet grid steps down to 1 ft', () {
+    const camera = Camera(height: Camera.startHeight / 4);
+    expect(feet(camera.gridCellMetres(Units.feet)), closeTo(1, 1e-9));
+  });
+
+  test('grid cells are round lengths in the units shown', () {
+    const limits = HeightLimits();
+    final feetSeen = <double>{};
+    final metresSeen = <double>{};
+    var camera = Camera(height: limits.lowest);
+    while (true) {
+      final ft = camera.gridCellMetres(Units.feet);
+      final m = camera.gridCellMetres(Units.metres);
+      feetSeen.add(double.parse(feet(ft).toStringAsFixed(6)));
+      metresSeen.add(m);
+      expect(
+        ft * camera.pixelsPerMetreNow,
+        greaterThanOrEqualTo(minGridCellPixels),
+      );
+      if (camera.height >= limits.highest) break;
+      camera = camera.zoomAt(Offset.zero, -1, limits: limits);
+    }
+    expect(feetSeen, {0.5, 1, 5, 10, 20});
+    expect(metresSeen.every(gridSteps[Units.metres]!.contains), isTrue);
   });
 
   test('by default the camera stays between 5 ft and 500 ft', () {

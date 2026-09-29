@@ -13,19 +13,24 @@ import '../../application/transform_box.dart';
 import '../../application/workspace_settings.dart';
 import '../../domain/bezier.dart';
 import '../../domain/document.dart';
-import '../../domain/fill_patterns.dart';
+import '../../domain/feature.dart';
 import '../../domain/geometry.dart';
 import '../../domain/land_rules.dart';
 import '../../domain/layer.dart';
 import '../../domain/reference_image.dart';
+import '../../domain/row_layout.dart';
 import '../../domain/units.dart';
 import '../../domain/vec.dart';
+import '../../domain/zone_ground.dart';
 import '../theme.dart';
 import 'curve_paths.dart';
 import 'pattern_painter.dart';
+import 'render_assets.dart';
 
 part 'construction_painter.dart';
+part 'feature_painter.dart';
 part 'reference_painter.dart';
+part 'render_painter.dart';
 
 /// Everything the painter needs, gathered so painting never reads the
 /// controller or changes state.
@@ -48,6 +53,10 @@ class SceneState {
     this.selectionBox,
     this.guideMarkers = const [],
     this.showCurveHandles = false,
+    this.viewMode = ViewMode.wireframe,
+    this.renderAssets,
+    this.selectedFeatureId,
+    this.viewMoving = false,
   });
 
   final GardenDocument document;
@@ -76,7 +85,7 @@ class SceneState {
   final String? referenceLineImageId;
   final Vec? referenceLineStart;
 
-  /// Physical pixels per logical pixel, so pattern tiles are drawn at the
+  /// Physical pixels per logical pixel, so hatch tiles are drawn at the
   /// screen's own sharpness.
   final double devicePixelRatio;
 
@@ -91,6 +100,20 @@ class SceneState {
   /// Whether the selected curves show their Bézier handles (Select, on an
   /// unlocked layer).
   final bool showCurveHandles;
+
+  /// Wireframe for drawing, or the Render view of the farm.
+  final ViewMode viewMode;
+
+  /// Textures and feature pictures; null in tests that do not need them,
+  /// which then see plain colours.
+  final RenderAssets? renderAssets;
+
+  /// The feature showing its selection ring, if any.
+  final String? selectedFeatureId;
+
+  /// Whether the view is panning or zooming right now. Render then skips
+  /// the costly blended ground edges and draws them once it settles.
+  final bool viewMoving;
 }
 
 /// Draws the grid, every layer, and the current tool feedback.
@@ -104,10 +127,6 @@ class ScenePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     canvas.clipRect(Offset.zero & size);
-    canvas.drawColor(Palette.canvas, BlendMode.src);
-    _paintGrid(canvas, size);
-    _paintReference(canvas);
-
     // While dragging, the drawing is shown as it would be if released now.
     final move = scene.preview is MovePreview
         ? scene.preview as MovePreview
@@ -116,8 +135,26 @@ class ScenePainter extends CustomPainter {
         ? scene.preview as BooleanPreview
         : null;
     final document = boolean?.document ?? move?.document ?? scene.document;
-    for (final layerId in document.drawingOrder) {
-      _paintLayer(canvas, document, layerId);
+    final render = scene.viewMode == ViewMode.render;
+
+    if (render) {
+      // The farm from above. Reference pictures are for tracing, so they
+      // stay out of it; outlines are drawn only for the selected layer.
+      _paintRenderGround(canvas, size, document);
+    } else {
+      canvas.drawColor(Palette.canvas, BlendMode.src);
+      _paintGrid(canvas, size);
+      _paintReference(canvas);
+      for (final layerId in document.drawingOrder) {
+        _paintLayer(canvas, document, layerId);
+      }
+    }
+    _paintFeatures(canvas);
+    if (render) {
+      final selected = scene.selectedLayerId;
+      if (selected != null && document.layers.containsKey(selected)) {
+        _paintLayer(canvas, document, selected, outlineOnly: true);
+      }
     }
 
     final selectedId = scene.selectedLayerId;
@@ -166,7 +203,7 @@ class ScenePainter extends CustomPainter {
     final paint = Paint()
       ..color = Color(a.gridColor).withValues(alpha: a.gridOpacity)
       ..strokeWidth = a.gridThickness;
-    final cell = _camera.gridCellMetres;
+    final cell = _camera.gridCellMetres(scene.units);
     final topLeft = _camera.toWorld(Offset.zero);
     final bottomRight = _camera.toWorld(Offset(size.width, size.height));
     final lines = LineBatch();
@@ -194,7 +231,15 @@ class ScenePainter extends CustomPainter {
   /// Active land gets a light fill. Closed land that is not active is
   /// hatched. Invalid land is drawn in red with dashed lines, so it stands
   /// out without being removed.
-  void _paintLayer(Canvas canvas, GardenDocument document, String layerId) {
+  ///
+  /// [outlineOnly] draws just the outline, as the Render view does for the
+  /// selected layer over its textures.
+  void _paintLayer(
+    Canvas canvas,
+    GardenDocument document,
+    String layerId, {
+    bool outlineOnly = false,
+  }) {
     final layer = document.layers[layerId]!;
     final geometry = document.geometryOf(layerId);
     // Red marks broken rules. Unfinished drawing also makes the layer
@@ -204,7 +249,7 @@ class ScenePainter extends CustomPainter {
     final color = invalid ? Palette.invalid : layerColor(layer);
     final isSelected = layerId == scene.selectedLayerId;
 
-    if (geometry.isClosed) {
+    if (geometry.isClosed && !outlineOnly) {
       final path = _regionPath(geometry);
       if (invalid) {
         canvas.drawPath(
@@ -213,7 +258,7 @@ class ScenePainter extends CustomPainter {
         );
       } else if (document.isActive(layerId)) {
         canvas.drawPath(path, Paint()..color = color.withValues(alpha: 0.07));
-        _paintPattern(canvas, document, layerId, color);
+        _paintWireRows(canvas, document, layerId);
       } else {
         _paintHatch(canvas, path);
       }
@@ -243,51 +288,7 @@ class ScenePainter extends CustomPainter {
       }
     }
     // Shapes carry no name on the canvas: Properties and the status bar
-    // say what is selected, and colour and pattern tell layers apart.
-  }
-
-  /// The layer's decorative pattern. Zone land is cut out of a property's
-  /// pattern, so it never shows through under a zone. Overlapping zones
-  /// each keep their own pattern. Invalid or inactive land shows its hatch
-  /// instead (see [_paintLayer]).
-  void _paintPattern(
-    Canvas canvas,
-    GardenDocument document,
-    String layerId,
-    Color color,
-  ) {
-    final pattern = document.patternOf(layerId);
-    if (pattern == null) return;
-    paintFillPattern(
-      canvas,
-      _patternArea(document, layerId).transform(cameraMatrix(_camera)),
-      pattern,
-      color.withValues(alpha: 0.45),
-      _camera.toScreen(Vec.zero),
-      devicePixelRatio: scene.devicePixelRatio,
-    );
-  }
-
-  /// The layer's land minus the land of zones inside a property, in world
-  /// metres.
-  /// Cutting paths is slow, so it is done once per document, not per frame.
-  Path _patternArea(GardenDocument document, String layerId) {
-    final cache = _patternAreas[document] ??= {};
-    return cache[layerId] ??= () {
-      var area = worldRegionPath(document.geometryOf(layerId).region!);
-      final depth = document.layers[layerId]!.kind.index;
-      for (final otherId in document.drawingOrder) {
-        if (document.layers[otherId]!.kind.index <= depth) continue;
-        final land = document.geometryOf(otherId).region;
-        if (land == null) continue;
-        area = Path.combine(
-          PathOperation.difference,
-          area,
-          worldRegionPath(land),
-        );
-      }
-      return area;
-    }();
+    // say what is selected, and colour tells layers apart.
   }
 
   /// Light grey diagonal lines marking a closed layer that is not active.
@@ -517,7 +518,11 @@ class ScenePainter extends CustomPainter {
           valid ? const Color(0xFF376B95) : Palette.invalid,
           dashed: true,
         );
-      case MovePreview() || ReferencePreview():
+      case MovePreview() ||
+          ReferencePreview() ||
+          FeatureHoverPreview() ||
+          FeatureMovePreview():
+        // Drawn with the drawing itself, or by the feature painter.
         break;
     }
   }
@@ -798,10 +803,6 @@ class ScenePainter extends CustomPainter {
   @override
   bool shouldRepaint(ScenePainter oldDelegate) => true;
 }
-
-/// Each document's pattern areas by layer, in world metres. Documents are
-/// immutable, so an entry stays right for as long as its document lives.
-final _patternAreas = Expando<Map<String, Path>>('pattern areas');
 
 /// The outline colour used for a layer on the canvas and in Layers.
 Color layerColor(Layer layer) => switch (layer.properties) {

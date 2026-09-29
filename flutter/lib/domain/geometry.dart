@@ -180,10 +180,9 @@ class Circle {
   Circle withRadius(double radius) => Circle(id, center, radius, label: label);
 }
 
-/// Row and mound settings stored with a zone's geometry.
-///
-/// Planting layout controls arrive in a later milestone; the values are kept
-/// so saved drawings round-trip without loss.
+/// Mound settings stored with a zone's geometry, kept for the planting
+/// layouts to come. Row sizes moved to the zone's properties ([RowSpec]);
+/// the row fields here are only read from older files.
 class PlantingDimensions {
   const PlantingDimensions({
     this.rowWidth,

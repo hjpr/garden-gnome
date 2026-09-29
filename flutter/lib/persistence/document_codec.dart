@@ -4,14 +4,21 @@ import 'dart:typed_data';
 import 'package:archive/archive.dart';
 
 import '../domain/document.dart';
+import '../domain/feature.dart';
 import '../domain/geometry.dart';
 import '../domain/layer.dart';
 import '../domain/reference_image.dart';
 import '../domain/vec.dart';
 
-// Only this version opens. Raise it whenever an older reader would lose or
-// misread something, so it refuses the file instead of re-saving it lossy.
-const int schemaVersion = 1;
+// Raise it whenever an older reader would lose or misread something, so it
+// refuses the file instead of re-saving it lossy.
+//
+// 2: zone ground (flat/row) and row sizes, features; patterns removed.
+const int schemaVersion = 2;
+
+/// The oldest version still opened. Version 1 files open with their
+/// patterns and free-text ground notes dropped.
+const int oldestSchemaVersion = 1;
 const String formatName = 'garden-gnome';
 const String documentEntry = 'document.json';
 
@@ -110,6 +117,19 @@ Map<String, Object?> documentToJson(GardenDocument d) => {
   'geometries': {for (final g in d.geometries.values) g.id: _geometryToJson(g)},
   'image_counter': d.imageCounter,
   'references': [for (final image in d.references) _referenceToJson(image)],
+  'feature_counter': d.featureCounter,
+  'features': [for (final f in d.features) _featureToJson(f)],
+};
+
+Map<String, Object?> _featureToJson(Feature f) => {
+  'id': f.id,
+  'kind': f.kind.name,
+  'centre': _vecToJson(f.centre),
+  'length': f.length,
+  'width': f.width,
+  'height': f.height,
+  'rotation': f.rotation,
+  'label': f.label,
 };
 
 Map<String, Object?> _referenceToJson(ReferenceImage image) => {
@@ -141,7 +161,6 @@ Map<String, Object?> _layerToJson(Layer layer) => {
   'properties': switch (layer.properties) {
     PropertyProperties p => {
       'color': p.color.name,
-      'pattern': p.pattern?.name,
       'drainage': p.drainage?.name,
       'soil': {
         'ph': p.soil.ph,
@@ -156,10 +175,13 @@ Map<String, Object?> _layerToJson(Layer layer) => {
     },
     ZoneProperties p => {
       'color': p.color.name,
-      'pattern': p.pattern?.name,
-      'ground': p.ground,
+      'ground': p.ground?.name,
+      'rows': {
+        'width': p.rows.width,
+        'spacing': p.rows.spacing,
+        'direction': p.rows.direction,
+      },
       'crop': p.crop,
-      'planting_type': p.plantingType.name,
     },
   },
 };
@@ -242,17 +264,20 @@ GardenDocument documentFromJson(
       'This file was made by a newer version of Garden Gnome',
     );
   }
-  if (version != schemaVersion) {
+  if (version is! int || version < oldestSchemaVersion) {
     throw const DocumentFormatError('Damaged file: unsupported schema version');
   }
 
-  final layers = <String, Layer>{};
-  _map(root['layers'], 'layers').forEach((id, value) {
-    layers[id] = _layerFromJson(id, _map(value, 'layer'));
-  });
   final geometries = <String, Geometry>{};
   _map(root['geometries'], 'geometries').forEach((id, value) {
     geometries[id] = _geometryFromJson(id, _map(value, 'geometry'));
+  });
+  final layers = <String, Layer>{};
+  _map(root['layers'], 'layers').forEach((id, value) {
+    final json = _map(value, 'layer');
+    layers[id] = version == 1
+        ? _layerFromJsonV1(id, json, geometries[json['geometry_id']])
+        : _layerFromJson(id, json);
   });
 
   final references = [
@@ -275,6 +300,28 @@ GardenDocument documentFromJson(
     }
   }
 
+  final featureCounter = version == 1 ? 0 : _count(root['feature_counter']);
+  final features = version == 1
+      ? const <Feature>[]
+      : [
+          for (final item in _list(root['features'], 'features'))
+            _featureFromJson(_map(item, 'feature')),
+        ];
+  final featureIds = <String>{};
+  for (final feature in features) {
+    final number = int.tryParse(
+      feature.id.substring(feature.id.lastIndexOf('-') + 1),
+    );
+    if (!featureIds.add(feature.id) ||
+        !feature.id.startsWith('feature-') ||
+        number == null ||
+        number > featureCounter) {
+      throw const DocumentFormatError(
+        'Damaged file: a feature ID is not valid',
+      );
+    }
+  }
+
   final nameCounters = <LayerKind, int>{};
   _map(root['name_counters'], 'name counters').forEach((k, v) {
     nameCounters[_enum(LayerKind.values, k, 'layer kind')] = _count(v);
@@ -288,6 +335,8 @@ GardenDocument documentFromJson(
     nameCounters: nameCounters,
     references: references,
     imageCounter: imageCounter,
+    features: features,
+    featureCounter: featureCounter,
   );
   _checkStructure(document);
   return document;
@@ -296,6 +345,53 @@ GardenDocument documentFromJson(
 Layer _layerFromJson(String id, Map<String, Object?> json) {
   final kind = _enum(LayerKind.values, json['kind'], 'layer kind');
   final props = _map(json['properties'], 'properties');
+  return _layerShell(id, json, kind, switch (kind) {
+    LayerKind.property => _propertyFromJson(props),
+    LayerKind.zone => ZoneProperties(
+      color: _enum(OutlineColor.values, props['color'], 'color'),
+      ground: props['ground'] == null
+          ? null
+          : _enum(GroundType.values, props['ground'], 'ground'),
+      rows: _rowsFromJson(_map(props['rows'], 'rows')),
+      crop: _optionalString(props['crop'], 'crop'),
+    ),
+  });
+}
+
+/// Version 1 layers: patterns and planting type are dropped, and the
+/// free-text ground note too, unless it names a ground type. Row sizes
+/// come from the zone's geometry, where version 1 kept them.
+Layer _layerFromJsonV1(
+  String id,
+  Map<String, Object?> json,
+  Geometry? geometry,
+) {
+  final kind = _enum(LayerKind.values, json['kind'], 'layer kind');
+  final props = _map(json['properties'], 'properties');
+  final note = _optionalString(props['ground'], 'ground')?.trim().toLowerCase();
+  final dims = geometry?.dimensions;
+  const defaults = RowSpec();
+  return _layerShell(id, json, kind, switch (kind) {
+    LayerKind.property => _propertyFromJson(props),
+    LayerKind.zone => ZoneProperties(
+      color: _enum(OutlineColor.values, props['color'], 'color'),
+      ground: GroundType.values.where((g) => g.name == note).firstOrNull,
+      rows: RowSpec(
+        width: dims?.rowWidth ?? defaults.width,
+        spacing: dims?.rowSpacing ?? defaults.spacing,
+        direction: RowSpec.normalDirection(dims?.rowDirection ?? 0),
+      ),
+      crop: _optionalString(props['crop'], 'crop'),
+    ),
+  });
+}
+
+Layer _layerShell(
+  String id,
+  Map<String, Object?> json,
+  LayerKind kind,
+  LayerProperties properties,
+) {
   final String name;
   try {
     name = validLayerName(_string(json['name'], 'layer name'));
@@ -310,32 +406,49 @@ Layer _layerFromJson(String id, Map<String, Object?> json) {
     children: _strings(json['children'], 'children'),
     geometryId: _string(json['geometry_id'], 'geometry ID'),
     locked: _bool(json['locked'], 'layer lock'),
-    properties: switch (kind) {
-      LayerKind.property => PropertyProperties(
-        color: _enum(OutlineColor.values, props['color'], 'color'),
-        pattern: _pattern(props['pattern']),
-        drainage: props['drainage'] == null
-            ? null
-            : _enum(SoilDrainage.values, props['drainage'], 'drainage'),
-        soil: _soilFromJson(_map(props['soil'], 'soil')),
-      ),
-      LayerKind.zone => ZoneProperties(
-        color: _enum(OutlineColor.values, props['color'], 'color'),
-        pattern: _pattern(props['pattern']),
-        ground: _optionalString(props['ground'], 'ground'),
-        crop: _optionalString(props['crop'], 'crop'),
-        plantingType: _enum(
-          PlantingType.values,
-          props['planting_type'],
-          'planting type',
-        ),
-      ),
-    },
+    properties: properties,
   );
 }
 
-FillPattern? _pattern(Object? name) =>
-    name == null ? null : _enum(FillPattern.values, name, 'pattern');
+PropertyProperties _propertyFromJson(Map<String, Object?> props) =>
+    PropertyProperties(
+      color: _enum(OutlineColor.values, props['color'], 'color'),
+      drainage: props['drainage'] == null
+          ? null
+          : _enum(SoilDrainage.values, props['drainage'], 'drainage'),
+      soil: _soilFromJson(_map(props['soil'], 'soil')),
+    );
+
+RowSpec _rowsFromJson(Map<String, Object?> json) {
+  final rows = RowSpec(
+    width: _number(json['width']),
+    spacing: _number(json['spacing']),
+    direction: _number(json['direction']),
+  );
+  if (rows.problem != null || rows.direction < 0 || rows.direction >= 180) {
+    throw const DocumentFormatError('Damaged file: row sizes');
+  }
+  return rows;
+}
+
+Feature _featureFromJson(Map<String, Object?> json) {
+  final feature = Feature(
+    id: _string(json['id'], 'feature ID'),
+    kind: _enum(FeatureKind.values, json['kind'], 'feature kind'),
+    centre: _vec(json['centre']),
+    length: _number(json['length']),
+    width: _number(json['width']),
+    height: _number(json['height']),
+    rotation: _number(json['rotation']),
+    label: _optionalString(json['label'], 'feature name'),
+  );
+  if (feature.problem != null ||
+      feature.rotation < 0 ||
+      feature.rotation >= 360) {
+    throw const DocumentFormatError('Damaged file: feature sizes');
+  }
+  return feature;
+}
 
 SoilSample _soilFromJson(Map<String, Object?> json) => SoilSample(
   ph: _optionalNumber(json['ph']),

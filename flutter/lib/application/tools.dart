@@ -1,4 +1,5 @@
-import '../domain/layer.dart';
+import '../domain/feature.dart';
+import '../domain/ground.dart';
 
 /// What a tool function does with pointer input.
 enum ToolFunction {
@@ -39,15 +40,14 @@ enum ToolFunction {
   /// Click two opposite corners.
   rectangle('Rectangle', 'rectangle.svg'),
 
-  /// Pattern functions: click inside one of the layer's closed shapes to
-  /// fill the whole layer. None removes it.
-  noPattern('None', 'fill-none.svg'),
-  diagonalPattern('Diagonal', 'fill-diagonal.svg'),
-  rowsPattern('Rows', 'fill-rows.svg'),
-  crosshatchPattern('Crosshatch', 'fill-crosshatch.svg'),
-  gridPattern('Grid', 'fill-grid.svg'),
-  dotsPattern('Dots', 'fill-dots.svg'),
-  crossesPattern('Crosses', 'fill-crosses.svg'),
+  /// Ground functions: click inside a zone to give it that ground.
+  flatGround('Flat', 'ground-flat.svg'),
+  rowGround('Row', 'ground-row.svg'),
+
+  /// Feature functions: click to place one at its usual size.
+  raisedBed('Raised bed', 'raised-bed.svg'),
+  greenhouse('Greenhouse', 'greenhouse.svg'),
+  highTunnel('High tunnel', 'high-tunnel.svg'),
 
   /// Click two points on the reference image a known distance apart.
   referenceLine('Ref. line', 'reference-line.svg');
@@ -57,15 +57,18 @@ enum ToolFunction {
   final String label;
   final String icon;
 
-  /// The pattern a Pattern function applies; null for None and for
-  /// functions of other tools.
-  FillPattern? get fillPattern => switch (this) {
-    diagonalPattern => FillPattern.diagonal,
-    rowsPattern => FillPattern.rows,
-    crosshatchPattern => FillPattern.crosshatch,
-    gridPattern => FillPattern.grid,
-    dotsPattern => FillPattern.dots,
-    crossesPattern => FillPattern.crosses,
+  /// The ground a Ground function gives a zone; null for other tools.
+  GroundType? get groundType => switch (this) {
+    flatGround => GroundType.flat,
+    rowGround => GroundType.row,
+    _ => null,
+  };
+
+  /// The feature a Feature function places; null for other tools.
+  FeatureKind? get featureKind => switch (this) {
+    raisedBed => FeatureKind.raisedBed,
+    greenhouse => FeatureKind.greenhouse,
+    highTunnel => FeatureKind.highTunnel,
     _ => null,
   };
 
@@ -103,16 +106,19 @@ enum Tool {
     ToolFunction.rectangle,
   ]),
 
-  /// Decorates all of the selected layer's land. Looks only: area and
-  /// land rules are unchanged.
-  pattern('Pattern', 'fill.svg', [
-    ToolFunction.noPattern,
-    ToolFunction.diagonalPattern,
-    ToolFunction.rowsPattern,
-    ToolFunction.crosshatchPattern,
-    ToolFunction.gridPattern,
-    ToolFunction.dotsPattern,
-    ToolFunction.crossesPattern,
+  /// Prepares a zone's soil: flat, or in rows. Rows are sized in
+  /// Properties.
+  ground('Ground', 'ground.svg', [
+    ToolFunction.flatGround,
+    ToolFunction.rowGround,
+  ]),
+
+  /// Places raised beds, greenhouses and high tunnels. Their sizes are
+  /// set in Properties.
+  feature('Feature', 'feature.svg', [
+    ToolFunction.raisedBed,
+    ToolFunction.greenhouse,
+    ToolFunction.highTunnel,
   ]),
 
   /// A picture to trace over. Upload it in Properties, move and scale it

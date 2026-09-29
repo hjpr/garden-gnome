@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:garden_gnome/application/editor_controller.dart';
+import 'package:garden_gnome/domain/feature.dart';
 import 'package:garden_gnome/domain/layer.dart';
 import 'package:garden_gnome/domain/vec.dart';
 import 'package:garden_gnome/presentation/panels/layers_panel.dart';
@@ -122,5 +123,101 @@ void main() {
     expect(find.text('Circle 2  outside Property 1'), findsOneWidget);
     expect(find.text('Circle 1'), findsOneWidget, reason: 'inside: no note');
     expect(find.text('Invalid: Circle 2 is not inside Property 1'), findsOne);
+  });
+
+  testWidgets('row boxes are greyed until the ground is Row', (tester) async {
+    final editor = EditorController()..addLayer(LayerKind.property);
+    addTearDown(editor.dispose);
+    drawSquare(editor, editor.selectedLayerId!);
+    editor.addLayer(LayerKind.zone);
+    final zone = editor.selectedLayerId!;
+    drawSquare(editor, zone);
+    await tester.pumpWidget(panels(editor));
+    TextField box(String label) => tester.widget<TextField>(
+      find.descendant(
+        of: find
+            .ancestor(of: find.text(label), matching: find.byType(Row))
+            .first,
+        matching: find.byType(TextField),
+      ),
+    );
+    expect(box('Row width (ft)').enabled, isFalse);
+    expect(find.text('—'), findsNWidgets(2), reason: 'Rows and Row length');
+
+    editor.setGround(zone, GroundType.row);
+    await tester.pumpAndSettle();
+    expect(box('Row width (ft)').enabled, isTrue);
+    expect(find.byKey(const ValueKey('readout-Rows')), findsOneWidget);
+
+    await tester.enterText(
+      find.descendant(
+        of: find
+            .ancestor(
+              of: find.text('Direction (°)'),
+              matching: find.byType(Row),
+            )
+            .first,
+        matching: find.byType(TextField),
+      ),
+      '90',
+    );
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    final p = editor.document.layers[zone]!.properties as ZoneProperties;
+    expect(p.rows.direction, 90);
+  });
+
+  testWidgets('a selected feature shows its name and sizes', (tester) async {
+    final editor = EditorController();
+    addTearDown(editor.dispose);
+    editor.addFeature(FeatureKind.raisedBed, const Vec(1, 1));
+    await tester.pumpWidget(panels(editor));
+    expect(find.text('Raised bed 1'), findsOneWidget);
+    for (final label in ['Length (ft)', 'Width (ft)', 'Height (ft)']) {
+      expect(find.text(label), findsOneWidget, reason: label);
+    }
+    expect(find.text('8'), findsOneWidget, reason: '8 ft long');
+    await tester.tap(find.bySemanticsLabel('Delete Raised bed 1'));
+    await tester.pumpAndSettle();
+    expect(editor.document.features, isEmpty);
+    expect(find.text('Nothing selected.'), findsOneWidget);
+  });
+
+  testWidgets('Direction has up and down arrows inside its box', (
+    tester,
+  ) async {
+    final editor = EditorController()..addLayer(LayerKind.property);
+    addTearDown(editor.dispose);
+    drawSquare(editor, editor.selectedLayerId!);
+    editor.addLayer(LayerKind.zone);
+    final zone = editor.selectedLayerId!;
+    drawSquare(editor, zone);
+    editor.setGround(zone, GroundType.row);
+    editor.setRows(zone, const RowSpec(direction: 178));
+    await tester.pumpWidget(panels(editor));
+    double direction() =>
+        (editor.document.layers[zone]!.properties as ZoneProperties)
+            .rows
+            .direction;
+
+    final up = find.bySemanticsLabel('Increase Direction');
+    final down = find.bySemanticsLabel('Decrease Direction');
+    expect(up, findsOneWidget);
+    // The arrows sit inside the box, at its right edge.
+    final box = tester.getRect(
+      find.ancestor(of: up, matching: find.byType(TextField)).first,
+    );
+    expect(tester.getCenter(up).dx, greaterThan(box.right - 24));
+
+    await tester.tap(up);
+    await tester.pumpAndSettle();
+    expect(direction(), 179);
+    await tester.tap(up);
+    await tester.pumpAndSettle();
+    expect(direction(), 0, reason: '180° wraps to 0°');
+    await tester.tap(down);
+    await tester.pumpAndSettle();
+    expect(direction(), 179);
+    expect(find.text('179'), findsOneWidget);
   });
 }

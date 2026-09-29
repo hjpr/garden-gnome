@@ -40,6 +40,12 @@ class WorkspaceStore {
                 : AreaUnits.squareFeet),
         snappingEnabled: snapping && !oldDrawingSnap,
         guidesEnabled: json['guides'] as bool? ?? (snapping && oldDrawingSnap),
+        // Saves from before the Render view open in Wireframe.
+        viewMode:
+            ViewMode.values
+                .where((m) => m.name == json['view_mode'])
+                .firstOrNull ??
+            ViewMode.wireframe,
         menuScale: MenuScale.values.byName(json['menu_scale'] as String),
         hiddenPanels: _panels(json['hidden']),
         minimizedPanels: _panels(json['minimized']),
@@ -97,6 +103,7 @@ class WorkspaceStore {
         'area_units': settings.areaUnits.name,
         'snapping': settings.snappingEnabled,
         'guides': settings.guidesEnabled,
+        'view_mode': settings.viewMode.name,
         'menu_scale': settings.menuScale.name,
         'hidden': [for (final p in settings.hiddenPanels) p.name],
         'minimized': [for (final p in settings.minimizedPanels) p.name],
@@ -123,6 +130,7 @@ class WorkspaceStore {
         },
         'counters': {
           'names': {for (final e in ledger.names.entries) e.key.name: e.value},
+          'features': ledger.features,
           'geometry': {
             for (final e in ledger.geometry.entries)
               e.key: [
@@ -148,6 +156,7 @@ class WorkspaceStore {
       (json['names'] as Map).forEach((k, v) {
         ledger.names[LayerKind.values.byName(k as String)] = v as int;
       });
+      ledger.features = json['features'] as int? ?? 0;
       (json['geometry'] as Map).forEach((k, v) {
         final n = (v as List).cast<int>();
         ledger.geometry[k as String] = IdCounters(

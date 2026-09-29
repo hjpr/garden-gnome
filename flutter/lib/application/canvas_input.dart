@@ -3,8 +3,10 @@ import 'dart:ui';
 
 import '../domain/curve_edge.dart';
 import '../domain/document.dart';
+import '../domain/feature.dart';
 import '../domain/geometry.dart';
 import '../domain/land_rules.dart';
+import '../domain/layer.dart';
 import '../domain/planar.dart';
 import '../domain/polygon_shapes.dart';
 import '../domain/reference_image.dart';
@@ -25,6 +27,7 @@ import 'transform_box.dart';
 part 'canvas_area_select.dart';
 part 'canvas_construction.dart';
 part 'canvas_curve.dart';
+part 'canvas_feature.dart';
 part 'canvas_reference.dart';
 part 'canvas_transform.dart';
 
@@ -50,6 +53,7 @@ class CanvasInput {
   _BoxDrag? _boxDrag;
   _AreaDrag? _areaDrag;
   _HandleDrag? _handleDrag;
+  _FeatureDrag? _featureDrag;
 
   /// The selection-box grip under the pointer while hovering, if any.
   BoxGrip? _hoverGrip;
@@ -61,6 +65,7 @@ class CanvasInput {
       _boxDrag != null ||
       _areaDrag != null ||
       _handleDrag != null ||
+      _featureDrag != null ||
       (_press?.curveStop != null && _press!.travelled);
 
   /// The selection-box grip being dragged, or else the one under the
@@ -81,6 +86,9 @@ class CanvasInput {
     if (_hoverGrip != null) return editor.setPreview(null);
     if (_curveHandleUnder(screen) != null) return editor.setPreview(null);
     if (editor.tool == Tool.select) {
+      if (_featureOnTop(screen) case final feature?) {
+        return editor.setPreview(FeatureHoverPreview(feature.id));
+      }
       final top = _selectHits(screen).firstOrNull;
       return editor.setPreview(
         top == null ? null : HoverPreview(top.itemId, layerId: top.layerId),
@@ -88,6 +96,9 @@ class CanvasInput {
     }
     if (editor.tool == Tool.reference) {
       return editor.setPreview(_referenceLinePreview(screen));
+    }
+    if (editor.tool == Tool.feature) {
+      return editor.setPreview(_featurePlacePreview(screen));
     }
     final layerId = editor.selectedLayerId;
     if (layerId == null || editor.document.isLocked(layerId)) {
@@ -104,7 +115,7 @@ class CanvasInput {
       (Tool.line, ToolFunction.curve) => _curveHover(layerId, geometry, screen),
       (Tool.arc, _) => _arcPreview(layerId, geometry, screen),
       (Tool.polygon, _) => _polygonPreview(layerId, screen),
-      (Tool.pattern, _) => _patternHover(geometry, screen),
+      (Tool.ground, _) => _groundHover(layerId, geometry, screen),
       (Tool.point, ToolFunction.delete) => _deleteHover(
         geometry,
         screen,
@@ -157,7 +168,11 @@ class CanvasInput {
         _boxDrag = _startBoxDrag(press);
         if (_boxDrag == null && press.grip == null) {
           _referenceDrag = _startReferenceDrag(press);
-          if (_referenceDrag == null && _dragTarget(press.origin) == null) {
+          if (_referenceDrag == null) _featureDrag = _startFeatureDrag(press);
+          if (_featureDrag != null) {
+            // A feature under the pointer moves.
+          } else if (_referenceDrag == null &&
+              _dragTarget(press.origin) == null) {
             // Empty ground: draw a marquee or lasso instead of moving.
             _areaDrag = _startAreaDrag(press);
           } else if (_referenceDrag == null) {
@@ -168,6 +183,8 @@ class CanvasInput {
     }
     final handleDrag = _handleDrag;
     if (handleDrag != null) return _updateHandleDrag(handleDrag, screen);
+    final featureDrag = _featureDrag;
+    if (featureDrag != null) return _updateFeatureDrag(featureDrag, screen);
     if (press.curveStop case final stop?) {
       return _updateCurveDrag(stop, screen);
     }
@@ -194,6 +211,8 @@ class CanvasInput {
     final boxDrag = _boxDrag;
     final areaDrag = _areaDrag;
     final handleDrag = _handleDrag;
+    final featureDrag = _featureDrag;
+    _featureDrag = null;
     _press = null;
     _drag = null;
     _referenceDrag = null;
@@ -201,6 +220,10 @@ class CanvasInput {
     _areaDrag = null;
     _handleDrag = null;
     if (press == null) return;
+    if (featureDrag != null) {
+      _finishFeatureDrag(featureDrag);
+      return hover(screen);
+    }
     if (handleDrag != null) {
       _finishHandleDrag(handleDrag);
       return hover(screen);
@@ -280,6 +303,7 @@ class CanvasInput {
     _boxDrag = null;
     _areaDrag = null;
     _handleDrag = null;
+    _featureDrag = null;
     _hoverGrip = null;
   }
 
@@ -288,6 +312,7 @@ class CanvasInput {
   void _click(Offset screen, {required bool shift}) {
     if (editor.tool == Tool.select) return _selectClick(screen, shift: shift);
     if (editor.tool == Tool.reference) return _referenceClick(screen);
+    if (editor.tool == Tool.feature) return _featureClick(screen);
 
     final layerId = editor.selectedLayerId;
     if (layerId == null) {
@@ -319,8 +344,8 @@ class CanvasInput {
         _arcClick(layerId, geometry, screen);
       case (Tool.polygon, _):
         _polygonClick(layerId, screen);
-      case (Tool.pattern, _):
-        _patternClick(layerId, geometry, screen);
+      case (Tool.ground, _):
+        _groundClick(layerId, geometry, screen);
       default:
         break;
     }
@@ -329,13 +354,21 @@ class CanvasInput {
   /// Select: picks the best item under the pointer on any layer, switching
   /// to its layer. Clicking empty ground clears the selection.
   void _selectClick(Offset screen, {required bool shift}) {
+    if (!shift) {
+      if (_featureOnTop(screen) case final feature?) {
+        return editor.selectFeature(feature.id);
+      }
+    }
     final top = _selectHits(screen).firstOrNull;
     if (top == null && !shift) {
       if (_referenceUnder(screen) case final image?) {
         return editor.selectReference(image.id);
       }
     }
-    if (top == null) return editor.selectItem(null, toggle: shift);
+    if (top == null) {
+      if (!shift) editor.deselectAll();
+      return;
+    }
     editor.selectObject(top.layerId, top.itemId, toggle: shift);
   }
 
@@ -543,6 +576,8 @@ class CanvasInput {
   // ---------------------------------------------------------------- previews
 
   static const noLayersToast = 'Add a Property layer to start drawing.';
+
+  static const groundNeedsZone = 'Ground is set on zones. Select a zone';
 
   static const tooClose =
       'Too close to another point. Place it farther away, or click the point to use it';
@@ -842,7 +877,7 @@ class CanvasInput {
     required Map<String, Set<String>> exclude,
   }) {
     final gridded = editor.settings.snappingEnabled
-        ? snapToGrid(world, editor.camera).position
+        ? snapToGrid(world, editor.camera, editor.settings.units).position
         : world;
     return snapToGuides(
       world,
@@ -858,7 +893,7 @@ class CanvasInput {
   /// on an axis no guide claims.
   SnapResult _snappedMove(_Drag drag, Vec anchor) {
     final gridded = editor.settings.snappingEnabled
-        ? snapToGrid(anchor, editor.camera).position
+        ? snapToGrid(anchor, editor.camera, editor.settings.units).position
         : anchor;
     final set = activeGuideSet(moving: drag.moving);
     if (set.isEmpty) return SnapResult(gridded);

@@ -252,8 +252,10 @@ class _BuildScreenState extends State<BuildScreen> {
         _editor.selectTool(Tool.circle);
       case LogicalKeyboardKey.keyG:
         _editor.selectTool(Tool.polygon);
+      case LogicalKeyboardKey.keyD:
+        _editor.selectTool(Tool.ground);
       case LogicalKeyboardKey.keyF:
-        _editor.selectTool(Tool.pattern);
+        _editor.selectTool(Tool.feature);
       case LogicalKeyboardKey.keyR:
         _editor.selectTool(Tool.reference);
       case LogicalKeyboardKey.escape:
@@ -299,7 +301,9 @@ class _BuildScreenState extends State<BuildScreen> {
       PanelId.properties => DockPanel(
         index: index,
         title: id.label,
-        subtitle: editor.showsReference
+        subtitle: editor.showsFeature
+            ? editor.selectedFeature!.kind.label
+            : editor.showsReference
             ? 'Reference'
             : editor.selectedLayer?.kind.label,
         expanded: expanded,
@@ -763,7 +767,7 @@ class _ScaleReadout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cell = editor.camera.gridCellMetres;
+    final cell = editor.camera.gridCellMetres(editor.settings.units);
     final width = cell * editor.camera.pixelsPerMetreNow;
     return Tooltip(
       message:

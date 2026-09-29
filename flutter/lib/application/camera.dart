@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
+import '../domain/units.dart';
 import '../domain/vec.dart';
 
 /// Logical screen pixels per metre with the camera at [Camera.startHeight].
@@ -74,15 +75,28 @@ class Camera {
 
   /// Side length of one grid cell in metres.
   ///
-  /// Cells stay between 30 and 60 screen pixels: each halving of the
-  /// camera's height halves the distance a cell represents. Grid lines are
-  /// anchored to the origin.
-  double get gridCellMetres => math
-      .pow(2, -_log2(pixelsPerMetreNow / pixelsPerMetre).floor())
-      .toDouble();
-
-  static double _log2(double value) => math.log(value) / math.ln2 + 1e-9;
+  /// The cell is a round length in the [units] shown (0.5, 1, 5, 10, 20 ft
+  /// and so on), so snapped points land on numbers a grower would measure
+  /// out. It is the smallest such length at least [minGridCellPixels]
+  /// across on screen. Grid lines are anchored to the origin.
+  double gridCellMetres(Units units) {
+    final steps = gridSteps[units]!;
+    for (final step in steps) {
+      final metres = units.toMetres(step);
+      if (metres * pixelsPerMetreNow >= minGridCellPixels) return metres;
+    }
+    return units.toMetres(steps.last);
+  }
 }
+
+/// The smallest a grid cell may look on screen, in logical pixels.
+const double minGridCellPixels = 24;
+
+/// The grid sizes offered in each unit, smallest first.
+const Map<Units, List<double>> gridSteps = {
+  Units.feet: [0.5, 1, 5, 10, 20, 50, 100],
+  Units.metres: [0.1, 0.5, 1, 2, 5, 10, 20, 50],
+};
 
 /// How low and how high the camera may go, in metres. A small plot wants
 /// a lower camera; a large property wants a higher one.

@@ -1,3 +1,7 @@
+import 'ground.dart';
+
+export 'ground.dart';
+
 /// The kinds of land a layer can describe.
 ///
 /// A property is land you hold: properties may not overlap one another.
@@ -60,35 +64,6 @@ enum SoilDrainage {
   poor('Poor');
 
   const SoilDrainage(this.label);
-
-  final String label;
-}
-
-/// Decorative patterns drawn inside a closed boundary. They are for
-/// looks only and never change area or land rules.
-enum FillPattern {
-  diagonal('Diagonal'),
-  rows('Rows'),
-  crosshatch('Crosshatch'),
-  grid('Grid'),
-  dots('Dots'),
-  crosses('Crosses');
-
-  const FillPattern(this.label);
-
-  final String label;
-
-  /// The pattern saved under [name], or null for none or an unknown name.
-  static FillPattern? fromName(String? name) =>
-      name == null ? null : values.asNameMap()[name];
-}
-
-enum PlantingType {
-  flat('Flat'),
-  row('Row'),
-  mound('Mound');
-
-  const PlantingType(this.label);
 
   final String label;
 }
@@ -161,12 +136,6 @@ class SoilSample {
 sealed class LayerProperties {
   const LayerProperties();
 
-  /// The decorative pattern drawn over all of the layer's land.
-  FillPattern? get pattern;
-
-  /// A copy with the pattern replaced (null for none).
-  LayerProperties withPattern(FillPattern? pattern);
-
   static LayerProperties defaultsFor(LayerKind kind) => switch (kind) {
     LayerKind.property => const PropertyProperties(),
     LayerKind.zone => const ZoneProperties(),
@@ -179,71 +148,56 @@ class PropertyProperties extends LayerProperties {
     this.color = OutlineColor.green,
     this.drainage,
     this.soil = const SoilSample(),
-    this.pattern,
   });
 
   final OutlineColor color;
   final SoilDrainage? drainage;
   final SoilSample soil;
-  @override
-  final FillPattern? pattern;
 
   PropertyProperties copyWith({
     OutlineColor? color,
     SoilDrainage? Function()? drainage,
     SoilSample? soil,
-    FillPattern? Function()? pattern,
   }) => PropertyProperties(
     color: color ?? this.color,
     drainage: drainage == null ? this.drainage : drainage(),
     soil: soil ?? this.soil,
-    pattern: pattern == null ? this.pattern : pattern(),
   );
-
-  @override
-  PropertyProperties withPattern(FillPattern? pattern) =>
-      copyWith(pattern: () => pattern);
 }
 
 /// Settings for a zone layer.
 class ZoneProperties extends LayerProperties {
   const ZoneProperties({
     this.color = OutlineColor.sage,
-    this.pattern,
     this.ground,
+    this.rows = const RowSpec(),
     this.crop,
-    this.plantingType = PlantingType.flat,
   });
 
   final OutlineColor color;
-  @override
-  final FillPattern? pattern;
 
-  /// A short description of the ground, such as "raised beds".
-  final String? ground;
+  /// How the soil is prepared, set with the Ground tool; null for plain
+  /// dirt.
+  final GroundType? ground;
+
+  /// Row size and heading. Used while [ground] is [GroundType.row], and
+  /// kept when it is not, so switching back restores them.
+  final RowSpec rows;
 
   /// The crop growing here, as a label.
   final String? crop;
 
-  /// How the crop is planted. Kept for the planting layouts to come.
-  final PlantingType plantingType;
-
   ZoneProperties copyWith({
     OutlineColor? color,
-    String? Function()? ground,
+    GroundType? Function()? ground,
+    RowSpec? rows,
     String? Function()? crop,
-    FillPattern? Function()? pattern,
   }) => ZoneProperties(
     color: color ?? this.color,
-    pattern: pattern == null ? this.pattern : pattern(),
     ground: ground == null ? this.ground : ground(),
+    rows: rows ?? this.rows,
     crop: crop == null ? this.crop : crop(),
-    plantingType: plantingType,
   );
-
-  @override
-  ZoneProperties withPattern(FillPattern? pattern) =>
-      copyWith(pattern: () => pattern);
 }
 
 /// One property or zone in the drawing.

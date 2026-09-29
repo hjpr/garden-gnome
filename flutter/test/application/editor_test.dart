@@ -398,11 +398,26 @@ void main() {
       expect(editor.selection.single, 'point-1');
     });
 
-    test('clicking empty ground clears the selection', () {
+    test('clicking empty ground clears the selection and the layer', () {
       final (editor, input, _, _, _) = stacked();
       click(input, at(6, 6));
+      expect(editor.selectedLayerId, isNotNull);
       click(input, at(30, 30));
       expect(editor.selection, isEmpty);
+      expect(editor.selectedLayerId, isNull);
+    });
+
+    test('Shift-clicking empty ground keeps the selection', () {
+      final (editor, input, _, _, _) = stacked();
+      click(input, at(6, 6));
+      final layer = editor.selectedLayerId;
+      final items = {...editor.selection};
+      input
+        ..hover(at(30, 30))
+        ..press(at(30, 30), shift: true)
+        ..release(at(30, 30));
+      expect(editor.selectedLayerId, layer);
+      expect(editor.selection, items);
     });
 
     test('dragging a point, a line, or a whole shape moves it', () {
@@ -516,7 +531,7 @@ void main() {
       check: (t) => t.contains('!') ? 'No exclamation marks' : null,
       apply: (t) {
         final p = editor.document.layers[layerId]!.properties as ZoneProperties;
-        editor.updateProperties(layerId, p.copyWith(ground: () => t));
+        editor.updateProperties(layerId, p.copyWith(crop: () => t));
       },
     );
 
@@ -547,7 +562,7 @@ void main() {
         editor.drafts.update('ground', groundDraft(editor, first, 'beds'));
         editor.selectLayer(second);
         String? ground(String id) =>
-            (editor.document.layers[id]!.properties as ZoneProperties).ground;
+            (editor.document.layers[id]!.properties as ZoneProperties).crop;
         expect(ground(first), 'beds');
         expect(ground(second), isNull);
       },

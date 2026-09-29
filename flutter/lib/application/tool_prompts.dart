@@ -1,3 +1,4 @@
+import '../domain/layer.dart';
 import 'editor_controller.dart';
 import 'tools.dart';
 
@@ -7,6 +8,11 @@ import 'tools.dart';
 String toolPrompt(EditorController editor) {
   if (editor.tool == Tool.select) return '';
   if (editor.tool == Tool.reference) return _referencePrompt(editor);
+  // Features sit on top of the land, so they need no layer.
+  if (editor.tool == Tool.feature) {
+    return 'Click to place a ${editor.function.label.toLowerCase()}. '
+        'Size it in Properties';
+  }
   if (editor.selectedLayer == null) {
     return editor.document.propertyIds.isEmpty
         ? 'Add a property in Layers to start drawing'
@@ -56,14 +62,14 @@ String toolPrompt(EditorController editor) {
       'Click one side of the circle',
     (Tool.circle, ToolFunction.twoPointCircle) =>
       'Click the opposite side. Esc to cancel',
-    (Tool.pattern, _)
+    (Tool.ground, _) when editor.selectedLayer?.kind != LayerKind.zone =>
+      'Ground is set on zones. Select a zone',
+    (Tool.ground, _)
         when editor.document.geometryOf(editor.selectedLayerId!).region ==
             null =>
-      'Close a shape before adding a pattern',
-    (Tool.pattern, ToolFunction.noPattern) =>
-      'Click inside a shape to remove the layer\'s pattern',
-    (Tool.pattern, final function) =>
-      'Click inside a shape to fill the layer with ${function.label}',
+      'Close a shape before setting its ground',
+    (Tool.ground, final function) =>
+      'Click inside the zone to make its ground ${function.label}',
     _ => '',
   };
 }

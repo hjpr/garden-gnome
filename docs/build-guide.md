@@ -64,12 +64,12 @@ selected zone. It can only be added once that property is Active.
 ## Tools
 
 Tools are laid out three to a row, in this order: Select, Point, Line,
-Arc, Circle, Polygon, Pattern, Reference. A tool's functions show
+Arc, Circle, Polygon, Ground, Feature, Reference. A tool's functions show
 underneath it.
 Boolean is not a tool; it lives in the Operations panel.
 
 Keyboard: V Select, P Point, L Line, A Arc, C Circle, G Polygon,
-F Pattern, R Reference. To move anything, use Select.
+D Ground, F Feature, R Reference. To move anything, use Select.
 
 The pointer tells you what a click will do. With Select it is the black
 arrow from the Select button: clicks pick and move things. Every other
@@ -87,6 +87,7 @@ Select (black arrow, the starting tool)
 - Press and hold without moving to open a small menu listing everything
   under the pointer. Pick the one you mean.
 - Shift-click adds to the selection within the same layer.
+- Click empty ground to deselect everything, including the layer.
 - Select has two functions, Marquee (the default) and Lasso. Drag from
   empty ground to select several things at once:
   - Marquee draws a dashed rectangle; Lasso (the pointer turns into a
@@ -206,16 +207,30 @@ Operations > Align (under Boolean)
 - Moving a whole property shape carries its zones' shapes inside it
   along, as a drag does. Items that share points cannot be aligned.
 
-Pattern
-- Choose None or one of six patterns (Diagonal, Rows, Crosshatch, Grid,
-  Dots, Crosses), then click inside the selected layer's closed boundary.
-  Clicks in a hole or outside do nothing. The tool stays chosen.
-- Patterns are for looks only: area and land checks are unchanged. They
-  show on Active land; Invalid or Inactive land shows its grey hatch
-  instead, and an open outline shows no pattern. A property's pattern is
-  cut away under its zones. Where zones overlap, both patterns show.
-- The Pattern menu in Properties (LOOK) changes the same setting. Each
-  change is one Undo step and is saved with the drawing.
+Ground (zones only)
+- Flat or Row, then click inside the selected zone. The whole zone gets
+  that ground; the tool stays chosen. Properties > GROUND has the same
+  choice, plus Dirt to clear it. Each change is one Undo step.
+- Row ground uses Row width, Spacing (the path between rows) and
+  Direction (degrees clockwise from up the screen: 0 runs rows up and
+  down, 90 left to right). The boxes are greyed out unless the ground is
+  Row, and keep their values when you switch away.
+- Rows are laid edge to edge from one side of each of the zone's shapes.
+  Properties shows how many rows fit and their total length.
+
+Feature
+- Raised bed, Greenhouse or High tunnel, then click to place one at its
+  usual size (8 × 4 ft bed, 12 × 8 ft greenhouse, 30 × 14 ft tunnel),
+  centred on the pointer. Features sit on top of the land and need no
+  layer.
+- Select picks a feature before the inside of a shape (points and lines
+  still win) and drags it. Its Properties show the name (click to
+  rename, bin to delete), Length, Width, Height, Rotation and footprint.
+  Delete removes the selected feature.
+- In Render a high tunnel is built from 5 ft sections (an end at each
+  end, middle sections between), so any length looks right. Its drawn
+  length is rounded to the nearest 5 ft: a 79 ft tunnel shows as 80 ft.
+  The number in Properties is kept exactly as typed.
 
 Reference (pictures to trace over)
 - Choose Reference (or press R). Properties always shows the same
@@ -281,7 +296,8 @@ point joining a third line. The status bar says why.
   height your range allows).
 
 The bar next to the camera height shows how long one grid square is, in
-your chosen units.
+your chosen units. The grid always uses round sizes: 0.5, 1, 5, 10 or
+20 ft (0.1, 0.5, 1, 2, 5, 10, 20 or 50 m), getting coarser as you zoom out.
 
 
 ## Layers and Properties
@@ -354,8 +370,15 @@ version of Garden Gnome is refused rather than opened with parts missing.
 
 ## Controls and preferences
 
-- Controls panel: Units (Dimensions in ft or m; Area in ft², m² or
-  acres), Snapping (to the grid) on or off, and Guides on or off.
+- Controls panel: View (Wireframe or Render), Units (Dimensions in ft
+  or m; Area in ft², m² or acres), Snapping (to the grid) on or off, and
+  Guides on or off.
+- Render shows the farm from above: open land is wild grass, a property
+  is lawn, a zone is tidy dirt, Flat ground is prepared soil and Row
+  ground shows its rows. Features show as pictures. Only the selected
+  layer's outline is drawn, and reference pictures are hidden. Every
+  tool works the same in both views; the choice is remembered with the
+  workspace, not the drawing.
 
 Guides line things up with their neighbours while you draw or move them.
 Rest the pointer on a point, line or circle for a moment; small blue

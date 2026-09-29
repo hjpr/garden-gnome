@@ -1,3 +1,4 @@
+import 'feature.dart';
 import 'geometry.dart';
 import 'layer.dart';
 import 'reference_image.dart';
@@ -17,11 +18,69 @@ class GardenDocument {
     Map<LayerKind, int> nameCounters = const {},
     List<ReferenceImage> references = const [],
     this.imageCounter = 0,
+    List<Feature> features = const [],
+    this.featureCounter = 0,
   }) : references = List.unmodifiable(references),
+       features = List.unmodifiable(features),
        layers = Map.unmodifiable(layers),
        geometries = Map.unmodifiable(geometries),
        propertyIds = List.unmodifiable(propertyIds),
        nameCounters = Map.unmodifiable(nameCounters);
+
+  /// Raised beds, greenhouses and high tunnels, drawn over all land in
+  /// this order (later ones on top).
+  final List<Feature> features;
+
+  /// Highest feature number issued, so IDs are never reused.
+  final int featureCounter;
+
+  Feature? featureById(String? id) {
+    for (final feature in features) {
+      if (feature.id == id) return feature;
+    }
+    return null;
+  }
+
+  /// Adds [feature] on top, or replaces the feature with the same ID in
+  /// place.
+  GardenDocument withFeature(Feature feature) {
+    final list = [...features];
+    final index = list.indexWhere((f) => f.id == feature.id);
+    index < 0 ? list.add(feature) : list[index] = feature;
+    return _rebuild(features: list);
+  }
+
+  GardenDocument withoutFeature(String id) =>
+      _rebuild(features: features.where((f) => f.id != id).toList());
+
+  /// An ID for a new feature: "feature-N" past every one issued.
+  (GardenDocument, String) nextFeatureId() {
+    final number = featureCounter + 1;
+    return (_rebuild(featureCounter: number), 'feature-$number');
+  }
+
+  /// This document with the given parts replaced; everything else kept.
+  GardenDocument _rebuild({
+    String? id,
+    Map<String, Layer>? layers,
+    Map<String, Geometry>? geometries,
+    List<String>? propertyIds,
+    Map<LayerKind, int>? nameCounters,
+    List<ReferenceImage>? references,
+    int? imageCounter,
+    List<Feature>? features,
+    int? featureCounter,
+  }) => GardenDocument(
+    id: id ?? this.id,
+    layers: layers ?? this.layers,
+    geometries: geometries ?? this.geometries,
+    propertyIds: propertyIds ?? this.propertyIds,
+    nameCounters: nameCounters ?? this.nameCounters,
+    references: references ?? this.references,
+    imageCounter: imageCounter ?? this.imageCounter,
+    features: features ?? this.features,
+    featureCounter: featureCounter ?? this.featureCounter,
+  );
 
   final String id;
   final Map<String, Layer> layers;
@@ -76,29 +135,11 @@ class GardenDocument {
   /// An ID for a new reference image: "image-N" past every one issued.
   (GardenDocument, String) nextImageId() {
     final number = imageCounter + 1;
-    return (
-      GardenDocument(
-        id: id,
-        layers: layers,
-        geometries: geometries,
-        propertyIds: propertyIds,
-        nameCounters: nameCounters,
-        references: references,
-        imageCounter: number,
-      ),
-      'image-$number',
-    );
+    return (_rebuild(imageCounter: number), 'image-$number');
   }
 
-  GardenDocument _withReferences(List<ReferenceImage> list) => GardenDocument(
-    id: id,
-    layers: layers,
-    geometries: geometries,
-    propertyIds: propertyIds,
-    nameCounters: nameCounters,
-    references: list,
-    imageCounter: imageCounter,
-  );
+  GardenDocument _withReferences(List<ReferenceImage> list) =>
+      _rebuild(references: list);
 
   Geometry geometryOf(String layerId) =>
       geometries[layers[layerId]!.geometryId]!;
@@ -140,29 +181,18 @@ class GardenDocument {
   ]);
 
   /// The same drawing under a new document identity, as used by Save as.
-  GardenDocument withId(String newId) => GardenDocument(
-    id: newId,
-    layers: layers,
-    geometries: geometries,
-    propertyIds: propertyIds,
-    nameCounters: nameCounters,
-    references: references,
-    imageCounter: imageCounter,
-  );
+  GardenDocument withId(String newId) => _rebuild(id: newId);
 
   GardenDocument copyWith({
     Map<String, Layer>? layers,
     Map<String, Geometry>? geometries,
     List<String>? propertyIds,
     Map<LayerKind, int>? nameCounters,
-  }) => GardenDocument(
-    id: id,
-    layers: layers ?? this.layers,
-    geometries: geometries ?? this.geometries,
-    propertyIds: propertyIds ?? this.propertyIds,
-    nameCounters: nameCounters ?? this.nameCounters,
-    references: references,
-    imageCounter: imageCounter,
+  }) => _rebuild(
+    layers: layers,
+    geometries: geometries,
+    propertyIds: propertyIds,
+    nameCounters: nameCounters,
   );
 
   GardenDocument withGeometry(Geometry geometry) =>
@@ -263,6 +293,11 @@ class GardenDocument {
       images = ledger.images;
       changed = true;
     }
+    var featureNumbers = featureCounter;
+    if (ledger.features > featureNumbers) {
+      featureNumbers = ledger.features;
+      changed = true;
+    }
     final updated = {...geometries};
     for (final entry in geometries.entries) {
       final known = ledger.geometry[entry.key];
@@ -274,14 +309,11 @@ class GardenDocument {
       }
     }
     if (!changed) return this;
-    return GardenDocument(
-      id: id,
-      layers: layers,
+    return _rebuild(
       geometries: updated,
-      propertyIds: propertyIds,
       nameCounters: names,
-      references: references,
       imageCounter: images,
+      featureCounter: featureNumbers,
     );
   }
 }
@@ -297,6 +329,9 @@ class CounterLedger {
   /// Highest reference image number issued.
   int images = 0;
 
+  /// Highest feature number issued.
+  int features = 0;
+
   /// Takes the higher of each number here and in [other].
   void merge(CounterLedger other) {
     other.geometry.forEach((id, counters) {
@@ -307,6 +342,7 @@ class CounterLedger {
       if (value > (names[kind] ?? 0)) names[kind] = value;
     });
     if (other.images > images) images = other.images;
+    if (other.features > features) features = other.features;
   }
 
   void record(GardenDocument document) {
@@ -320,5 +356,8 @@ class CounterLedger {
       if (value > (names[kind] ?? 0)) names[kind] = value;
     });
     if (document.imageCounter > images) images = document.imageCounter;
+    if (document.featureCounter > features) {
+      features = document.featureCounter;
+    }
   }
 }

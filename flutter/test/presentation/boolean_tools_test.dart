@@ -52,7 +52,7 @@ Widget workbench(EditorController editor) => MaterialApp(
 );
 
 void main() {
-  testWidgets('tools are laid out Select to Pattern, three to a row', (
+  testWidgets('tools are laid out Select to Reference, three to a row', (
     tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(1200, 800));
@@ -61,7 +61,8 @@ void main() {
     addTearDown(editor.dispose);
     await tester.pumpWidget(workbench(editor));
     await tester.pumpAndSettle();
-    // Rows: Select Point Line / Arc Circle Polygon / Pattern.
+    // Rows: Select Point Line / Arc Circle Polygon / Ground Feature
+    // Reference.
     Offset centre(String label) => tester.getCenter(
       find.descendant(of: find.byType(ToolsBody), matching: find.text(label)),
     );
@@ -69,7 +70,9 @@ void main() {
       ('Arc', 'Select'),
       ('Circle', 'Point'),
       ('Polygon', 'Line'),
-      ('Pattern', 'Select'),
+      ('Ground', 'Select'),
+      ('Feature', 'Point'),
+      ('Reference', 'Line'),
     ]) {
       expect(centre(label).dx, centre(column).dx, reason: label);
     }
@@ -78,7 +81,9 @@ void main() {
     expect(centre('Arc').dy, greaterThan(centre('Select').dy));
     expect(centre('Circle').dy, centre('Arc').dy);
     expect(centre('Polygon').dy, centre('Arc').dy);
-    expect(centre('Pattern').dy, greaterThan(centre('Arc').dy));
+    expect(centre('Ground').dy, greaterThan(centre('Arc').dy));
+    expect(centre('Feature').dy, centre('Ground').dy);
+    expect(find.text('Pattern'), findsNothing, reason: 'Pattern was removed');
     expect(find.text('Boolean'), findsNothing, reason: 'now in Operations');
 
     await tester.tap(find.text('Line'));
@@ -248,17 +253,15 @@ void main() {
       'Arc',
       'Circle',
       'Polygon',
-      'Pattern',
+      'Ground',
+      'Feature',
       'Reference',
     ]);
-    expect(Tool.pattern.functions.map((f) => f.label), [
-      'None',
-      'Diagonal',
-      'Rows',
-      'Crosshatch',
-      'Grid',
-      'Dots',
-      'Crosses',
+    expect(Tool.ground.functions.map((f) => f.label), ['Flat', 'Row']);
+    expect(Tool.feature.functions.map((f) => f.label), [
+      'Raised bed',
+      'Greenhouse',
+      'High tunnel',
     ]);
     expect(Tool.line.functions.map((f) => f.label), isNot(contains('Arc')));
     expect(Tool.arc.functions, [

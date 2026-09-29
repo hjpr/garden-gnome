@@ -2,32 +2,6 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui';
 
-import '../../domain/layer.dart';
-
-/// Draws a decorative [pattern] inside [area].
-///
-/// Spacing is in screen pixels so the pattern stays readable at any zoom.
-/// [anchor] is the screen position of the world origin: tying the pattern
-/// to it keeps the marks still while the view pans.
-///
-/// The marks are drawn once into a small repeating tile, and the area is
-/// filled with that tile in one draw. Drawing each mark through a clip
-/// shaped like the area was far slower, most of all zoomed in.
-void paintFillPattern(
-  Canvas canvas,
-  Path area,
-  FillPattern pattern,
-  Color color,
-  Offset anchor, {
-  double devicePixelRatio = 1,
-}) {
-  final spec = _specs[pattern]!;
-  canvas.drawPath(
-    area,
-    _tilePaint(_Tile(spec, color, devicePixelRatio), anchor),
-  );
-}
-
 /// Light grey diagonal lines [step] pixels apart along x, filling
 /// [region], with [phase] fixing where the lines fall.
 void paintHatch(
@@ -67,36 +41,12 @@ class LineBatch {
 
 // --------------------------------------------------------------- tiles
 
-/// How one pattern repeats: the tile's side in logical pixels, and how to
+/// How one hatch repeats: the tile's side in logical pixels, and how to
 /// draw its marks inside a square of that side with the world origin at
 /// the tile's corner. Marks that cross an edge are drawn on both sides,
 /// so tiles join without seams.
 class _TileSpec {
   const _TileSpec(this.key, this.side, this.draw);
-
-  /// Diagonals [spacing] apart. Their repeat along x is spacing·√2, which
-  /// is not a whole number of pixels, so the tile holds several repeats
-  /// and the spacing is stretched by well under a hundredth of a pixel to
-  /// fit exactly.
-  factory _TileSpec.diagonal(
-    String key,
-    double spacing, {
-    required int repeats,
-    bool crossed = false,
-  }) {
-    final side = (spacing * math.sqrt2 * repeats).roundToDouble();
-    final step = side / repeats;
-    return _TileSpec(key, side, (canvas, color) {
-      final lines = LineBatch();
-      for (var k = -side; k <= 2 * side + 0.001; k += step) {
-        // x + y = k (rising) across the tile, from top to bottom.
-        lines.add(Offset(k, 0), Offset(k - side, side));
-        // x − y = k (falling).
-        if (crossed) lines.add(Offset(k - side, 0), Offset(k, side));
-      }
-      lines.draw(canvas, _stroke(color));
-    });
-  }
 
   /// The grey hatch on inactive land: rising lines [step] apart along x.
   factory _TileSpec.hatch(double step) =>
@@ -118,43 +68,7 @@ Paint _stroke(Color color) => Paint()
   ..strokeWidth = 1
   ..style = PaintingStyle.stroke;
 
-final Map<FillPattern, _TileSpec> _specs = {
-  FillPattern.diagonal: _TileSpec.diagonal('diagonal', 10, repeats: 7),
-  FillPattern.crosshatch: _TileSpec.diagonal(
-    'crosshatch',
-    12,
-    repeats: 35,
-    crossed: true,
-  ),
-  FillPattern.rows: _TileSpec('rows', 9, (canvas, color) {
-    LineBatch()
-      ..add(const Offset(0, 0), const Offset(9, 0))
-      ..add(const Offset(0, 9), const Offset(9, 9))
-      ..draw(canvas, _stroke(color));
-  }),
-  FillPattern.grid: _TileSpec('grid', 12, (canvas, color) {
-    final lines = LineBatch();
-    for (final at in [0.0, 12.0]) {
-      lines
-        ..add(Offset(0, at), Offset(12, at))
-        ..add(Offset(at, 0), Offset(at, 12));
-    }
-    lines.draw(canvas, _stroke(color));
-  }),
-  // One dot in the middle of each 10 px cell.
-  FillPattern.dots: _TileSpec('dots', 10, (canvas, color) {
-    canvas.drawCircle(const Offset(5, 5), 1.8, Paint()..color = color);
-  }),
-  // One small cross in the middle of each 14 px cell.
-  FillPattern.crosses: _TileSpec('crosses', 14, (canvas, color) {
-    LineBatch()
-      ..add(const Offset(4, 7), const Offset(10, 7))
-      ..add(const Offset(7, 4), const Offset(7, 10))
-      ..draw(canvas, _stroke(color));
-  }),
-};
-
-/// One drawn tile: a pattern in one colour at one screen density.
+/// One drawn tile: a hatch in one colour at one screen density.
 class _Tile {
   _Tile(this.spec, this.color, this.devicePixelRatio);
 
@@ -165,8 +79,8 @@ class _Tile {
   String get key => '${spec.key}|${color.toARGB32()}|$devicePixelRatio';
 }
 
-/// Tiles already drawn. There are only a few patterns and layer colours,
-/// so this stays small.
+/// Tiles already drawn. There are only a few hatch colours, so this stays
+/// small.
 final Map<String, Image> _tiles = {};
 
 /// A paint that fills with [tile], repeated, with a tile corner at

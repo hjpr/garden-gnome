@@ -6,13 +6,14 @@ import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 
 import '../domain/document.dart';
-import '../domain/fill_patterns.dart';
+import '../domain/feature.dart';
 import '../domain/geometry.dart';
 import '../domain/land_rules.dart';
 import '../domain/layer.dart';
 import '../domain/reference_image.dart';
 import '../domain/region.dart';
 import '../domain/vec.dart';
+import '../domain/zone_ground.dart';
 import 'alignment.dart';
 import 'camera.dart';
 import 'drafts.dart';
@@ -121,6 +122,13 @@ class EditorController extends ChangeNotifier {
 
   WorkspaceSettings _settings;
   WorkspaceSettings get settings => _settings;
+
+  /// Switches the canvas between the Wireframe drawing and the Render
+  /// view. A workspace choice, not part of the drawing's history.
+  void setViewMode(ViewMode mode) {
+    if (mode == _settings.viewMode) return;
+    updateSettings(_settings.copyWith(viewMode: mode));
+  }
 
   void updateSettings(WorkspaceSettings settings) {
     _settings = settings;
@@ -342,6 +350,9 @@ class EditorController extends ChangeNotifier {
     if (tool != Tool.select && tool != Tool.reference) {
       _clearReferenceSelection();
     }
+    // Feature keeps its selection so a placed feature can be sized at
+    // once; every other tool works on land or images.
+    if (tool != Tool.select && tool != Tool.feature) _selectedFeatureId = null;
     if (tool == Tool.reference) {
       // Its settings, and the Add image button, are in Properties.
       _openProperties();
@@ -468,6 +479,10 @@ class EditorController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// A Select click on empty ground: nothing stays selected, not even the
+  /// layer, so the user can always get back to a clean slate.
+  void deselectAll() => selectLayer(null);
+
   /// Replaces or toggles the geometry selection after a click.
   void selectItem(String? itemId, {bool toggle = false}) {
     if (itemId != null || !toggle) _clearReferenceSelection();
@@ -494,7 +509,9 @@ class EditorController extends ChangeNotifier {
       _cancelOperation();
     } else if (_selection.isNotEmpty) {
       _selection.clear();
-    } else if (_selectedImageId != null || _referenceLayerSelected) {
+    } else if (_selectedImageId != null ||
+        _referenceLayerSelected ||
+        _selectedFeatureId != null) {
       _clearReferenceSelection();
     }
     _preview = null;
@@ -819,20 +836,96 @@ class EditorController extends ChangeNotifier {
     );
   }
 
-  /// Sets a layer's decorative pattern (null for none) as one Undo step.
-  /// Used by both the Pattern tool and the Properties panel.
-  void setPattern(String layerId, FillPattern? pattern) {
+  /// Sets a zone's ground (null for plain dirt) as one Undo step. Used by
+  /// both the Ground tool and the Properties panel.
+  void setGround(String layerId, GroundType? ground) {
+    _changeZone(
+      layerId,
+      ground == null ? 'Clear ground' : '${ground.label} ground',
+      (document) => document.withGround(layerId, ground),
+    );
+  }
+
+  /// Sets a zone's row width, spacing and direction as one Undo step.
+  void setRows(String layerId, RowSpec rows) {
+    _changeZone(
+      layerId,
+      'Change rows',
+      (document) => document.withRows(layerId, rows),
+    );
+  }
+
+  /// Applies a zone change unless the zone is locked; a refusal shows its
+  /// reason in the status bar instead.
+  void _changeZone(
+    String layerId,
+    String label,
+    GardenDocument Function(GardenDocument) change,
+  ) {
     if (!_document.layers.containsKey(layerId)) return;
     final locked = lockNotice(layerId);
     if (locked != null) return showNotice(locked);
     final GardenDocument next;
     try {
-      next = _document.withPattern(layerId, pattern);
+      next = change(_document);
     } on StateError catch (error) {
       return showNotice(error.message);
     }
     if (identical(next, _document)) return;
-    commit(pattern == null ? 'Remove pattern' : 'Pattern', next);
+    commit(label, next);
+  }
+
+  // --------------------------------------------------------------- features
+
+  /// The raised bed, greenhouse or high tunnel selected, or null. Its
+  /// sizes show in Properties.
+  String? _selectedFeatureId;
+
+  Feature? get selectedFeature => _document.featureById(_selectedFeatureId);
+
+  /// Whether Properties shows the selected feature.
+  bool get showsFeature => selectedFeature != null && _tool != Tool.reference;
+
+  /// Selects one feature and opens its Properties. Land stays the drawing
+  /// target but nothing on it is selected, so Delete removes the feature.
+  void selectFeature(String featureId) {
+    if (_document.featureById(featureId) == null) return;
+    drafts.settleForLayerSwitch();
+    _clearReferenceSelection();
+    _selectedFeatureId = featureId;
+    _selection.clear();
+    _openProperties();
+    notifyListeners();
+  }
+
+  /// Places a new feature of [kind] at its usual size, centred on
+  /// [centre], as one Undo step, and selects it.
+  void addFeature(FeatureKind kind, Vec centre) {
+    final (base, id) = documentForEditing.nextFeatureId();
+    commit(
+      'Add ${kind.label.toLowerCase()}',
+      base.withFeature(Feature.placed(id, kind, centre)),
+    );
+    selectFeature(id);
+  }
+
+  /// Commits a changed feature (matched by ID) as one Undo step. Values
+  /// that cannot be used are refused with the reason in the status bar.
+  void updateFeature(String label, Feature feature) {
+    final current = _document.featureById(feature.id);
+    if (current == null || feature == current) return;
+    if (feature.problem case final problem?) return showNotice(problem);
+    commit(label, _document.withFeature(feature));
+  }
+
+  /// Removes a feature. Undo brings it back.
+  void removeFeature(String featureId) {
+    final feature = _document.featureById(featureId);
+    if (feature == null) return;
+    commit(
+      'Delete ${feature.displayName}',
+      _document.withoutFeature(featureId),
+    );
   }
 
   // ------------------------------------------------------------- operations
@@ -1014,6 +1107,7 @@ class EditorController extends ChangeNotifier {
     if (_document.referenceById(imageId) == null) return;
     drafts.settleForLayerSwitch();
     _selectedImageId = imageId;
+    _selectedFeatureId = null;
     _referenceLayerSelected = false;
     _referenceOpacityDraft = null;
     _selection.clear();
@@ -1026,14 +1120,18 @@ class EditorController extends ChangeNotifier {
   void selectReferenceLayer() {
     drafts.settleForLayerSwitch();
     _selectedImageId = null;
+    _selectedFeatureId = null;
     _referenceLayerSelected = true;
     _selection.clear();
     _openProperties();
     notifyListeners();
   }
 
+  /// Clears the reference image and feature selection; called whenever
+  /// land is selected instead.
   void _clearReferenceSelection() {
     _selectedImageId = null;
+    _selectedFeatureId = null;
     _referenceLayerSelected = false;
     _referenceOpacityDraft = null;
   }
@@ -1174,6 +1272,9 @@ class EditorController extends ChangeNotifier {
   /// Deletes the selected items and whatever depends on them. With the
   /// reference image selected instead, removes the image.
   void deleteSelection() {
+    if (_selectedFeatureId != null && _selection.isEmpty) {
+      return removeFeature(_selectedFeatureId!);
+    }
     if (_selectedImageId != null && _selection.isEmpty) {
       return removeReference(_selectedImageId!);
     }
@@ -1254,6 +1355,9 @@ class EditorController extends ChangeNotifier {
 
   /// Clears selection and references to items that no longer exist.
   void _dropStaleReferences() {
+    if (_document.featureById(_selectedFeatureId) == null) {
+      _selectedFeatureId = null;
+    }
     if (_document.referenceById(_selectedImageId) == null) {
       _selectedImageId = null;
       _referenceOpacityDraft = null;
@@ -1286,6 +1390,7 @@ bool sameContent(GardenDocument a, GardenDocument b) {
     return false;
   }
   if (!listEquals(a.references, b.references)) return false;
+  if (!listEquals(a.features, b.features)) return false;
   if (a.layers.length != b.layers.length) return false;
   for (final entry in a.layers.entries) {
     if (!identical(entry.value, b.layers[entry.key])) return false;

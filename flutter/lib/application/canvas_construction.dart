@@ -208,7 +208,7 @@ extension _ConstructionInput on CanvasInput {
     );
   }
 
-  /// Pattern: only a click inside one of the selected layer's closed
+  /// Ground: only a click inside one of the selected zone's closed
   /// shapes counts. Holes are outside. Returns that shape's ID.
   String? _shapeUnder(Geometry geometry, Offset screen) {
     final world = editor.camera.toWorld(screen);
@@ -220,19 +220,33 @@ extension _ConstructionInput on CanvasInput {
     return null;
   }
 
-  HoverPreview? _patternHover(Geometry geometry, Offset screen) {
+  HoverPreview? _groundHover(String layerId, Geometry geometry, Offset screen) {
+    if (editor.document.layers[layerId]?.kind != LayerKind.zone) return null;
     final id = _shapeUnder(geometry, screen);
     return id == null ? null : HoverPreview(id);
   }
 
-  void _patternClick(String layerId, Geometry geometry, Offset screen) {
+  void _groundClick(String layerId, Geometry geometry, Offset screen) {
+    if (editor.document.layers[layerId]?.kind != LayerKind.zone) {
+      return editor.showNotice(CanvasInput.groundNeedsZone);
+    }
     if (geometry.region == null) {
-      return editor.showNotice('Close a shape before adding a pattern');
+      return editor.showNotice('Close a shape before setting its ground');
     }
     if (_shapeUnder(geometry, screen) == null) {
-      return editor.showNotice('Click inside one of this layer\'s shapes');
+      return editor.showNotice('Click inside one of this zone\'s shapes');
     }
     editor.showNotice(null);
-    editor.setPattern(layerId, editor.function.fillPattern);
+    editor.setGround(layerId, editor.function.groundType);
+  }
+
+  /// Feature: a click places one at its usual size, centred on the
+  /// pointer (snapped like a point). Features sit on top of the land, so
+  /// no layer is needed.
+  void _featureClick(Offset screen) {
+    final kind = editor.function.featureKind;
+    if (kind == null) return;
+    editor.showNotice(null);
+    editor.addFeature(kind, _snapped(screen).position);
   }
 }
