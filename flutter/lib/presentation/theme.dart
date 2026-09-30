@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../domain/layer.dart';
+
 /// The app's colours. Chrome is a quiet neutral grey so the drawing stands
 /// out; green is kept for the accent and for land.
 abstract final class Palette {
@@ -23,10 +25,29 @@ abstract final class Palette {
   // Drawing.
   static const canvas = Color(0xFFF7F8F5);
 
+  // Ground type indicators, independent of editable outline colours.
+  static const groundZone = Color(0xFF6B7280);
+  static const groundFlat = Color(0xFFBF5700);
+  static const groundRow = Color(0xFF98DFC2);
+  static const groundGrow = Color(0xFF00875A);
+
   static const valid = Color(0xFF2E7D32);
   static const invalid = Color(0xFFC62828);
   static const hatch = Color(0xFFB8BCB4);
+
+  // Growing calendars: one colour per kind of job.
+  static const directSow = Color(0xFF3F8A4F);
+  static const greenhouse = Color(0xFFB9822F);
+  static const plantOut = Color(0xFF3C74A6);
+  static const harvest = Color(0xFFC0583A);
+  static const caution = Color(0xFFB7791F);
 }
+
+/// The outline colour used for a layer on the canvas and in Layers.
+Color layerColor(Layer layer) => switch (layer.properties) {
+  PropertyProperties p => Color(p.color.argb),
+  ZoneProperties p => Color(p.color.argb),
+};
 
 /// Sizes shared across the screen, in logical pixels.
 abstract final class Metrics {

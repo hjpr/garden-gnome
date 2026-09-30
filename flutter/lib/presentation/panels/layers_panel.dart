@@ -4,10 +4,11 @@ import 'package:flutter/services.dart';
 import '../../application/editor_controller.dart';
 import '../../domain/land_rules.dart';
 import '../../domain/layer.dart';
-import '../canvas/scene_painter.dart';
 import '../dialogs.dart';
 import '../theme.dart';
+import '../widgets/icon_controls.dart';
 import '../widgets/panel.dart';
+import 'reference_layer_rows.dart';
 
 /// Each property with its zones listed under it. A layer expands to show
 /// its shapes, top of the stack first.
@@ -33,20 +34,11 @@ class _LayersBodyState extends State<LayersBody> {
     final document = editor.document;
     final reference = document.references.isEmpty
         ? null
-        : Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _ReferenceRow(
-                editor: editor,
-                expanded: _referenceExpanded,
-                onToggle: () =>
-                    setState(() => _referenceExpanded = !_referenceExpanded),
-              ),
-              // Top of the layer first, as with shapes.
-              if (_referenceExpanded)
-                for (final image in document.references.reversed)
-                  _ImageRow(editor: editor, imageId: image.id),
-            ],
+        : ReferenceLayerRows(
+            editor: editor,
+            expanded: _referenceExpanded,
+            onToggle: () =>
+                setState(() => _referenceExpanded = !_referenceExpanded),
           );
     if (document.propertyIds.isEmpty) {
       return Column(
@@ -83,253 +75,6 @@ class _LayersBodyState extends State<LayersBody> {
         // last.
         ?reference,
       ],
-    );
-  }
-}
-
-/// The Reference layer's row, always at the bottom of Layers: every
-/// reference image sits in it, listed as its own row when expanded.
-/// Clicking it shows the layer's Properties (where images are added);
-/// hover reveals lock-all and delete-all.
-class _ReferenceRow extends StatefulWidget {
-  const _ReferenceRow({
-    required this.editor,
-    required this.expanded,
-    required this.onToggle,
-  });
-
-  final EditorController editor;
-  final bool expanded;
-  final VoidCallback onToggle;
-
-  @override
-  State<_ReferenceRow> createState() => _ReferenceRowState();
-}
-
-class _ReferenceRowState extends State<_ReferenceRow> {
-  bool _hovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final editor = widget.editor;
-    final images = editor.document.references;
-    final selected = editor.referenceLayerSelected;
-    final allLocked = images.every((image) => image.locked);
-    return Semantics(
-      selected: selected,
-      button: true,
-      label: 'Reference, ${images.length} images${allLocked ? ', locked' : ''}',
-      child: MouseRegion(
-        onEnter: (_) => setState(() => _hovered = true),
-        onExit: (_) => setState(() => _hovered = false),
-        child: Material(
-          color: selected ? Palette.wash : Colors.transparent,
-          borderRadius: BorderRadius.circular(Metrics.radius),
-          child: InkWell(
-            onTap: editor.selectReferenceLayer,
-            borderRadius: BorderRadius.circular(Metrics.radius),
-            hoverColor: Palette.hover,
-            child: SizedBox(
-              height: 30,
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 20,
-                    child: InkResponse(
-                      onTap: widget.onToggle,
-                      radius: 12,
-                      child: Semantics(
-                        button: true,
-                        label: widget.expanded
-                            ? 'Hide images of Reference'
-                            : 'Show images of Reference',
-                        child: Icon(
-                          widget.expanded
-                              ? Icons.expand_more
-                              : Icons.chevron_right,
-                          size: 16,
-                          color: Palette.muted,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const ExcludeSemantics(
-                    child: Icon(
-                      Icons.image_outlined,
-                      size: 13,
-                      color: Palette.muted,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      images.length > 1
-                          ? 'Reference  ·  ${images.length}'
-                          : 'Reference',
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: selected
-                            ? FontWeight.w600
-                            : FontWeight.w400,
-                        color: selected
-                            ? Palette.accent
-                            : (allLocked ? Palette.muted : Palette.ink),
-                      ),
-                    ),
-                  ),
-                  Opacity(
-                    opacity: allLocked || _hovered || selected ? 1 : 0,
-                    child: IconAction(
-                      iconData: allLocked
-                          ? Icons.lock_outline
-                          : Icons.lock_open_outlined,
-                      label: allLocked
-                          ? 'Unlock every image'
-                          : 'Lock every image',
-                      selected: allLocked,
-                      size: 26,
-                      onPressed: () =>
-                          editor.setAllReferencesLocked(!allLocked),
-                    ),
-                  ),
-                  Opacity(
-                    opacity: _hovered || selected ? 1 : 0,
-                    child: IconAction(
-                      iconData: Icons.delete_outline,
-                      label: 'Delete Reference',
-                      tooltip: 'Delete Reference and all its images',
-                      size: 26,
-                      onPressed: editor.removeReferenceLayer,
-                    ),
-                  ),
-                  const SizedBox(width: 2),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// One reference image inside the Reference layer: its name and whether
-/// its scale is set, with hover buttons to reorder, lock and delete it.
-/// It is renamed in Properties.
-class _ImageRow extends StatefulWidget {
-  const _ImageRow({required this.editor, required this.imageId});
-
-  final EditorController editor;
-  final String imageId;
-
-  @override
-  State<_ImageRow> createState() => _ImageRowState();
-}
-
-class _ImageRowState extends State<_ImageRow> {
-  bool _hovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final editor = widget.editor;
-    final images = editor.document.references;
-    final index = images.indexWhere((i) => i.id == widget.imageId);
-    final image = images[index];
-    final name = image.displayName;
-    final selected = editor.selectedImage?.id == image.id;
-    final showActions = _hovered || selected;
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: Material(
-        color: selected ? Palette.wash : Colors.transparent,
-        borderRadius: BorderRadius.circular(Metrics.radius),
-        child: InkWell(
-          onTap: () => editor.selectReference(image.id),
-          borderRadius: BorderRadius.circular(Metrics.radius),
-          hoverColor: Palette.hover,
-          child: SizedBox(
-            height: 26,
-            child: Row(
-              children: [
-                const SizedBox(width: 26),
-                const Icon(
-                  Icons.photo_outlined,
-                  size: 12,
-                  color: Palette.muted,
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(text: name),
-                        if (!image.isCalibrated)
-                          const TextSpan(
-                            text: '  no scale',
-                            style: TextStyle(
-                              color: Palette.muted,
-                              fontSize: 11,
-                            ),
-                          ),
-                      ],
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: selected
-                          ? Palette.accent
-                          : (image.locked ? Palette.muted : Palette.ink),
-                    ),
-                  ),
-                ),
-                if (showActions) ...[
-                  IconAction(
-                    iconData: Icons.arrow_upward,
-                    label: 'Move $name up',
-                    size: 22,
-                    onPressed: index < images.length - 1
-                        ? () => editor.moveReference(image.id, up: true)
-                        : null,
-                  ),
-                  IconAction(
-                    iconData: Icons.arrow_downward,
-                    label: 'Move $name down',
-                    size: 22,
-                    onPressed: index > 0
-                        ? () => editor.moveReference(image.id, up: false)
-                        : null,
-                  ),
-                ],
-                if (showActions || image.locked)
-                  IconAction(
-                    iconData: image.locked
-                        ? Icons.lock_outline
-                        : Icons.lock_open_outlined,
-                    label: image.locked ? 'Unlock $name' : 'Lock $name',
-                    selected: image.locked,
-                    size: 22,
-                    onPressed: () => editor.updateReference(
-                      image.locked
-                          ? 'Unlock reference image'
-                          : 'Lock reference image',
-                      image.withLocked(!image.locked),
-                    ),
-                  ),
-                if (showActions)
-                  IconAction(
-                    iconData: Icons.delete_outline,
-                    label: 'Delete $name',
-                    size: 22,
-                    onPressed: () => editor.removeReference(image.id),
-                  ),
-                const SizedBox(width: 2),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
@@ -553,7 +298,7 @@ class _ShapeRowState extends State<_ShapeRow> {
     final index = stack.indexOf(id);
     final selected =
         editor.selectedLayerId == layer.id && editor.selection.contains(id);
-    final editable = editor.lockNotice(layer.id) == null;
+    final editable = editor.geometryLockNotice(layer.id) == null;
     final showActions = _hovered || selected;
 
     return MouseRegion(
@@ -649,57 +394,6 @@ class _ShapeRowState extends State<_ShapeRow> {
           ),
         ),
       ),
-    );
-  }
-}
-
-/// Add property / zone buttons shown under the layer tree.
-class LayerActions extends StatelessWidget {
-  const LayerActions({super.key, required this.editor});
-
-  final EditorController editor;
-
-  @override
-  Widget build(BuildContext context) {
-    Widget add(LayerKind kind) {
-      final blocker = editor.addLayerBlocker(kind);
-      final enabled = blocker == null;
-      final colour = enabled ? Palette.ink : Palette.faint;
-      return Expanded(
-        child: Tooltip(
-          message: blocker ?? 'Add ${kind.label.toLowerCase()}',
-          child: Semantics(
-            button: true,
-            enabled: enabled,
-            label: 'Add ${kind.label.toLowerCase()}',
-            excludeSemantics: true,
-            child: InkWell(
-              onTap: enabled ? () => editor.addLayer(kind) : null,
-              borderRadius: BorderRadius.circular(Metrics.radius),
-              hoverColor: Palette.hover,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 7),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.add, size: 14, color: colour),
-                    const SizedBox(width: 4),
-                    Text(
-                      kind.label,
-                      style: TextStyle(fontSize: 12, color: colour),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-      child: Row(children: [add(LayerKind.property), add(LayerKind.zone)]),
     );
   }
 }

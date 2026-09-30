@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../application/editor_controller.dart';
 import '../widgets/draft_text_field.dart';
-import '../widgets/panel.dart';
+import '../widgets/property_controls.dart';
 
 /// The smallest value a [MeasureField] accepts.
 enum Minimum { none, zero, aboveZero }

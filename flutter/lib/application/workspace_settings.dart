@@ -1,5 +1,6 @@
 import '../domain/units.dart';
 import 'camera.dart';
+import 'tools.dart';
 
 enum MenuScale {
   small('Small', 0.85),
@@ -33,6 +34,10 @@ enum DockSide { left, right }
 enum PanelId {
   tools('Drawing tools', DockSide.left),
 
+  /// The Seed Vault's varieties, dragged onto grow zones. Shown in Plant
+  /// mode only.
+  seeds('Seeds', DockSide.left),
+
   /// Actions on the selected shapes, such as Boolean Union and Subtract.
   operations('Operations', DockSide.left),
   settings('Controls', DockSide.left),
@@ -45,12 +50,24 @@ enum PanelId {
 
   /// The dock the panel lives in.
   final DockSide side;
+
+  /// Mode filtering never changes the user's saved visibility or order.
+  bool availableIn(EditMode mode) => switch (this) {
+    seeds => mode == EditMode.plant,
+    operations || settings => mode == EditMode.build,
+    tools || properties || layers => true,
+  };
 }
 
 /// Which docks are open and the top-to-bottom order of panels in each.
 class DockLayout {
   const DockLayout({
-    this.left = const [PanelId.tools, PanelId.operations, PanelId.settings],
+    this.left = const [
+      PanelId.tools,
+      PanelId.seeds,
+      PanelId.operations,
+      PanelId.settings,
+    ],
     this.right = const [PanelId.properties, PanelId.layers],
     this.folded = const {},
     this.widths = const {},

@@ -9,7 +9,7 @@ import 'package:garden_gnome/domain/units.dart';
 import 'package:garden_gnome/domain/vec.dart';
 import 'package:garden_gnome/presentation/panels/layers_panel.dart';
 import 'package:garden_gnome/presentation/panels/properties_panel.dart';
-import 'package:garden_gnome/presentation/theme.dart';
+import '../support/widget_harness.dart';
 import 'package:garden_gnome/presentation/widgets/text_focus.dart';
 
 final png = Uint8List.fromList([
@@ -23,16 +23,9 @@ final png = Uint8List.fromList([
   0x0A,
 ]);
 
-Widget harness(EditorController editor) => MaterialApp(
-  theme: buildTheme(),
-  home: Scaffold(
-    body: ListenableBuilder(
-      listenable: editor,
-      builder: (context, _) => SingleChildScrollView(
-        child: SizedBox(width: 264, child: PropertiesBody(editor: editor)),
-      ),
-    ),
-  ),
+Widget harness(EditorController editor) => editorPanel(
+  editor: editor,
+  builder: (context) => PropertiesBody(editor: editor),
 );
 
 void main() {
@@ -84,15 +77,9 @@ void main() {
     (tester) async {
       final editor = EditorController()..setViewportSize(const Size(800, 600));
       addTearDown(editor.dispose);
-      Widget layers() => MaterialApp(
-        theme: buildTheme(),
-        home: Scaffold(
-          body: ListenableBuilder(
-            listenable: editor,
-            builder: (context, _) =>
-                SizedBox(width: 264, child: LayersBody(editor: editor)),
-          ),
-        ),
+      Widget layers() => editorPanel(
+        editor: editor,
+        builder: (context) => LayersBody(editor: editor),
       );
       await tester.pumpWidget(layers());
       expect(find.textContaining('Reference'), findsNothing);

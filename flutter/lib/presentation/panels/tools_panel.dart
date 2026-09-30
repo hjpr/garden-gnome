@@ -4,7 +4,8 @@ import '../../application/editor_controller.dart';
 import '../../application/tools.dart';
 import '../theme.dart';
 import '../widgets/button_grid.dart';
-import '../widgets/panel.dart';
+import '../widgets/icon_controls.dart';
+import '../widgets/property_controls.dart';
 
 /// The drawing tools as a grid of buttons, then the chosen tool's functions.
 class ToolsBody extends StatelessWidget {
@@ -19,7 +20,9 @@ class ToolsBody extends StatelessWidget {
       children: [
         ButtonGrid(
           children: [
-            for (final tool in Tool.values)
+            for (final tool in Tool.values.where(
+              (tool) => tool.availableIn(editor.mode),
+            ))
               _ToolButton(
                 icon: tool.icon,
                 label: tool.label,
@@ -30,7 +33,15 @@ class ToolsBody extends StatelessWidget {
               ),
           ],
         ),
-        if (editor.tool.hasFunctionChoice)
+        if (editor.mode == EditMode.plant)
+          const Padding(
+            padding: EdgeInsets.only(top: 12),
+            child: Text(
+              'Select grow zones to plant seeds. Edit geometry in Build mode.',
+              style: TextStyle(fontSize: 12, color: Palette.muted),
+            ),
+          ),
+        if (editor.mode == EditMode.build && editor.tool.hasFunctionChoice)
           PropertyGroup(
             title: '${editor.tool.label} functions'.toUpperCase(),
             children: [
@@ -120,6 +131,7 @@ class _ToolButton extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
+      enabled: true,
       label: label,
       excludeSemantics: true,
       child: AnimatedContainer(

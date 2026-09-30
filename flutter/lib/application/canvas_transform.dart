@@ -47,7 +47,7 @@ extension _BoxInput on CanvasInput {
           (moving[other] ??= {}).addAll(points);
         });
       }
-      final locked = moving.keys.where(document.isLocked);
+      final locked = moving.keys.where(editor.isFrozen);
       if (locked.isNotEmpty) {
         editor.showNotice(
           '${document.layers[locked.first]!.name} is locked, so the '

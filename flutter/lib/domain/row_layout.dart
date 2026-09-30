@@ -4,6 +4,8 @@ import 'planar.dart';
 import 'region.dart';
 import 'vec.dart';
 
+part 'row_border.dart';
+
 /// One straight run of a planting row inside a zone: the row's centre
 /// line from [start] to [end], in world metres. A row that crosses a hole
 /// or a notch in the zone is split into several runs.
@@ -18,9 +20,10 @@ class RowRun {
 
 /// Where a zone's rows fall, and how much row there is to plant.
 ///
-/// Rows are laid across the land edge to edge: the first row's side sits
-/// on the land's outermost edge across the rows, and each next row is one
-/// [RowSpec.pitch] further on. Each row is cut to the zone's land.
+/// Rows are [RowSpec.pitch] apart. With no border they start at the land's
+/// outermost edge. Bordered rows are centred across the usable span so
+/// leftover space is shared equally, with at least [RowSpec.border] clear
+/// around the whole strip, including its ends and hole rims.
 class RowLayout {
   RowLayout._(this.spec, this.runs, this.rowCount);
 
@@ -38,12 +41,13 @@ class RowLayout {
     final (ax, ay) = spec.along;
     final along = Vec(ax, ay);
     final across = Vec(-ay, ax);
+    final exactAxes = spec.border > 0 ? [along, across] : null;
 
     // How far the land reaches along and across the rows.
     var lowAcross = double.infinity, highAcross = double.negativeInfinity;
     var lowAlong = double.infinity, highAlong = double.negativeInfinity;
     for (final edge in contours.expand((c) => c)) {
-      for (final p in _extremes(edge)) {
+      for (final p in _extremes(edge, axes: exactAxes)) {
         final a = p.dot(across), b = p.dot(along);
         if (a < lowAcross) lowAcross = a;
         if (a > highAcross) highAcross = a;
@@ -51,26 +55,35 @@ class RowLayout {
         if (b > highAlong) highAlong = b;
       }
     }
+    lowAcross += spec.border;
+    highAcross -= spec.border;
+    lowAlong += spec.border;
+    highAlong -= spec.border;
+    if (highAlong <= lowAlong) return RowLayout._(spec, const [], 0);
     final span = highAcross - lowAcross;
     if (!(span > 0)) return RowLayout._(spec, const [], 0);
     final count = ((span - spec.width) / spec.pitch).floor() + 1;
-    if (count > maxRows) return RowLayout._(spec, const [], 0);
+    if (count <= 0 || count > maxRows) return RowLayout._(spec, const [], 0);
 
+    final usedSpan = spec.width + (count - 1) * spec.pitch;
+    final margin = spec.border > 0 ? (span - usedSpan) / 2 : 0.0;
+    final border = spec.border > 0
+        ? _RowBorder(region, spec.border, across * (spec.width / 2))
+        : null;
     final runs = <RowRun>[];
     var rowsWithLand = 0;
     for (var i = 0; i < count; i++) {
-      final offset = lowAcross + spec.width / 2 + i * spec.pitch;
+      final offset = lowAcross + margin + spec.width / 2 + i * spec.pitch;
       final from = across * offset + along * (lowAlong - 1);
       final to = across * offset + along * (highAlong + 1);
-      final found = _clip(region, from, to);
+      final found = _clip(region, from, to, border: border);
       if (found.isNotEmpty) rowsWithLand++;
       runs.addAll(found);
     }
     return RowLayout._(spec, List.unmodifiable(runs), rowsWithLand);
   }
 
-  /// Rows for each separate piece of land, laid out on its own, so every
-  /// piece starts with a whole row at its edge.
+  /// Rows for each separate piece of land, laid out on its own.
   factory RowLayout.ofPieces(Iterable<Region> pieces, RowSpec spec) {
     final runs = <RowRun>[];
     var rows = 0;
@@ -97,25 +110,53 @@ class RowLayout {
   double get bedArea => totalLength * spec.width;
 }
 
-/// Points that bound an edge: its ends and, for an arc, the arc's
-/// outermost points in eight directions, which cover every heading of
-/// the rows closely enough to size the layout.
-Iterable<Vec> _extremes(CurveEdge edge) sync* {
+/// Exact extrema on [axes], or the legacy arc samples when omitted.
+/// Bordered strips need exact bounds so a near-tangent row does not
+/// appear or disappear merely because the row direction changes.
+Iterable<Vec> _extremes(CurveEdge edge, {List<Vec>? axes}) sync* {
   yield edge.start;
   yield edge.end;
   if (!edge.isArc) return;
+  if (axes != null) {
+    for (final axis in axes) {
+      for (final sign in [-1.0, 1.0]) {
+        final point = edge.centre + axis * (sign * edge.radius);
+        if (edge.parameterOf(point) <= 1) yield point;
+      }
+    }
+    return;
+  }
   for (var i = 1; i < 16; i++) {
     yield edge.pointAt(i / 16);
   }
 }
 
+/// How far [region] reaches along [axis] (a unit vector): the lowest and
+/// highest value of `point · axis` over its outline. Arcs are sampled, as
+/// for sizing a row layout.
+(double, double) extentAlong(Region region, Vec axis) {
+  var low = double.infinity, high = double.negativeInfinity;
+  for (final edge in region.contours.expand((c) => c)) {
+    for (final p in _extremes(edge)) {
+      final d = p.dot(axis);
+      if (d < low) low = d;
+      if (d > high) high = d;
+    }
+  }
+  return (low, high);
+}
+
 /// The parts of segment [from]–[to] that lie inside [region].
-List<RowRun> _clip(Region region, Vec from, Vec to) {
+List<RowRun> clipToRegion(Region region, Vec from, Vec to) =>
+    _clip(region, from, to);
+
+/// The parts of segment [from]–[to] that lie inside [region].
+List<RowRun> _clip(Region region, Vec from, Vec to, {_RowBorder? border}) {
   final line = CurveEdge(from, to);
   final direction = to - from;
   final lengthSquared = direction.dot(direction);
   final cuts = <double>[0, 1];
-  for (final edge in region.contours.expand((c) => c)) {
+  for (final edge in border?.cuts ?? region.contours.expand((c) => c)) {
     for (final p in intersections(line, edge)) {
       cuts.add((p - from).dot(direction) / lengthSquared);
     }
@@ -126,9 +167,14 @@ List<RowRun> _clip(Region region, Vec from, Vec to) {
   var lastEnd = from;
   for (var i = 0; i + 1 < cuts.length; i++) {
     final a = cuts[i], b = cuts[i + 1];
-    if (b - a < 1e-9) continue;
+    if (b <= a) continue;
+    // A tiny parameter interval can still be real excluded land on a
+    // long row. Bordered layouts classify every gap before joining runs.
+    if (border == null && b - a < 1e-9) continue;
     final middle = from + direction * ((a + b) / 2);
-    final inside = region.locate(middle) == PointLocation.inside;
+    final inside =
+        border?.contains(middle) ??
+        (region.locate(middle) == PointLocation.inside);
     final start = from + direction * a;
     final end = from + direction * b;
     if (inside) {
@@ -140,5 +186,6 @@ List<RowRun> _clip(Region region, Vec from, Vec to) {
     }
   }
   if (open != null) runs.add(RowRun(open, lastEnd));
+  if (border != null) runs.removeWhere((run) => run.length <= tolerance);
   return runs;
 }

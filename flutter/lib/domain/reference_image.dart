@@ -37,12 +37,14 @@ String? imageMimeType(Uint8List bytes) {
 /// comes out the right size.
 ///
 /// Immutable: every change returns a new image, so Undo can keep old ones.
+/// The picture is copied once, when the image is made from uploaded or
+/// loaded bytes; every later copy shares that read-only picture.
 class ReferenceImage {
-  const ReferenceImage({
+  ReferenceImage({
     required this.id,
     this.label,
     this.fileName,
-    required this.bytes,
+    required Uint8List bytes,
     required this.mimeType,
     required this.pixelWidth,
     required this.pixelHeight,
@@ -53,6 +55,23 @@ class ReferenceImage {
     this.knownDistance,
     this.opacity = 0.6,
     this.locked = false,
+  }) : bytes = Uint8List.fromList(bytes).asUnmodifiableView();
+
+  const ReferenceImage._({
+    required this.id,
+    required this.label,
+    required this.fileName,
+    required this.bytes,
+    required this.mimeType,
+    required this.pixelWidth,
+    required this.pixelHeight,
+    required this.topLeft,
+    required this.metresPerPixel,
+    required this.lineStart,
+    required this.lineEnd,
+    required this.knownDistance,
+    required this.opacity,
+    required this.locked,
   });
 
   /// Stable identity, such as "image-3". Never reused in a drawing.
@@ -216,25 +235,11 @@ class ReferenceImage {
   /// Renamed; null or blank goes back to the automatic name.
   ReferenceImage withLabel(String? value) {
     final clean = value?.trim();
-    return ReferenceImage(
-      id: id,
-      label: clean == null || clean.isEmpty ? null : clean,
-      fileName: fileName,
-      bytes: bytes,
-      mimeType: mimeType,
-      pixelWidth: pixelWidth,
-      pixelHeight: pixelHeight,
-      topLeft: topLeft,
-      metresPerPixel: metresPerPixel,
-      lineStart: lineStart,
-      lineEnd: lineEnd,
-      knownDistance: knownDistance,
-      opacity: opacity,
-      locked: locked,
-    );
+    return _copy(label: () => clean == null || clean.isEmpty ? null : clean);
   }
 
   ReferenceImage _copy({
+    String? Function()? label,
     Vec? topLeft,
     double? metresPerPixel,
     Vec? lineStart,
@@ -243,9 +248,9 @@ class ReferenceImage {
     bool clearDistance = false,
     double? opacity,
     bool? locked,
-  }) => ReferenceImage(
+  }) => ReferenceImage._(
     id: id,
-    label: label,
+    label: label == null ? this.label : label(),
     fileName: fileName,
     bytes: bytes,
     mimeType: mimeType,

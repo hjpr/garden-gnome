@@ -5,6 +5,7 @@ import '../domain/curve_edge.dart';
 import '../domain/document.dart';
 import '../domain/feature.dart';
 import '../domain/geometry.dart';
+import '../domain/geometry_editor.dart';
 import '../domain/land_rules.dart';
 import '../domain/layer.dart';
 import '../domain/planar.dart';
@@ -13,12 +14,16 @@ import '../domain/reference_image.dart';
 import '../domain/vec.dart';
 import 'area_selection.dart';
 import 'carried_land.dart';
+import 'construction_state.dart';
+import 'drawing_input.dart';
 import 'curve_handles.dart';
 import 'editor_controller.dart';
 import 'guides.dart';
 import 'hit_testing.dart';
 import 'history.dart';
 import 'previews.dart';
+import 'selection_box.dart';
+import 'selection_target.dart';
 import 'snapping.dart';
 import 'toasts.dart';
 import 'tools.dart';
@@ -46,6 +51,7 @@ class CanvasInput {
   }
 
   final EditorController editor;
+  late final DrawingInput _drawing = DrawingInput(editor, snapAt: _snapped);
 
   _Press? _press;
   _Drag? _drag;
@@ -86,13 +92,14 @@ class CanvasInput {
     if (_hoverGrip != null) return editor.setPreview(null);
     if (_curveHandleUnder(screen) != null) return editor.setPreview(null);
     if (editor.tool == Tool.select) {
-      if (_featureOnTop(screen) case final feature?) {
-        return editor.setPreview(FeatureHoverPreview(feature.id));
-      }
-      final top = _selectHits(screen).firstOrNull;
-      return editor.setPreview(
-        top == null ? null : HoverPreview(top.itemId, layerId: top.layerId),
-      );
+      return editor.setPreview(switch (_selectionTargets.at(screen)) {
+        LandTarget(:final hit) => HoverPreview(
+          hit.itemId,
+          layerId: hit.layerId,
+        ),
+        FeatureTarget(:final feature) => FeatureHoverPreview(feature.id),
+        _ => null,
+      });
     }
     if (editor.tool == Tool.reference) {
       return editor.setPreview(_referenceLinePreview(screen));
@@ -101,27 +108,30 @@ class CanvasInput {
       return editor.setPreview(_featurePlacePreview(screen));
     }
     final layerId = editor.selectedLayerId;
-    if (layerId == null || editor.document.isLocked(layerId)) {
+    if (layerId == null || editor.isFrozen(layerId)) {
       return editor.setPreview(null);
     }
     final geometry = editor.document.geometryOf(layerId);
     editor.setPreview(switch ((editor.tool, editor.function)) {
-      (Tool.point, ToolFunction.place) => _placePreview(
+      (Tool.point, ToolFunction.place) => _drawing.pointPreview(
         layerId,
         geometry,
         screen,
       ),
-      (Tool.line, ToolFunction.draw) => _drawPreview(layerId, geometry, screen),
+      (Tool.line, ToolFunction.draw) => _drawing.linePreview(
+        layerId,
+        geometry,
+        screen,
+      ),
       (Tool.line, ToolFunction.curve) => _curveHover(layerId, geometry, screen),
       (Tool.arc, _) => _arcPreview(layerId, geometry, screen),
       (Tool.polygon, _) => _polygonPreview(layerId, screen),
       (Tool.ground, _) => _groundHover(layerId, geometry, screen),
-      (Tool.point, ToolFunction.delete) => _deleteHover(
+      (Tool.point, ToolFunction.delete) => _drawing.deleteHover(
         geometry,
         screen,
-        HitKind.point,
       ),
-      (Tool.circle, _) => _circlePreview(layerId, geometry, screen),
+      (Tool.circle, _) => _drawing.circlePreview(layerId, geometry, screen),
       _ => null,
     });
   }
@@ -166,19 +176,7 @@ class CanvasInput {
       if (editor.tool == Tool.reference) _startReferenceLineDrag(press);
       if (editor.function.drags && _handleDrag == null) {
         _boxDrag = _startBoxDrag(press);
-        if (_boxDrag == null && press.grip == null) {
-          _referenceDrag = _startReferenceDrag(press);
-          if (_referenceDrag == null) _featureDrag = _startFeatureDrag(press);
-          if (_featureDrag != null) {
-            // A feature under the pointer moves.
-          } else if (_referenceDrag == null &&
-              _dragTarget(press.origin) == null) {
-            // Empty ground: draw a marquee or lasso instead of moving.
-            _areaDrag = _startAreaDrag(press);
-          } else if (_referenceDrag == null) {
-            _drag = _startDrag(press);
-          }
-        }
+        if (_boxDrag == null && press.grip == null) _startSelectDrag(press);
       }
     }
     final handleDrag = _handleDrag;
@@ -326,11 +324,11 @@ class CanvasInput {
     final geometry = editor.document.geometryOf(layerId);
     switch ((editor.tool, editor.function)) {
       case (Tool.point, ToolFunction.place):
-        _placePoint(layerId, geometry, screen);
+        _drawing.placePoint(layerId, geometry, screen);
       case (Tool.point, ToolFunction.delete):
-        _deleteAt(layerId, geometry, screen, HitKind.point);
+        _drawing.deletePoint(layerId, geometry, screen);
       case (Tool.line, ToolFunction.draw):
-        _drawClick(layerId, geometry, screen);
+        _drawing.drawLine(layerId, geometry, screen);
       case (Tool.line, ToolFunction.curve):
         _curvePlace(
           layerId,
@@ -339,7 +337,7 @@ class CanvasInput {
           Vec.zero,
         );
       case (Tool.circle, _):
-        _circleClick(layerId, geometry, screen);
+        _drawing.drawCircle(layerId, geometry, screen);
       case (Tool.arc, _):
         _arcClick(layerId, geometry, screen);
       case (Tool.polygon, _):
@@ -351,368 +349,67 @@ class CanvasInput {
     }
   }
 
-  /// Select: picks the best item under the pointer on any layer, switching
-  /// to its layer. Clicking empty ground clears the selection.
+  /// Select: picks what is under the pointer, switching to its layer.
+  /// Clicking empty ground clears the selection. Shift only adds land to
+  /// the selection; it never picks a feature or an image.
   void _selectClick(Offset screen, {required bool shift}) {
-    if (!shift) {
-      if (_featureOnTop(screen) case final feature?) {
-        return editor.selectFeature(feature.id);
-      }
+    switch (_selectionTargets.at(screen, landOnly: shift)) {
+      case LandTarget(:final hit):
+        editor.selectObject(hit.layerId, hit.itemId, toggle: shift);
+      case FeatureTarget(:final feature) when !shift:
+        editor.selectFeature(feature.id);
+      case ImageTarget(:final image) when !shift:
+        editor.selectReference(image.id);
+      case null when !shift:
+        editor.deselectAll();
+      default:
+        break;
     }
-    final top = _selectHits(screen).firstOrNull;
-    if (top == null && !shift) {
-      if (_referenceUnder(screen) case final image?) {
-        return editor.selectReference(image.id);
-      }
-    }
-    if (top == null) {
-      if (!shift) editor.deselectAll();
-      return;
-    }
-    editor.selectObject(top.layerId, top.itemId, toggle: shift);
   }
 
-  /// Everything Select could pick at [screen]. Locked layers are left out,
-  /// so clicks pass through them to the land underneath.
-  List<LayerHit> _selectHits(Offset screen) => [
-    for (final hit in hitsAcrossLayers(editor.document, editor.camera, screen))
-      if (!editor.document.isLocked(hit.layerId)) hit,
-  ];
-
-  void _placePoint(String layerId, Geometry geometry, Offset screen) {
-    final preview = _placePreview(layerId, geometry, screen);
-    if (preview.lineId == null && _crowded(geometry, preview.position)) {
-      return editor.showNotice(tooClose);
+  /// A Select drag that is not on the selection box: it moves whatever a
+  /// click there would pick, or on empty ground draws a marquee or lasso.
+  void _startSelectDrag(_Press press) {
+    switch (_selectionTargets.at(press.origin)) {
+      case ImageHandleTarget(:final image, :final corner):
+        _referenceDrag = _startReferenceScale(press, image, corner);
+      case LandTarget(:final hit):
+        if (editor.mode == EditMode.plant) {
+          editor.selectObject(hit.layerId, hit.itemId);
+        } else {
+          _drag = _startDrag(press, hit);
+        }
+      case FeatureTarget(:final feature):
+        _featureDrag = _startFeatureDrag(press, feature);
+      case ImageTarget(:final image):
+        _referenceDrag = _startReferenceMove(press, image);
+      case null:
+        _areaDrag = _startAreaDrag(press);
     }
-    late String pointId;
-    final (next, problem) = editor.tryGeometryEdit(layerId, (e) {
-      pointId = preview.lineId == null
-          ? e.addPoint(preview.position)
-          : e.insertPoint(preview.lineId!, preview.position);
-    });
-    if (next == null) return editor.showNotice(problem);
-    editor.commit(
-      preview.lineId == null ? 'Place point' : 'Insert point',
-      next,
-    );
-    editor.selectItem(pointId);
   }
 
-  void _deleteAt(
-    String layerId,
-    Geometry geometry,
-    Offset screen,
-    HitKind kind,
-  ) {
-    final itemId = kind == HitKind.point
-        ? pointAt(geometry, editor.camera, screen)
-        : lineAt(geometry, editor.camera, screen);
-    if (itemId == null) return;
-    final (next, problem) = editor.tryGeometryEdit(
-      layerId,
-      (e) => e.delete([itemId]),
-    );
-    if (next == null) return editor.showNotice(problem);
-    editor.commit(kind == HitKind.point ? 'Delete point' : 'Delete line', next);
-  }
+  SelectionTargets get _selectionTargets => SelectionTargets(
+    document: editor.document,
+    camera: editor.camera,
+    isFrozen: editor.isFrozen,
+    overlaysEnabled: editor.mode == EditMode.build,
+    selectedImage: editor.selectedImage,
+  );
 
-  /// Line → Straight: each click commits a corner, or joins an existing
-  /// point.
-  void _drawClick(String layerId, Geometry geometry, Offset screen) {
-    final anchor = editor.lineAnchor;
-    final target = _joinableAt(geometry, screen, from: anchor);
-
-    if (anchor == null) {
-      if (target != null) {
-        editor.startLineOperation();
-        editor.setLineAnchor(target);
-        return editor.showNotice(null);
-      }
-      final position = _snapped(screen).position;
-      if (_crowded(geometry, position)) return editor.showNotice(tooClose);
-      late String pointId;
-      final (next, problem) = editor.tryGeometryEdit(
-        layerId,
-        (e) => pointId = e.addPoint(position),
-      );
-      if (next == null) return editor.showNotice(problem);
-      final token = editor.lineToken ?? editor.startLineOperation();
-      editor.commit(
-        'Place point',
-        next,
-        lineContext: LineContext(operation: token, anchorAfter: pointId),
-      );
-      editor.setLineAnchor(pointId);
-      return editor.selectItem(pointId);
-    }
-
-    final token = editor.lineToken ?? editor.startLineOperation();
-    if (target != null) {
-      late String lineId;
-      final (next, problem) = editor.tryGeometryEdit(
-        layerId,
-        (e) => lineId = e.connect(anchor, target),
-      );
-      if (next == null) return editor.showNotice(problem);
-      // Joining a loose point carries on from it, so existing points can be
-      // joined in a run. A point that now has two lines (a closed loop, or
-      // the open end of another line) ends the drawing.
-      final carryOn = next.geometryOf(layerId).degreeOf(target) < 2
-          ? target
-          : null;
-      editor.commit(
-        'Join line',
-        next,
-        lineContext: LineContext(
-          operation: token,
-          anchorBefore: anchor,
-          anchorAfter: carryOn,
-        ),
-      );
-      editor.setLineAnchor(carryOn);
-      editor.setPreview(null);
-      return editor.selectItem(lineId);
-    }
-
-    final position = _snapped(screen).position;
-    if (_crowded(geometry, position)) return editor.showNotice(tooClose);
-    late String pointId;
-    late String lineId;
-    final (next, problem) = editor.tryGeometryEdit(layerId, (e) {
-      pointId = e.addPoint(position);
-      lineId = e.connect(anchor, pointId);
-    });
-    if (next == null) return editor.showNotice(problem);
-    editor.commit(
-      'Draw line',
-      next,
-      lineContext: LineContext(
-        operation: token,
-        anchorBefore: anchor,
-        anchorAfter: pointId,
-      ),
-    );
-    editor.setLineAnchor(pointId);
-    editor.selectItem(lineId);
-  }
-
-  /// Circle: the first click is kept aside, not added to the drawing; the
-  /// second click adds the circle (and a new centre point, if needed) as
-  /// one undoable step. Esc, or changing tool or layer, forgets the first
-  /// click.
-  void _circleClick(String layerId, Geometry geometry, Offset screen) {
-    final start = editor.circleStart;
-    if (start == null) {
-      editor.setCircleStart(_circleStartAt(geometry, screen));
-      return editor.showNotice(null);
-    }
-    final plan = _circlePlan(start, _snapped(screen).position);
-    if (plan == null) return;
-    if (plan.centreId == null && _crowded(geometry, plan.centre)) {
-      return editor.showNotice(tooClose);
-    }
-    late String circleId;
-    final (next, problem) = editor.tryGeometryEdit(
-      layerId,
-      (e) => circleId = _addCircle(e, plan),
-    );
-    if (next == null) return editor.showNotice(problem);
-    editor.commit('Draw circle', next);
-    editor.selectItem(circleId);
-  }
-
-  /// Where a circle's first click lands. A centre circle may reuse an
-  /// existing point as its centre.
-  CircleStart _circleStartAt(Geometry geometry, Offset screen) {
-    if (editor.function == ToolFunction.centerCircle) {
-      final pointId = pointAt(geometry, editor.camera, screen);
-      if (pointId != null) {
-        return CircleStart(geometry.points[pointId]!, pointId: pointId);
-      }
-    }
-    return CircleStart(_snapped(screen).position);
-  }
-
-  /// The centre and radius given the first click and the pointer, or null
-  /// while they are too close to make a circle.
-  _CirclePlan? _circlePlan(CircleStart start, Vec pointer) {
-    final twoPoint = editor.function == ToolFunction.twoPointCircle;
-    final centre = twoPoint ? (start.position + pointer) / 2 : start.position;
-    final radius = centre.distanceTo(pointer);
-    if (radius <= 1e-6) return null;
-    return _CirclePlan(
-      centre,
-      radius,
-      centreId: twoPoint ? null : start.pointId,
-    );
-  }
-
-  String _addCircle(GeometryEditor e, _CirclePlan plan) =>
-      e.addCircle(plan.centreId ?? e.addPoint(plan.centre), plan.radius);
-
-  Preview? _circlePreview(String layerId, Geometry geometry, Offset screen) {
-    final start = editor.circleStart;
-    if (start == null) {
-      final reused = editor.function == ToolFunction.centerCircle
-          ? pointAt(geometry, editor.camera, screen)
-          : null;
-      if (reused != null) return HoverPreview(reused, joinable: true);
-      final snap = _snapped(screen);
-      return PointPreview(snap.position, valid: true, guides: snap.guides);
-    }
-    final snap = _snapped(screen);
-    final plan = _circlePlan(start, snap.position);
-    if (plan == null) return null;
-    return CirclePreview(
-      start: start.position,
-      edge: snap.position,
-      centre: plan.centre,
-      radius: plan.radius,
-      valid: _staysValid(layerId, (e) => _addCircle(e, plan)),
-      guides: snap.guides,
-    );
-  }
-
-  // ---------------------------------------------------------------- previews
+  List<LayerHit> _selectHits(Offset screen) => _selectionTargets.landAt(screen);
 
   static const noLayersToast = 'Add a Property layer to start drawing.';
-
   static const groundNeedsZone = 'Ground is set on zones. Select a zone';
+  static const tooClose = DrawingInput.tooClose;
 
-  static const tooClose =
-      'Too close to another point. Place it farther away, or click the point to use it';
-
-  /// New points must sit at least one drawn point marker apart from the
-  /// layer's existing points, measured on screen. Reusing a point is fine.
-  /// A zone's shapes may touch, so there only unfinished drawing counts:
-  /// a new corner may land on a finished shape's corner.
-  bool _crowded(Geometry geometry, Vec position) {
-    final reach = editor.camera.metres(PointerReach.pointDiameter);
-    final kind = editor.document.layers[geometry.ownerLayerId]?.kind;
-    final touchable = kind == null || kind.exclusive
-        ? const <String>{}
-        : geometry.definingPoints(geometry.closedIds);
-    return geometry.points.entries.any(
-      (p) => !touchable.contains(p.key) && p.value.distanceTo(position) < reach,
-    );
-  }
-
-  PointPreview _placePreview(String layerId, Geometry geometry, Offset screen) {
-    final camera = editor.camera;
-    final lineId = lineAt(geometry, camera, screen);
-    if (lineId != null && pointAt(geometry, camera, screen) == null) {
-      final line = geometry.lines[lineId]!;
-      final position = line.closestPoint(
-        geometry.points,
-        camera.toWorld(screen),
-      );
-      return PointPreview(
-        position,
-        valid: _staysValid(layerId, (e) => e.insertPoint(lineId, position)),
-        lineId: lineId,
-      );
-    }
-    final snap = _snapped(screen);
-    // A guide can land the point on a line of this layer (e.g. its
-    // midpoint); it then splits that line rather than sitting on top.
-    final landedOn = snap.guides.isEmpty
-        ? null
-        : _lineThrough(geometry, snap.position);
-    if (landedOn != null) {
-      return PointPreview(
-        snap.position,
-        valid: _staysValid(
-          layerId,
-          (e) => e.insertPoint(landedOn, snap.position),
-        ),
-        lineId: landedOn,
-        guides: snap.guides,
-      );
-    }
-    return PointPreview(
-      snap.position,
-      valid:
-          !_crowded(geometry, snap.position) &&
-          _staysValid(layerId, (e) => e.addPoint(snap.position)),
-      guides: snap.guides,
-    );
-  }
-
-  /// A line of [geometry] that [position] lies on, away from its ends.
-  String? _lineThrough(Geometry geometry, Vec position) {
-    final reach = editor.camera.metres(PointerReach.pointDiameter);
-    for (final line in geometry.lines.values) {
-      if (line.distanceTo(geometry.points, position) < 1e-9 &&
-          geometry.points[line.start]!.distanceTo(position) >= reach &&
-          geometry.points[line.end]!.distanceTo(position) >= reach) {
-        return line.id;
-      }
-    }
-    return null;
-  }
-
-  Preview? _drawPreview(String layerId, Geometry geometry, Offset screen) {
-    final anchor = editor.lineAnchor;
-    final target = _joinableAt(geometry, screen, from: anchor);
-    if (anchor == null) {
-      return target == null ? null : HoverPreview(target, joinable: true);
-    }
-    final from = geometry.points[anchor]!;
-    if (target != null) {
-      return SegmentPreview(
-        from,
-        geometry.points[target]!,
-        valid: _staysValid(layerId, (e) => e.connect(anchor, target)),
-        joinTarget: target,
-      );
-    }
-    final snap = _snapped(screen);
-    return SegmentPreview(
-      from,
-      snap.position,
-      valid: _staysValid(
-        layerId,
-        (e) => e.connect(anchor, e.addPoint(snap.position)),
-      ),
-      guides: snap.guides,
-    );
-  }
-
-  Preview? _deleteHover(Geometry geometry, Offset screen, HitKind kind) {
-    final itemId = kind == HitKind.point
-        ? pointAt(geometry, editor.camera, screen)
-        : lineAt(geometry, editor.camera, screen);
-    return itemId == null ? null : HoverPreview(itemId, destructive: true);
-  }
-
-  /// Whether [change] would be accepted without making any layer invalid.
-  /// Previews use this to turn red before the click.
-  bool _staysValid(String layerId, void Function(GeometryEditor e) change) {
-    final (next, _) = editor.tryGeometryEdit(layerId, change);
-    return next != null && next.newProblemsSince(editor.document).isEmpty;
-  }
-
-  /// A point the Line tool could attach to: fewer than two lines, and not
-  /// already joined to [from].
-  String? _joinableAt(Geometry geometry, Offset screen, {String? from}) =>
-      pointAt(
-        geometry,
-        editor.camera,
-        screen,
-        accept: (id) =>
-            id != from &&
-            geometry.degreeOf(id) < 2 &&
-            (from == null ||
-                !geometry.lines.values.any(
-                  (l) => l.connects(from, id) && l.isStraight,
-                )),
-      );
+  bool _crowded(Geometry geometry, Vec position) =>
+      _drawing.isCrowded(geometry, position);
+  bool _staysValid(String layerId, void Function(GeometryEditor e) change) =>
+      _drawing.staysValid(layerId, change);
 
   // ------------------------------------------------------------------- drags
 
-  _Drag? _startDrag(_Press press) {
-    final target = _dragTarget(press.origin);
-    if (target == null) return null;
+  _Drag? _startDrag(_Press press, LayerHit target) {
     final layerId = target.layerId;
     final itemId = target.itemId;
 
@@ -733,7 +430,7 @@ class CanvasInput {
     final carried = target.kind == HitKind.interior
         ? landInside(document, layerId, itemId)
         : const <String, Set<String>>{};
-    final lockedInside = carried.keys.where(document.isLocked);
+    final lockedInside = carried.keys.where(editor.isFrozen);
     if (lockedInside.isNotEmpty) {
       editor.showNotice(
         '${document.layers[lockedInside.first]!.name} is locked, so '
@@ -780,9 +477,6 @@ class CanvasInput {
       grabOffset: pressWorld - geometry.points[anchor]!,
     );
   }
-
-  /// What a Select drag starting at [screen] would pick up.
-  LayerHit? _dragTarget(Offset screen) => _selectHits(screen).firstOrNull;
 
   void _updateDrag(_Drag drag, Offset screen) {
     final pointer = editor.camera.toWorld(screen);
@@ -1001,14 +695,4 @@ class _Drag {
 
   GardenDocument? candidate;
   Vec delta = Vec.zero;
-}
-
-/// Where a circle would go and, for a centre circle drawn on an existing
-/// point, which point is its centre.
-class _CirclePlan {
-  const _CirclePlan(this.centre, this.radius, {this.centreId});
-
-  final Vec centre;
-  final double radius;
-  final String? centreId;
 }

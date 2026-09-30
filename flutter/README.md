@@ -1,64 +1,72 @@
 # Garden Gnome (Flutter)
 
-The Build screen: the canvas editor where fields, plots and areas are drawn.
-How to use it: ../docs/build-guide.md. The design decisions behind it:
-../docs/flutter-build-workthrough.md (B01–B16).
+The current web app: Home, Build, Seed Vault, Greenhouse, Grow and Harvest.
+Build draws **properties and zones**, including curved boundaries, holes,
+ground/rows, features and reference images. Plant mode places varieties on
+grow zones; the other tools track varieties, sowing and harvest calendars.
 
-## Run
+User guides: [Build](../docs/build-guide.md) and
+[garden tools](../docs/garden-tools-guide.md).
 
-    flutter pub get
-    flutter run -d chrome     # develop
-    flutter test              # all tests
-    flutter analyze           # lint
-    flutter build web         # release build in build/web
+## Run and verify
 
-## Code layout
+Run these commands from `flutter/` with Flutter installed and Chrome available:
 
-Each layer depends only on the ones above it.
+```sh
+flutter pub get                    # first setup or dependency changes
+flutter run --no-pub -d chrome
+flutter analyze --no-pub
+flutter test --no-pub
+flutter build web --no-pub          # release output: build/web
+```
 
-    lib/domain/         Pure Dart. The drawing and its rules.
-      vec, planar         points in metres and shared tolerance/predicates
-      curve_edge, region  exact line/arc boundaries, holes and Boolean maths
-      geometry            editable layer geometry, plus GeometryEditor
-      layer, document     fields, plots, areas and the whole drawing
-      land_rules          nesting and overlap checks between layers
-      units               feet / metres (display only; storage is metres)
+The root `npm test` also runs this Flutter suite. Root
+`npm run test:prototype` runs only the retained Node prototype tests.
 
-    lib/application/    Editor behaviour, no widgets. Testable headlessly.
-      editor_controller   the one place every change goes through
-                          (validate, record history, tidy selection)
-      canvas_input        turns clicks and drags into tool actions
-      history, drafts     undo/redo and unapplied Properties text
-      camera, snapping, hit_testing, previews, tools, tool_prompts
-      document_session    New, Open, Save, Save as, Import, Export
+## Code boundaries
 
-    lib/persistence/    Storage.
-      document_codec      the .ggnome file (zip with document.json),
-                          versioned and checked before it is opened
-      drawing_library     drawings saved in the browser (IndexedDB)
-      workspace_store     settings and view per drawing
+- `lib/domain/`: pure Dart records, geometry, land rules, row/plant layouts
+  and growing-calendar rules. Coordinates and stored lengths are in metres;
+  display units are separate. No Flutter or downstream imports.
+- `lib/application/`: controllers, history/drafts, tool/input behavior and
+  storage contracts. Document edits go through the editor's commit/history
+  boundary. Garden-record state is owned separately from drawing state.
+- `lib/persistence/`: versioned drawing and garden-record codecs, catalog
+  loading, and concrete browser storage adapters.
+- `lib/presentation/`: app navigation, screens, panels, reusable controls and
+  canvas rendering. Widgets adapt input and display controller/domain state.
+- `lib/platform/`: conditional browser implementations and non-web stubs.
+  These facades are intentional dependencies of composition/presentation,
+  not the bottom of a strictly linear layer stack.
+- `lib/main.dart`: startup and adapter composition.
 
-    lib/presentation/   Widgets.
-      build_screen        page layout, menus, shortcuts, status bar
-      canvas/             painter and pointer handling
-      panels/             Drawing tools, Settings, Layers, Properties,
-                          Preferences
-      widgets/dock        folding side docks with drag-to-reorder panels
-      widgets/panel       panel chrome and shared controls
-      dialogs, theme      dialogs; colours, sizes, Material theme
+Drawing geometry stores straight, circular-arc and Bézier edges. Line/arc
+region math is analytic; Bézier edges use arc approximations for land math.
+Do not substitute rendered paths for domain calculations.
 
-    lib/platform/       Browser-only bits (warn before closing the tab).
+## Data and assets
 
-## Notes
+Drawings use `.ggnome` files and browser IndexedDB. Per-drawing workspace/view
+settings and the garden record (varieties, plantings, climate) have separate
+storage and lifetimes. Export a drawing to keep a copy outside the browser;
+it does not export the garden record.
 
-- assets/icons is a link to ../src/icons, so the app and the docs share
-  one set of icons.
-- Circles: `Geometry.circles` (a centre point + radius). Additional closed
-  shapes/circles can be staged as same-layer Boolean operands.
-- Edges store a signed arc bulge (zero means straight). Closed shapes have
-  an outer ring and hole rings. Region calculations use exact line/arc maths,
-  not rendered paths or polygon approximations of circles.
-- Schema 2 saves arc curvature and hole rings; schema 1 files still open.
-- Milestone 2 scope and remaining work: ../docs/milestone-2.md. Decorative
-  Fill and extended recorded properties remain; images, rows and mounds are
-  later milestones.
+`assets/icons` links to `../../src/icons`, which is live shared artwork.
+`assets/render/` and `assets/catalog/` contain bundled runtime assets. Do not
+copy this directory without its icon target or confuse it with the retained
+Node/layout prototypes described in [the root README](../README.md).
+
+## Tests
+
+Place tests by the behavior under test: pure rules/math in `test/domain`,
+controller/input behavior in `test/application`, codecs/adapters in
+`test/persistence`, and rendered controls in `test/presentation`.
+
+Reusable builders and widget harnesses belong in `test/support`, never in a
+runnable `*_test.dart` imported by another suite. Keep numerical expected
+values independent of production calculations. Isolated panels need scrolling
+and controller listening; full-app tests should keep their own navigation and
+storage setup rather than inheriting a panel harness.
+
+The long design documents under `../docs/` are historical references. Use the
+two current guides above for implemented behavior.

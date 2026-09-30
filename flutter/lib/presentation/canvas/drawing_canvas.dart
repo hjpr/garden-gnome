@@ -8,14 +8,19 @@ import '../../application/canvas_input.dart';
 import '../../application/curve_handles.dart';
 import '../../application/editor_controller.dart';
 import '../../application/hit_testing.dart';
+import '../../application/planting.dart';
 import '../../application/previews.dart';
 import '../../application/tools.dart';
+import '../../application/selection_box.dart';
 import '../../application/transform_box.dart';
+import '../../domain/grow/variety.dart';
+import '../../domain/vec.dart';
 import '../../platform/canvas_cursor.dart';
 import '../widgets/text_focus.dart';
 import 'reference_image_cache.dart';
 import 'render_assets.dart';
 import 'scene_painter.dart';
+import 'scene_state.dart';
 
 /// The drawing viewport: routes pointer input and paints the scene.
 ///
@@ -253,6 +258,35 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
         WidgetsBinding.instance.addPostFrameCallback(
           (_) => widget.editor.setViewportSize(size),
         );
+        return DragTarget<VarietyProfile>(
+          // Seeds from the Seeds panel land on grow zones (Plant mode).
+          onWillAcceptWithDetails: (_) => widget.editor.mode == EditMode.plant,
+          onMove: (details) => widget.editor.setPreview(
+            SeedDropPreview(
+              growZoneAt(widget.editor, _worldAt(details.offset)),
+            ),
+          ),
+          onLeave: (_) => widget.editor.setPreview(null),
+          onAcceptWithDetails: (details) {
+            widget.editor.setPreview(null);
+            dropSeed(widget.editor, details.data, _worldAt(details.offset));
+          },
+          builder: (context, _, _) => _pointerArea(size),
+        );
+      },
+    );
+  }
+
+  /// The world point under a global screen position.
+  Vec _worldAt(Offset global) {
+    final box = context.findRenderObject() as RenderBox?;
+    final local = box == null ? global : box.globalToLocal(global);
+    return widget.editor.camera.toWorld(local);
+  }
+
+  Widget _pointerArea(Size size) {
+    return Builder(
+      builder: (context) {
         return MouseRegion(
           cursor: _spaceHeld || _panPointer != null
               ? SystemMouseCursors.grab

@@ -4,8 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:garden_gnome/application/camera.dart';
 import 'package:garden_gnome/application/editor_controller.dart';
 import 'package:garden_gnome/application/workspace_settings.dart';
+import 'package:garden_gnome/application/tools.dart';
 import 'package:garden_gnome/domain/units.dart';
 import 'package:garden_gnome/domain/vec.dart';
+
+import '../support/editor_input.dart';
 
 double feet(double metres) => Units.feet.fromMetres(metres);
 
@@ -128,6 +131,53 @@ void main() {
       expect(limited(20, 10).appearance.problem, contains('above the lowest'));
       expect(limited(1, double.infinity).appearance.problem, isNotNull);
       expect(limited(1, 1000).appearance.problem, isNull);
+    });
+  });
+
+  group('Framing drawings', () {
+    test('Fit drawing includes arc extrema away from both endpoints', () {
+      final (editor, input, _) = property();
+      editor.selectTool(Tool.arc);
+      click(input, 2, 8);
+      click(input, 6, 4);
+      click(input, 10, 8);
+      editor.setViewportSize(const Size(600, 400));
+      editor.fitDrawing();
+      for (final p in [const Vec(2, 8), const Vec(6, 4), const Vec(10, 8)]) {
+        final screen = editor.camera.toScreen(p);
+        expect(screen.dx, inInclusiveRange(39.0, 561.0));
+        expect(screen.dy, inInclusiveRange(39.0, 361.0));
+      }
+    });
+
+    test('a drawing opened with no remembered view is framed once', () {
+      final (drawn, input, _) = property();
+      rectangle(input, 5000, 5000, 10, 10);
+      final opened = EditorController(
+        document: drawn.document,
+        fitOnFirstView: true,
+      )..setViewportSize(const Size(600, 400));
+      addTearDown(opened.dispose);
+      final screen = opened.camera.toScreen(const Vec(5005, 5005));
+      expect(screen.dx, closeTo(300, 1));
+      expect(screen.dy, closeTo(200, 1));
+      // Later resizes keep the view instead of fitting again.
+      final after = opened.camera;
+      opened.setViewportSize(const Size(700, 500));
+      expect(opened.camera.height, after.height);
+    });
+
+    test('a drawing opened with a remembered view keeps it', () {
+      final (drawn, input, _) = property();
+      rectangle(input, 5000, 5000, 10, 10);
+      const remembered = Camera(topLeft: Vec(3, 4), height: 20);
+      final opened = EditorController(
+        document: drawn.document,
+        camera: remembered,
+      )..setViewportSize(const Size(600, 400));
+      addTearDown(opened.dispose);
+      expect(opened.camera.topLeft, remembered.topLeft);
+      expect(opened.camera.height, remembered.height);
     });
   });
 }

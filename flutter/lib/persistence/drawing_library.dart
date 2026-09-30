@@ -2,43 +2,13 @@ import 'dart:typed_data';
 
 import 'package:idb_shim/idb_browser.dart';
 
+import '../application/document_storage.dart';
+import '../application/storage_error.dart';
 import '../domain/document.dart';
 import 'document_codec.dart';
 
-/// A drawing listed in the browser library.
-class LibraryEntry {
-  const LibraryEntry({
-    required this.id,
-    required this.title,
-    required this.savedAt,
-  });
-
-  final String id;
-  final String title;
-  final DateTime savedAt;
-}
-
-/// Raised when the library cannot read or write. Shown to the user.
-class StorageError implements Exception {
-  const StorageError(this.message);
-
-  final String message;
-
-  @override
-  String toString() => message;
-}
-
-/// Where drawings are kept between sessions.
-abstract interface class DrawingLibrary {
-  Future<List<LibraryEntry>> list();
-
-  /// Saves [document] under [id] and confirms by reading it back.
-  Future<void> save(String id, String title, GardenDocument document);
-
-  Future<GardenDocument> open(String id);
-
-  Future<void> delete(String id);
-}
+export '../application/document_storage.dart' show DrawingLibrary, LibraryEntry;
+export '../application/storage_error.dart';
 
 /// Drawings saved in this browser with IndexedDB.
 ///
@@ -91,8 +61,8 @@ class BrowserDrawingLibrary implements DrawingLibrary {
 
   @override
   Future<void> save(String id, String title, GardenDocument document) async {
-    final bytes = encodeGgnome(document);
     try {
+      final bytes = encodeGgnome(document);
       final db = await _open();
       final txn = db.transaction(_store, idbModeReadWrite);
       await txn.objectStore(_store).put({
@@ -132,10 +102,14 @@ class BrowserDrawingLibrary implements DrawingLibrary {
 
   @override
   Future<void> delete(String id) async {
-    final db = await _open();
-    final txn = db.transaction(_store, idbModeReadWrite);
-    await txn.objectStore(_store).delete(id);
-    await txn.completed;
+    try {
+      final db = await _open();
+      final txn = db.transaction(_store, idbModeReadWrite);
+      await txn.objectStore(_store).delete(id);
+      await txn.completed;
+    } catch (_) {
+      throw const StorageError('Could not delete that drawing');
+    }
   }
 
   Future<Uint8List?> _readBytes(String id) async {

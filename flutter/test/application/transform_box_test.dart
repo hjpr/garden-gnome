@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:garden_gnome/application/canvas_input.dart';
 import 'package:garden_gnome/application/editor_controller.dart';
 import 'package:garden_gnome/application/previews.dart';
+import 'package:garden_gnome/application/selection_box.dart';
 import 'package:garden_gnome/application/tool_prompts.dart';
 import 'package:garden_gnome/application/tools.dart';
 import 'package:garden_gnome/application/transform_box.dart';

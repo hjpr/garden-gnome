@@ -54,6 +54,24 @@ extension ZoneGround on GardenDocument {
     );
   }
 
+  /// This document with [seed] planted in grow zone [layerId] (null takes
+  /// the seed out). Returns this same document when nothing would change.
+  ///
+  /// Throws [StateError] when the layer is not a grow zone or the
+  /// spacings cannot be used.
+  GardenDocument withSeed(String layerId, ZoneSeed? seed) {
+    final layer = layers[layerId]!;
+    final properties = layer.properties;
+    if (properties is! ZoneProperties || !properties.isGrow) {
+      throw StateError('Seeds are planted in grow zones');
+    }
+    if (seed?.problem case final problem?) throw StateError(problem);
+    if (properties.seed == seed) return this;
+    return withLayer(
+      layer.copyWith(properties: properties.copyWith(seed: () => seed)),
+    );
+  }
+
   /// This document with [layerId]'s row settings replaced. Returns this
   /// same document when nothing would change.
   ///

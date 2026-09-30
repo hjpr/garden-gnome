@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../application/camera.dart';
+import '../application/document_storage.dart';
+import '../application/storage_error.dart';
 import '../application/workspace_settings.dart';
 import '../domain/document.dart';
 import '../domain/geometry.dart';
@@ -14,12 +16,12 @@ import '../domain/vec.dart';
 ///
 /// Stored apart from the drawing, so they never mark it as changed. Also
 /// keeps the highest ID numbers used, so Undo never lets one be reused.
-class WorkspaceStore {
+class WorkspaceStore implements WorkspaceStorage {
   static const _prefix = 'garden_gnome.workspace.';
 
+  @override
   Future<(WorkspaceSettings, Camera)?> load(String documentId) async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString('$_prefix$documentId');
+    final raw = await _readRaw(documentId);
     if (raw == null) return null;
     try {
       final json = jsonDecode(raw) as Map<String, Object?>;
@@ -88,17 +90,16 @@ class WorkspaceStore {
     }
   }
 
+  @override
   Future<void> save(
     String documentId,
     WorkspaceSettings settings,
     Camera camera,
     CounterLedger ledger,
   ) async {
-    final prefs = await SharedPreferences.getInstance();
-    final a = settings.appearance;
-    await prefs.setString(
-      '$_prefix$documentId',
-      jsonEncode({
+    try {
+      final a = settings.appearance;
+      final raw = jsonEncode({
         'units': settings.units.name,
         'area_units': settings.areaUnits.name,
         'snapping': settings.snappingEnabled,
@@ -141,15 +142,21 @@ class WorkspaceStore {
               ],
           },
         },
-      }),
-    );
+      });
+      final prefs = await SharedPreferences.getInstance();
+      if (!await prefs.setString('$_prefix$documentId', raw)) {
+        throw const StorageError('Could not remember this drawing’s workspace');
+      }
+    } catch (_) {
+      throw const StorageError('Could not remember this drawing’s workspace');
+    }
   }
 
   /// The highest ID numbers this device has seen for [documentId].
+  @override
   Future<CounterLedger> counters(String documentId) async {
     final ledger = CounterLedger();
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString('$_prefix$documentId');
+    final raw = await _readRaw(documentId);
     if (raw == null) return ledger;
     try {
       final json = (jsonDecode(raw) as Map)['counters'] as Map;
@@ -170,6 +177,15 @@ class WorkspaceStore {
       // Unreadable local records are ignored; saved counters still apply.
     }
     return ledger;
+  }
+
+  Future<String?> _readRaw(String documentId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getString('$_prefix$documentId');
+    } catch (_) {
+      throw const StorageError('Could not read this drawing’s workspace');
+    }
   }
 
   /// Panels named in [value]; names this version does not know are skipped.

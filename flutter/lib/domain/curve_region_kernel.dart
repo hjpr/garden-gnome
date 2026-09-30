@@ -11,24 +11,6 @@ List<CurveEdge> _reverse(List<CurveEdge> contour) =>
 List<List<CurveEdge>> _immutableContours(List<List<CurveEdge>> contours) =>
     List.unmodifiable(contours.map((c) => List<CurveEdge>.unmodifiable(c)));
 
-/// Translate the area integral to a local origin, and compensate its sum.
-/// Large map coordinates must not erase a small parcel's area.
-double _signedArea(List<CurveEdge> contour) {
-  if (contour.isEmpty) return 0;
-  final origin = contour.first.start;
-  var sum = 0.0;
-  var correction = 0.0;
-  for (final edge in contour) {
-    final value =
-        (edge.start - origin).cross(edge.end - origin) / 2 + edge.segmentArea;
-    final adjusted = value - correction;
-    final next = sum + adjusted;
-    correction = (next - sum) - adjusted;
-    sum = next;
-  }
-  return sum;
-}
-
 void _checkContours(List<List<CurveEdge>> contours) {
   for (final contour in contours) {
     if (contour.isEmpty) throw ArgumentError('A contour cannot be empty.');
@@ -76,7 +58,7 @@ List<CurveEdge> _normalizeContour(List<List<CurveEdge>> contours, int index) {
     if (inside == true) depth++;
   }
   final wantsPositive = depth.isEven;
-  return (_signedArea(contour) < 0) == wantsPositive
+  return (signedContourArea(contour) < 0) == wantsPositive
       ? _reverse(contour)
       : contour;
 }
@@ -306,7 +288,7 @@ void _requireBooleanContours(List<List<CurveEdge>> contours) {
     throw StateError(error.message.toString());
   }
   for (final contour in contours) {
-    if (_signedArea(contour) == 0) {
+    if (signedContourArea(contour) == 0) {
       throw StateError('A Boolean contour must enclose land.');
     }
   }
@@ -481,7 +463,7 @@ List<List<CurveEdge>> _stitch(List<CurveEdge> edges) {
       contour.add(links[current].edge);
       current = next[current];
     } while (current != start);
-    if (_signedArea(contour).abs() > tolerance * tolerance) {
+    if (signedContourArea(contour).abs() > tolerance * tolerance) {
       contours.add(contour);
     }
   }

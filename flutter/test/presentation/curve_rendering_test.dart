@@ -14,6 +14,7 @@ import 'package:garden_gnome/domain/region.dart';
 import 'package:garden_gnome/domain/vec.dart';
 import 'package:garden_gnome/presentation/canvas/curve_paths.dart';
 import 'package:garden_gnome/presentation/canvas/scene_painter.dart';
+import 'package:garden_gnome/presentation/canvas/scene_state.dart';
 
 Future<Uint8List> raster(
   GardenDocument document, {

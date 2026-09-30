@@ -59,7 +59,7 @@ List<CurveHandle> visibleCurveHandles(EditorController editor) {
   final layerId = editor.selectedLayerId;
   if (editor.tool != Tool.select ||
       layerId == null ||
-      editor.document.isLocked(layerId) ||
+      editor.geometryLockNotice(layerId) != null ||
       !editor.document.layers.containsKey(layerId)) {
     return const [];
   }

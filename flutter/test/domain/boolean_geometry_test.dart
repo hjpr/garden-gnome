@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:garden_gnome/domain/geometry.dart';
+import 'package:garden_gnome/domain/geometry_editor.dart';
+import 'package:garden_gnome/domain/geometry_rules.dart';
 import 'package:garden_gnome/domain/planar.dart';
 import 'package:garden_gnome/domain/region.dart';
 import 'package:garden_gnome/domain/vec.dart';

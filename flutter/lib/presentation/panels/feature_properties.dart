@@ -4,7 +4,8 @@ import 'package:flutter/services.dart';
 import '../../application/editor_controller.dart';
 import '../../domain/feature.dart';
 import '../theme.dart';
-import '../widgets/panel.dart';
+import '../widgets/icon_controls.dart';
+import '../widgets/property_controls.dart';
 import 'measure_field.dart';
 
 /// Properties for one raised bed, greenhouse or high tunnel: its name

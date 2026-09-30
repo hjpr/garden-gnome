@@ -134,26 +134,12 @@ extension _ReferencePainter on ScenePainter {
     _referenceMarker(canvas, a, colour);
     _referenceMarker(canvas, b, colour);
     if (label == null) return;
-    final painter = TextPainter(
-      text: TextSpan(
-        text: label,
-        style: TextStyle(
-          fontSize: 12,
-          color: colour,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    final at = (a + b) / 2 + const Offset(8, 6);
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        (at - const Offset(4, 2)) & Size(painter.width + 8, painter.height + 4),
-        const Radius.circular(4),
-      ),
-      Paint()..color = Palette.paper.withValues(alpha: 0.9),
+    paintMeasurementLabel(
+      canvas,
+      text: label,
+      anchor: (a + b) / 2,
+      color: colour,
     );
-    painter.paint(canvas, at);
   }
 
   void _referenceMarker(Canvas canvas, Offset at, Color colour) {

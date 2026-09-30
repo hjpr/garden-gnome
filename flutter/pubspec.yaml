@@ -27,5 +27,6 @@ flutter:
   assets:
     - assets/icons/
     - assets/render/
+    - assets/catalog/
   shaders:
     - shaders/ground.frag

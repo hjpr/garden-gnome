@@ -172,31 +172,42 @@ class ZoneProperties extends LayerProperties {
     this.ground,
     this.rows = const RowSpec(),
     this.crop,
+    this.seed,
   });
 
   final OutlineColor color;
 
   /// How the soil is prepared, set with the Ground tool; null for plain
-  /// dirt.
+  /// dirt. [GroundType.grow] marks a grow zone.
   final GroundType? ground;
 
   /// Row size and heading. Used while [ground] is [GroundType.row], and
-  /// kept when it is not, so switching back restores them.
+  /// kept when it is not, so switching back restores them. A grow zone
+  /// uses only the direction, to line up plants on flat ground.
   final RowSpec rows;
 
   /// The crop growing here, as a label.
   final String? crop;
+
+  /// The seed planted here. Only grow zones are planted; the seed is kept
+  /// when the ground changes, so switching back to Grow restores it.
+  final ZoneSeed? seed;
+
+  /// Whether this zone is a grow zone, which Plant mode works on.
+  bool get isGrow => ground == GroundType.grow;
 
   ZoneProperties copyWith({
     OutlineColor? color,
     GroundType? Function()? ground,
     RowSpec? rows,
     String? Function()? crop,
+    ZoneSeed? Function()? seed,
   }) => ZoneProperties(
     color: color ?? this.color,
     ground: ground == null ? this.ground : ground(),
     rows: rows ?? this.rows,
     crop: crop == null ? this.crop : crop(),
+    seed: seed == null ? this.seed : seed(),
   );
 }
 

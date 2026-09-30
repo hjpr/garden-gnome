@@ -5,7 +5,7 @@ import '../../application/editor_controller.dart';
 import '../../application/workspace_settings.dart';
 import '../../domain/units.dart';
 import '../theme.dart';
-import '../widgets/panel.dart';
+import '../widgets/property_controls.dart';
 
 /// The groups Preferences is split into, listed down its left side.
 enum PreferencesCategory {

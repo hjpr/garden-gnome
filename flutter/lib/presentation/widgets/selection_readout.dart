@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../application/editor_controller.dart';
 import '../../application/previews.dart';
-import '../../application/transform_box.dart';
+import '../../application/selection_box.dart';
 import '../theme.dart';
 
 /// The status bar's reading of the selection box: its width and height in

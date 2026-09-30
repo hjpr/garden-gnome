@@ -44,6 +44,10 @@ extension _RenderPainter on ScenePainter {
               _softEdge(canvas, path, _RenderColours.lawnEdge, 3);
             }
           }
+        // A grow zone is a plan over the soil, not soil: its plants and
+        // dashed outline are drawn on top later.
+        case ZoneProperties(ground: GroundType.grow):
+          break;
         case ZoneProperties(:final ground, :final rows):
           _paintZoneGround(canvas, size, document, layerId, path, ground, rows);
       }
@@ -334,44 +338,4 @@ extension _RenderPainter on ScenePainter {
         ..color = colour.withValues(alpha: 0.7),
     );
   }
-
-  /// Wireframe: a zone with row ground shows its rows as thin strips, so
-  /// the layout can be checked while drawing.
-  void _paintWireRows(Canvas canvas, GardenDocument document, String layerId) {
-    final layout = rowLayoutOf(document, layerId);
-    if (layout == null || layout.runs.isEmpty) return;
-    final ppm = _camera.pixelsPerMetreNow;
-    final width = layout.spec.width * ppm;
-    if (width < 2) return;
-    final layer = document.layers[layerId]!;
-    final colour = layerColor(layer);
-    final strips = Path();
-    for (final run in layout.runs) {
-      final a = _camera.toScreen(run.start), b = _camera.toScreen(run.end);
-      strips
-        ..moveTo(a.dx, a.dy)
-        ..lineTo(b.dx, b.dy);
-    }
-    final region = document.geometryOf(layerId).region!;
-    canvas.save();
-    canvas.clipPath(regionPath(region, _camera));
-    canvas.drawPath(
-      strips,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = width
-        ..color = colour.withValues(alpha: 0.16),
-    );
-    canvas.restore();
-  }
 }
-
-/// A zone's rows for this document, worked out once per document and
-/// zone; null for layers without row ground or without land.
-RowLayout? rowLayoutOf(GardenDocument document, String layerId) {
-  final cache = _rowLayouts[document] ??= {};
-  if (cache.containsKey(layerId)) return cache[layerId];
-  return cache[layerId] = document.rowLayoutOf(layerId);
-}
-
-final _rowLayouts = Expando<Map<String, RowLayout?>>('row layouts');

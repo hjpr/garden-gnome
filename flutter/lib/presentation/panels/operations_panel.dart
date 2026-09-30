@@ -5,7 +5,8 @@ import '../../application/editor_controller.dart';
 import '../../domain/region.dart';
 import '../theme.dart';
 import '../widgets/button_grid.dart';
-import '../widgets/panel.dart';
+import '../widgets/icon_controls.dart';
+import '../widgets/property_controls.dart';
 
 /// One-shot actions on the selected shapes. Unlike the drawing tools,
 /// these do not wait for canvas clicks: select the shapes first (Select

@@ -6,7 +6,12 @@ import 'package:garden_gnome/domain/planar.dart';
 import 'package:garden_gnome/domain/region.dart';
 import 'package:garden_gnome/domain/vec.dart';
 
-const square = PolygonRegion([Vec(0, 0), Vec(10, 0), Vec(10, 10), Vec(0, 10)]);
+final square = PolygonRegion([
+  const Vec(0, 0),
+  const Vec(10, 0),
+  const Vec(10, 10),
+  const Vec(0, 10),
+]);
 
 void main() {
   test('a disc inside a square, touching its edge, is contained', () {
@@ -253,7 +258,7 @@ void main() {
     );
 
     test('analytic segment containment catches a concave escape', () {
-      const concave = PolygonRegion([
+      final concave = PolygonRegion(const [
         Vec(0, 0),
         Vec(4, 0),
         Vec(4, 4),
@@ -297,7 +302,7 @@ void main() {
     });
 
     test('large translated coordinates do not cancel parcel area', () {
-      const translated = PolygonRegion([
+      final translated = PolygonRegion(const [
         Vec(1000000000, 1000000000),
         Vec(1000000010, 1000000000),
         Vec(1000000010, 1000000010),

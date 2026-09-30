@@ -1,5 +1,6 @@
 import 'document.dart';
 import 'geometry.dart';
+import 'geometry_rules.dart';
 import 'layer.dart';
 import 'planar.dart';
 import 'region.dart';

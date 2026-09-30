@@ -3,11 +3,10 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:uuid/uuid.dart';
 
 import '../domain/document.dart';
 import '../domain/feature.dart';
-import '../domain/geometry.dart';
+import '../domain/geometry_editor.dart';
 import '../domain/land_rules.dart';
 import '../domain/layer.dart';
 import '../domain/reference_image.dart';
@@ -16,7 +15,10 @@ import '../domain/vec.dart';
 import '../domain/zone_ground.dart';
 import 'alignment.dart';
 import 'camera.dart';
+import 'construction_state.dart';
+import 'document_content.dart';
 import 'drafts.dart';
+import 'identifiers.dart';
 import 'guides.dart';
 import 'history.dart';
 import 'previews.dart';
@@ -24,12 +26,9 @@ import 'toasts.dart';
 import 'tools.dart';
 import 'workspace_settings.dart';
 
-const _uuid = Uuid();
-
 /// The owner recorded on Properties drafts typed for the reference image,
 /// which is not a layer.
 const referenceDraftOwner = 'reference-image';
-String newUuid() => _uuid.v4();
 
 /// The Build screen's state and the only place drawing changes are made.
 ///
@@ -95,21 +94,21 @@ class EditorController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Switches to a copy of the drawing with a new identity (Save as).
-  ///
-  /// Layer and item IDs, history, and selection are kept.
-  void replaceDocumentIdentity(GardenDocument copy) {
-    _document = copy;
-    _ledger.record(copy);
+  /// Gives the drawing as it is now a new identity (Save as). Its content,
+  /// layer and item IDs, history, and selection are all kept.
+  void adoptIdentity(String documentId) {
+    _document = _document.withId(documentId);
+    _ledger.record(_document);
     notifyListeners();
   }
 
-  /// Records [saved] as the content now held in storage.
+  /// Records [saved], under [title], as what storage now holds. The
+  /// drawing itself is not touched: work done since the save started,
+  /// including a rename, still counts as unsaved.
   void markSaved(GardenDocument saved, {String? libraryId, String? title}) {
     _savedDocument = saved;
     if (libraryId != null) this.libraryId = libraryId;
-    if (title != null) this.title = title;
-    _savedTitle = this.title;
+    _savedTitle = title ?? this.title;
     notifyListeners();
   }
 
@@ -305,7 +304,7 @@ class EditorController extends ChangeNotifier {
 
   /// A short explanation of why the last attempt was refused.
   String? _notice;
-  String? get notice => _notice;
+  String? get notice => _preview?.problem ?? _notice;
 
   final DraftRegistry drafts = DraftRegistry();
 
@@ -327,31 +326,32 @@ class EditorController extends ChangeNotifier {
   /// Hook that lets the canvas input handler drop any gesture in progress.
   VoidCallback? onCancelOperation;
 
-  /// Shows tool feedback on the canvas. Only the canvas redraws; see
-  /// [viewChanges].
+  /// Preview-only changes redraw the canvas; refusal changes also notify controls.
   void setPreview(Preview? preview) {
     if (preview == _preview) return;
+    final previousNotice = notice;
     _preview = preview;
+    if (notice != previousNotice) notifyListeners();
     _viewChanges.fire();
   }
 
   void showNotice(String? message) {
+    if (_preview?.problem != null) _preview = null;
     _notice = message;
     notifyListeners();
   }
 
   void selectTool(Tool tool) {
     if (tool == _tool) return;
+    if (!tool.availableIn(_mode)) return showNotice(plantModeNotice);
     _cancelOperation();
     _functionMemory[_tool] = _function;
     _tool = tool;
     _function = _functionMemory[tool] ?? tool.functions.first;
     // Drawing tools work on layers, so Properties goes back to the layer.
-    if (tool != Tool.select && tool != Tool.reference) {
-      _clearReferenceSelection();
-    }
     // Feature keeps its selection so a placed feature can be sized at
-    // once; every other tool works on land or images.
+    // once; Reference keeps its image for the same reason.
+    if (tool != Tool.select && tool != Tool.reference) _clearImageSelection();
     if (tool != Tool.select && tool != Tool.feature) _selectedFeatureId = null;
     if (tool == Tool.reference) {
       // Its settings, and the Add image button, are in Properties.
@@ -372,7 +372,11 @@ class EditorController extends ChangeNotifier {
   ///
   /// Choosing the layer that is already selected only reopens Properties.
   void selectLayer(String? layerId) {
-    if (layerId != null && layerId == _selectedLayerId) {
+    if (layerId != null &&
+        layerId == _selectedLayerId &&
+        _selectedFeatureId == null &&
+        _selectedImageId == null &&
+        !_referenceLayerSelected) {
       _openProperties();
       notifyListeners();
       return;
@@ -381,7 +385,7 @@ class EditorController extends ChangeNotifier {
     _cancelOperation();
     _selectedLayerId = layerId;
     _selection.clear();
-    _clearReferenceSelection();
+    _clearOverlaySelection();
     if (layerId != null) _openProperties();
     notifyListeners();
   }
@@ -452,7 +456,7 @@ class EditorController extends ChangeNotifier {
   /// selection, but only within the layer already selected.
   void selectObject(String layerId, String itemId, {bool toggle = false}) {
     if (!_document.layers.containsKey(layerId)) return;
-    _clearReferenceSelection();
+    _clearOverlaySelection();
     if (layerId != _selectedLayerId) {
       drafts.settleForLayerSwitch();
       _selectedLayerId = layerId;
@@ -467,7 +471,7 @@ class EditorController extends ChangeNotifier {
   /// that layer if needed. [add] keeps what was already selected on it.
   void selectItems(String layerId, Set<String> itemIds, {bool add = false}) {
     if (!_document.layers.containsKey(layerId)) return;
-    _clearReferenceSelection();
+    _clearOverlaySelection();
     if (layerId != _selectedLayerId) {
       drafts.settleForLayerSwitch();
       _selectedLayerId = layerId;
@@ -485,7 +489,7 @@ class EditorController extends ChangeNotifier {
 
   /// Replaces or toggles the geometry selection after a click.
   void selectItem(String? itemId, {bool toggle = false}) {
-    if (itemId != null || !toggle) _clearReferenceSelection();
+    if (itemId != null || !toggle) _clearOverlaySelection();
     if (itemId == null) {
       if (!toggle) _selection.clear();
     } else if (toggle) {
@@ -500,80 +504,48 @@ class EditorController extends ChangeNotifier {
 
   /// Handles Escape: ends the current operation, or else clears selection.
   void escape() {
-    if (_lineAnchor != null ||
-        _lineToken != null ||
-        _circleStart != null ||
-        _polygonStart != null ||
-        _referenceLineStart != null ||
-        _arcPoints.isNotEmpty) {
+    if (_construction.isActive) {
       _cancelOperation();
     } else if (_selection.isNotEmpty) {
       _selection.clear();
-    } else if (_selectedImageId != null ||
-        _referenceLayerSelected ||
-        _selectedFeatureId != null) {
-      _clearReferenceSelection();
+    } else {
+      _clearOverlaySelection();
     }
     _preview = null;
     notifyListeners();
   }
 
-  // ----------------------------------------------------- live Line operation
+  final ConstructionState _construction = ConstructionState();
 
-  int _tokenCounter = 0;
-  int? _lineToken;
-  String? _lineAnchor;
-
-  /// The point the dashed Line preview starts from, if drawing.
-  String? get lineAnchor => _lineAnchor;
-
-  Vec _curveHandle = Vec.zero;
-
-  /// Line → Curve: the handle pulled out at the last point placed, as an
-  /// offset from it. The next curve piece leaves that point along it.
-  Vec get curveHandle => _curveHandle;
+  String? get lineAnchor => _construction.lineAnchor;
+  int? get lineToken => _construction.lineToken;
+  Vec get curveHandle => _construction.curveHandle;
+  List<ArcPoint> get arcPoints => List.unmodifiable(_construction.arcPoints);
+  CircleStart? get circleStart => _construction.circleStart;
+  Vec? get polygonStart => _construction.polygonStart;
 
   void setCurveHandle(Vec offset) {
-    _curveHandle = offset;
+    _construction.curveHandle = offset;
     notifyListeners();
   }
-
-  final List<ArcPoint> _arcPoints = [];
-
-  /// Start and through clicks stay outside the document until Arc completes.
-  List<ArcPoint> get arcPoints => List.unmodifiable(_arcPoints);
 
   void addArcPoint(ArcPoint point) {
-    _arcPoints.add(point);
+    _construction.arcPoints.add(point);
     notifyListeners();
   }
-
-  CircleStart? _circleStart;
-
-  /// The first click of a circle being drawn, if waiting for the second.
-  /// It is not part of the drawing until the circle is finished.
-  CircleStart? get circleStart => _circleStart;
 
   void setCircleStart(CircleStart? start) {
-    _circleStart = start;
+    _construction.circleStart = start;
     notifyListeners();
   }
-
-  Vec? _polygonStart;
-
-  /// The first click of a Polygon (its centre, or one corner of a
-  /// Rectangle). Like a circle's first click, it is not in the drawing yet.
-  Vec? get polygonStart => _polygonStart;
 
   void setPolygonStart(Vec? start) {
-    _polygonStart = start;
+    _construction.polygonStart = start;
     notifyListeners();
   }
 
-  /// Sides for Polygon → Regular. Kept between uses of the tool.
   int _polygonSides = defaultPolygonSides;
   int get polygonSides => _polygonSides;
-
   static const defaultPolygonSides = 6;
   static const minPolygonSides = 3;
   static const maxPolygonSides = 24;
@@ -586,27 +558,16 @@ class EditorController extends ChangeNotifier {
     notifyListeners();
   }
 
-  int? get lineToken => _lineToken;
-
-  /// Starts a new Line drawing operation and returns its token.
-  int startLineOperation() => _lineToken = ++_tokenCounter;
+  int startLineOperation() => _construction.startLine();
 
   void setLineAnchor(String? pointId) {
-    _lineAnchor = pointId;
+    _construction.lineAnchor = pointId;
     notifyListeners();
   }
 
-  /// Ends any drawing in progress. Placed points and lines stay.
   void _cancelOperation() {
-    _lineToken = null;
-    _lineAnchor = null;
-    _curveHandle = Vec.zero;
-    _circleStart = null;
-    _polygonStart = null;
-    _referenceLineStart = null;
-    _referenceLineImageId = null;
+    _construction.reset();
     _referenceOpacityDraft = null;
-    _arcPoints.clear();
     _preview = null;
     _notice = null;
     onCancelOperation?.call();
@@ -634,7 +595,7 @@ class EditorController extends ChangeNotifier {
     String layerId,
     void Function(GeometryEditor editor) change,
   ) {
-    final locked = lockNotice(layerId);
+    final locked = geometryLockNotice(layerId);
     if (locked != null) return (null, locked);
     final base = documentForEditing;
     try {
@@ -651,16 +612,8 @@ class EditorController extends ChangeNotifier {
   /// why. Edits that are not part of a live Line drawing end that drawing.
   void commit(String label, GardenDocument next, {LineContext? lineContext}) {
     if (identical(next, _document)) return;
-    if (lineContext == null) {
-      _lineToken = null;
-      _lineAnchor = null;
-      _curveHandle = Vec.zero;
-      _circleStart = null;
-      _polygonStart = null;
-      _referenceLineStart = null;
-      _referenceLineImageId = null;
-      _arcPoints.clear();
-    }
+    if (!_allowsLayoutOf(next)) return showNotice(plantModeNotice);
+    if (lineContext == null) _construction.reset();
     _history.record(
       HistoryEntry(
         label: label,
@@ -688,13 +641,78 @@ class EditorController extends ChangeNotifier {
   // ---------------------------------------------------------------- locking
 
   /// Why [layerId] cannot be edited because of a lock, or null if it can.
+  ///
+  /// In Plant mode only grow-zone planting and metadata remain editable.
+  /// Geometry uses [geometryLockNotice] instead.
   String? lockNotice(String layerId) {
     final by = _document.lockedBy(layerId);
-    if (by == null) return null;
-    final name = _document.layers[layerId]!.name;
-    return by.id == layerId
-        ? '$name is locked. Unlock it in Layers to change it'
-        : '$name is inside ${by.name}, which is locked';
+    final name = _document.layers[layerId]?.name ?? 'This layer';
+    if (by != null) {
+      return by.id == layerId
+          ? '$name is locked. Unlock it in Layers to change it'
+          : '$name is inside ${by.name}, which is locked';
+    }
+    if (_mode == EditMode.plant && !isGrowZone(layerId)) {
+      return plantModeNotice;
+    }
+    return null;
+  }
+
+  /// Whether [layerId] cannot be changed now: locked, or frozen by Plant
+  /// mode. Canvas input skips such layers, so clicks pass through them.
+  bool isFrozen(String layerId) => lockNotice(layerId) != null;
+
+  /// Geometry is fixed in Plant, even on a selectable, plantable grow zone.
+  String? geometryLockNotice(String layerId) =>
+      _mode == EditMode.plant ? plantModeNotice : lockNotice(layerId);
+
+  static const plantModeNotice =
+      'Plant mode: geometry is locked. Switch to Build to edit the layout';
+
+  // ------------------------------------------------------------ plant mode
+
+  EditMode _mode = EditMode.build;
+
+  /// Build lays out land; Plant changes only grow zones and plants seeds.
+  EditMode get mode => _mode;
+
+  /// Switches between Build and Plant. Plant keeps the selection only on
+  /// a grow zone, and swaps a tool it does not offer for Select.
+  void setMode(EditMode mode) {
+    if (mode == _mode) return;
+    drafts.settleForLayerSwitch();
+    _cancelOperation();
+    _mode = mode;
+    _notice = null;
+    if (mode == EditMode.plant) {
+      if (!_tool.availableIn(mode)) {
+        _functionMemory[_tool] = _function;
+        _tool = Tool.select;
+        _function = _functionMemory[Tool.select] ?? Tool.select.functions.first;
+      }
+      _clearOverlaySelection();
+      if (_selectedLayerId != null && !isGrowZone(_selectedLayerId!)) {
+        _selection.clear();
+      }
+    }
+    notifyListeners();
+  }
+
+  /// Whether [layerId] is a grow zone.
+  bool isGrowZone(String layerId) =>
+      switch (_document.layers[layerId]?.properties) {
+        ZoneProperties p => p.isGrow,
+        _ => false,
+      };
+
+  /// Plants [seed] in grow zone [layerId] as one Undo step; null takes it
+  /// out. Used by dropping a seed on the canvas and by Properties.
+  void setSeed(String layerId, ZoneSeed? seed) {
+    _changeZone(
+      layerId,
+      seed == null ? 'Remove seed' : 'Plant ${seed.name}',
+      (document) => document.withSeed(layerId, seed),
+    );
   }
 
   /// Locks or unlocks a layer, as an undoable step.
@@ -706,6 +724,9 @@ class EditorController extends ChangeNotifier {
   void setLayerLocked(String layerId, bool locked) {
     final layer = _document.layers[layerId];
     if (layer == null || layer.locked == locked) return;
+    if (_mode == EditMode.plant && !isGrowZone(layerId)) {
+      return showNotice(plantModeNotice);
+    }
     if (locked) {
       // Values typed into Properties are applied before the layer freezes.
       drafts.settleForLayerSwitch();
@@ -734,7 +755,7 @@ class EditorController extends ChangeNotifier {
     _cancelOperation();
     _selectedLayerId = layerId;
     _selection.clear();
-    _clearReferenceSelection();
+    _clearOverlaySelection();
     _openProperties();
     notifyListeners();
   }
@@ -754,6 +775,7 @@ class EditorController extends ChangeNotifier {
   /// selected zone) and must stay within it, so that property must be
   /// unlocked and complete first.
   String? addLayerBlocker(LayerKind kind) {
+    if (_mode == EditMode.plant) return plantModeNotice;
     if (kind.parentKind == null) return null;
     final label = kind.label.toLowerCase();
     final propertyId = _homePropertyId;
@@ -771,7 +793,7 @@ class EditorController extends ChangeNotifier {
   /// zones is locked. Null if it can be.
   String? deleteLayerBlocker(String layerId) {
     for (final id in _document.subtree(layerId)) {
-      final locked = lockNotice(id);
+      final locked = geometryLockNotice(id);
       if (locked != null) return locked;
     }
     return null;
@@ -839,6 +861,8 @@ class EditorController extends ChangeNotifier {
   /// Sets a zone's ground (null for plain dirt) as one Undo step. Used by
   /// both the Ground tool and the Properties panel.
   void setGround(String layerId, GroundType? ground) {
+    // Plant mode plants grow zones; turning them into soil is Build work.
+    if (_mode == EditMode.plant) return showNotice(plantModeNotice);
     _changeZone(
       layerId,
       ground == null ? 'Clear ground' : '${ground.label} ground',
@@ -890,8 +914,9 @@ class EditorController extends ChangeNotifier {
   /// target but nothing on it is selected, so Delete removes the feature.
   void selectFeature(String featureId) {
     if (_document.featureById(featureId) == null) return;
+    if (_mode == EditMode.plant) return showNotice(plantModeNotice);
     drafts.settleForLayerSwitch();
-    _clearReferenceSelection();
+    _clearImageSelection();
     _selectedFeatureId = featureId;
     _selection.clear();
     _openProperties();
@@ -901,6 +926,7 @@ class EditorController extends ChangeNotifier {
   /// Places a new feature of [kind] at its usual size, centred on
   /// [centre], as one Undo step, and selects it.
   void addFeature(FeatureKind kind, Vec centre) {
+    if (_mode == EditMode.plant) return showNotice(plantModeNotice);
     final (base, id) = documentForEditing.nextFeatureId();
     commit(
       'Add ${kind.label.toLowerCase()}',
@@ -912,6 +938,7 @@ class EditorController extends ChangeNotifier {
   /// Commits a changed feature (matched by ID) as one Undo step. Values
   /// that cannot be used are refused with the reason in the status bar.
   void updateFeature(String label, Feature feature) {
+    if (_mode == EditMode.plant) return showNotice(plantModeNotice);
     final current = _document.featureById(feature.id);
     if (current == null || feature == current) return;
     if (feature.problem case final problem?) return showNotice(problem);
@@ -920,6 +947,7 @@ class EditorController extends ChangeNotifier {
 
   /// Removes a feature. Undo brings it back.
   void removeFeature(String featureId) {
+    if (_mode == EditMode.plant) return showNotice(plantModeNotice);
     final feature = _document.featureById(featureId);
     if (feature == null) return;
     commit(
@@ -937,7 +965,7 @@ class EditorController extends ChangeNotifier {
     if (layerId == null || _selection.length < 2) {
       return 'Select two or more shapes on one layer';
     }
-    return lockNotice(layerId);
+    return geometryLockNotice(layerId);
   }
 
   /// Builds the result of a Boolean on the selected shapes without
@@ -964,12 +992,7 @@ class EditorController extends ChangeNotifier {
   void previewBoolean(BooleanOperation? operation) {
     final layerId = _selectedLayerId;
     if (operation == null || layerId == null || _selection.length < 2) {
-      if (_preview is BooleanPreview) {
-        _preview = null;
-        _notice = null;
-        notifyListeners();
-      }
-      return;
+      return _clearOperationPreview<BooleanPreview>();
     }
     final attempt = tryBoolean(operation);
     final geometry = _document.geometryOf(layerId);
@@ -986,7 +1009,7 @@ class EditorController extends ChangeNotifier {
       problem: attempt.problem,
       valid: next != null && next.newProblemsSince(_document).isEmpty,
     );
-    _notice = attempt.problem;
+    _notice = null;
     notifyListeners();
   }
 
@@ -1015,7 +1038,7 @@ class EditorController extends ChangeNotifier {
     if (layerId == null || _selection.length != 2) {
       return 'Select two items: the one to align to, then the one to move';
     }
-    return lockNotice(layerId);
+    return geometryLockNotice(layerId);
   }
 
   /// Builds the result of aligning the second selected item to the first,
@@ -1038,31 +1061,20 @@ class EditorController extends ChangeNotifier {
     }
   }
 
-  bool _alignPreviewing = false;
-
   /// Shows where the second item would go while the pointer is over an
   /// Align button, drawn like a drag in progress. Null clears it.
   void previewAlign(AlignEdge? edge) {
-    if (edge == null) {
-      if (_alignPreviewing) {
-        _alignPreviewing = false;
-        _preview = null;
-        _notice = null;
-        notifyListeners();
-      }
-      return;
-    }
+    if (edge == null) return _clearOperationPreview<AlignPreview>();
     final attempt = tryAlign(edge);
     final result = attempt.result;
-    _alignPreviewing = true;
-    _preview = result == null
-        ? null
-        : MovePreview(
-            document: result.document,
-            moved: result.moved,
-            valid: result.document.newProblemsSince(_document).isEmpty,
-          );
-    _notice = attempt.problem;
+    _preview = AlignPreview(
+      document: result?.document ?? _document,
+      moved: result?.moved ?? const {},
+      valid:
+          result != null && result.document.newProblemsSince(_document).isEmpty,
+      problem: attempt.problem,
+    );
+    _notice = null;
     notifyListeners();
   }
 
@@ -1072,10 +1084,17 @@ class EditorController extends ChangeNotifier {
     final attempt = tryAlign(edge);
     final result = attempt.result;
     if (result == null) return showNotice(attempt.problem);
-    _alignPreviewing = false;
     _preview = null;
     if (sameContent(result.document, _document)) return notifyListeners();
     commit('Align ${edge.label.toLowerCase()}', result.document);
+  }
+
+  /// Leaving an Operations button takes away its preview and notice, and
+  /// only those: a preview some other tool has put up since stays.
+  void _clearOperationPreview<T extends Preview>() {
+    if (_preview is! T) return;
+    _preview = null;
+    notifyListeners();
   }
 
   // -------------------------------------------------------- reference layer
@@ -1106,10 +1125,8 @@ class EditorController extends ChangeNotifier {
   void selectReference(String imageId) {
     if (_document.referenceById(imageId) == null) return;
     drafts.settleForLayerSwitch();
+    _clearOverlaySelection();
     _selectedImageId = imageId;
-    _selectedFeatureId = null;
-    _referenceLayerSelected = false;
-    _referenceOpacityDraft = null;
     _selection.clear();
     _openProperties();
     notifyListeners();
@@ -1119,34 +1136,32 @@ class EditorController extends ChangeNotifier {
   /// (where more images are added).
   void selectReferenceLayer() {
     drafts.settleForLayerSwitch();
-    _selectedImageId = null;
-    _selectedFeatureId = null;
+    _clearOverlaySelection();
     _referenceLayerSelected = true;
     _selection.clear();
     _openProperties();
     notifyListeners();
   }
 
-  /// Clears the reference image and feature selection; called whenever
-  /// land is selected instead.
-  void _clearReferenceSelection() {
-    _selectedImageId = null;
+  /// Features and reference images sit over and under the land rather
+  /// than on a layer; selecting land, or one of them, drops the other.
+  void _clearOverlaySelection() {
     _selectedFeatureId = null;
+    _clearImageSelection();
+  }
+
+  void _clearImageSelection() {
+    _selectedImageId = null;
     _referenceLayerSelected = false;
     _referenceOpacityDraft = null;
   }
 
-  /// The image a reference line is being drawn on, and its first end in
-  /// that image's pixels. Neither is in the drawing until the second click.
-  String? _referenceLineImageId;
-  Vec? _referenceLineStart;
-
-  String? get referenceLineImageId => _referenceLineImageId;
-  Vec? get referenceLineStart => _referenceLineStart;
+  String? get referenceLineImageId => _construction.referenceImageId;
+  Vec? get referenceLineStart => _construction.referenceStart;
 
   void setReferenceLineStart(String? imageId, Vec? pixel) {
-    _referenceLineImageId = pixel == null ? null : imageId;
-    _referenceLineStart = pixel;
+    _construction.referenceImageId = pixel == null ? null : imageId;
+    _construction.referenceStart = pixel;
     notifyListeners();
   }
 
@@ -1170,6 +1185,7 @@ class EditorController extends ChangeNotifier {
     required int pixelWidth,
     required int pixelHeight,
   }) {
+    if (_mode == EditMode.plant) return showNotice(plantModeNotice);
     final view = _viewport.isEmpty ? const Size(800, 600) : _viewport;
     final (base, id) = documentForEditing.nextImageId();
     final image = ReferenceImage.fitted(
@@ -1189,6 +1205,7 @@ class EditorController extends ChangeNotifier {
 
   /// Takes one image out of the Reference layer. Undo brings it back.
   void removeReference(String imageId) {
+    if (_mode == EditMode.plant) return showNotice(plantModeNotice);
     if (_document.referenceById(imageId) == null) return;
     commit('Remove reference image', _document.withoutReferenceImage(imageId));
   }
@@ -1196,6 +1213,7 @@ class EditorController extends ChangeNotifier {
   /// Takes every image out, so the Reference layer disappears. One Undo
   /// step.
   void removeReferenceLayer() {
+    if (_mode == EditMode.plant) return showNotice(plantModeNotice);
     if (_document.references.isEmpty) return;
     var next = _document;
     for (final image in _document.references) {
@@ -1207,6 +1225,7 @@ class EditorController extends ChangeNotifier {
   /// Locks or unlocks every image in the Reference layer, as one Undo
   /// step.
   void setAllReferencesLocked(bool locked) {
+    if (_mode == EditMode.plant) return showNotice(plantModeNotice);
     var next = _document;
     for (final image in _document.references) {
       next = next.withReferenceImage(image.withLocked(locked));
@@ -1217,6 +1236,7 @@ class EditorController extends ChangeNotifier {
 
   /// Moves an image up (over more of the others) or down in the layer.
   void moveReference(String imageId, {required bool up}) {
+    if (_mode == EditMode.plant) return showNotice(plantModeNotice);
     final next = _document.withReferenceMoved(imageId, up: up);
     if (identical(next, _document)) return;
     commit(up ? 'Move image up' : 'Move image down', next);
@@ -1225,6 +1245,7 @@ class EditorController extends ChangeNotifier {
   /// Commits a changed reference image (matched by ID) as one Undo step.
   /// Unchanged images add nothing to history.
   void updateReference(String label, ReferenceImage image) {
+    if (_mode == EditMode.plant) return showNotice(plantModeNotice);
     final current = _document.referenceById(image.id);
     if (current == null || image == current) return;
     commit(label, _document.withReferenceImage(image));
@@ -1233,6 +1254,7 @@ class EditorController extends ChangeNotifier {
   /// Sets the real length of image [imageId]'s reference line and scales
   /// that image, and only it, to match. Returns why not, or null.
   String? calibrateReference(String imageId, double metres) {
+    if (_mode == EditMode.plant) return plantModeNotice;
     final image = _document.referenceById(imageId);
     if (image == null) return 'Select a reference image first';
     if (!image.hasLine) {
@@ -1269,9 +1291,29 @@ class EditorController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Deletes the selected items and whatever depends on them. With the
-  /// reference image selected instead, removes the image.
+  /// Whether Delete has something to remove: selected items on the
+  /// layer, or else the selected feature or reference image.
+  bool get canDeleteSelection {
+    if (_selection.isNotEmpty) {
+      return _selectedLayerId != null &&
+          geometryLockNotice(_selectedLayerId!) == null;
+    }
+    return _mode == EditMode.build &&
+        (_selectedFeatureId != null || _selectedImageId != null);
+  }
+
+  /// Deletes the selected items and whatever depends on them. With a
+  /// feature or reference image selected instead, removes that.
   void deleteSelection() {
+    if (!canDeleteSelection) {
+      if (_selection.isNotEmpty && _selectedLayerId != null) {
+        showNotice(geometryLockNotice(_selectedLayerId!));
+      } else if (_mode == EditMode.plant &&
+          (_selectedFeatureId != null || _selectedImageId != null)) {
+        showNotice(plantModeNotice);
+      }
+      return;
+    }
     if (_selectedFeatureId != null && _selection.isEmpty) {
       return removeFeature(_selectedFeatureId!);
     }
@@ -1288,22 +1330,49 @@ class EditorController extends ChangeNotifier {
 
   // ---------------------------------------------------------------- history
 
-  bool get canUndo => _history.canUndo && !drafts.hasUnappliedChanges;
-  bool get canRedo => _history.canRedo && !drafts.hasUnappliedChanges;
+  bool get canUndo =>
+      _history.canUndo &&
+      !drafts.hasUnappliedChanges &&
+      _allowsLayoutOf(_history.undoEntry!.before);
+  bool get canRedo =>
+      _history.canRedo &&
+      !drafts.hasUnappliedChanges &&
+      _allowsLayoutOf(_history.redoEntry!.after);
   String? get undoLabel => _history.undoLabel;
   String? get redoLabel => _history.redoLabel;
 
-  /// Whether a multi-click tool is waiting for its next click. Undo and
-  /// Redo drop those clicks when there is no history step to take.
-  bool get _hasPendingClicks =>
-      _arcPoints.isNotEmpty ||
-      _circleStart != null ||
-      _polygonStart != null ||
-      _referenceLineStart != null;
+  /// Plant edits and history can change details, but not the saved layout.
+  bool _allowsLayoutOf(GardenDocument next) {
+    if (_mode == EditMode.build) return true;
+    if (!mapEquals(_document.geometries, next.geometries) ||
+        !listEquals(_document.references, next.references) ||
+        !listEquals(_document.features, next.features) ||
+        !listEquals(_document.propertyIds, next.propertyIds) ||
+        _document.layers.length != next.layers.length) {
+      return false;
+    }
+    for (final layer in _document.layers.values) {
+      final other = next.layers[layer.id];
+      if (other == null ||
+          layer.kind != other.kind ||
+          layer.parentId != other.parentId ||
+          layer.geometryId != other.geometryId ||
+          !listEquals(layer.children, other.children)) {
+        return false;
+      }
+      if (layer.properties case ZoneProperties properties) {
+        if (other.properties is! ZoneProperties ||
+            properties.ground != (other.properties as ZoneProperties).ground) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
 
   void undo() {
     if (!canUndo) {
-      if (_hasPendingClicks) cancelOperation();
+      if (_construction.hasPendingClicks) cancelOperation();
       return;
     }
     final entry = _history.takeUndo()!;
@@ -1313,7 +1382,7 @@ class EditorController extends ChangeNotifier {
 
   void redo() {
     if (!canRedo) {
-      if (_hasPendingClicks) cancelOperation();
+      if (_construction.hasPendingClicks) cancelOperation();
       return;
     }
     final entry = _history.takeRedo()!;
@@ -1323,21 +1392,13 @@ class EditorController extends ChangeNotifier {
 
   /// Resumes the dashed Line preview only within the same live drawing.
   void _restoreLineContext(LineContext? context, String? anchor) {
-    final live =
-        context != null &&
-        context.operation == _lineToken &&
-        _tool == Tool.line &&
-        (_function == ToolFunction.draw || _function == ToolFunction.curve);
-    _lineAnchor = live ? anchor : null;
-    // The pulled-out handle is not kept in history; the piece after an
-    // Undo starts straight from its point.
-    _curveHandle = Vec.zero;
-    if (!live) _lineToken = null;
-    _circleStart = null;
-    _polygonStart = null;
-    _referenceLineStart = null;
-    _referenceLineImageId = null;
-    _arcPoints.clear();
+    _construction.restoreLine(
+      context,
+      anchor,
+      drawingLine:
+          _tool == Tool.line &&
+          (_function == ToolFunction.draw || _function == ToolFunction.curve),
+    );
     _preview = null;
     _notice = null;
     onCancelOperation?.call();
@@ -1363,10 +1424,9 @@ class EditorController extends ChangeNotifier {
       _referenceOpacityDraft = null;
     }
     if (_document.references.isEmpty) _referenceLayerSelected = false;
-    if (_document.referenceById(_referenceLineImageId) == null) {
-      _referenceLineImageId = null;
-      _referenceLineStart = null;
-      _referenceLineImageId = null;
+    if (_document.referenceById(_construction.referenceImageId) == null) {
+      _construction.referenceImageId = null;
+      _construction.referenceStart = null;
     }
     if (!_document.layers.containsKey(_selectedLayerId)) {
       _selectedLayerId = null;
@@ -1377,118 +1437,13 @@ class EditorController extends ChangeNotifier {
         : _document.geometryOf(_selectedLayerId!);
     _selection.removeWhere((id) => geometry == null || !geometry.contains(id));
     final layerGeometry = geometry;
-    if (_lineAnchor != null && layerGeometry?.points[_lineAnchor] == null) {
-      _lineAnchor = null;
+    if (layerGeometry?.points[_construction.lineAnchor] == null) {
+      _construction.lineAnchor = null;
     }
   }
-}
-
-/// Whether two documents hold the same drawing, ignoring ID counters.
-bool sameContent(GardenDocument a, GardenDocument b) {
-  if (identical(a, b)) return true;
-  if (a.id != b.id || !listEquals(a.propertyIds, b.propertyIds)) {
-    return false;
-  }
-  if (!listEquals(a.references, b.references)) return false;
-  if (!listEquals(a.features, b.features)) return false;
-  if (a.layers.length != b.layers.length) return false;
-  for (final entry in a.layers.entries) {
-    if (!identical(entry.value, b.layers[entry.key])) return false;
-  }
-  if (a.geometries.length != b.geometries.length) return false;
-  for (final entry in a.geometries.entries) {
-    final other = b.geometries[entry.key];
-    if (other == null) return false;
-    final mine = entry.value;
-    if (identical(mine, other)) continue;
-    if (!_sameCircles(mine.circles, other.circles)) return false;
-    if (!identical(mine.points, other.points) ||
-        !identical(mine.lines, other.lines) ||
-        !identical(mine.shapes, other.shapes) ||
-        !listEquals(mine.stack, other.stack)) {
-      if (!mapEquals(mine.points, other.points) ||
-          !_sameLines(mine.lines, other.lines) ||
-          !listEquals(mine.stack, other.stack) ||
-          !_sameShapes(mine.shapes, other.shapes)) {
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
-bool _sameLines(Map<String, LineSegment> a, Map<String, LineSegment> b) {
-  if (a.length != b.length) return false;
-  for (final entry in a.entries) {
-    final other = b[entry.key];
-    if (other == null ||
-        other.start != entry.value.start ||
-        other.end != entry.value.end ||
-        other.bulge != entry.value.bulge ||
-        other.startHandle != entry.value.startHandle ||
-        other.endHandle != entry.value.endHandle) {
-      return false;
-    }
-  }
-  return true;
-}
-
-bool _sameCircles(Map<String, Circle> a, Map<String, Circle> b) {
-  if (identical(a, b)) return true;
-  if (a.length != b.length) return false;
-  for (final entry in a.entries) {
-    final other = b[entry.key];
-    if (other == null ||
-        other.center != entry.value.center ||
-        other.radius != entry.value.radius ||
-        other.label != entry.value.label) {
-      return false;
-    }
-  }
-  return true;
-}
-
-bool _sameShapes(Map<String, ClosedShape> a, Map<String, ClosedShape> b) {
-  if (a.length != b.length) return false;
-  for (final entry in a.entries) {
-    final other = b[entry.key];
-    final mine = entry.value;
-    if (other == null ||
-        other.label != mine.label ||
-        other.rings.length != mine.rings.length) {
-      return false;
-    }
-    for (var ring = 0; ring < mine.rings.length; ring++) {
-      final a = mine.rings[ring], b = other.rings[ring];
-      if (a.length != b.length) return false;
-      for (var i = 0; i < a.length; i++) {
-        if (a[i].segmentId != b[i].segmentId ||
-            a[i].reversed != b[i].reversed) {
-          return false;
-        }
-      }
-    }
-  }
-  return true;
 }
 
 /// A bare change signal; see [EditorController.viewChanges].
 class _Signal extends ChangeNotifier {
   void fire() => notifyListeners();
-}
-
-/// A temporary Arc click and the open endpoint it may reuse on completion.
-class ArcPoint {
-  const ArcPoint(this.position, {this.pointId});
-
-  final Vec position;
-  final String? pointId;
-}
-
-/// The first circle click; only a centre circle reuses [pointId].
-class CircleStart {
-  const CircleStart(this.position, {this.pointId});
-
-  final Vec position;
-  final String? pointId;
 }

@@ -3,12 +3,13 @@ import 'package:flutter/material.dart';
 import '../../application/editor_controller.dart';
 import '../../application/workspace_settings.dart';
 import '../theme.dart';
-import 'panel.dart';
+import 'icon_controls.dart';
 
 /// The icon that stands for a panel on a dock's rail.
 extension PanelIcon on PanelId {
   IconData get icon => switch (this) {
     PanelId.tools => Icons.draw_outlined,
+    PanelId.seeds => Icons.spa_outlined,
     PanelId.operations => Icons.join_full_outlined,
     PanelId.settings => Icons.tune,
     PanelId.properties => Icons.info_outline,
@@ -53,7 +54,8 @@ class Dock extends StatelessWidget {
     final open = settings.docks.isOpen(side);
     final visible = [
       for (final id in settings.docks.orderOf(side))
-        if (!settings.hiddenPanels.contains(id)) id,
+        if (id.availableIn(editor.mode) && !settings.hiddenPanels.contains(id))
+          id,
     ];
     final edge = BorderSide(color: Palette.panelBorder);
 

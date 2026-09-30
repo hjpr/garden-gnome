@@ -1,12 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:garden_gnome/application/canvas_input.dart';
 import 'package:garden_gnome/application/curve_handles.dart';
+import 'package:garden_gnome/application/document_content.dart';
 import 'package:garden_gnome/application/editor_controller.dart';
 import 'package:garden_gnome/application/hit_testing.dart';
 import 'package:garden_gnome/application/previews.dart';
 import 'package:garden_gnome/application/tools.dart';
 import 'package:garden_gnome/domain/bezier.dart';
 import 'package:garden_gnome/domain/geometry.dart';
+import 'package:garden_gnome/domain/geometry_editor.dart';
 import 'package:garden_gnome/domain/land_rules.dart';
 import 'package:garden_gnome/domain/layer.dart';
 import 'package:garden_gnome/domain/vec.dart';

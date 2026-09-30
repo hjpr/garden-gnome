@@ -32,7 +32,7 @@ and it becomes Active again.
 
 1. In Layers (right side), press + Property. A new property appears in
    the list.
-2. In Drawing tools (left side), choose Line, then Draw.
+2. In Drawing tools (left side), choose Line, then Straight.
 3. Click on the grid to place the first corner, then click again for each
    next corner.
 4. Click the first corner again to close the shape. It turns Active.
@@ -210,11 +210,11 @@ Operations > Align (under Boolean)
 Ground (zones only)
 - Flat or Row, then click inside the selected zone. The whole zone gets
   that ground; the tool stays chosen. Properties > GROUND has the same
-  choice, plus Dirt to clear it. Each change is one Undo step.
+  choice, plus Zone to clear it. Each change is one Undo step.
 - Row ground uses Row width, Spacing (the path between rows) and
   Direction (degrees clockwise from up the screen: 0 runs rows up and
-  down, 90 left to right). The boxes are greyed out unless the ground is
-  Row, and keep their values when you switch away.
+  down, 90 left to right). These controls appear only for Row ground,
+  and keep their values when you switch away.
 - Rows are laid edge to edge from one side of each of the zone's shapes.
   Properties shows how many rows fit and their total length.
 
@@ -303,15 +303,16 @@ your chosen units. The grid always uses round sizes: 0.5, 1, 5, 10 or
 ## Layers and Properties
 
 - Click a layer in Layers to work on it. Its details show in Properties.
-- In Properties you can rename the layer (pencil button) and set its
-  options, such as colour or soil drainage. A zone can note its ground
-  (such as raised beds) and crop. Properties also record a soil
-  sample (pH, phosphorus, potassium, calcium, magnesium, CEC,
-  conductivity, organic matter): type a number, or leave it blank. Values
-  are kept exactly as typed; units and lab method are not recorded, so
-  the app does not convert or judge them. Net area excludes holes and
-  includes curved edges; it is displayed in m² or ft² with your chosen
-  units. Where a zone's shapes overlap, the shared ground counts once.
+- In Properties you can rename the layer (pencil button). Properties have
+  a colour option; soil drainage and soil sample controls are hidden for
+  now, without removing previously saved values.
+- A zone's bar above its name shows its ground type: grey for Zone, burnt
+  orange for Flat, mint green for Row, and emerald green for Grow. Zone
+  and Flat show colour and ground options; Row adds row controls. Grow
+  shows only planting options. The free-text Crop field is hidden.
+- Net area excludes holes and includes curved edges; it is displayed in
+  m² or ft² with your chosen units. Where a zone's shapes overlap, the
+  shared ground counts once.
 - The bin icon (shown when you point at a layer) deletes it. Deleting a
   property deletes its zones too. You are asked first.
 - The padlock next to the bin locks a layer once it is finished. A

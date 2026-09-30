@@ -4,9 +4,7 @@ import 'dart:ui';
 import '../domain/geometry.dart';
 import '../domain/vec.dart';
 import 'camera.dart';
-import 'editor_controller.dart';
-import 'previews.dart';
-import 'tools.dart';
+import 'item_bounds.dart';
 
 /// Screen distances, in logical pixels, for the selection box.
 abstract final class BoxReach {
@@ -82,27 +80,19 @@ class TransformBox {
   /// The box around the selected [itemIds], or null when the selection
   /// holds no whole shape or circle (a lone point or line gets no box).
   static TransformBox? around(Geometry geometry, Iterable<String> itemIds) {
-    var low = const Vec(double.infinity, double.infinity);
-    var high = const Vec(double.negativeInfinity, double.negativeInfinity);
+    final boxes = <(Vec, Vec)>[];
     var hasShape = false;
-    void include((Vec, Vec) bounds) {
-      low = Vec(math.min(low.x, bounds.$1.x), math.min(low.y, bounds.$1.y));
-      high = Vec(math.max(high.x, bounds.$2.x), math.max(high.y, bounds.$2.y));
-    }
-
     for (final id in itemIds) {
-      if (geometry.shapes.containsKey(id) || geometry.circles.containsKey(id)) {
-        final region = geometry.regionOf(id);
-        if (region == null) continue;
-        hasShape = true;
-        include(region.bounds);
-      } else if (geometry.lines[id] case final line?) {
-        include(line.bounds(geometry.points));
-      } else if (geometry.points[id] case final point?) {
-        include((point, point));
-      }
+      final bounds = boundsOfItem(geometry, id, includeOpenShapes: false);
+      if (bounds == null) continue;
+      boxes.add(bounds);
+      hasShape |=
+          geometry.shapes.containsKey(id) || geometry.circles.containsKey(id);
     }
-    if (!hasShape || !low.isFinite || !high.isFinite) return null;
+    final bounds = unionBounds(boxes);
+    if (!hasShape || bounds == null) return null;
+    final (low, high) = bounds;
+    if (!low.isFinite || !high.isFinite) return null;
     return TransformBox((low + high) / 2, high.x - low.x, high.y - low.y);
   }
 
@@ -188,30 +178,4 @@ class TransformBox {
     final cos = math.cos(angle), sin = math.sin(angle);
     return Vec(v.x * cos - v.y * sin, v.x * sin + v.y * cos);
   }
-}
-
-/// The selection box to show, or null. Select shows it around a selected
-/// shape on an unlocked layer; while a drag is in progress it follows the
-/// drawing as it would be if released now.
-TransformBox? selectionBoxOf(EditorController editor) {
-  final layerId = editor.selectedLayerId;
-  if (editor.tool != Tool.select ||
-      layerId == null ||
-      editor.selection.isEmpty ||
-      editor.document.isLocked(layerId)) {
-    return null;
-  }
-  final preview = editor.preview;
-  if (preview is MovePreview) {
-    if (preview.box != null) return preview.box;
-    if (!preview.document.layers.containsKey(layerId)) return null;
-    return TransformBox.around(
-      preview.document.geometryOf(layerId),
-      editor.selection,
-    );
-  }
-  return TransformBox.around(
-    editor.document.geometryOf(layerId),
-    editor.selection,
-  );
 }

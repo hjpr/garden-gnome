@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'curve_contour.dart';
 import 'curve_edge.dart';
 import 'curve_numeric.dart';
 import 'planar.dart';
@@ -21,8 +22,9 @@ sealed class Region {
   List<List<CurveEdge>> get contours;
 
   /// Net filled area in square metres, integrating circular arcs analytically.
-  double get area =>
-      contours.fold(0.0, (sum, contour) => sum + _signedArea(contour)).abs();
+  double get area => contours
+      .fold(0.0, (sum, contour) => sum + signedContourArea(contour))
+      .abs();
 
   /// Total boundary length in metres, including the rims of holes.
   double get perimeter =>
@@ -65,7 +67,7 @@ sealed class Region {
 }
 
 class PolygonRegion extends Region {
-  const PolygonRegion(this.corners);
+  PolygonRegion(List<Vec> corners) : corners = List.unmodifiable(corners);
 
   final List<Vec> corners;
 
@@ -78,7 +80,7 @@ class PolygonRegion extends Region {
           CurveEdge(corners[i], corners[(i + 1) % corners.length]),
     ];
     if (edges.isEmpty) return const [];
-    return [_signedArea(edges) < 0 ? _reverse(edges) : edges];
+    return [signedContourArea(edges) < 0 ? _reverse(edges) : edges];
   }
 
   double distanceToEdge(Vec p) => contours
@@ -140,7 +142,7 @@ class CurveRegion extends Region {
   @override
   final List<List<CurveEdge>> contours;
 
-  int get outerCount => contours.where((c) => _signedArea(c) > 0).length;
+  int get outerCount => contours.where((c) => signedContourArea(c) > 0).length;
 }
 
 /// Whether segment AB crosses or touches the outline of the circle.

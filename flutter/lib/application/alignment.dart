@@ -1,9 +1,8 @@
-import 'dart:math' as math;
-
 import '../domain/document.dart';
-import '../domain/geometry.dart';
+import '../domain/geometry_editor.dart';
 import '../domain/vec.dart';
 import 'carried_land.dart';
+import 'item_bounds.dart';
 
 /// Which side of the anchor the moved item lines up with.
 enum AlignEdge {
@@ -101,34 +100,4 @@ Vec _offsetFor(
     AlignEdge.bottom => Vec(0, aHigh.y - mHigh.y),
     AlignEdge.center => (aLow + aHigh) / 2 - (mLow + mHigh) / 2,
   };
-}
-
-/// The bounding box (low, high corners) of one shape, circle, line or
-/// point, or null when [itemId] is not in [geometry].
-(Vec, Vec)? boundsOfItem(Geometry geometry, String itemId) {
-  if (geometry.shapes.containsKey(itemId) ||
-      geometry.circles.containsKey(itemId)) {
-    final region = geometry.regionOf(itemId);
-    if (region != null) return region.bounds;
-    // An open shape: fall back to the lines that make it.
-    return _union([
-      for (final p in geometry.definingPoints([itemId]))
-        (geometry.points[p]!, geometry.points[p]!),
-    ]);
-  }
-  if (geometry.lines[itemId] case final line?) {
-    return line.bounds(geometry.points);
-  }
-  if (geometry.points[itemId] case final point?) return (point, point);
-  return null;
-}
-
-(Vec, Vec)? _union(List<(Vec, Vec)> boxes) {
-  if (boxes.isEmpty) return null;
-  var low = boxes.first.$1, high = boxes.first.$2;
-  for (final (l, h) in boxes.skip(1)) {
-    low = Vec(math.min(low.x, l.x), math.min(low.y, l.y));
-    high = Vec(math.max(high.x, h.x), math.max(high.y, h.y));
-  }
-  return (low, high);
 }

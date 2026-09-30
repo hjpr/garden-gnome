@@ -16,6 +16,8 @@ sealed class Preview {
 
   /// The dashed guides a snap lined the pointer up with, if any.
   final SnapGuides guides;
+
+  String? get problem => null;
 }
 
 /// Where a new point would go. [lineId] is set when it would split a line.
@@ -73,6 +75,21 @@ class MovePreview extends Preview {
   final bool valid;
 }
 
+/// An Align button's preview: the drawing with the second selected item
+/// moved into line, drawn like a drag in progress. Its own kind, so
+/// leaving the button clears only an Align preview.
+class AlignPreview extends MovePreview {
+  const AlignPreview({
+    required super.document,
+    required super.moved,
+    required super.valid,
+    this.problem,
+  });
+
+  @override
+  final String? problem;
+}
+
 /// A circle being drawn, from its first click to the pointer.
 ///
 /// A thin line joins the first click ([start]) to the pointer ([edge]):
@@ -123,6 +140,21 @@ class HoverPreview extends Preview {
 
   @override
   int get hashCode => Object.hash(itemId, layerId, destructive, joinable);
+}
+
+/// A seed being dragged over the canvas: [layerId] is the grow zone it
+/// would be planted in, or null when letting go would plant nothing.
+class SeedDropPreview extends Preview {
+  const SeedDropPreview(this.layerId);
+
+  final String? layerId;
+
+  @override
+  bool operator ==(Object other) =>
+      other is SeedDropPreview && other.layerId == layerId;
+
+  @override
+  int get hashCode => layerId.hashCode;
 }
 
 /// A marquee or lasso being drawn with Select, in world metres, and what

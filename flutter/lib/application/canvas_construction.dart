@@ -239,14 +239,4 @@ extension _ConstructionInput on CanvasInput {
     editor.showNotice(null);
     editor.setGround(layerId, editor.function.groundType);
   }
-
-  /// Feature: a click places one at its usual size, centred on the
-  /// pointer (snapped like a point). Features sit on top of the land, so
-  /// no layer is needed.
-  void _featureClick(Offset screen) {
-    final kind = editor.function.featureKind;
-    if (kind == null) return;
-    editor.showNotice(null);
-    editor.addFeature(kind, _snapped(screen).position);
-  }
 }

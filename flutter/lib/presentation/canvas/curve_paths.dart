@@ -103,11 +103,44 @@ Path curvePath(CurveEdge edge, Camera camera) {
   );
 }
 
+void paintDashedCircle(
+  Canvas canvas,
+  Offset centre,
+  double radius,
+  Color colour, {
+  required double width,
+  double dash = 8,
+  double gap = 4,
+}) {
+  if (radius <= 0) return;
+  final rect = Rect.fromCircle(center: centre, radius: radius);
+  final circumference = 2 * math.pi * radius;
+  final steps = math.max(1, (circumference / (dash + gap)).floor());
+  final sweep = 2 * math.pi / steps;
+  final dashSweep = sweep * dash / (dash + gap);
+  // Dashes wholly off screen are skipped; the rest go in one path. No
+  // part of a dash is farther from its start than its arc length.
+  final reach = canvas.getLocalClipBounds().inflate(dashSweep * radius + width);
+  if (!reach.overlaps(rect)) return;
+  final dashes = Path();
+  for (var i = 0; i < steps; i++) {
+    final angle = i * sweep;
+    final start = centre + Offset(math.cos(angle), math.sin(angle)) * radius;
+    if (!reach.contains(start)) continue;
+    dashes.addArc(rect, angle, dashSweep);
+  }
+  canvas.drawPath(
+    dashes,
+    Paint()
+      ..color = colour
+      ..strokeWidth = width
+      ..style = PaintingStyle.stroke,
+  );
+}
+
 /// Screen-space dashes follow a path's real curves, never their chords.
-///
-/// Dashes wholly off screen are skipped and the rest are drawn in one
-/// call, so a long dashed outline seen close up costs no more than the
-/// part in view.
+/// Off-screen dashes are skipped when drawing; traversal still follows the
+/// whole path.
 void dashedPath(
   Canvas canvas,
   Path path,

@@ -1,3 +1,10 @@
 node_modules/
 playwright-report/
 test-results/
+__pycache__/
+*.pyc
+
+# render-art generation rounds and processing outputs, not runtime assets
+/tools/render-art/r[0-9]*/
+/tools/render-art/work/
+/tools/render-art/out/

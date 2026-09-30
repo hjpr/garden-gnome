@@ -15,106 +15,24 @@ import '../../domain/bezier.dart';
 import '../../domain/document.dart';
 import '../../domain/feature.dart';
 import '../../domain/geometry.dart';
-import '../../domain/land_rules.dart';
 import '../../domain/layer.dart';
+import '../../domain/plant_layout.dart';
 import '../../domain/reference_image.dart';
 import '../../domain/row_layout.dart';
-import '../../domain/units.dart';
 import '../../domain/vec.dart';
-import '../../domain/zone_ground.dart';
 import '../theme.dart';
 import 'curve_paths.dart';
+import 'land_painter.dart';
+import 'measurement_label.dart';
 import 'pattern_painter.dart';
 import 'render_assets.dart';
+import 'scene_state.dart';
 
 part 'construction_painter.dart';
 part 'feature_painter.dart';
+part 'plant_painter.dart';
 part 'reference_painter.dart';
 part 'render_painter.dart';
-
-/// Everything the painter needs, gathered so painting never reads the
-/// controller or changes state.
-class SceneState {
-  const SceneState({
-    required this.document,
-    required this.camera,
-    required this.appearance,
-    required this.selectedLayerId,
-    required this.selection,
-    required this.preview,
-    required this.lineAnchor,
-    this.units = Units.feet,
-    this.referencePictures = const {},
-    this.referenceOpacity,
-    this.selectedImageId,
-    this.referenceLineImageId,
-    this.referenceLineStart,
-    this.devicePixelRatio = 1,
-    this.selectionBox,
-    this.guideMarkers = const [],
-    this.showCurveHandles = false,
-    this.viewMode = ViewMode.wireframe,
-    this.renderAssets,
-    this.selectedFeatureId,
-    this.viewMoving = false,
-  });
-
-  final GardenDocument document;
-  final Camera camera;
-  final Appearance appearance;
-  final String? selectedLayerId;
-  final Set<String> selection;
-  final Preview? preview;
-  final String? lineAnchor;
-
-  /// How lengths such as a circle's diameter are labelled.
-  final Units units;
-
-  /// Decoded reference pictures by their bytes; null while loading.
-  final Map<Uint8List, ui.Image?> referencePictures;
-
-  /// Opacity to draw each reference image with (live while its slider
-  /// moves), or null to use the saved values.
-  final double Function(ReferenceImage image)? referenceOpacity;
-
-  /// The reference image showing corner handles, if any.
-  final String? selectedImageId;
-
-  /// The image a reference line is being drawn on, and its first end in
-  /// that image's pixels.
-  final String? referenceLineImageId;
-  final Vec? referenceLineStart;
-
-  /// Physical pixels per logical pixel, so hatch tiles are drawn at the
-  /// screen's own sharpness.
-  final double devicePixelRatio;
-
-  /// The dashed box with scale handles around the selected shapes, or
-  /// null when there is none.
-  final TransformBox? selectionBox;
-
-  /// Where guides come from right now (the geometry last hovered), marked
-  /// so the user can see what a move or new point will line up with.
-  final List<Vec> guideMarkers;
-
-  /// Whether the selected curves show their Bézier handles (Select, on an
-  /// unlocked layer).
-  final bool showCurveHandles;
-
-  /// Wireframe for drawing, or the Render view of the farm.
-  final ViewMode viewMode;
-
-  /// Textures and feature pictures; null in tests that do not need them,
-  /// which then see plain colours.
-  final RenderAssets? renderAssets;
-
-  /// The feature showing its selection ring, if any.
-  final String? selectedFeatureId;
-
-  /// Whether the view is panning or zooming right now. Render then skips
-  /// the costly blended ground edges and draws them once it settles.
-  final bool viewMoving;
-}
 
 /// Draws the grid, every layer, and the current tool feedback.
 class ScenePainter extends CustomPainter {
@@ -136,6 +54,7 @@ class ScenePainter extends CustomPainter {
         : null;
     final document = boolean?.document ?? move?.document ?? scene.document;
     final render = scene.viewMode == ViewMode.render;
+    final land = LandPainter(scene);
 
     if (render) {
       // The farm from above. Reference pictures are for tracing, so they
@@ -146,25 +65,28 @@ class ScenePainter extends CustomPainter {
       _paintGrid(canvas, size);
       _paintReference(canvas);
       for (final layerId in document.drawingOrder) {
-        _paintLayer(canvas, document, layerId);
+        land.paintLayer(canvas, document, layerId);
       }
     }
+    // Plants sit on the ground, under raised beds and tunnels.
+    _paintPlants(canvas, size, document);
+    _paintGrowOutlines(canvas, document);
     _paintFeatures(canvas);
     if (render) {
       final selected = scene.selectedLayerId;
       if (selected != null && document.layers.containsKey(selected)) {
-        _paintLayer(canvas, document, selected, outlineOnly: true);
+        land.paintLayer(canvas, document, selected, outlineOnly: true);
       }
     }
 
     final selectedId = scene.selectedLayerId;
     if (selectedId != null && document.layers.containsKey(selectedId)) {
-      _paintSelectedLayerDetail(canvas, document.geometryOf(selectedId), move);
+      land.paintSelectedLayerDetail(canvas, document.geometryOf(selectedId));
       if (scene.showCurveHandles) {
         _paintCurveHandles(canvas, document.geometryOf(selectedId));
       }
     }
-    if (move != null) _paintMovedLines(canvas, document, move);
+    if (move != null) land.paintMovedLines(canvas, document, move);
     if (scene.selectionBox case final box?) _paintSelectionBox(canvas, box);
     _paintPreview(canvas, size);
     _paintGuideAnchors(canvas);
@@ -224,192 +146,6 @@ class ScenePainter extends CustomPainter {
       lines.add(Offset(0, sy), Offset(size.width, sy));
     }
     lines.draw(canvas, paint);
-  }
-
-  // ------------------------------------------------------------------ layers
-
-  /// Active land gets a light fill. Closed land that is not active is
-  /// hatched. Invalid land is drawn in red with dashed lines, so it stands
-  /// out without being removed.
-  ///
-  /// [outlineOnly] draws just the outline, as the Render view does for the
-  /// selected layer over its textures.
-  void _paintLayer(
-    Canvas canvas,
-    GardenDocument document,
-    String layerId, {
-    bool outlineOnly = false,
-  }) {
-    final layer = document.layers[layerId]!;
-    final geometry = document.geometryOf(layerId);
-    // Red marks broken rules. Unfinished drawing also makes the layer
-    // invalid (see Layers and Properties) but keeps its colour here, so
-    // what is being drawn is not shown as a mistake.
-    final invalid = document.ruleProblemOf(layerId) != null;
-    final color = invalid ? Palette.invalid : layerColor(layer);
-    final isSelected = layerId == scene.selectedLayerId;
-
-    if (geometry.isClosed && !outlineOnly) {
-      final path = _regionPath(geometry);
-      if (invalid) {
-        canvas.drawPath(
-          path,
-          Paint()..color = Palette.invalid.withValues(alpha: 0.08),
-        );
-      } else if (document.isActive(layerId)) {
-        canvas.drawPath(path, Paint()..color = color.withValues(alpha: 0.07));
-        _paintWireRows(canvas, document, layerId);
-      } else {
-        _paintHatch(canvas, path);
-      }
-    }
-
-    final width = scene.appearance.lineWidth + (isSelected ? 0.5 : 0);
-    final stroke = Paint()
-      ..color = color.withValues(alpha: isSelected ? 1 : 0.85)
-      ..strokeWidth = width
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke;
-    for (final line in geometry.lines.values) {
-      final path = linePath(line, geometry.points, _camera);
-      if (invalid) {
-        dashedPath(canvas, path, color, dash: 8, gap: 4, width: width);
-      } else {
-        canvas.drawPath(path, stroke);
-      }
-    }
-    for (final circle in geometry.circles.values) {
-      final centre = _camera.toScreen(geometry.points[circle.center]!);
-      final radius = circle.radius * _camera.pixelsPerMetreNow;
-      if (invalid) {
-        _dashedCircle(canvas, centre, radius, color, width: width);
-      } else {
-        canvas.drawCircle(centre, radius, stroke);
-      }
-    }
-    // Shapes carry no name on the canvas: Properties and the status bar
-    // say what is selected, and colour tells layers apart.
-  }
-
-  /// Light grey diagonal lines marking a closed layer that is not active.
-  void _paintHatch(Canvas canvas, Path region) {
-    canvas.drawPath(
-      region,
-      Paint()..color = Palette.hatch.withValues(alpha: 0.12),
-    );
-    // The lines are tied to the shape's corner, so they move with it.
-    paintHatch(
-      canvas,
-      region,
-      Palette.hatch,
-      8,
-      region.getBounds().topLeft,
-      devicePixelRatio: scene.devicePixelRatio,
-    );
-  }
-
-  // -------------------------------------------------------- selected layer
-
-  /// Point markers and selection highlights for the layer being edited.
-  void _paintSelectedLayerDetail(
-    Canvas canvas,
-    Geometry geometry,
-    MovePreview? move,
-  ) {
-    final highlight = Paint()
-      ..color = Palette.accent.withValues(alpha: 0.35)
-      ..strokeWidth = scene.appearance.lineWidth + 6
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke;
-
-    for (final id in scene.selection) {
-      if ((geometry.shapes.containsKey(id) ||
-              geometry.circles.containsKey(id)) &&
-          geometry.regionOf(id) != null) {
-        final region = _regionPath(geometry, id: id);
-        canvas.drawPath(
-          region,
-          Paint()..color = Palette.accent.withValues(alpha: 0.12),
-        );
-        canvas.drawPath(region, highlight);
-      }
-      final line = geometry.lines[id];
-      if (line != null) {
-        canvas.drawPath(linePath(line, geometry.points, _camera), highlight);
-      }
-    }
-
-    const radius = PointerReach.pointDiameter / 2;
-    for (final entry in geometry.points.entries) {
-      final centre = _camera.toScreen(entry.value);
-      final selected = scene.selection.contains(entry.key);
-      if (selected) {
-        canvas.drawCircle(
-          centre,
-          radius + 4,
-          Paint()..color = Palette.accent.withValues(alpha: 0.3),
-        );
-      }
-      canvas.drawCircle(centre, radius, Paint()..color = Palette.paper);
-      canvas.drawCircle(
-        centre,
-        radius,
-        Paint()
-          ..color = selected ? Palette.accent : Palette.ink
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.5,
-      );
-    }
-
-    for (final id in [scene.lineAnchor]) {
-      final point = geometry.points[id];
-      if (point != null) {
-        canvas.drawCircle(
-          _camera.toScreen(point),
-          radius,
-          Paint()..color = Palette.accent,
-        );
-      }
-    }
-  }
-
-  /// Dots the lines being dragged: green if releasing here keeps every
-  /// layer valid, red if it would leave something invalid.
-  void _paintMovedLines(
-    Canvas canvas,
-    GardenDocument document,
-    MovePreview move,
-  ) {
-    final colour = move.valid ? Palette.valid : Palette.invalid;
-    move.moved.forEach((layerId, points) {
-      if (!document.layers.containsKey(layerId)) return;
-      final geometry = document.geometryOf(layerId);
-      for (final circle in geometry.circles.values) {
-        if (points.contains(circle.center)) {
-          _dashedCircle(
-            canvas,
-            _camera.toScreen(geometry.points[circle.center]!),
-            circle.radius * _camera.pixelsPerMetreNow,
-            colour,
-            width: scene.appearance.lineWidth + 1,
-            dash: 3,
-            gap: 3,
-          );
-        }
-      }
-      for (final line in geometry.lines.values) {
-        if (points.contains(line.start) || points.contains(line.end)) {
-          dashedPath(
-            canvas,
-            linePath(line, geometry.points, _camera),
-            colour,
-            dash: 3,
-            gap: 3,
-            width: scene.appearance.lineWidth + 1,
-          );
-        }
-      }
-    });
   }
 
   // ---------------------------------------------------------------- previews
@@ -479,7 +215,7 @@ class ScenePainter extends CustomPainter {
       ):
         final colour = valid ? Palette.accent : Palette.invalid;
         final c = _camera.toScreen(centre);
-        _dashedCircle(
+        paintDashedCircle(
           canvas,
           c,
           radius * _camera.pixelsPerMetreNow,
@@ -501,7 +237,12 @@ class ScenePainter extends CustomPainter {
         for (final marker in [from, c]) {
           canvas.drawCircle(marker, 3, Paint()..color = colour);
         }
-        _paintCircleSize(canvas, c, radius, colour);
+        paintMeasurementLabel(
+          canvas,
+          text: '⌀ ${scene.units.format(radius * 2)}',
+          anchor: c,
+          color: colour,
+        );
       case ArcPreview():
         _paintArcFeedback(canvas, preview);
       case PolygonPreview():
@@ -518,7 +259,26 @@ class ScenePainter extends CustomPainter {
           valid ? const Color(0xFF376B95) : Palette.invalid,
           dashed: true,
         );
-      case MovePreview() ||
+      case SeedDropPreview(:final layerId?):
+        // The grow zone a dropped seed would be planted in.
+        final region = scene.document.layers.containsKey(layerId)
+            ? scene.document.geometryOf(layerId).region
+            : null;
+        if (region == null) return;
+        final path = regionPath(region, _camera);
+        canvas.drawPath(
+          path,
+          Paint()..color = Palette.accent.withValues(alpha: 0.18),
+        );
+        canvas.drawPath(
+          path,
+          Paint()
+            ..color = Palette.accent
+            ..strokeWidth = scene.appearance.lineWidth + 2
+            ..style = PaintingStyle.stroke,
+        );
+      case SeedDropPreview() ||
+          MovePreview() ||
           ReferencePreview() ||
           FeatureHoverPreview() ||
           FeatureMovePreview():
@@ -656,7 +416,7 @@ class ScenePainter extends CustomPainter {
         case GuideLine():
           _paintGuideLine(canvas, size, guide);
         case GuideCircle(:final centre, :final radius):
-          _dashedCircle(
+          paintDashedCircle(
             canvas,
             _camera.toScreen(centre),
             radius * _camera.pixelsPerMetreNow,
@@ -708,73 +468,6 @@ class ScenePainter extends CustomPainter {
     return region == null ? Path() : regionPath(region, _camera);
   }
 
-  /// The diameter of a circle being drawn, in the user's units, next to
-  /// its centre.
-  void _paintCircleSize(
-    Canvas canvas,
-    Offset centre,
-    double radius,
-    Color colour,
-  ) {
-    final painter = TextPainter(
-      text: TextSpan(
-        text: '⌀ ${scene.units.format(radius * 2)}',
-        style: TextStyle(
-          fontSize: 12,
-          color: colour,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    final at = centre + const Offset(8, 6);
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        (at - const Offset(4, 2)) & Size(painter.width + 8, painter.height + 4),
-        const Radius.circular(4),
-      ),
-      Paint()..color = Palette.paper.withValues(alpha: 0.9),
-    );
-    painter.paint(canvas, at);
-  }
-
-  void _dashedCircle(
-    Canvas canvas,
-    Offset centre,
-    double radius,
-    Color colour, {
-    required double width,
-    double dash = 8,
-    double gap = 4,
-  }) {
-    if (radius <= 0) return;
-    final rect = Rect.fromCircle(center: centre, radius: radius);
-    final circumference = 2 * math.pi * radius;
-    final steps = math.max(1, (circumference / (dash + gap)).floor());
-    final sweep = 2 * math.pi / steps;
-    final dashSweep = sweep * dash / (dash + gap);
-    // Dashes wholly off screen are skipped; the rest go in one path. No
-    // part of a dash is farther from its start than its arc length.
-    final reach = canvas.getLocalClipBounds().inflate(
-      dashSweep * radius + width,
-    );
-    if (!reach.overlaps(rect)) return;
-    final dashes = Path();
-    for (var i = 0; i < steps; i++) {
-      final angle = i * sweep;
-      final start = centre + Offset(math.cos(angle), math.sin(angle)) * radius;
-      if (!reach.contains(start)) continue;
-      dashes.addArc(rect, angle, dashSweep);
-    }
-    canvas.drawPath(
-      dashes,
-      Paint()
-        ..color = colour
-        ..strokeWidth = width
-        ..style = PaintingStyle.stroke,
-    );
-  }
-
   void _dashedLine(
     Canvas canvas,
     Offset from,
@@ -803,9 +496,3 @@ class ScenePainter extends CustomPainter {
   @override
   bool shouldRepaint(ScenePainter oldDelegate) => true;
 }
-
-/// The outline colour used for a layer on the canvas and in Layers.
-Color layerColor(Layer layer) => switch (layer.properties) {
-  PropertyProperties p => Color(p.color.argb),
-  ZoneProperties p => Color(p.color.argb),
-};

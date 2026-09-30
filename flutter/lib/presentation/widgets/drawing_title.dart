@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../theme.dart';
-import 'panel.dart';
+import 'icon_controls.dart';
 
 /// The drawing's name in the middle of the header, with a pencil to
 /// rename it in place. Enter or clicking away keeps the new name; Esc

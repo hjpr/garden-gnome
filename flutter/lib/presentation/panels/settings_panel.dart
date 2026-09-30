@@ -4,7 +4,8 @@ import '../../application/editor_controller.dart';
 import '../../application/workspace_settings.dart';
 import '../../domain/units.dart';
 import '../theme.dart';
-import '../widgets/panel.dart';
+import '../widgets/icon_controls.dart';
+import '../widgets/property_controls.dart';
 
 /// The Controls panel: view, units, snapping and guides. Changes apply at
 /// once and are not part of the drawing's Undo history.
@@ -181,12 +182,18 @@ class _ViewModeButton extends StatelessWidget {
                 children: [
                   AppIcon(mode.icon, size: 15, color: colour),
                   const SizedBox(width: 5),
-                  Text(
-                    mode.label,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-                      color: colour,
+                  Flexible(
+                    child: Text(
+                      mode.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: selected
+                            ? FontWeight.w600
+                            : FontWeight.w400,
+                        color: colour,
+                      ),
                     ),
                   ),
                 ],

@@ -87,5 +87,6 @@ class BooleanPreview extends Preview {
 
   /// The shapes the operation would leave, bottom first.
   final List<String> resultIds;
+  @override
   final String? problem;
 }

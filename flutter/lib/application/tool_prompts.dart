@@ -13,6 +13,11 @@ String toolPrompt(EditorController editor) {
     return 'Click to place a ${editor.function.label.toLowerCase()}. '
         'Size it in Properties';
   }
+  if (editor.mode == EditMode.plant &&
+      (editor.selectedLayerId == null ||
+          !editor.isGrowZone(editor.selectedLayerId!))) {
+    return 'Select a grow zone to draw on, or add one in Layers';
+  }
   if (editor.selectedLayer == null) {
     return editor.document.propertyIds.isEmpty
         ? 'Add a property in Layers to start drawing'
@@ -68,6 +73,10 @@ String toolPrompt(EditorController editor) {
         when editor.document.geometryOf(editor.selectedLayerId!).region ==
             null =>
       'Close a shape before setting its ground',
+    (Tool.ground, ToolFunction.clearGround) =>
+      'Click inside the zone to clear it back to plain dirt',
+    (Tool.ground, ToolFunction.growGround) =>
+      'Click inside the zone to make it a grow zone. Plant it in Plant mode',
     (Tool.ground, final function) =>
       'Click inside the zone to make its ground ${function.label}',
     _ => '',

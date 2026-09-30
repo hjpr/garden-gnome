@@ -4,10 +4,12 @@ import 'dart:typed_data';
 import 'package:archive/archive.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:garden_gnome/domain/document.dart';
+import 'package:garden_gnome/domain/geometry_editor.dart';
 import 'package:garden_gnome/domain/land_rules.dart';
 import 'package:garden_gnome/domain/layer.dart';
 import 'package:garden_gnome/domain/vec.dart';
 import 'package:garden_gnome/persistence/document_codec.dart';
+import 'package:garden_gnome/persistence/document_json.dart' as mapping;
 import '../support/first_shape.dart';
 
 int _next = 0;
@@ -58,6 +60,100 @@ Uint8List zipWith(Map<String, Object?> json) => ZipEncoder().encodeBytes(
 );
 
 void main() {
+  test('schema 2 retains rows and features without a seed field', () {
+    final json = documentToJson(sampleDocument())..['schema_version'] = 2;
+    final zone = (json['layers'] as Map).values.cast<Map>().singleWhere(
+      (layer) => layer['kind'] == 'zone',
+    );
+    final props = zone['properties'] as Map;
+    props
+      ..remove('seed')
+      ..['ground'] = 'row'
+      ..['rows'] = {'width': 2.0, 'spacing': 0.5, 'direction': 45.0};
+    json['feature_counter'] = 1;
+    json['features'] = [
+      {
+        'id': 'feature-1',
+        'kind': 'highTunnel',
+        'centre': {'x': 3.0, 'y': 4.0},
+        'length': 12.0,
+        'width': 4.0,
+        'height': 3.0,
+        'rotation': 30.0,
+        'label': 'Tunnel',
+      },
+    ];
+    const codec = GgnomeCodec();
+    final opened = codec.decode(zipWith(json));
+    final zoneProps =
+        opened.layers.values
+                .singleWhere((layer) => layer.kind == LayerKind.zone)
+                .properties
+            as ZoneProperties;
+    expect(zoneProps.seed, isNull);
+    expect(zoneProps.ground, GroundType.row);
+    expect(
+      zoneProps.rows,
+      const RowSpec(width: 2, spacing: 0.5, direction: 45),
+    );
+    expect(opened.features.single.label, 'Tunnel');
+    expect(opened.features.single.length, 12);
+    final jsonOnly = mapping.documentFromJson(json);
+    expect(mapping.documentToJson(jsonOnly), documentToJson(opened));
+    expect(
+      documentToJson(codec.decode(codec.encode(opened))),
+      documentToJson(opened),
+    );
+  });
+
+  test('ZIP assets resolve through the JSON mapping boundary', () {
+    final json = documentToJson(sampleDocument());
+    final png = base64Decode(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a2uoAAAAASUVORK5CYII=',
+    );
+    json['image_counter'] = 1;
+    json['references'] = [
+      {
+        'id': 'image-1',
+        'label': 'Plan',
+        'file_name': 'plan.png',
+        'asset': 'assets/image-1.png',
+        'mime_type': 'image/png',
+        'pixel_width': 1,
+        'pixel_height': 1,
+        'top_left': {'x': 3.0, 'y': 4.0},
+        'metres_per_pixel': 2.0,
+        'line_start': {'x': 0.0, 'y': 0.0},
+        'line_end': {'x': 1.0, 'y': 0.0},
+        'known_distance': 2.0,
+        'opacity': 0.4,
+        'locked': true,
+      },
+    ];
+    final requested = <String>[];
+    final mapped = mapping.documentFromJson(
+      json,
+      readAsset: (name) {
+        requested.add(name);
+        return name == 'assets/image-1.png' ? png : null;
+      },
+    );
+    expect(requested, ['assets/image-1.png']);
+    final bytes = const GgnomeCodec().encode(mapped);
+    final archive = ZipDecoder().decodeBytes(bytes);
+    expect(archive.files.map((file) => file.name), [
+      'document.json',
+      'assets/image-1.png',
+    ]);
+    final reopened = const GgnomeCodec().decode(bytes);
+    expect(reopened.references.single.bytes, png);
+    expect(mapping.documentToJson(reopened), json);
+    expect(
+      () => mapping.documentFromJson(json),
+      throwsA(isA<DocumentFormatError>()),
+    );
+  });
+
   test('a drawing survives a save and reopen unchanged', () {
     final original = sampleDocument();
     final reopened = decodeGgnome(encodeGgnome(original));

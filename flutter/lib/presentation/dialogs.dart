@@ -72,69 +72,81 @@ Future<LeaveChoice> askToSave(BuildContext context, String title) async {
 }
 
 /// Asks for a drawing name. Returns null when cancelled.
-Future<String?> askForName(BuildContext context, String initial) {
-  // Pre-select the suggestion so typing replaces it.
-  final text = TextEditingController(text: initial)
-    ..selection = TextSelection(baseOffset: 0, extentOffset: initial.length);
-  return showDialog<String>(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('Save in this browser'),
-      content: SizedBox(
-        width: 360,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: text,
-              autofocus: true,
-              decoration: const InputDecoration(labelText: 'Drawing name'),
-              onSubmitted: (value) => Navigator.pop(context, value),
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              'Drawings are kept in this browser only. They are not backed '
-              'up; use File → Export to keep a copy.',
-              style: TextStyle(fontSize: 12, color: Palette.muted),
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.pop(context, text.text),
-          child: const Text('Save'),
-        ),
-      ],
-    ),
-  );
-}
+Future<String?> askForName(BuildContext context, String initial) =>
+    showDialog<String>(
+      context: context,
+      builder: (context) => _NameDialog(initial: initial),
+    );
 
 /// Asks for a shape's name. Returns null when cancelled; an empty string
 /// means "use the automatic name".
-Future<String?> askForShapeName(BuildContext context, String initial) {
-  final text = TextEditingController(text: initial)
-    ..selection = TextSelection(baseOffset: 0, extentOffset: initial.length);
-  return showDialog<String>(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('Rename shape'),
+Future<String?> askForShapeName(BuildContext context, String initial) =>
+    showDialog<String>(
+      context: context,
+      builder: (context) => _NameDialog(initial: initial, forShape: true),
+    );
+
+class _NameDialog extends StatefulWidget {
+  const _NameDialog({required this.initial, this.forShape = false});
+
+  final String initial;
+  final bool forShape;
+
+  @override
+  State<_NameDialog> createState() => _NameDialogState();
+}
+
+class _NameDialogState extends State<_NameDialog> {
+  late final TextEditingController _text;
+
+  @override
+  void initState() {
+    super.initState();
+    _text = TextEditingController(text: widget.initial)
+      ..selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: widget.initial.length,
+      );
+  }
+
+  @override
+  void dispose() {
+    _text.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final field = TextField(
+      controller: _text,
+      autofocus: true,
+      decoration: widget.forShape
+          ? const InputDecoration(
+              labelText: 'Shape name',
+              helperText: 'Leave blank for the automatic name',
+            )
+          : const InputDecoration(labelText: 'Drawing name'),
+      onSubmitted: (value) => Navigator.pop(context, value),
+    );
+    return AlertDialog(
+      title: Text(widget.forShape ? 'Rename shape' : 'Save in this browser'),
       content: SizedBox(
-        width: 320,
-        child: TextField(
-          controller: text,
-          autofocus: true,
-          decoration: const InputDecoration(
-            labelText: 'Shape name',
-            helperText: 'Leave blank for the automatic name',
-          ),
-          onSubmitted: (value) => Navigator.pop(context, value),
-        ),
+        width: widget.forShape ? 320 : 360,
+        child: widget.forShape
+            ? field
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  field,
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Drawings are kept in this browser only. They are not backed '
+                    'up; use File → Export to keep a copy.',
+                    style: TextStyle(fontSize: 12, color: Palette.muted),
+                  ),
+                ],
+              ),
       ),
       actions: [
         TextButton(
@@ -142,12 +154,12 @@ Future<String?> askForShapeName(BuildContext context, String initial) {
           child: const Text('Cancel'),
         ),
         FilledButton(
-          onPressed: () => Navigator.pop(context, text.text),
-          child: const Text('Rename'),
+          onPressed: () => Navigator.pop(context, _text.text),
+          child: Text(widget.forShape ? 'Rename' : 'Save'),
         ),
       ],
-    ),
-  );
+    );
+  }
 }
 
 /// What the user chose in the Open dialog.

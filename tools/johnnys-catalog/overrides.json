@@ -1,0 +1,3370 @@
+{
+  "_about": "Hand-curated values merged over the parsed Johnny's pages by scrape.py. Any field listed here that differs from the parsed value is recorded in the crop's 'estimated' list. Keys starting with '_' are notes and are ignored.",
+  "crops": {
+    "acorn-winter-squash": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "weeksToTransplant": [
+        3,
+        4
+      ],
+      "daysToMaturity": [
+        85,
+        110
+      ],
+      "plantOutWeeks": [
+        1,
+        3
+      ],
+      "harvestWindowDays": [
+        7,
+        14
+      ],
+      "germinationDays": [
+        5,
+        10
+      ]
+    },
+    "anise": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "daysToMaturity": [
+        100,
+        120
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        1,
+        4
+      ],
+      "harvestWindowDays": [
+        14,
+        21
+      ]
+    },
+    "anise-hyssop": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "sowing": "transplant",
+      "weeksToTransplant": [
+        6,
+        8
+      ],
+      "daysToMaturity": [
+        90,
+        110
+      ],
+      "maturityFrom": "transplant",
+      "plantOutWeeks": [
+        0,
+        2
+      ],
+      "harvestWindowDays": [
+        60,
+        90
+      ]
+    },
+    "artichoke": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "sowing": "transplant",
+      "daysToMaturity": [
+        85,
+        100
+      ],
+      "plantOutWeeks": [
+        0,
+        2
+      ],
+      "harvestWindowDays": [
+        30,
+        60
+      ],
+      "germinationDays": [
+        10,
+        14
+      ]
+    },
+    "arugula": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "daysToMaturity": [
+        21,
+        40
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -4,
+        6
+      ],
+      "harvestWindowDays": [
+        7,
+        21
+      ],
+      "inRowSpacingIn": [
+        0.5,
+        1
+      ],
+      "betweenRowSpacingIn": [
+        2,
+        6
+      ]
+    },
+    "asian-greens": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "daysToMaturity": [
+        21,
+        50
+      ],
+      "plantOutWeeks": [
+        -4,
+        4
+      ],
+      "harvestWindowDays": [
+        7,
+        21
+      ],
+      "inRowSpacingIn": [
+        2,
+        6
+      ],
+      "scientificName": "Brassica rapa",
+      "germinationDays": [
+        3,
+        7
+      ]
+    },
+    "asparagus": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "sowing": "transplant",
+      "daysToMaturity": [
+        730,
+        1095
+      ],
+      "maturityFrom": "transplant",
+      "plantOutWeeks": [
+        -4,
+        -1
+      ],
+      "harvestWindowDays": [
+        14,
+        42
+      ],
+      "inRowSpacingIn": [
+        12,
+        18
+      ],
+      "_note": "perennial: first real harvest in year 2-3",
+      "germinationDays": [
+        10,
+        14
+      ]
+    },
+    "baby-leaf-beets": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "daysToMaturity": [
+        30,
+        35
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -3,
+        6
+      ],
+      "harvestWindowDays": [
+        7,
+        14
+      ],
+      "inRowSpacingIn": [
+        0.5,
+        1
+      ],
+      "betweenRowSpacingIn": [
+        2,
+        6
+      ],
+      "germinationDays": [
+        5,
+        10
+      ]
+    },
+    "baby-leaf-brassicas": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "daysToMaturity": [
+        21,
+        30
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -4,
+        6
+      ],
+      "harvestWindowDays": [
+        7,
+        21
+      ],
+      "inRowSpacingIn": [
+        0.5,
+        1
+      ],
+      "betweenRowSpacingIn": [
+        2,
+        6
+      ],
+      "scientificName": "Brassica spp.",
+      "germinationDays": [
+        3,
+        7
+      ]
+    },
+    "baby-leaf-swiss-chard": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "daysToMaturity": [
+        25,
+        35
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -2,
+        6
+      ],
+      "harvestWindowDays": [
+        7,
+        14
+      ],
+      "inRowSpacingIn": [
+        0.5,
+        1
+      ],
+      "betweenRowSpacingIn": [
+        2,
+        6
+      ],
+      "germinationDays": [
+        5,
+        10
+      ]
+    },
+    "basil": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "daysToMaturity": [
+        60,
+        75
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        2,
+        6
+      ],
+      "harvestWindowDays": [
+        60,
+        90
+      ]
+    },
+    "beets": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "daysToMaturity": [
+        50,
+        60
+      ],
+      "plantOutWeeks": [
+        -3,
+        4
+      ],
+      "harvestWindowDays": [
+        14,
+        30
+      ],
+      "fallCrop": true,
+      "germinationDays": [
+        5,
+        10
+      ]
+    },
+    "borage": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "sowing": "direct",
+      "daysToMaturity": [
+        50,
+        60
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -2,
+        2
+      ],
+      "harvestWindowDays": [
+        30,
+        60
+      ]
+    },
+    "broccoli": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "daysToMaturity": [
+        55,
+        80
+      ],
+      "plantOutWeeks": [
+        -3,
+        0
+      ],
+      "harvestWindowDays": [
+        7,
+        21
+      ],
+      "name": "Broccoli",
+      "germinationDays": [
+        4,
+        7
+      ]
+    },
+    "broccoli-raab": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "sowing": "direct",
+      "weeksToTransplant": null,
+      "daysToMaturity": [
+        40,
+        55
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -4,
+        0
+      ],
+      "germinationDays": [
+        4,
+        7
+      ]
+    },
+    "broom-corn": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "sowing": "direct",
+      "daysToMaturity": [
+        90,
+        110
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        1,
+        4
+      ],
+      "harvestWindowDays": [
+        7,
+        14
+      ],
+      "inRowSpacingIn": [
+        8,
+        12
+      ],
+      "scientificName": "Sorghum bicolor",
+      "germinationDays": [
+        7,
+        10
+      ]
+    },
+    "brussels-sprouts": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "daysToMaturity": [
+        85,
+        110
+      ],
+      "plantOutWeeks": [
+        -2,
+        2
+      ],
+      "harvestWindowDays": [
+        30,
+        60
+      ],
+      "fallCrop": true,
+      "scientificName": "Brassica oleracea var. gemmifera",
+      "germinationDays": [
+        4,
+        7
+      ]
+    },
+    "bunching-onions": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "weeksToTransplant": [
+        6,
+        8
+      ],
+      "daysToMaturity": [
+        60,
+        70
+      ],
+      "plantOutWeeks": [
+        -4,
+        2
+      ],
+      "harvestWindowDays": [
+        21,
+        45
+      ],
+      "sowingDepthIn": 0.25,
+      "germinationDays": [
+        7,
+        10
+      ]
+    },
+    "burdock": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "daysToMaturity": [
+        100,
+        120
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -2,
+        2
+      ],
+      "harvestWindowDays": [
+        14,
+        60
+      ],
+      "germinationDays": [
+        7,
+        14
+      ]
+    },
+    "bush-bean": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "daysToMaturity": [
+        50,
+        60
+      ],
+      "plantOutWeeks": [
+        1,
+        8
+      ],
+      "harvestWindowDays": [
+        14,
+        21
+      ],
+      "inRowSpacingIn": [
+        2,
+        4
+      ],
+      "germinationDays": [
+        6,
+        10
+      ]
+    },
+    "buttercup-winter-squash": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "weeksToTransplant": [
+        3,
+        4
+      ],
+      "daysToMaturity": [
+        85,
+        110
+      ],
+      "plantOutWeeks": [
+        1,
+        3
+      ],
+      "harvestWindowDays": [
+        7,
+        14
+      ],
+      "germinationDays": [
+        5,
+        10
+      ]
+    },
+    "butternut-winter-squash": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "weeksToTransplant": [
+        3,
+        4
+      ],
+      "daysToMaturity": [
+        85,
+        110
+      ],
+      "plantOutWeeks": [
+        1,
+        3
+      ],
+      "harvestWindowDays": [
+        7,
+        14
+      ],
+      "germinationDays": [
+        5,
+        10
+      ]
+    },
+    "cabbage": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "daysToMaturity": [
+        60,
+        100
+      ],
+      "maturityFrom": "transplant",
+      "plantOutWeeks": [
+        -4,
+        0
+      ],
+      "harvestWindowDays": [
+        7,
+        21
+      ],
+      "germinationDays": [
+        4,
+        7
+      ]
+    },
+    "caraway": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "sowing": "direct",
+      "daysToMaturity": [
+        70,
+        80
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -3,
+        0
+      ],
+      "harvestWindowDays": [
+        30,
+        60
+      ]
+    },
+    "cardoon": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "sowing": "transplant",
+      "daysToMaturity": [
+        100,
+        120
+      ],
+      "plantOutWeeks": [
+        0,
+        2
+      ],
+      "harvestWindowDays": [
+        14,
+        30
+      ],
+      "germinationDays": [
+        10,
+        14
+      ]
+    },
+    "carrots": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "daysToMaturity": [
+        60,
+        80
+      ],
+      "plantOutWeeks": [
+        -3,
+        4
+      ],
+      "harvestWindowDays": [
+        14,
+        30
+      ],
+      "fallCrop": true,
+      "germinationDays": [
+        10,
+        18
+      ]
+    },
+    "cauliflower": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "daysToMaturity": [
+        55,
+        85
+      ],
+      "plantOutWeeks": [
+        -2,
+        1
+      ],
+      "harvestWindowDays": [
+        5,
+        10
+      ],
+      "inRowSpacingIn": [
+        18,
+        24
+      ],
+      "germinationDays": [
+        4,
+        7
+      ]
+    },
+    "celery-and-celeriac": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "daysToMaturity": [
+        85,
+        120
+      ],
+      "plantOutWeeks": [
+        1,
+        3
+      ],
+      "harvestWindowDays": [
+        14,
+        45
+      ],
+      "germinationDays": [
+        14,
+        21
+      ]
+    },
+    "celtuce": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "daysToMaturity": [
+        60,
+        80
+      ],
+      "maturityFrom": "transplant",
+      "plantOutWeeks": [
+        -2,
+        2
+      ],
+      "harvestWindowDays": [
+        7,
+        14
+      ]
+    },
+    "chamomile": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "daysToMaturity": [
+        60,
+        70
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -2,
+        2
+      ],
+      "harvestWindowDays": [
+        30,
+        45
+      ]
+    },
+    "chamomile-roman": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "sowing": "transplant",
+      "weeksToTransplant": [
+        6,
+        8
+      ],
+      "daysToMaturity": [
+        80,
+        100
+      ],
+      "maturityFrom": "transplant",
+      "plantOutWeeks": [
+        0,
+        2
+      ],
+      "harvestWindowDays": [
+        30,
+        60
+      ]
+    },
+    "chervil": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "sowing": "direct",
+      "weeksToTransplant": null,
+      "daysToMaturity": [
+        45,
+        60
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -3,
+        1
+      ],
+      "harvestWindowDays": [
+        21,
+        42
+      ],
+      "fallCrop": true
+    },
+    "chicory-baby-leaf": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "daysToMaturity": [
+        25,
+        35
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -3,
+        6
+      ],
+      "harvestWindowDays": [
+        7,
+        14
+      ],
+      "inRowSpacingIn": [
+        0.5,
+        1
+      ],
+      "betweenRowSpacingIn": [
+        2,
+        6
+      ],
+      "fallCrop": true,
+      "germinationDays": [
+        5,
+        10
+      ]
+    },
+    "chicory-belgian-endive": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "daysToMaturity": [
+        110,
+        150
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -2,
+        4
+      ],
+      "harvestWindowDays": [
+        14,
+        30
+      ],
+      "inRowSpacingIn": [
+        4,
+        6
+      ],
+      "fallCrop": true,
+      "germinationDays": [
+        5,
+        10
+      ]
+    },
+    "chicory-endive-escarole": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "daysToMaturity": [
+        45,
+        85
+      ],
+      "plantOutWeeks": [
+        -2,
+        2
+      ],
+      "harvestWindowDays": [
+        7,
+        14
+      ],
+      "inRowSpacingIn": [
+        8,
+        12
+      ],
+      "fallCrop": true,
+      "germinationDays": [
+        5,
+        10
+      ]
+    },
+    "chinese-cabbage": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "weeksToTransplant": [
+        3,
+        4
+      ],
+      "daysToMaturity": [
+        50,
+        70
+      ],
+      "plantOutWeeks": [
+        -2,
+        1
+      ],
+      "harvestWindowDays": [
+        7,
+        14
+      ],
+      "inRowSpacingIn": [
+        12,
+        18
+      ],
+      "germinationDays": [
+        3,
+        7
+      ]
+    },
+    "chinese-leeks-garlic-chives": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "daysToMaturity": [
+        80,
+        90
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -2,
+        2
+      ],
+      "harvestWindowDays": [
+        90,
+        150
+      ]
+    },
+    "chives": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "daysToMaturity": [
+        75,
+        85
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -2,
+        2
+      ],
+      "harvestWindowDays": [
+        90,
+        150
+      ]
+    },
+    "cilantro-coriander": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "daysToMaturity": [
+        50,
+        55
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -2,
+        4
+      ],
+      "harvestWindowDays": [
+        14,
+        21
+      ],
+      "betweenRowSpacingIn": [
+        6,
+        12
+      ]
+    },
+    "cipollini-mini-specialty-onions": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "daysToMaturity": [
+        60,
+        100
+      ],
+      "plantOutWeeks": [
+        -4,
+        -1
+      ],
+      "harvestWindowDays": [
+        7,
+        14
+      ],
+      "inRowSpacingIn": [
+        0.5,
+        1
+      ],
+      "betweenRowSpacingIn": [
+        4,
+        12
+      ],
+      "germinationDays": [
+        7,
+        10
+      ]
+    },
+    "claytonia": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "weeksToTransplant": [
+        3,
+        4
+      ],
+      "daysToMaturity": [
+        40,
+        50
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -4,
+        0
+      ],
+      "harvestWindowDays": [
+        30,
+        60
+      ],
+      "betweenRowSpacingIn": [
+        4,
+        6
+      ],
+      "germinationDays": [
+        7,
+        14
+      ]
+    },
+    "collards": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "daysToMaturity": [
+        55,
+        75
+      ],
+      "plantOutWeeks": [
+        -4,
+        0
+      ],
+      "harvestWindowDays": [
+        60,
+        120
+      ],
+      "germinationDays": [
+        4,
+        7
+      ]
+    },
+    "corn-old-fashioned-sweet": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "sowing": "direct",
+      "daysToMaturity": [
+        70,
+        90
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        1,
+        6
+      ],
+      "harvestWindowDays": [
+        7,
+        10
+      ],
+      "germinationDays": [
+        5,
+        10
+      ]
+    },
+    "corn-ornamental-dry-field": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "daysToMaturity": [
+        95,
+        115
+      ],
+      "plantOutWeeks": [
+        1,
+        4
+      ],
+      "harvestWindowDays": [
+        14,
+        30
+      ],
+      "germinationDays": [
+        5,
+        10
+      ]
+    },
+    "corn-super-sweet": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "sowing": "direct",
+      "daysToMaturity": [
+        70,
+        90
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        2,
+        6
+      ],
+      "harvestWindowDays": [
+        5,
+        10
+      ],
+      "germinationDays": [
+        5,
+        10
+      ]
+    },
+    "corn-sweet": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "daysToMaturity": [
+        65,
+        90
+      ],
+      "plantOutWeeks": [
+        1,
+        6
+      ],
+      "harvestWindowDays": [
+        5,
+        10
+      ],
+      "germinationDays": [
+        5,
+        10
+      ]
+    },
+    "cress": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "daysToMaturity": [
+        20,
+        50
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -4,
+        2
+      ],
+      "harvestWindowDays": [
+        14,
+        30
+      ],
+      "betweenRowSpacingIn": [
+        4,
+        12
+      ],
+      "germinationDays": [
+        3,
+        7
+      ]
+    },
+    "cucumber": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "daysToMaturity": [
+        50,
+        65
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        1,
+        6
+      ],
+      "harvestWindowDays": [
+        21,
+        42
+      ],
+      "germinationDays": [
+        3,
+        7
+      ]
+    },
+    "cumin": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "daysToMaturity": [
+        120,
+        130
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        2,
+        4
+      ],
+      "harvestWindowDays": [
+        7,
+        14
+      ],
+      "betweenRowSpacingIn": [
+        12,
+        18
+      ],
+      "scientificName": "Cuminum cyminum"
+    },
+    "cutting-celery": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "weeksToTransplant": [
+        8,
+        10
+      ],
+      "daysToMaturity": [
+        70,
+        80
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        0,
+        2
+      ],
+      "harvestWindowDays": [
+        60,
+        120
+      ]
+    },
+    "daikon-radishes": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "daysToMaturity": [
+        45,
+        70
+      ],
+      "plantOutWeeks": [
+        -2,
+        2
+      ],
+      "harvestWindowDays": [
+        14,
+        21
+      ],
+      "fallCrop": true,
+      "germinationDays": [
+        3,
+        7
+      ]
+    },
+    "dandelion": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "weeksToTransplant": [
+        4,
+        6
+      ],
+      "daysToMaturity": [
+        45,
+        60
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -3,
+        1
+      ],
+      "harvestWindowDays": [
+        30,
+        90
+      ]
+    },
+    "delicata-sweet-dumpling-winter-squash": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "weeksToTransplant": [
+        3,
+        4
+      ],
+      "daysToMaturity": [
+        85,
+        110
+      ],
+      "plantOutWeeks": [
+        1,
+        3
+      ],
+      "harvestWindowDays": [
+        7,
+        14
+      ],
+      "germinationDays": [
+        5,
+        10
+      ]
+    },
+    "dill": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "sowing": "direct",
+      "daysToMaturity": [
+        40,
+        60
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -2,
+        4
+      ],
+      "harvestWindowDays": [
+        14,
+        30
+      ],
+      "betweenRowSpacingIn": [
+        12,
+        18
+      ]
+    },
+    "eggplant": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "daysToMaturity": [
+        60,
+        80
+      ],
+      "plantOutWeeks": [
+        2,
+        5
+      ],
+      "harvestWindowDays": [
+        45,
+        75
+      ],
+      "germinationDays": [
+        7,
+        14
+      ]
+    },
+    "fava-bean": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "sowing": "direct",
+      "daysToMaturity": [
+        75,
+        90
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -6,
+        -2
+      ],
+      "harvestWindowDays": [
+        14,
+        21
+      ],
+      "fallCrop": true,
+      "germinationDays": [
+        7,
+        14
+      ]
+    },
+    "fennel": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "weeksToTransplant": [
+        4,
+        5
+      ],
+      "daysToMaturity": [
+        60,
+        80
+      ],
+      "plantOutWeeks": [
+        -2,
+        2
+      ],
+      "harvestWindowDays": [
+        7,
+        14
+      ],
+      "germinationDays": [
+        7,
+        14
+      ]
+    },
+    "flower-sprouts": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "weeksToTransplant": [
+        4,
+        6
+      ],
+      "daysToMaturity": [
+        100,
+        120
+      ],
+      "maturityFrom": "transplant",
+      "plantOutWeeks": [
+        -2,
+        2
+      ],
+      "harvestWindowDays": [
+        30,
+        60
+      ],
+      "inRowSpacingIn": [
+        18,
+        24
+      ],
+      "betweenRowSpacingIn": [
+        24,
+        36
+      ],
+      "fallCrop": true,
+      "germinationDays": [
+        4,
+        7
+      ]
+    },
+    "french-filet-beans": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "daysToMaturity": [
+        50,
+        60
+      ],
+      "plantOutWeeks": [
+        1,
+        8
+      ],
+      "harvestWindowDays": [
+        14,
+        21
+      ],
+      "inRowSpacingIn": [
+        2,
+        4
+      ],
+      "germinationDays": [
+        6,
+        10
+      ]
+    },
+    "fresh-shell-bean": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "sowing": "direct",
+      "daysToMaturity": [
+        65,
+        80
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        1,
+        6
+      ],
+      "harvestWindowDays": [
+        10,
+        14
+      ],
+      "inRowSpacingIn": [
+        2,
+        4
+      ],
+      "germinationDays": [
+        6,
+        10
+      ]
+    },
+    "garlic": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "sowing": "direct",
+      "daysToMaturity": [
+        240,
+        270
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -6,
+        -2
+      ],
+      "harvestWindowDays": [
+        7,
+        14
+      ],
+      "inRowSpacingIn": [
+        4,
+        6
+      ],
+      "_note": "planted in fall to overwinter (overwinterWeeks, weeks from first fall frost); the spring window is for spring planting",
+      "overwinterWeeks": [
+        -2,
+        4
+      ],
+      "germinationDays": [
+        14,
+        28
+      ]
+    },
+    "greenhouse-cucumbers": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "daysToMaturity": [
+        50,
+        60
+      ],
+      "plantOutWeeks": [
+        0,
+        3
+      ],
+      "harvestWindowDays": [
+        60,
+        90
+      ],
+      "betweenRowSpacingIn": [
+        48,
+        60
+      ],
+      "scientificName": "Cucumis sativus",
+      "germinationDays": [
+        3,
+        7
+      ]
+    },
+    "greenhouse-eggplants": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "daysToMaturity": [
+        60,
+        75
+      ],
+      "plantOutWeeks": [
+        0,
+        3
+      ],
+      "harvestWindowDays": [
+        90,
+        150
+      ],
+      "inRowSpacingIn": [
+        12,
+        12
+      ],
+      "germinationDays": [
+        7,
+        14
+      ]
+    },
+    "greenhouse-peppers": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "daysToMaturity": [
+        70,
+        85
+      ],
+      "plantOutWeeks": [
+        0,
+        3
+      ],
+      "harvestWindowDays": [
+        120,
+        180
+      ],
+      "inRowSpacingIn": [
+        12,
+        18
+      ],
+      "betweenRowSpacingIn": [
+        36,
+        48
+      ],
+      "germinationDays": [
+        7,
+        14
+      ]
+    },
+    "greenhouse-tomatoes": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "weeksToTransplant": [
+        5,
+        7
+      ],
+      "daysToMaturity": [
+        70,
+        80
+      ],
+      "plantOutWeeks": [
+        0,
+        3
+      ],
+      "harvestWindowDays": [
+        150,
+        240
+      ],
+      "inRowSpacingIn": [
+        16,
+        24
+      ],
+      "betweenRowSpacingIn": [
+        48,
+        60
+      ],
+      "germinationDays": [
+        5,
+        7
+      ]
+    },
+    "horseradish": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "sowing": "direct",
+      "daysToMaturity": [
+        150,
+        180
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -4,
+        0
+      ],
+      "harvestWindowDays": [
+        14,
+        60
+      ],
+      "betweenRowSpacingIn": [
+        24,
+        36
+      ],
+      "fallCrop": true,
+      "sowingDepthIn": 2.5,
+      "inRowSpacingIn": [
+        12,
+        18
+      ],
+      "germinationDays": [
+        14,
+        28
+      ]
+    },
+    "hubbard-winter-squash": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "weeksToTransplant": [
+        3,
+        4
+      ],
+      "daysToMaturity": [
+        85,
+        110
+      ],
+      "plantOutWeeks": [
+        1,
+        3
+      ],
+      "harvestWindowDays": [
+        7,
+        14
+      ],
+      "inRowSpacingIn": [
+        24,
+        36
+      ],
+      "germinationDays": [
+        5,
+        10
+      ]
+    },
+    "husk-cherry": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "weeksToTransplant": [
+        6,
+        8
+      ],
+      "daysToMaturity": [
+        65,
+        75
+      ],
+      "plantOutWeeks": [
+        2,
+        4
+      ],
+      "harvestWindowDays": [
+        45,
+        75
+      ],
+      "betweenRowSpacingIn": [
+        36,
+        48
+      ]
+    },
+    "hyssop": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "weeksToTransplant": [
+        8,
+        10
+      ],
+      "daysToMaturity": [
+        85,
+        100
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        0,
+        2
+      ],
+      "harvestWindowDays": [
+        60,
+        90
+      ]
+    },
+    "italian-dandelion-chicory": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "daysToMaturity": [
+        50,
+        65
+      ],
+      "plantOutWeeks": [
+        -3,
+        2
+      ],
+      "harvestWindowDays": [
+        21,
+        45
+      ],
+      "fallCrop": true,
+      "germinationDays": [
+        5,
+        10
+      ]
+    },
+    "kabocha-winter-squash": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "weeksToTransplant": [
+        3,
+        4
+      ],
+      "daysToMaturity": [
+        85,
+        110
+      ],
+      "plantOutWeeks": [
+        1,
+        3
+      ],
+      "harvestWindowDays": [
+        7,
+        14
+      ],
+      "germinationDays": [
+        5,
+        10
+      ]
+    },
+    "kale": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "daysToMaturity": [
+        50,
+        65
+      ],
+      "plantOutWeeks": [
+        -4,
+        0
+      ],
+      "harvestWindowDays": [
+        60,
+        120
+      ],
+      "germinationDays": [
+        4,
+        7
+      ]
+    },
+    "kalettes": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "weeksToTransplant": [
+        4,
+        6
+      ],
+      "daysToMaturity": [
+        110,
+        120
+      ],
+      "maturityFrom": "transplant",
+      "plantOutWeeks": [
+        -2,
+        2
+      ],
+      "harvestWindowDays": [
+        30,
+        60
+      ],
+      "inRowSpacingIn": [
+        18,
+        24
+      ],
+      "betweenRowSpacingIn": [
+        24,
+        36
+      ],
+      "fallCrop": true,
+      "germinationDays": [
+        4,
+        7
+      ]
+    },
+    "kohlrabi": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "daysToMaturity": [
+        40,
+        60
+      ],
+      "plantOutWeeks": [
+        -3,
+        1
+      ],
+      "harvestWindowDays": [
+        7,
+        14
+      ],
+      "inRowSpacingIn": [
+        4,
+        6
+      ],
+      "fallCrop": true,
+      "germinationDays": [
+        4,
+        7
+      ]
+    },
+    "lavender": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "sowing": "transplant",
+      "daysToMaturity": [
+        90,
+        110
+      ],
+      "maturityFrom": "transplant",
+      "plantOutWeeks": [
+        0,
+        2
+      ],
+      "harvestWindowDays": [
+        21,
+        42
+      ]
+    },
+    "leaf-broccoli": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "sowing": "direct",
+      "daysToMaturity": [
+        50,
+        60
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -4,
+        0
+      ],
+      "fallCrop": true,
+      "germinationDays": [
+        4,
+        7
+      ]
+    },
+    "leaf-fennel": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "sowing": "direct",
+      "daysToMaturity": [
+        60,
+        70
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        0,
+        4
+      ],
+      "harvestWindowDays": [
+        30,
+        60
+      ],
+      "betweenRowSpacingIn": [
+        12,
+        18
+      ]
+    },
+    "leeks": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "daysToMaturity": [
+        75,
+        120
+      ],
+      "plantOutWeeks": [
+        -2,
+        2
+      ],
+      "harvestWindowDays": [
+        30,
+        90
+      ],
+      "betweenRowSpacingIn": [
+        24,
+        36
+      ],
+      "fallCrop": true,
+      "germinationDays": [
+        7,
+        14
+      ]
+    },
+    "lemon-balm": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "sowing": "transplant",
+      "daysToMaturity": [
+        70,
+        80
+      ],
+      "maturityFrom": "transplant",
+      "plantOutWeeks": [
+        0,
+        2
+      ],
+      "harvestWindowDays": [
+        90,
+        120
+      ]
+    },
+    "lemon-grass": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "weeksToTransplant": [
+        6,
+        8
+      ],
+      "daysToMaturity": [
+        100,
+        120
+      ],
+      "maturityFrom": "transplant",
+      "plantOutWeeks": [
+        2,
+        4
+      ],
+      "harvestWindowDays": [
+        60,
+        90
+      ],
+      "fallCrop": false
+    },
+    "lettuce": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "daysToMaturity": [
+        45,
+        60
+      ],
+      "maturityFrom": "transplant",
+      "plantOutWeeks": [
+        -4,
+        2
+      ],
+      "harvestWindowDays": [
+        7,
+        14
+      ],
+      "fallCrop": true,
+      "germinationDays": [
+        2,
+        7
+      ]
+    },
+    "lima-bean": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "sowing": "direct",
+      "daysToMaturity": [
+        75,
+        95
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        2,
+        5
+      ],
+      "harvestWindowDays": [
+        14,
+        21
+      ],
+      "inRowSpacingIn": [
+        3,
+        4
+      ],
+      "germinationDays": [
+        6,
+        10
+      ]
+    },
+    "lovage": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "sowing": "transplant",
+      "daysToMaturity": [
+        70,
+        90
+      ],
+      "maturityFrom": "transplant",
+      "plantOutWeeks": [
+        -2,
+        1
+      ],
+      "harvestWindowDays": [
+        60,
+        120
+      ]
+    },
+    "mache": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "daysToMaturity": [
+        45,
+        60
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -4,
+        0
+      ],
+      "harvestWindowDays": [
+        14,
+        30
+      ],
+      "fallCrop": true
+    },
+    "magenta-spreen": {
+      "season": "warm",
+      "frostTolerance": "half-hardy",
+      "sowing": "either",
+      "weeksToTransplant": [
+        3,
+        4
+      ],
+      "daysToMaturity": [
+        40,
+        60
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        0,
+        4
+      ],
+      "harvestWindowDays": [
+        30,
+        60
+      ],
+      "inRowSpacingIn": [
+        6,
+        12
+      ],
+      "fallCrop": false,
+      "germinationDays": [
+        7,
+        14
+      ]
+    },
+    "malabar-spinach": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "daysToMaturity": [
+        70,
+        80
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        2,
+        5
+      ],
+      "harvestWindowDays": [
+        45,
+        75
+      ],
+      "fallCrop": false,
+      "germinationDays": [
+        10,
+        21
+      ]
+    },
+    "marjoram": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "sowing": "transplant",
+      "daysToMaturity": [
+        80,
+        95
+      ],
+      "maturityFrom": "transplant",
+      "plantOutWeeks": [
+        1,
+        3
+      ],
+      "harvestWindowDays": [
+        60,
+        90
+      ]
+    },
+    "melons": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "weeksToTransplant": [
+        3,
+        4
+      ],
+      "daysToMaturity": [
+        70,
+        90
+      ],
+      "plantOutWeeks": [
+        2,
+        4
+      ],
+      "harvestWindowDays": [
+        14,
+        28
+      ],
+      "fallCrop": false,
+      "germinationDays": [
+        4,
+        8
+      ]
+    },
+    "mexican-mint-marigold": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "sowing": "transplant",
+      "daysToMaturity": [
+        90,
+        110
+      ],
+      "maturityFrom": "transplant",
+      "plantOutWeeks": [
+        2,
+        4
+      ],
+      "harvestWindowDays": [
+        60,
+        90
+      ]
+    },
+    "mini-broccoli": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "daysToMaturity": [
+        50,
+        75
+      ],
+      "plantOutWeeks": [
+        -3,
+        0
+      ],
+      "harvestWindowDays": [
+        21,
+        42
+      ],
+      "inRowSpacingIn": [
+        6,
+        18
+      ],
+      "fallCrop": true,
+      "germinationDays": [
+        4,
+        7
+      ]
+    },
+    "mint": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "daysToMaturity": [
+        85,
+        90
+      ],
+      "maturityFrom": "transplant",
+      "plantOutWeeks": [
+        -1,
+        2
+      ],
+      "harvestWindowDays": [
+        90,
+        120
+      ]
+    },
+    "mustard": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "sowing": "direct",
+      "daysToMaturity": [
+        21,
+        45
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -4,
+        4
+      ],
+      "harvestWindowDays": [
+        14,
+        30
+      ],
+      "inRowSpacingIn": [
+        2,
+        6
+      ],
+      "germinationDays": [
+        3,
+        7
+      ]
+    },
+    "okra": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "weeksToTransplant": [
+        4,
+        6
+      ],
+      "daysToMaturity": [
+        50,
+        65
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        2,
+        6
+      ],
+      "harvestWindowDays": [
+        45,
+        75
+      ],
+      "germinationDays": [
+        7,
+        14
+      ]
+    },
+    "onion-sets": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "sowing": "direct",
+      "daysToMaturity": [
+        80,
+        100
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -4,
+        -1
+      ],
+      "harvestWindowDays": [
+        7,
+        14
+      ],
+      "germinationDays": [
+        7,
+        14
+      ]
+    },
+    "onions": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "daysToMaturity": [
+        100,
+        120
+      ],
+      "plantOutWeeks": [
+        -4,
+        -1
+      ],
+      "harvestWindowDays": [
+        7,
+        14
+      ],
+      "germinationDays": [
+        7,
+        10
+      ]
+    },
+    "orach": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "sowing": "direct",
+      "daysToMaturity": [
+        30,
+        60
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -3,
+        2
+      ],
+      "harvestWindowDays": [
+        21,
+        45
+      ],
+      "germinationDays": [
+        7,
+        14
+      ]
+    },
+    "oregano-greek": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "daysToMaturity": [
+        80,
+        90
+      ],
+      "maturityFrom": "transplant",
+      "plantOutWeeks": [
+        0,
+        2
+      ],
+      "harvestWindowDays": [
+        60,
+        120
+      ]
+    },
+    "ornamental-gourds": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "weeksToTransplant": [
+        3,
+        4
+      ],
+      "daysToMaturity": [
+        90,
+        110
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        1,
+        4
+      ],
+      "harvestWindowDays": [
+        14,
+        30
+      ],
+      "inRowSpacingIn": [
+        24,
+        36
+      ],
+      "betweenRowSpacingIn": [
+        72,
+        144
+      ],
+      "germinationDays": [
+        5,
+        10
+      ]
+    },
+    "pac-choi": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "weeksToTransplant": [
+        3,
+        4
+      ],
+      "daysToMaturity": [
+        30,
+        50
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -3,
+        2
+      ],
+      "harvestWindowDays": [
+        7,
+        14
+      ],
+      "inRowSpacingIn": [
+        6,
+        12
+      ],
+      "scientificName": "Brassica rapa var. chinensis",
+      "germinationDays": [
+        3,
+        7
+      ]
+    },
+    "parsley": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "weeksToTransplant": [
+        8,
+        10
+      ],
+      "daysToMaturity": [
+        70,
+        80
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -3,
+        1
+      ],
+      "harvestWindowDays": [
+        60,
+        120
+      ],
+      "fallCrop": true
+    },
+    "parsnip": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "daysToMaturity": [
+        95,
+        120
+      ],
+      "plantOutWeeks": [
+        -3,
+        2
+      ],
+      "harvestWindowDays": [
+        30,
+        90
+      ],
+      "germinationDays": [
+        14,
+        21
+      ]
+    },
+    "peas": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "daysToMaturity": [
+        55,
+        70
+      ],
+      "plantOutWeeks": [
+        -6,
+        -2
+      ],
+      "harvestWindowDays": [
+        14,
+        21
+      ],
+      "germinationDays": [
+        7,
+        14
+      ]
+    },
+    "pelleted-beets": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "daysToMaturity": [
+        50,
+        60
+      ],
+      "plantOutWeeks": [
+        -3,
+        4
+      ],
+      "harvestWindowDays": [
+        14,
+        30
+      ],
+      "fallCrop": true,
+      "germinationDays": [
+        5,
+        10
+      ]
+    },
+    "pelleted-carrots": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "sowing": "direct",
+      "daysToMaturity": [
+        60,
+        80
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -3,
+        4
+      ],
+      "harvestWindowDays": [
+        14,
+        30
+      ],
+      "fallCrop": true,
+      "inRowSpacingIn": [
+        0.75,
+        2
+      ],
+      "germinationDays": [
+        10,
+        18
+      ]
+    },
+    "pelleted-fennel": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "weeksToTransplant": [
+        4,
+        5
+      ],
+      "daysToMaturity": [
+        60,
+        80
+      ],
+      "plantOutWeeks": [
+        -2,
+        2
+      ],
+      "harvestWindowDays": [
+        7,
+        14
+      ],
+      "germinationDays": [
+        7,
+        14
+      ]
+    },
+    "pelleted-lettuce": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "daysToMaturity": [
+        45,
+        60
+      ],
+      "plantOutWeeks": [
+        -4,
+        2
+      ],
+      "harvestWindowDays": [
+        7,
+        14
+      ],
+      "fallCrop": true,
+      "germinationDays": [
+        2,
+        7
+      ]
+    },
+    "pelleted-onions": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "daysToMaturity": [
+        100,
+        120
+      ],
+      "plantOutWeeks": [
+        -4,
+        -1
+      ],
+      "harvestWindowDays": [
+        7,
+        14
+      ],
+      "germinationDays": [
+        7,
+        10
+      ]
+    },
+    "pelleted-parsnips": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "sowing": "direct",
+      "daysToMaturity": [
+        95,
+        120
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -3,
+        2
+      ],
+      "harvestWindowDays": [
+        30,
+        90
+      ],
+      "inRowSpacingIn": [
+        2,
+        3
+      ],
+      "fallCrop": true,
+      "germinationDays": [
+        14,
+        21
+      ]
+    },
+    "peppers": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "daysToMaturity": [
+        60,
+        90
+      ],
+      "plantOutWeeks": [
+        2,
+        4
+      ],
+      "harvestWindowDays": [
+        45,
+        75
+      ],
+      "germinationDays": [
+        7,
+        14
+      ]
+    },
+    "pole-bean": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "daysToMaturity": [
+        60,
+        70
+      ],
+      "plantOutWeeks": [
+        1,
+        6
+      ],
+      "harvestWindowDays": [
+        30,
+        60
+      ],
+      "germinationDays": [
+        6,
+        10
+      ]
+    },
+    "potatoes": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "sowing": "direct",
+      "daysToMaturity": [
+        70,
+        120
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -3,
+        0
+      ],
+      "harvestWindowDays": [
+        7,
+        21
+      ],
+      "inRowSpacingIn": [
+        10,
+        12
+      ],
+      "germinationDays": [
+        14,
+        28
+      ]
+    },
+    "pumpkins": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "weeksToTransplant": [
+        3,
+        4
+      ],
+      "daysToMaturity": [
+        90,
+        120
+      ],
+      "plantOutWeeks": [
+        1,
+        4
+      ],
+      "harvestWindowDays": [
+        7,
+        14
+      ],
+      "inRowSpacingIn": [
+        24,
+        36
+      ],
+      "germinationDays": [
+        5,
+        10
+      ]
+    },
+    "purslane": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "weeksToTransplant": [
+        3,
+        4
+      ],
+      "daysToMaturity": [
+        40,
+        50
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        1,
+        6
+      ],
+      "harvestWindowDays": [
+        30,
+        60
+      ],
+      "betweenRowSpacingIn": [
+        12,
+        18
+      ],
+      "germinationDays": [
+        7,
+        14
+      ]
+    },
+    "radicchio": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "daysToMaturity": [
+        65,
+        85
+      ],
+      "maturityFrom": "transplant",
+      "plantOutWeeks": [
+        -2,
+        2
+      ],
+      "harvestWindowDays": [
+        7,
+        21
+      ],
+      "fallCrop": true,
+      "germinationDays": [
+        5,
+        10
+      ]
+    },
+    "radishes": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "daysToMaturity": [
+        25,
+        30
+      ],
+      "plantOutWeeks": [
+        -4,
+        4
+      ],
+      "harvestWindowDays": [
+        7,
+        10
+      ],
+      "fallCrop": true,
+      "germinationDays": [
+        3,
+        7
+      ]
+    },
+    "root-parsley": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "daysToMaturity": [
+        90,
+        100
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -3,
+        1
+      ],
+      "harvestWindowDays": [
+        30,
+        60
+      ],
+      "scientificName": "Petroselinum crispum var. tuberosum"
+    },
+    "rosemary": {
+      "season": "warm",
+      "frostTolerance": "half-hardy",
+      "daysToMaturity": [
+        85,
+        100
+      ],
+      "maturityFrom": "transplant",
+      "plantOutWeeks": [
+        1,
+        3
+      ],
+      "harvestWindowDays": [
+        60,
+        120
+      ],
+      "fallCrop": false
+    },
+    "rutabaga": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "daysToMaturity": [
+        90,
+        100
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -2,
+        2
+      ],
+      "harvestWindowDays": [
+        30,
+        60
+      ],
+      "fallCrop": true,
+      "germinationDays": [
+        4,
+        7
+      ]
+    },
+    "sage": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "sowing": "transplant",
+      "daysToMaturity": [
+        75,
+        90
+      ],
+      "maturityFrom": "transplant",
+      "plantOutWeeks": [
+        0,
+        2
+      ],
+      "harvestWindowDays": [
+        60,
+        120
+      ],
+      "fallCrop": false
+    },
+    "salad-burnet": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "daysToMaturity": [
+        60,
+        80
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -2,
+        2
+      ],
+      "harvestWindowDays": [
+        60,
+        120
+      ]
+    },
+    "salad-mixes": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "daysToMaturity": [
+        21,
+        30
+      ],
+      "plantOutWeeks": [
+        -3,
+        6
+      ],
+      "harvestWindowDays": [
+        7,
+        21
+      ],
+      "inRowSpacingIn": [
+        0.5,
+        1
+      ],
+      "betweenRowSpacingIn": [
+        2,
+        6
+      ],
+      "fallCrop": true,
+      "germinationDays": [
+        3,
+        7
+      ]
+    },
+    "saltwort": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "weeksToTransplant": [
+        4,
+        6
+      ],
+      "daysToMaturity": [
+        40,
+        50
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -2,
+        2
+      ],
+      "harvestWindowDays": [
+        21,
+        42
+      ]
+    },
+    "scorzonera-salsify": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "daysToMaturity": [
+        110,
+        120
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        -3,
+        1
+      ],
+      "harvestWindowDays": [
+        30,
+        90
+      ],
+      "germinationDays": [
+        10,
+        14
+      ]
+    },
+    "shallots": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "weeksToTransplant": [
+        8,
+        10
+      ],
+      "daysToMaturity": [
+        90,
+        100
+      ],
+      "plantOutWeeks": [
+        -4,
+        -1
+      ],
+      "harvestWindowDays": [
+        7,
+        14
+      ],
+      "germinationDays": [
+        7,
+        14
+      ]
+    },
+    "shiso": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "daysToMaturity": [
+        70,
+        85
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        2,
+        4
+      ],
+      "harvestWindowDays": [
+        60,
+        90
+      ]
+    },
+    "sorrel": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "weeksToTransplant": [
+        4,
+        6
+      ],
+      "daysToMaturity": [
+        40,
+        60
+      ],
+      "plantOutWeeks": [
+        -4,
+        0
+      ],
+      "harvestWindowDays": [
+        60,
+        120
+      ],
+      "betweenRowSpacingIn": [
+        12,
+        18
+      ],
+      "germinationDays": [
+        7,
+        14
+      ]
+    },
+    "soybean": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "sowing": "direct",
+      "daysToMaturity": [
+        75,
+        100
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        1,
+        5
+      ],
+      "harvestWindowDays": [
+        7,
+        14
+      ],
+      "inRowSpacingIn": [
+        2,
+        4
+      ],
+      "germinationDays": [
+        5,
+        10
+      ]
+    },
+    "spaghetti-winter-squash": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "weeksToTransplant": [
+        3,
+        4
+      ],
+      "daysToMaturity": [
+        85,
+        110
+      ],
+      "plantOutWeeks": [
+        1,
+        3
+      ],
+      "harvestWindowDays": [
+        7,
+        14
+      ],
+      "germinationDays": [
+        5,
+        10
+      ]
+    },
+    "specialty-summer-squash": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "sowing": "either",
+      "weeksToTransplant": [
+        3,
+        4
+      ],
+      "daysToMaturity": [
+        45,
+        55
+      ],
+      "plantOutWeeks": [
+        1,
+        6
+      ],
+      "harvestWindowDays": [
+        45,
+        60
+      ],
+      "germinationDays": [
+        5,
+        10
+      ]
+    },
+    "spinach": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "weeksToTransplant": [
+        3,
+        4
+      ],
+      "daysToMaturity": [
+        37,
+        50
+      ],
+      "plantOutWeeks": [
+        -6,
+        0
+      ],
+      "harvestWindowDays": [
+        14,
+        21
+      ],
+      "inRowSpacingIn": [
+        2,
+        4
+      ],
+      "betweenRowSpacingIn": [
+        12,
+        18
+      ],
+      "germinationDays": [
+        7,
+        14
+      ]
+    },
+    "stevia": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "daysToMaturity": [
+        90,
+        110
+      ],
+      "maturityFrom": "transplant",
+      "plantOutWeeks": [
+        2,
+        4
+      ],
+      "harvestWindowDays": [
+        45,
+        90
+      ],
+      "betweenRowSpacingIn": [
+        18,
+        24
+      ]
+    },
+    "summer-savory": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "weeksToTransplant": [
+        4,
+        6
+      ],
+      "daysToMaturity": [
+        60,
+        70
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        1,
+        3
+      ],
+      "harvestWindowDays": [
+        30,
+        60
+      ]
+    },
+    "summer-squash": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "sowing": "either",
+      "weeksToTransplant": [
+        3,
+        4
+      ],
+      "daysToMaturity": [
+        45,
+        55
+      ],
+      "plantOutWeeks": [
+        1,
+        6
+      ],
+      "harvestWindowDays": [
+        45,
+        60
+      ],
+      "germinationDays": [
+        5,
+        10
+      ]
+    },
+    "sweet-potatoes": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "sowing": "transplant",
+      "weeksToTransplant": [
+        6,
+        8
+      ],
+      "daysToMaturity": [
+        90,
+        120
+      ],
+      "maturityFrom": "transplant",
+      "plantOutWeeks": [
+        2,
+        5
+      ],
+      "harvestWindowDays": [
+        7,
+        14
+      ],
+      "sowingDepthIn": null,
+      "_note": "grown from slips, not seed",
+      "inRowSpacingIn": [
+        12,
+        18
+      ],
+      "germinationDays": [
+        14,
+        28
+      ]
+    },
+    "swiss-chard": {
+      "season": "cool",
+      "frostTolerance": "half-hardy",
+      "daysToMaturity": [
+        50,
+        60
+      ],
+      "plantOutWeeks": [
+        -2,
+        2
+      ],
+      "harvestWindowDays": [
+        60,
+        120
+      ],
+      "germinationDays": [
+        5,
+        10
+      ]
+    },
+    "thyme": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "daysToMaturity": [
+        85,
+        95
+      ],
+      "maturityFrom": "transplant",
+      "plantOutWeeks": [
+        0,
+        2
+      ],
+      "harvestWindowDays": [
+        60,
+        120
+      ]
+    },
+    "tomatillo": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "daysToMaturity": [
+        70,
+        80
+      ],
+      "plantOutWeeks": [
+        2,
+        4
+      ],
+      "harvestWindowDays": [
+        45,
+        75
+      ],
+      "betweenRowSpacingIn": [
+        48,
+        72
+      ]
+    },
+    "tomatoes": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "daysToMaturity": [
+        60,
+        85
+      ],
+      "plantOutWeeks": [
+        1,
+        4
+      ],
+      "harvestWindowDays": [
+        60,
+        90
+      ],
+      "inRowSpacingIn": [
+        12,
+        36
+      ]
+    },
+    "turnips": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "daysToMaturity": [
+        35,
+        60
+      ],
+      "plantOutWeeks": [
+        -4,
+        2
+      ],
+      "harvestWindowDays": [
+        14,
+        21
+      ],
+      "inRowSpacingIn": [
+        1,
+        4
+      ],
+      "germinationDays": [
+        3,
+        7
+      ]
+    },
+    "vegetable-amaranth": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "daysToMaturity": [
+        30,
+        50
+      ],
+      "maturityFrom": "seeding",
+      "plantOutWeeks": [
+        2,
+        6
+      ],
+      "harvestWindowDays": [
+        21,
+        42
+      ],
+      "betweenRowSpacingIn": [
+        18,
+        18
+      ],
+      "germinationDays": [
+        5,
+        10
+      ]
+    },
+    "watermelons": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "weeksToTransplant": [
+        3,
+        4
+      ],
+      "daysToMaturity": [
+        75,
+        95
+      ],
+      "plantOutWeeks": [
+        2,
+        4
+      ],
+      "harvestWindowDays": [
+        14,
+        21
+      ],
+      "fallCrop": false,
+      "germinationDays": [
+        4,
+        8
+      ]
+    },
+    "wild-marjoram": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "daysToMaturity": [
+        80,
+        95
+      ],
+      "maturityFrom": "transplant",
+      "plantOutWeeks": [
+        0,
+        2
+      ],
+      "harvestWindowDays": [
+        60,
+        120
+      ]
+    },
+    "winter-savory": {
+      "season": "cool",
+      "frostTolerance": "hardy",
+      "daysToMaturity": [
+        80,
+        90
+      ],
+      "maturityFrom": "transplant",
+      "plantOutWeeks": [
+        0,
+        2
+      ],
+      "harvestWindowDays": [
+        60,
+        120
+      ]
+    },
+    "winter-squash": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "weeksToTransplant": [
+        3,
+        4
+      ],
+      "daysToMaturity": [
+        85,
+        110
+      ],
+      "plantOutWeeks": [
+        1,
+        3
+      ],
+      "harvestWindowDays": [
+        7,
+        14
+      ],
+      "inRowSpacingIn": [
+        18,
+        24
+      ],
+      "germinationDays": [
+        5,
+        10
+      ]
+    },
+    "yellow-summer-squash": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "sowing": "either",
+      "weeksToTransplant": [
+        3,
+        4
+      ],
+      "daysToMaturity": [
+        45,
+        55
+      ],
+      "plantOutWeeks": [
+        1,
+        6
+      ],
+      "harvestWindowDays": [
+        45,
+        60
+      ],
+      "germinationDays": [
+        5,
+        10
+      ]
+    },
+    "zucchini": {
+      "season": "warm",
+      "frostTolerance": "tender",
+      "sowing": "either",
+      "weeksToTransplant": [
+        3,
+        4
+      ],
+      "daysToMaturity": [
+        45,
+        55
+      ],
+      "plantOutWeeks": [
+        1,
+        6
+      ],
+      "harvestWindowDays": [
+        45,
+        60
+      ],
+      "germinationDays": [
+        5,
+        10
+      ]
+    }
+  }
+}

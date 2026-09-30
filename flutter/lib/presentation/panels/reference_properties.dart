@@ -7,7 +7,8 @@ import '../../domain/reference_image.dart';
 import '../canvas/reference_image_cache.dart';
 import '../theme.dart';
 import '../widgets/draft_text_field.dart';
-import '../widgets/panel.dart';
+import '../widgets/icon_controls.dart';
+import '../widgets/property_controls.dart';
 
 /// Properties for the Reference layer, always laid out the same way:
 /// an Upload image button, the selected image's name (click to rename,

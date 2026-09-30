@@ -1,40 +1,59 @@
 # Garden Gnome
 
-Farm management, starting with the documentation.
+A Flutter web app for planning land and growing food. Home opens the tools:
 
-Open `docs/index.html` in a browser. No install or build step is needed.
+- **Build:** draw properties and zones with straight lines, curves, arcs,
+  circles and polygons; edit ground, rows, features and reference images;
+  use Plant mode to place Seed Vault varieties on grow zones.
+- **Seed Vault:** keep varieties and their growing requirements.
+- **Greenhouse, Grow and Harvest:** plan sowing, planting out and harvests
+  using the crop catalog and your frost dates.
 
-Edit `docs/index.html` to change the outline. An article's H1 is its sidebar
-label; its H2s become subsection links automatically on reload. Add
-`data-parent="build-api"` to an article to place its page under the separate Build API section.
-Pages have their own fragment URLs within the same file, so direct local
-viewing still works. Keep existing IDs stable for bookmarks. New H2s can omit IDs.
+Drawings save in the browser and can be exported as `.ggnome` files. The
+Seed Vault, plantings and climate settings are a separate browser record.
 
-Document model shapes and examples in language-neutral YAML. Shape blocks describe
-types, relationships, and defaults; example blocks contain data, not constructors.
-This is documentation notation, not a YAML loader or a change to the runtime models.
+## Use the app
 
-Styles live in `docs/styles.css`; sidebar behavior lives in `docs/navigation.js`.
-Shared UI icons and pattern swatches live in `src/icons/` as standalone SVG files.
-DrawingTools documents each tool's `icon`, `display_name`, and `context_menu_name`.
-Icon paths are relative to the repository root; HTML pages in `docs/` use `../src/icons/`.
-The diagrams are placeholders. The first Build data models are in `src/build/`:
-`Field` contains `Plot` instances, each containing `Area` instances.
-Geometry, the drawing tool, and persistence are not implemented yet.
+- [Build guide](docs/build-guide.md): drawing, editing, saving and controls.
+- [Garden tools guide](docs/garden-tools-guide.md): varieties, Plant mode and
+  growing calendars.
 
-## Flutter Build workthrough
+## Develop and check
 
-The [Build workthrough](docs/flutter-build-workthrough.md) consolidates the
-prebuild decisions, staged scope, complete user journeys, and Flutter handoff.
-The [canvas implementation plan](docs/canvas-implementation-plan.md) describes
-the reference-based models, controller/preview responsibilities, and persistence
-adapters. These are intended contracts, not implemented Flutter features.
+Install Flutter with a Dart SDK compatible with `flutter/pubspec.yaml`, and
+Chrome for the development target. From the repository root:
 
-The remaining gate is explicit authorization to implement. The first milestone
-includes the straight-edged boundary editor, properties, Undo/Redo, and native/web
-save/open; circles/Fill, reference images, and generated planting layouts follow.
+```sh
+cd flutter
+flutter pub get                    # first setup or dependency changes
+flutter run --no-pub -d chrome      # develop
+flutter analyze --no-pub
+flutter test --no-pub
+flutter build web --no-pub          # release output: flutter/build/web
+```
 
-## Tests
+After dependency setup, `npm test` from the repository root runs the same
+Flutter test suite. npm is only a convenience entry point; it does not install
+Flutter or its packages. See [the Flutter README](flutter/README.md) for code
+and test boundaries.
 
-With Node.js 24 or later, run `npm test` for the models.
-Documentation prototypes have no automated tests; browser tests are deferred until app development.
+## Repository boundaries
+
+- `flutter/` is the current application, its tests and bundled assets.
+- `src/build/` and `tests/` retain the early Node model prototype. Its
+  Field/Plot/Area model is not the current Property/Zone model. Run its tests
+  separately with `npm run test:prototype` (Node.js 24 or later; no npm
+  dependencies to install). These are **not** application verification.
+- `src/icons/` is **live shared artwork**, not disposable prototype code:
+  `flutter/assets/icons` is a symlink to `../../src/icons`. Keep the repository
+  layout intact when building Flutter.
+- `docs/index.html`, `docs/build-layout.*`, the
+  [Build workthrough](docs/flutter-build-workthrough.md),
+  [canvas implementation plan](docs/canvas-implementation-plan.md) and
+  [milestone notes](docs/milestone-2.md) are retained design references/layout
+  prototypes, not a list of current features or remaining work. The HTML
+  studies can be opened directly in a browser.
+- `tools/johnnys-catalog/` builds the bundled crop catalog; see its
+  [README](tools/johnnys-catalog/README.md). `tools/render-art/` generates and
+  processes artwork; selected runtime assets live in `flutter/assets/render/`,
+  separate from ignored generation rounds and processing intermediates.

@@ -72,7 +72,7 @@ extension _AreaSelectInput on CanvasInput {
     final touched = itemsTouchedAcrossLayers(
       document,
       outline,
-      include: (id) => !document.isLocked(id),
+      include: (id) => !editor.isFrozen(id),
     );
     final selected = editor.selectedLayerId;
     if (touched[selected] case final items?) return (selected, items);

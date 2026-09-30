@@ -40,9 +40,13 @@ enum ToolFunction {
   /// Click two opposite corners.
   rectangle('Rectangle', 'rectangle.svg'),
 
-  /// Ground functions: click inside a zone to give it that ground.
+  /// Ground functions: click inside a zone to give it that ground. Zone
+  /// clears it back to plain dirt; Grow makes it a grow zone, which is
+  /// planted in Plant mode.
+  clearGround('Zone', 'ground-zone.svg'),
   flatGround('Flat', 'ground-flat.svg'),
   rowGround('Row', 'ground-row.svg'),
+  growGround('Grow', 'ground-grow.svg'),
 
   /// Feature functions: click to place one at its usual size.
   raisedBed('Raised bed', 'raised-bed.svg'),
@@ -57,10 +61,19 @@ enum ToolFunction {
   final String label;
   final String icon;
 
-  /// The ground a Ground function gives a zone; null for other tools.
+  /// Whether this is one of the Ground tool's functions.
+  bool get setsGround =>
+      this == clearGround ||
+      this == flatGround ||
+      this == rowGround ||
+      this == growGround;
+
+  /// The ground a Ground function gives a zone; null for Zone (plain
+  /// dirt) and for other tools. Check [setsGround] first.
   GroundType? get groundType => switch (this) {
     flatGround => GroundType.flat,
     rowGround => GroundType.row,
+    growGround => GroundType.grow,
     _ => null,
   };
 
@@ -78,6 +91,19 @@ enum ToolFunction {
   bool get drags => this == marquee || this == lasso;
 
   bool get drawsCircle => this == centerCircle || this == twoPointCircle;
+}
+
+/// Build's two modes, switched from the header.
+///
+/// Build lays out the land. Plant freezes all geometry while existing
+/// grow zones can be selected and planted with seeds from the Seed Vault.
+enum EditMode {
+  build('Build'),
+  plant('Plant');
+
+  const EditMode(this.label);
+
+  final String label;
 }
 
 /// The drawing tools, in the order the Tools panel shows them.
@@ -106,11 +132,13 @@ enum Tool {
     ToolFunction.rectangle,
   ]),
 
-  /// Prepares a zone's soil: flat, or in rows. Rows are sized in
-  /// Properties.
+  /// Prepares a zone's soil: plain (Zone), flat, or in rows, or makes it
+  /// a grow zone. Rows are sized in Properties.
   ground('Ground', 'ground.svg', [
+    ToolFunction.clearGround,
     ToolFunction.flatGround,
     ToolFunction.rowGround,
+    ToolFunction.growGround,
   ]),
 
   /// Places raised beds, greenhouses and high tunnels. Their sizes are
@@ -137,6 +165,9 @@ enum Tool {
   /// Whether the tool's functions are listed under it. Reference lists
   /// its one function too, so Reference line is visible by name.
   bool get hasFunctionChoice => functions.length > 1 || this == reference;
+
+  /// Plant selects existing grow zones; all drawing belongs to Build.
+  bool availableIn(EditMode mode) => mode == EditMode.build || this == select;
 
   /// Select picks and moves existing things, so it shows an arrow on the
   /// canvas. Every other tool adds or removes geometry and shows a

@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
-import '../../application/drafts.dart';
 import '../../application/editor_controller.dart';
 import '../../domain/land_rules.dart';
 import '../../domain/layer.dart';
-import '../../domain/zone_ground.dart';
 import '../theme.dart';
-import '../widgets/draft_text_field.dart';
 import '../widgets/panel.dart';
+import '../widgets/property_controls.dart';
 import 'feature_properties.dart';
-import 'measure_field.dart';
 import 'reference_properties.dart';
+import 'layer_fields.dart';
+import 'property_options.dart';
+import 'zone_options.dart';
 
 /// Settings for the selected layer: its name, status, and options.
 class PropertiesBody extends StatelessWidget {
@@ -50,7 +50,9 @@ class PropertiesBody extends StatelessWidget {
       key: ValueKey(layer.id),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _NameEditor(editor: editor, layer: layer, editable: editable),
+        if (layer.properties case ZoneProperties(:final ground))
+          _GroundTypeBar(ground: ground),
+        LayerNameEditor(editor: editor, layer: layer, editable: editable),
         _StatusBadge(
           text: status,
           colour: invalid
@@ -72,286 +74,60 @@ class PropertiesBody extends StatelessWidget {
                 ? () => editor.setLayerLocked(layer.id, false)
                 : null,
           ),
-        ...switch (layer.properties) {
-          PropertyProperties p => _propertyOptions(layer, p, editable),
-          ZoneProperties p => _zoneOptions(layer, p, editable),
+        switch (layer.properties) {
+          PropertyProperties p => PropertyOptions(
+            editor: editor,
+            layer: layer,
+            properties: p,
+            editable: editable,
+          ),
+          ZoneProperties p => ZoneOptions(
+            editor: editor,
+            layer: layer,
+            properties: p,
+            editable: editable,
+          ),
         },
       ],
     );
   }
+}
 
-  List<Widget> _propertyOptions(
-    Layer layer,
-    PropertyProperties p,
-    bool editable,
-  ) => [
-    PropertyGroup(
-      title: 'OPTIONS',
-      children: [
-        _colorRow(
-          layer,
-          p.color,
-          OutlineColor.propertyChoices,
-          (c) => p.copyWith(color: c),
-          editable,
-        ),
-        PropertyRow(
-          label: 'Soil drainage',
-          child: CompactDropdown<SoilDrainage?>(
-            label: 'Soil drainage',
-            value: p.drainage,
-            items: {
-              null: 'Select…',
-              for (final d in SoilDrainage.values) d: d.label,
-            },
-            onChanged: editable
-                ? (d) => editor.updateProperties(
-                    layer.id,
-                    p.copyWith(drainage: () => d),
-                  )
-                : null,
-          ),
-        ),
-      ],
-    ),
-    PropertyGroup(
-      title: 'SOIL SAMPLE',
-      children: [
-        const Padding(
-          padding: EdgeInsets.only(bottom: 4),
+class _GroundTypeBar extends StatelessWidget {
+  const _GroundTypeBar({required this.ground});
+
+  final GroundType? ground;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = switch (ground) {
+      null => Palette.groundZone,
+      GroundType.flat => Palette.groundFlat,
+      GroundType.row => Palette.groundRow,
+      GroundType.grow => Palette.groundGrow,
+    };
+    final label = ground?.label ?? 'Zone';
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Semantics(
+        label: 'Ground type: $label',
+        excludeSemantics: true,
+        child: Container(
+          key: const ValueKey('ground-type-bar'),
+          color: color,
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           child: Text(
-            'Lab values as recorded. Units and method unspecified.',
-            style: TextStyle(fontSize: 11.5, color: Palette.muted),
+            label,
+            style: TextStyle(
+              color: ground == GroundType.row ? Palette.ink : Colors.white,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-        ),
-        for (final (field, label) in SoilSample.fields)
-          _soilRow(layer, p, field, label, editable),
-      ],
-    ),
-  ];
-
-  /// One soil value. Blank clears it; anything else must be a finite
-  /// number. Values are stored as typed, with no unit conversion.
-  Widget _soilRow(
-    Layer layer,
-    PropertyProperties p,
-    String field,
-    String label,
-    bool editable,
-  ) => PropertyRow(
-    label: label,
-    child: DraftTextField(
-      editor: editor,
-      draftKey: '${layer.id}/soil/$field',
-      layerId: layer.id,
-      committedText: _formatSoil(p.soil.valueOf(field)),
-      label: label,
-      enabled: editable,
-      check: _soilProblem,
-      apply: (text) {
-        final current = editor.document.layers[layer.id]?.properties;
-        if (current is! PropertyProperties) return;
-        final value = _parseSoil(text);
-        if (value == current.soil.valueOf(field)) return;
-        editor.updateProperties(
-          layer.id,
-          current.copyWith(soil: current.soil.withValue(field, value)),
-        );
-      },
-    ),
-  );
-
-  static String _formatSoil(double? value) {
-    if (value == null) return '';
-    return value == value.roundToDouble()
-        ? value.toStringAsFixed(0)
-        : value.toString();
-  }
-
-  static double? _parseSoil(String text) =>
-      text.trim().isEmpty ? null : double.tryParse(text.trim());
-
-  static String? _soilProblem(String text) {
-    if (text.trim().isEmpty) return null;
-    final value = double.tryParse(text.trim());
-    return value == null || !value.isFinite
-        ? 'Enter a number or leave blank'
-        : null;
-  }
-
-  List<Widget> _zoneOptions(Layer layer, ZoneProperties p, bool editable) => [
-    PropertyGroup(
-      title: 'OPTIONS',
-      children: [
-        _colorRow(
-          layer,
-          p.color,
-          OutlineColor.zoneChoices,
-          (c) => p.copyWith(color: c),
-          editable,
-        ),
-        _zoneText(
-          layer,
-          label: 'Crop',
-          hint: 'e.g. tomatoes',
-          value: p.crop,
-          editable: editable,
-          change: (current, value) => current.copyWith(crop: () => value),
-          read: (current) => current.crop,
-        ),
-      ],
-    ),
-    _groundGroup(layer, p, editable),
-  ];
-
-  /// The zone's ground, as the Ground tool sets it, and its rows. The row
-  /// boxes are always shown and greyed out unless the ground is Row, so
-  /// the panel keeps one layout.
-  Widget _groundGroup(Layer layer, ZoneProperties p, bool editable) {
-    final document = editor.document;
-    final closed = document.geometryOf(layer.id).isClosed;
-    final units = editor.settings.units;
-    final rowsOn = p.ground == GroundType.row;
-    final rowsEditable = editable && rowsOn;
-    final layout = document.rowLayoutOf(layer.id);
-    void setRows(RowSpec Function(RowSpec) change) {
-      final current = editor.document.layers[layer.id]?.properties;
-      if (current is ZoneProperties) {
-        editor.setRows(layer.id, change(current.rows));
-      }
-    }
-
-    return PropertyGroup(
-      title: 'GROUND',
-      children: [
-        PropertyRow(
-          label: 'Ground',
-          child: CompactDropdown<GroundType?>(
-            label: 'Ground',
-            value: p.ground,
-            items: {
-              null: 'Dirt',
-              for (final g in GroundType.values) g: g.label,
-            },
-            onChanged: editable && closed
-                ? (g) => editor.setGround(layer.id, g)
-                : null,
-          ),
-        ),
-        MeasureField(
-          editor: editor,
-          ownerId: layer.id,
-          field: 'row-width',
-          label: 'Row width',
-          unit: units.symbol,
-          metres: p.rows.width,
-          toDisplay: units.fromMetres,
-          fromDisplay: units.toMetres,
-          enabled: rowsEditable,
-          minimum: Minimum.aboveZero,
-          apply: (w) => setRows((r) => r.copyWith(width: w)),
-        ),
-        MeasureField(
-          editor: editor,
-          ownerId: layer.id,
-          field: 'row-spacing',
-          label: 'Spacing',
-          unit: units.symbol,
-          metres: p.rows.spacing,
-          toDisplay: units.fromMetres,
-          fromDisplay: units.toMetres,
-          enabled: rowsEditable,
-          minimum: Minimum.zero,
-          apply: (s) => setRows((r) => r.copyWith(spacing: s)),
-        ),
-        MeasureField(
-          editor: editor,
-          ownerId: layer.id,
-          field: 'row-direction',
-          label: 'Direction',
-          unit: '°',
-          metres: p.rows.direction,
-          enabled: rowsEditable,
-          minimum: Minimum.none,
-          // 180° wraps back to 0°, since rows run both ways.
-          step: 1,
-          bigStep: 15,
-          apply: (d) => setRows((r) => r.copyWith(direction: d)),
-        ),
-        _readout('Rows', layout == null ? '—' : '${layout.rowCount}', rowsOn),
-        _readout(
-          'Row length',
-          layout == null ? '—' : units.format(layout.totalLength),
-          rowsOn,
-        ),
-      ],
-    );
-  }
-
-  /// A worked-out value, greyed out when it does not apply.
-  Widget _readout(String label, String value, bool active) => PropertyRow(
-    label: label,
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 2),
-      child: Text(
-        value,
-        key: ValueKey('readout-$label'),
-        style: TextStyle(
-          fontSize: 13,
-          color: active ? Palette.ink : Palette.faint,
         ),
       ),
-    ),
-  );
-
-  /// One of a zone's free-text settings. Blank clears it.
-  Widget _zoneText(
-    Layer layer, {
-    required String label,
-    required String hint,
-    required String? value,
-    required bool editable,
-    required ZoneProperties Function(ZoneProperties, String?) change,
-    required String? Function(ZoneProperties) read,
-  }) => PropertyRow(
-    label: label,
-    child: DraftTextField(
-      editor: editor,
-      draftKey: '${layer.id}/${label.toLowerCase()}',
-      layerId: layer.id,
-      committedText: value ?? '',
-      label: label,
-      hint: hint,
-      enabled: editable,
-      apply: (text) {
-        final current = editor.document.layers[layer.id]?.properties;
-        if (current is! ZoneProperties) return;
-        final next = text.trim().isEmpty ? null : text.trim();
-        if (next == read(current)) return;
-        editor.updateProperties(layer.id, change(current, next));
-      },
-    ),
-  );
-
-  Widget _colorRow(
-    Layer layer,
-    OutlineColor value,
-    List<OutlineColor> choices,
-    LayerProperties Function(OutlineColor) change,
-    bool editable,
-  ) => PropertyRow(
-    label: 'Color',
-    child: CompactDropdown<OutlineColor>(
-      label: 'Color',
-      value: value,
-      items: {for (final c in choices) c: c.label},
-      onChanged: editable
-          ? (c) {
-              if (c != value) editor.updateProperties(layer.id, change(c));
-            }
-          : null,
-    ),
-  );
+    );
+  }
 }
 
 /// A small dot and label showing whether the layer counts as land.
@@ -414,144 +190,4 @@ class _LockedNote extends StatelessWidget {
       ],
     ),
   );
-}
-
-/// The layer name, with a Rename form that saves only on Save name.
-class _NameEditor extends StatefulWidget {
-  const _NameEditor({
-    required this.editor,
-    required this.layer,
-    required this.editable,
-  });
-
-  final EditorController editor;
-  final Layer layer;
-  final bool editable;
-
-  @override
-  State<_NameEditor> createState() => _NameEditorState();
-}
-
-class _NameEditorState extends State<_NameEditor> {
-  static const _draftKey = 'rename';
-  TextEditingController? _text;
-  String? _error;
-
-  bool get _renaming => _text != null;
-
-  void _start() {
-    setState(() {
-      _text = TextEditingController(text: widget.layer.name);
-      _error = null;
-    });
-  }
-
-  void _stop() {
-    widget.editor.drafts.discard(_draftKey);
-    widget.editor.draftsChanged();
-    setState(() {
-      _text?.dispose();
-      _text = null;
-      _error = null;
-    });
-  }
-
-  void _save() {
-    try {
-      final name = validLayerName(_text!.text);
-      widget.editor.drafts.discard(_draftKey);
-      widget.editor.renameLayer(widget.layer.id, name);
-      _stop();
-    } on FormatException catch (e) {
-      setState(() => _error = e.message);
-    }
-  }
-
-  /// Records the typed name so Save and layer switching know a rename is
-  /// pending. It is only ever applied by Save name.
-  void _onChanged(String text) {
-    widget.editor.drafts.update(
-      _draftKey,
-      PropertyDraft(
-        layerId: widget.layer.id,
-        text: text,
-        committedText: widget.layer.name,
-        check: _nameProblem,
-        apply: (_) {},
-        isRename: true,
-      ),
-    );
-    widget.editor.draftsChanged();
-  }
-
-  static String? _nameProblem(String text) {
-    try {
-      validLayerName(text);
-      return null;
-    } on FormatException catch (e) {
-      return e.message;
-    }
-  }
-
-  @override
-  void dispose() {
-    _text?.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // A layer switch or Save may have dropped the pending rename.
-    if (_renaming &&
-        widget.editor.drafts[_draftKey] == null &&
-        _text!.text != widget.layer.name) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && _renaming) _stop();
-      });
-    }
-    if (!_renaming) {
-      return Row(
-        children: [
-          Expanded(
-            child: Text(
-              widget.layer.name,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-            ),
-          ),
-          IconAction(
-            icon: 'rename.svg',
-            label: 'Rename layer',
-            onPressed: widget.editable ? _start : null,
-          ),
-        ],
-      );
-    }
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          TextField(
-            controller: _text,
-            autofocus: true,
-            style: const TextStyle(fontSize: 13),
-            decoration: InputDecoration(
-              labelText: 'Layer name',
-              errorText: _error,
-            ),
-            onChanged: _onChanged,
-            onSubmitted: (_) => _save(),
-          ),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              FilledButton(onPressed: _save, child: const Text('Save name')),
-              const SizedBox(width: 8),
-              TextButton(onPressed: _stop, child: const Text('Cancel')),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 }

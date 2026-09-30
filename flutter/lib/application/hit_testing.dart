@@ -96,8 +96,9 @@ List<Hit> hitsAt(Geometry geometry, Camera camera, Offset screen) {
 ///
 /// Points rank above lines, and lines above insides. Within a kind a zone
 /// wins over its property, so a click inside a zone picks the zone. After
-/// that the nearest wins, and then the layer drawn on top, so a click
-/// where zones overlap picks the later one.
+/// that the nearest wins, then the layer drawn on top, so a click where
+/// zones overlap picks the later one, and within one layer [hitsAt]'s
+/// order (stack, then ID) still decides.
 List<LayerHit> hitsAcrossLayers(
   GardenDocument document,
   Camera camera,
@@ -106,11 +107,16 @@ List<LayerHit> hitsAcrossLayers(
   final order = {
     for (final (index, id) in document.drawingOrder.indexed) id: index,
   };
-  final hits = [
-    for (final layerId in document.drawingOrder)
-      for (final hit in hitsAt(document.geometryOf(layerId), camera, screen))
-        LayerHit(layerId, hit),
-  ];
+  final hits = <LayerHit>[];
+  final rank = <LayerHit, int>{};
+  for (final layerId in document.drawingOrder) {
+    final layerHits = hitsAt(document.geometryOf(layerId), camera, screen);
+    for (final (index, hit) in layerHits.indexed) {
+      final layerHit = LayerHit(layerId, hit);
+      hits.add(layerHit);
+      rank[layerHit] = index;
+    }
+  }
   int depth(LayerHit h) => document.layers[h.layerId]!.kind.index;
   hits.sort((a, b) {
     final byKind = a.kind.index.compareTo(b.kind.index);
@@ -119,7 +125,8 @@ List<LayerHit> hitsAcrossLayers(
     if (byDepth != 0) return byDepth;
     final byDistance = a.hit.distance.compareTo(b.hit.distance);
     if (byDistance != 0) return byDistance;
-    return order[b.layerId]!.compareTo(order[a.layerId]!);
+    final byLayer = order[b.layerId]!.compareTo(order[a.layerId]!);
+    return byLayer != 0 ? byLayer : rank[a]!.compareTo(rank[b]!);
   });
   return hits;
 }

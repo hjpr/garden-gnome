@@ -1,34 +1,11 @@
 part of 'canvas_input.dart';
 
 /// Pointer input for features (raised beds, greenhouses, high tunnels).
-/// They sit on top of the land: Select picks a feature before the inside
-/// of a shape, but points and lines still win so outlines under a
-/// feature stay editable. Dragging a feature moves it, snapping its
-/// centre like a point.
+/// Select picks one as described at [SelectionTargets];
+/// dragging it moves it, snapping its centre like a point. The Feature
+/// tool places one where it is clicked.
 extension _FeatureInput on CanvasInput {
-  /// The topmost feature under [screen], or null.
-  Feature? _featureUnder(Offset screen) {
-    final world = editor.camera.toWorld(screen);
-    for (final feature in editor.document.features.reversed) {
-      if (feature.contains(world)) return feature;
-    }
-    return null;
-  }
-
-  /// The feature Select would pick at [screen]: one under the pointer,
-  /// unless a point, line or circle edge is within reach there.
-  Feature? _featureOnTop(Offset screen) {
-    final feature = _featureUnder(screen);
-    if (feature == null) return null;
-    final top = _selectHits(screen).firstOrNull;
-    if (top != null && top.kind != HitKind.interior) return null;
-    return feature;
-  }
-
-  _FeatureDrag? _startFeatureDrag(_Press press) {
-    if (editor.tool != Tool.select) return null;
-    final feature = _featureOnTop(press.origin);
-    if (feature == null) return null;
+  _FeatureDrag _startFeatureDrag(_Press press, Feature feature) {
     editor.selectFeature(feature.id);
     return _FeatureDrag(
       original: feature,
@@ -65,6 +42,16 @@ extension _FeatureInput on CanvasInput {
       placing: true,
       guides: snap.guides,
     );
+  }
+
+  /// Feature tool: a click places one at its usual size, centred on the
+  /// pointer (snapped like a point). Features sit on top of the land, so
+  /// no layer is needed.
+  void _featureClick(Offset screen) {
+    final kind = editor.function.featureKind;
+    if (kind == null) return;
+    editor.showNotice(null);
+    editor.addFeature(kind, _snapped(screen).position);
   }
 }
 

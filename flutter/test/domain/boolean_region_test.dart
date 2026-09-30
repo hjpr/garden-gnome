@@ -492,7 +492,12 @@ void main() {
   );
 
   test('self-crossing drafts can be queried but are not Boolean operands', () {
-    const draft = PolygonRegion([Vec(0, 0), Vec(4, 4), Vec(0, 4), Vec(4, 0)]);
+    final draft = PolygonRegion(const [
+      Vec(0, 0),
+      Vec(4, 4),
+      Vec(0, 4),
+      Vec(4, 0),
+    ]);
     expect(() => square.contains(draft), returnsNormally);
     expect(() => square.overlaps(draft), returnsNormally);
     expect(() => draft.contains(square), returnsNormally);

@@ -1,11 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:garden_gnome/application/document_content.dart';
 import 'package:garden_gnome/application/alignment.dart';
 import 'package:garden_gnome/application/editor_controller.dart';
+import 'package:garden_gnome/application/item_bounds.dart';
 import 'package:garden_gnome/application/previews.dart';
 import 'package:garden_gnome/domain/land_rules.dart';
 import 'package:garden_gnome/domain/vec.dart';
 
-import 'boolean_tools_test.dart' show circle, property, rectangle, selectShapes;
+import '../support/editor_input.dart';
 
 void main() {
   group('Align', () {

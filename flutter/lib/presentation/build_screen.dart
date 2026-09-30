@@ -4,27 +4,30 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../application/app_tools.dart';
 import '../application/document_session.dart';
 import '../application/editor_controller.dart';
+import '../application/garden_controller.dart';
 import '../application/toasts.dart';
-import '../application/tool_prompts.dart';
 import '../application/tools.dart';
 import '../application/workspace_settings.dart';
 import '../platform/leave_guard.dart';
 import '../platform/persistent_storage.dart';
+import 'build_header.dart';
+import 'build_status_bar.dart';
 import 'canvas/drawing_canvas.dart';
 import 'dialogs.dart';
+import 'panels/layer_actions.dart';
 import 'panels/layers_panel.dart';
 import 'panels/operations_panel.dart';
 import 'panels/preferences_panel.dart';
 import 'panels/properties_panel.dart';
+import 'panels/seeds_panel.dart';
 import 'panels/settings_panel.dart';
 import 'panels/tools_panel.dart';
 import 'theme.dart';
 import 'widgets/dock.dart';
-import 'widgets/drawing_title.dart';
 import 'widgets/panel.dart';
-import 'widgets/selection_readout.dart';
 import 'widgets/text_focus.dart';
 import 'widgets/toaster.dart';
 
@@ -34,9 +37,21 @@ const Size minimumEditorSize = Size(800, 600);
 /// The Build screen: a header with menus, the drawing canvas between two
 /// folding docks of panels, and a status bar.
 class BuildScreen extends StatefulWidget {
-  const BuildScreen({super.key, required this.session});
+  const BuildScreen({
+    super.key,
+    required this.session,
+    this.navigator,
+    this.garden,
+  });
 
   final DocumentSession session;
+
+  /// The Seed Vault, listed in Plant mode's Seeds panel; null shows it
+  /// empty.
+  final GardenController? garden;
+
+  /// Switches to the other tools from the header; null shows Build alone.
+  final AppNavigator? navigator;
 
   @override
   State<BuildScreen> createState() => _BuildScreenState();
@@ -44,6 +59,10 @@ class BuildScreen extends StatefulWidget {
 
 class _BuildScreenState extends State<BuildScreen> {
   final FocusNode _canvasFocus = FocusNode(debugLabel: 'canvas');
+
+  /// The screen's own focus, taken back whenever Build is opened again so
+  /// its shortcuts work at once.
+  final FocusNode _screenFocus = FocusNode(debugLabel: 'build screen');
   late final AppLifecycleListener _lifecycle;
 
   DocumentSession get _session => widget.session;
@@ -54,6 +73,7 @@ class _BuildScreenState extends State<BuildScreen> {
     super.initState();
     _session.addListener(_onSessionChanged);
     _editor.addListener(_onEditorChanged);
+    widget.navigator?.addListener(_onToolChanged);
     _lifecycle = AppLifecycleListener(
       // Switching away mid-drawing drops the half-made shape, as Esc does.
       onInactive: () => _editor.cancelOperation(),
@@ -65,6 +85,8 @@ class _BuildScreenState extends State<BuildScreen> {
   @override
   void dispose() {
     _lifecycle.dispose();
+    widget.navigator?.removeListener(_onToolChanged);
+    _screenFocus.dispose();
     _session.removeListener(_onSessionChanged);
     _editor.removeListener(_onEditorChanged);
     _canvasFocus.dispose();
@@ -72,6 +94,20 @@ class _BuildScreenState extends State<BuildScreen> {
   }
 
   EditorController? _listened;
+
+  bool get _isOpen =>
+      widget.navigator == null || widget.navigator!.current == AppTool.build;
+
+  void _onToolChanged() {
+    if (_isOpen) {
+      _screenFocus.requestFocus();
+    } else {
+      // Leaving Build drops a half-made shape, as Esc does, and keeps the
+      // view in case the tab is closed from another tool.
+      _editor.cancelOperation();
+      unawaited(_session.rememberWorkspace());
+    }
+  }
 
   void _onSessionChanged() {
     _listened?.removeListener(_onEditorChanged);
@@ -284,6 +320,13 @@ class _BuildScreenState extends State<BuildScreen> {
         onExpandedChanged: setExpanded,
         child: ToolsBody(editor: editor),
       ),
+      PanelId.seeds => DockPanel(
+        index: index,
+        title: id.label,
+        expanded: expanded,
+        onExpandedChanged: setExpanded,
+        child: SeedsBody(editor: editor, garden: widget.garden),
+      ),
       PanelId.operations => DockPanel(
         index: index,
         title: id.label,
@@ -326,8 +369,10 @@ class _BuildScreenState extends State<BuildScreen> {
   @override
   Widget build(BuildContext context) {
     return Focus(
+      focusNode: _screenFocus,
       autofocus: true,
-      onKeyEvent: _onKey,
+      onKeyEvent: (node, event) =>
+          _isOpen ? _onKey(node, event) : KeyEventResult.ignored,
       child: LayoutBuilder(
         builder: (context, constraints) {
           final tooSmall =
@@ -338,7 +383,7 @@ class _BuildScreenState extends State<BuildScreen> {
               children: [
                 Column(
                   children: [
-                    _Header(
+                    BuildHeader(
                       title: _editor.title,
                       dirty: _session.hasUnsavedWork,
                       editor: _editor,
@@ -349,11 +394,12 @@ class _BuildScreenState extends State<BuildScreen> {
                       onExport: _export,
                       onClose: _close,
                       onPreferences: _preferences,
+                      navigator: widget.navigator,
                     ),
                     Expanded(
                       child: tooSmall ? const _TooSmallNotice() : _workspace(),
                     ),
-                    _StatusBar(editor: _editor),
+                    BuildStatusBar(editor: _editor),
                   ],
                 ),
                 Positioned.fill(
@@ -412,386 +458,6 @@ class _BuildScreenState extends State<BuildScreen> {
         ),
         dock(DockSide.right),
       ],
-    );
-  }
-}
-
-// -------------------------------------------------------------------- header
-
-class _Header extends StatelessWidget {
-  const _Header({
-    required this.title,
-    required this.dirty,
-    required this.editor,
-    required this.onNew,
-    required this.onOpen,
-    required this.onSave,
-    required this.onSaveAs,
-    required this.onExport,
-    required this.onClose,
-    required this.onPreferences,
-  });
-
-  final String title;
-  final bool dirty;
-  final EditorController editor;
-  final VoidCallback onNew, onOpen, onSave, onSaveAs, onExport, onClose;
-  final VoidCallback onPreferences;
-
-  @override
-  Widget build(BuildContext context) {
-    MenuItemButton item(
-      String label,
-      VoidCallback? onPressed, {
-      String? shortcut,
-      IconData? icon,
-    }) => MenuItemButton(
-      onPressed: onPressed,
-      leadingIcon: SizedBox(
-        width: 18,
-        child: icon == null ? null : Icon(icon, size: 16, color: Palette.muted),
-      ),
-      trailingIcon: shortcut == null
-          ? null
-          : Padding(
-              padding: const EdgeInsets.only(left: 24),
-              child: Text(
-                shortcut,
-                style: const TextStyle(fontSize: 12, color: Palette.faint),
-              ),
-            ),
-      child: Text(label),
-    );
-
-    final docks = editor.settings.docks;
-    return Container(
-      height: Metrics.headerHeight,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      decoration: const BoxDecoration(
-        color: Palette.paper,
-        border: Border(bottom: BorderSide(color: Palette.panelBorder)),
-      ),
-      child: Row(
-        children: [
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 6),
-            child: Icon(Icons.eco, size: 20, color: Palette.accent),
-          ),
-          MenuBar(
-            style: const MenuStyle(
-              backgroundColor: WidgetStatePropertyAll(Colors.transparent),
-              elevation: WidgetStatePropertyAll(0),
-              padding: WidgetStatePropertyAll(EdgeInsets.zero),
-            ),
-            children: [
-              SubmenuButton(
-                menuChildren: [
-                  item(
-                    'New',
-                    onNew,
-                    shortcut: 'Ctrl+N',
-                    icon: Icons.note_add_outlined,
-                  ),
-                  item(
-                    'Open…',
-                    onOpen,
-                    shortcut: 'Ctrl+O',
-                    icon: Icons.folder_open_outlined,
-                  ),
-                  const Divider(),
-                  item(
-                    'Save',
-                    onSave,
-                    shortcut: 'Ctrl+S',
-                    icon: Icons.save_outlined,
-                  ),
-                  item('Save as…', onSaveAs, shortcut: 'Ctrl+Shift+S'),
-                  const Divider(),
-                  item(
-                    'Export .ggnome file',
-                    onExport,
-                    icon: Icons.download_outlined,
-                  ),
-                  const Divider(),
-                  item('Close drawing', onClose, icon: Icons.close),
-                ],
-                child: const Text('File'),
-              ),
-              SubmenuButton(
-                menuChildren: [
-                  item(
-                    editor.undoLabel == null
-                        ? 'Undo'
-                        : 'Undo ${editor.undoLabel}',
-                    editor.canUndo ? editor.undo : null,
-                    shortcut: 'Ctrl+Z',
-                    icon: Icons.undo,
-                  ),
-                  item(
-                    editor.redoLabel == null
-                        ? 'Redo'
-                        : 'Redo ${editor.redoLabel}',
-                    editor.canRedo ? editor.redo : null,
-                    shortcut: 'Ctrl+Shift+Z',
-                    icon: Icons.redo,
-                  ),
-                  const Divider(),
-                  item(
-                    'Delete',
-                    editor.selection.isEmpty && !editor.referenceSelected
-                        ? null
-                        : editor.deleteSelection,
-                    shortcut: 'Del',
-                    icon: Icons.delete_outline,
-                  ),
-                  const Divider(),
-                  item(
-                    'Preferences…',
-                    onPreferences,
-                    icon: Icons.settings_outlined,
-                  ),
-                ],
-                child: const Text('Edit'),
-              ),
-              SubmenuButton(
-                menuChildren: [
-                  for (final side in DockSide.values)
-                    CheckboxMenuButton(
-                      value: docks.isOpen(side),
-                      onChanged: (v) => editor.setDockOpen(side, v ?? true),
-                      child: Text(
-                        side == DockSide.left ? 'Left panels' : 'Right panels',
-                      ),
-                    ),
-                  const Divider(),
-                  for (final id in PanelId.values)
-                    CheckboxMenuButton(
-                      value: !editor.settings.hiddenPanels.contains(id),
-                      onChanged: (v) => editor.setPanelVisible(id, v ?? true),
-                      child: Text(id.label),
-                    ),
-                  const Divider(),
-                  item(
-                    'Fit drawing',
-                    editor.fitDrawing,
-                    icon: Icons.fit_screen_outlined,
-                  ),
-                  item(
-                    'Reset view',
-                    editor.resetView,
-                    icon: Icons.center_focus_strong_outlined,
-                  ),
-                ],
-                child: const Text('View'),
-              ),
-            ],
-          ),
-          Expanded(
-            child: Center(
-              child: DrawingTitle(
-                title: title,
-                dirty: dirty,
-                onRename: editor.renameDrawing,
-              ),
-            ),
-          ),
-          IconAction(
-            iconData: Icons.undo,
-            label: editor.undoLabel == null
-                ? 'Undo'
-                : 'Undo ${editor.undoLabel}',
-            tooltip: editor.undoLabel == null
-                ? 'Undo (Ctrl+Z)'
-                : 'Undo ${editor.undoLabel} (Ctrl+Z)',
-            size: 30,
-            onPressed: editor.canUndo ? editor.undo : null,
-          ),
-          IconAction(
-            iconData: Icons.redo,
-            label: editor.redoLabel == null
-                ? 'Redo'
-                : 'Redo ${editor.redoLabel}',
-            tooltip: editor.redoLabel == null
-                ? 'Redo (Ctrl+Shift+Z)'
-                : 'Redo ${editor.redoLabel} (Ctrl+Shift+Z)',
-            size: 30,
-            onPressed: editor.canRedo ? editor.redo : null,
-          ),
-          const SizedBox(width: 4),
-        ],
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------- status bar
-
-class _StatusBar extends StatelessWidget {
-  const _StatusBar({required this.editor});
-
-  final EditorController editor;
-
-  @override
-  Widget build(BuildContext context) {
-    final layer = editor.selectedLayer;
-    final path = <String>[];
-    for (var l = layer; l != null; l = editor.document.parentOf(l.id)) {
-      path.insert(0, l.name);
-    }
-    final count = editor.selection.length;
-    final notice = editor.notice;
-    const small = TextStyle(fontSize: 12, color: Palette.muted);
-    Widget divider() => const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 12),
-      child: SizedBox(height: 14, child: VerticalDivider(width: 1)),
-    );
-    final centre = editor.viewport.center(Offset.zero);
-    return Container(
-      height: Metrics.statusHeight,
-      padding: const EdgeInsets.only(left: 12, right: 4),
-      decoration: const BoxDecoration(
-        color: Palette.paper,
-        border: Border(top: BorderSide(color: Palette.panelBorder)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Semantics(
-              liveRegion: true,
-              child: Row(
-                children: [
-                  // What is selected: the selection box's size.
-                  SelectionReadout(editor: editor),
-                  const SizedBox(width: 12),
-                  if (notice != null)
-                    const Padding(
-                      padding: EdgeInsets.only(right: 6),
-                      child: Icon(
-                        Icons.error_outline,
-                        size: 14,
-                        color: Palette.invalid,
-                      ),
-                    ),
-                  Expanded(
-                    child: Text(
-                      notice ?? toolPrompt(editor),
-                      overflow: TextOverflow.ellipsis,
-                      style: notice == null
-                          ? small
-                          : const TextStyle(
-                              fontSize: 12,
-                              color: Palette.invalid,
-                            ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          if (path.isNotEmpty) ...[
-            Text(path.join(' › '), style: small),
-            if (count > 0) Text('  ·  $count selected', style: small),
-            divider(),
-          ],
-          // Zoom changes arrive on viewChanges, which does not rebuild the
-          // screen, so the readouts listen for it themselves.
-          ListenableBuilder(
-            listenable: editor.viewChanges,
-            builder: (context, _) => _ScaleReadout(editor: editor),
-          ),
-          divider(),
-          IconAction(
-            iconData: Icons.remove,
-            label: 'Zoom out',
-            size: 22,
-            onPressed: () => editor.zoomAt(centre, -1),
-          ),
-          Tooltip(
-            message: 'Camera height. Click to fit drawing',
-            child: InkWell(
-              onTap: editor.fitDrawing,
-              borderRadius: BorderRadius.circular(4),
-              child: SizedBox(
-                width: 72,
-                child: ListenableBuilder(
-                  listenable: editor.viewChanges,
-                  builder: (context, _) => Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.photo_camera_outlined,
-                        size: 14,
-                        color: Palette.muted,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        _cameraHeight(editor),
-                        style: small.copyWith(
-                          fontFeatures: const [FontFeature.tabularFigures()],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          IconAction(
-            iconData: Icons.add,
-            label: 'Zoom in',
-            size: 22,
-            onPressed: () => editor.zoomAt(centre, 1),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// The camera's height above the ground in the user's units, such as
-/// "100 ft" or "7.4 ft".
-String _cameraHeight(EditorController editor) {
-  final units = editor.settings.units;
-  final value = units.fromMetres(editor.camera.height);
-  final text = value
-      .toStringAsFixed(value < 9.95 ? 1 : 0)
-      .replaceFirst(RegExp(r'\.0$'), '');
-  return '$text ${units.symbol}';
-}
-
-/// A bar one grid cell wide, labelled with the length it represents.
-class _ScaleReadout extends StatelessWidget {
-  const _ScaleReadout({required this.editor});
-
-  final EditorController editor;
-
-  @override
-  Widget build(BuildContext context) {
-    final cell = editor.camera.gridCellMetres(editor.settings.units);
-    final width = cell * editor.camera.pixelsPerMetreNow;
-    return Tooltip(
-      message:
-          'One grid square is ${editor.settings.units.format(cell)} across',
-      child: Row(
-        children: [
-          Container(
-            width: width,
-            height: 6,
-            decoration: const BoxDecoration(
-              border: Border(
-                left: BorderSide(color: Palette.muted),
-                right: BorderSide(color: Palette.muted),
-                bottom: BorderSide(color: Palette.muted),
-              ),
-            ),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            editor.settings.units.format(cell),
-            style: const TextStyle(fontSize: 12, color: Palette.muted),
-          ),
-        ],
-      ),
     );
   }
 }

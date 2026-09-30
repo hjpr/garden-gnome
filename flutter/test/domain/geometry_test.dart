@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:garden_gnome/domain/geometry.dart';
+import 'package:garden_gnome/domain/geometry_editor.dart';
+import 'package:garden_gnome/domain/geometry_rules.dart';
 import 'package:garden_gnome/domain/vec.dart';
 import '../support/first_shape.dart';
 

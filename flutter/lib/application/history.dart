@@ -44,6 +44,8 @@ class History {
 
   bool get canUndo => _undo.isNotEmpty;
   bool get canRedo => _redo.isNotEmpty;
+  HistoryEntry? get undoEntry => _undo.lastOrNull;
+  HistoryEntry? get redoEntry => _redo.lastOrNull;
   String? get undoLabel => canUndo ? _undo.last.label : null;
   String? get redoLabel => canRedo ? _redo.last.label : null;
 

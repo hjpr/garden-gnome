@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:garden_gnome/domain/document.dart';
+import 'package:garden_gnome/domain/geometry_editor.dart';
 import 'package:garden_gnome/domain/land_rules.dart';
 import 'package:garden_gnome/domain/layer.dart';
 import 'package:garden_gnome/domain/planar.dart';

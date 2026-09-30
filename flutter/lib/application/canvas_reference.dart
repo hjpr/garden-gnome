@@ -1,53 +1,24 @@
 part of 'canvas_input.dart';
 
-/// Screen distance, in logical pixels, within which a press grabs one of
-/// the selected reference image's corner handles.
-const double referenceHandleReach = 10;
-
 /// Pointer input for reference images: Select moves one (drag its inside)
 /// and scales it (drag a corner of the selected image), and the Reference
 /// tool draws a reference line on whichever image is clicked. None of it
 /// snaps: images are placed by eye, then calibrated one by one.
 extension _ReferenceInput on CanvasInput {
-  /// The topmost unlocked reference image under [screen], or null.
-  ReferenceImage? _referenceUnder(Offset screen) {
-    final world = editor.camera.toWorld(screen);
-    for (final image in editor.document.references.reversed) {
-      if (!image.locked && image.containsWorld(world)) return image;
-    }
-    return null;
-  }
+  /// A Select drag from the selected image's [corner] handle scales it.
+  _ReferenceDrag _startReferenceScale(
+    _Press press,
+    ReferenceImage image,
+    int corner,
+  ) => _ReferenceDrag(
+    original: image,
+    pressWorld: editor.camera.toWorld(press.origin),
+    corner: corner,
+  );
 
-  /// The corner handle of the selected image under [screen], clockwise
-  /// from the top-left, or null.
-  int? _handleAt(Offset screen) {
-    final image = editor.selectedImage;
-    if (image == null || image.locked) return null;
-    final corners = image.corners;
-    for (var i = 0; i < corners.length; i++) {
-      final at = editor.camera.toScreen(corners[i]);
-      if ((at - screen).distance <= referenceHandleReach) return i;
-    }
-    return null;
-  }
-
-  /// A Select drag on an image. The selected image's corner handles win
-  /// over everything, so it can always be resized; otherwise land on top
-  /// of the images is picked first, and an image moves only when nothing
-  /// else is under the pointer.
-  _ReferenceDrag? _startReferenceDrag(_Press press) {
-    if (editor.tool != Tool.select) return null;
-    final corner = _handleAt(press.origin);
-    if (corner != null) {
-      return _ReferenceDrag(
-        original: editor.selectedImage!,
-        pressWorld: editor.camera.toWorld(press.origin),
-        corner: corner,
-      );
-    }
-    if (_selectHits(press.origin).isNotEmpty) return null;
-    final image = _referenceUnder(press.origin);
-    if (image == null) return null;
+  /// A Select drag on [image], with nothing else under the pointer, moves
+  /// it.
+  _ReferenceDrag _startReferenceMove(_Press press, ReferenceImage image) {
     editor.selectReference(image.id);
     return _ReferenceDrag(
       original: image,

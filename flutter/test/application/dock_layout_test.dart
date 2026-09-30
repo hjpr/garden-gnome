@@ -7,7 +7,12 @@ void main() {
   test('the right dock starts with Properties above Layers, both open', () {
     const layout = DockLayout();
     expect(layout.right, [PanelId.properties, PanelId.layers]);
-    expect(layout.left, [PanelId.tools, PanelId.operations, PanelId.settings]);
+    expect(layout.left, [
+      PanelId.tools,
+      PanelId.seeds,
+      PanelId.operations,
+      PanelId.settings,
+    ]);
     expect(layout.isOpen(DockSide.left), isTrue);
     expect(layout.isOpen(DockSide.right), isTrue);
   });
@@ -35,6 +40,7 @@ void main() {
     final restored = DockLayout.restore(left: ['tools', 'settings']);
     expect(restored.left, [
       PanelId.tools,
+      PanelId.seeds,
       PanelId.operations,
       PanelId.settings,
     ]);
@@ -49,6 +55,7 @@ void main() {
     expect(restored.left, [
       PanelId.settings,
       PanelId.tools,
+      PanelId.seeds,
       PanelId.operations,
     ]);
     expect(restored.right, [PanelId.layers, PanelId.properties]);
