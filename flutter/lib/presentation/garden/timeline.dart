@@ -39,10 +39,11 @@ class TimelineRow {
   final bool selected;
 }
 
-/// A calendar strip: month headings across the top, one row per item
-/// with its windows as bars, and a line at today. Shared by Grow,
+/// A calendar strip: today's date with arrows to move the view, month
+/// headings, one row per item with its windows as bars over week (major)
+/// and day (minor) lines, and a line at today. Shared by Grow,
 /// Greenhouse and Harvest so all three read the same way.
-class Timeline extends StatelessWidget {
+class Timeline extends StatefulWidget {
   const Timeline({
     super.key,
     required this.range,
@@ -60,8 +61,77 @@ class Timeline extends StatelessWidget {
 
   static const rowHeight = 40.0;
 
+  /// How far one arrow click moves the view.
+  static const stepMonths = 2;
+
+  @override
+  State<Timeline> createState() => _TimelineState();
+}
+
+class _TimelineState extends State<Timeline> {
+  /// Steps of [Timeline.stepMonths] from [Timeline.range]; 0 is the view
+  /// around today.
+  int _offset = 0;
+
+  DayWindow get range {
+    if (_offset == 0) return widget.range;
+    DateTime shift(DateTime d) =>
+        DateTime.utc(d.year, d.month + _offset * Timeline.stepMonths, d.day);
+    return DayWindow(shift(widget.range.start), shift(widget.range.end));
+  }
+
+  DateTime get today => widget.today;
+  List<TimelineRow> get rows => widget.rows;
+  double get labelWidth => widget.labelWidth;
+  String get emptyText => widget.emptyText;
+  static const rowHeight = Timeline.rowHeight;
+
+  Widget _navigator() {
+    final weekday = const [
+      'Monday', 'Tuesday', 'Wednesday', 'Thursday', //
+      'Friday', 'Saturday', 'Sunday',
+    ][today.weekday - 1];
+    return SizedBox(
+      height: 34,
+      child: Row(
+        children: [
+          SizedBox(width: labelWidth),
+          IconButton(
+            tooltip: 'Earlier',
+            visualDensity: VisualDensity.compact,
+            iconSize: 18,
+            onPressed: () => setState(() => _offset--),
+            icon: const Icon(Icons.chevron_left),
+          ),
+          Expanded(
+            child: Text(
+              '$weekday, ${formatDay(today)}, ${today.year}',
+              key: const ValueKey('calendar-today'),
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+            ),
+          ),
+          if (_offset != 0)
+            TextButton(
+              onPressed: () => setState(() => _offset = 0),
+              child: const Text('Today'),
+            ),
+          IconButton(
+            tooltip: 'Later',
+            visualDensity: VisualDensity.compact,
+            iconSize: 18,
+            onPressed: () => setState(() => _offset++),
+            icon: const Icon(Icons.chevron_right),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final range = this.range;
+    final showsToday = range.contains(today);
     return LayoutBuilder(
       builder: (context, constraints) {
         final chartWidth = (constraints.maxWidth - labelWidth).clamp(
@@ -77,6 +147,7 @@ class Timeline extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            _navigator(),
             SizedBox(
               height: 32,
               child: Row(
@@ -85,7 +156,7 @@ class Timeline extends StatelessWidget {
                   SizedBox(
                     width: chartWidth,
                     child: CustomPaint(
-                      painter: _MonthsPainter(range, x, today),
+                      painter: _MonthsPainter(range, x, today, showsToday),
                     ),
                   ),
                 ],
@@ -101,16 +172,17 @@ class Timeline extends StatelessWidget {
                           itemCount: rows.length,
                           itemExtent: rowHeight,
                           itemBuilder: (context, i) =>
-                              _row(rows[i], chartWidth, x),
+                              _row(rows[i], range, chartWidth, x),
                         ),
-                        Positioned(
-                          left: labelWidth + x(today) - 1,
-                          top: 0,
-                          bottom: 0,
-                          child: IgnorePointer(
-                            child: Container(width: 2, color: Palette.ink),
+                        if (showsToday)
+                          Positioned(
+                            left: labelWidth + x(today) - 1,
+                            top: 0,
+                            bottom: 0,
+                            child: IgnorePointer(
+                              child: Container(width: 2, color: Palette.ink),
+                            ),
                           ),
-                        ),
                       ],
                     ),
             ),
@@ -120,7 +192,12 @@ class Timeline extends StatelessWidget {
     );
   }
 
-  Widget _row(TimelineRow row, double chartWidth, double Function(DateTime) x) {
+  Widget _row(
+    TimelineRow row,
+    DayWindow range,
+    double chartWidth,
+    double Function(DateTime) x,
+  ) {
     return Material(
       color: row.selected ? Palette.wash : Palette.paper,
       child: InkWell(
@@ -174,7 +251,12 @@ class Timeline extends StatelessWidget {
                 width: chartWidth,
                 height: rowHeight,
                 child: Stack(
-                  children: [for (final bar in row.bars) ..._bar(bar, x)],
+                  children: [
+                    Positioned.fill(
+                      child: CustomPaint(painter: _DayLinesPainter(range, x)),
+                    ),
+                    for (final bar in row.bars) ..._bar(bar, range, x),
+                  ],
                 ),
               ),
             ],
@@ -184,7 +266,11 @@ class Timeline extends StatelessWidget {
     );
   }
 
-  List<Widget> _bar(TimelineBar bar, double Function(DateTime) x) {
+  List<Widget> _bar(
+    TimelineBar bar,
+    DayWindow range,
+    double Function(DateTime) x,
+  ) {
     if (bar.span.end.isBefore(range.start) ||
         bar.span.start.isAfter(range.end)) {
       return const [];
@@ -234,11 +320,12 @@ class _EmptyText extends StatelessWidget {
 
 /// Month names and ticks across the top of the timeline.
 class _MonthsPainter extends CustomPainter {
-  _MonthsPainter(this.range, this.x, this.today);
+  _MonthsPainter(this.range, this.x, this.today, this.showsToday);
 
   final DayWindow range;
   final double Function(DateTime) x;
   final DateTime today;
+  final bool showsToday;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -270,6 +357,7 @@ class _MonthsPainter extends CustomPainter {
       label.dispose();
       month = next;
     }
+    if (!showsToday) return;
     final t = x(today);
     final todayLabel = TextPainter(
       text: const TextSpan(
@@ -298,5 +386,42 @@ class _MonthsPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_MonthsPainter old) =>
-      old.range != range || old.today != today;
+      old.range != range || old.today != today || old.showsToday != showsToday;
+}
+
+/// A faint line at every day and a stronger one at the start of every
+/// week (Monday), so where a window starts and ends reads at a glance.
+/// Day lines are left out when days are too narrow to tell apart.
+class _DayLinesPainter extends CustomPainter {
+  _DayLinesPainter(this.range, this.x);
+
+  final DayWindow range;
+  final double Function(DateTime) x;
+
+  /// Day lines need at least this many pixels per day.
+  static const _minDayPixels = 4.0;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final week = Paint()
+      ..color = Palette.muted.withValues(alpha: 0.55)
+      ..strokeWidth = 1.5;
+    final day = Paint()
+      ..color = Palette.rule.withValues(alpha: 0.5)
+      ..strokeWidth = 1;
+    final dayPixels = x(addDays(range.start, 1)) - x(range.start);
+    for (var d = range.start; !d.isAfter(range.end); d = addDays(d, 1)) {
+      final monday = d.weekday == DateTime.monday;
+      if (!monday && dayPixels < _minDayPixels) continue;
+      final at = x(d).roundToDouble() + 0.5;
+      canvas.drawLine(
+        Offset(at, 0),
+        Offset(at, size.height),
+        monday ? week : day,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DayLinesPainter old) => old.range != range;
 }

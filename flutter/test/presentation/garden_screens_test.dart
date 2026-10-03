@@ -561,15 +561,38 @@ void main() {
     expect(find.textContaining('Start in greenhouse · Spring'), findsOneWidget);
     await tester.tap(find.byTooltip('Start in greenhouse today'));
     await tester.pumpAndSettle();
-    expect(garden.schedules(PlantingStage.greenhouse), hasLength(1));
+    // Two flats of 50 cells.
+    await tester.enterText(find.byKey(const ValueKey('tray-Flats')), '2');
+    await tester.enterText(
+      find.byKey(const ValueKey('tray-Cells per flat')),
+      '50',
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('100 plants to plant out'), findsOneWidget);
+    await tester.tap(find.text('Start'));
+    await tester.pumpAndSettle();
+    final tray = garden.schedules(PlantingStage.greenhouse).single.planting;
+    expect(tray.container, GrowContainer.flat);
+    expect(tray.plants, 100);
 
     navigator.open(AppTool.greenhouse);
     await tester.pumpAndSettle();
     expect(tester.widget<Timeline>(find.byType(Timeline)).range, range);
     expect(find.textContaining('Sown Apr 1'), findsOneWidget);
+    expect(find.textContaining('2 flats × 50 = 100 plants'), findsOneWidget);
     await tester.tap(find.byTooltip('Planted out today'));
     await tester.pumpAndSettle();
     expect(find.text('Nothing in the greenhouse.'), findsOneWidget);
+
+    // The calendar steps by two months either way and comes back.
+    expect(find.byKey(const ValueKey('calendar-today')), findsOneWidget);
+    expect(find.text('Wednesday, Apr 1, 2026'), findsOneWidget);
+    await tester.tap(find.byTooltip('Later'));
+    await tester.pumpAndSettle();
+    expect(find.text('TODAY'), findsNothing, reason: 'today is off the view');
+    await tester.tap(find.widgetWithText(TextButton, 'Today'));
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(TextButton, 'Today'), findsNothing);
 
     navigator.open(AppTool.harvest);
     await tester.pumpAndSettle();

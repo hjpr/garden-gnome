@@ -108,6 +108,7 @@ void main() {
 
     editor.setMode(EditMode.plant);
     await tester.pumpAndSettle();
+    // An explicit layout without Greenhouse keeps it out.
     expect(dockTitles(tester, DockSide.left), ['Seeds', 'Drawing tools']);
     expect(dockTitles(tester, DockSide.right), ['Layers']);
     expect(find.text('tools body'), findsNothing);
@@ -138,7 +139,7 @@ void main() {
     addTearDown(editor.dispose);
     await tester.pumpWidget(workspaceFor(editor));
     await tester.pumpAndSettle();
-    expect(dockTitles(tester, DockSide.left), ['Drawing tools']);
+    expect(dockTitles(tester, DockSide.left), ['Drawing tools', 'Greenhouse']);
     expect(find.byTooltip('Seeds'), findsNothing);
 
     await tester.tap(find.text('View'));
@@ -148,7 +149,11 @@ void main() {
     await tester.tap(seeds);
     await tester.pumpAndSettle();
     expect(editor.settings.hiddenPanels, isNot(contains(PanelId.seeds)));
-    expect(dockTitles(tester, DockSide.left), ['Drawing tools', 'Seeds']);
+    expect(dockTitles(tester, DockSide.left), [
+      'Drawing tools',
+      'Seeds',
+      'Greenhouse',
+    ]);
     expect(tester.takeException(), isNull);
   });
 
@@ -244,11 +249,16 @@ void main() {
 
     editor.setMode(EditMode.plant);
     await tester.pumpAndSettle();
-    expect(dockTitles(tester, DockSide.left), ['Drawing tools', 'Seeds']);
+    expect(dockTitles(tester, DockSide.left), [
+      'Drawing tools',
+      'Seeds',
+      'Greenhouse',
+    ]);
     expect(dockTitles(tester, DockSide.right), ['Properties', 'Layers']);
     await expectViewPanels(tester, [
       PanelId.tools,
       PanelId.seeds,
+      PanelId.greenhouse,
       PanelId.properties,
       PanelId.layers,
     ]);

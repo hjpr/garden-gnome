@@ -26,7 +26,9 @@ import 'garden_record_codec.dart'
 // 8: the farm's climate and plantings (older readers would drop them).
 // 9: plantings name their planting layer; a planting layer's Plant on
 //    date moves into a sown planting (older readers would drop the link).
-const int schemaVersion = 9;
+// 10: greenhouse flats and pots on plantings (older readers would drop
+//     them).
+const int schemaVersion = 10;
 
 /// The oldest version still opened. Version 1 files open with their
 /// patterns and free-text ground notes dropped.

@@ -17,6 +17,17 @@ enum PlantingStage {
   final String label;
 }
 
+/// What greenhouse seed is started in. A flat holds several cells, one
+/// plant each; a pot holds one plant.
+enum GrowContainer {
+  flat('Flat'),
+  pot('Pot');
+
+  const GrowContainer(this.label);
+
+  final String label;
+}
+
 /// One sowing of one variety, followed from seed to harvest.
 ///
 /// Sown in the greenhouse it appears in Greenhouse until it is planted
@@ -34,6 +45,9 @@ class Planting {
     this.location = '',
     this.notes = '',
     this.layerId,
+    this.container,
+    this.containers = 1,
+    this.cellsPerFlat = 1,
   });
 
   final String id;
@@ -59,6 +73,23 @@ class Planting {
   /// not yet in the ground, or a sowing made without the map.
   final String? layerId;
 
+  /// For a greenhouse sowing, what it is started in; null otherwise.
+  final GrowContainer? container;
+
+  /// How many flats or pots.
+  final int containers;
+
+  /// Cells in each flat; a pot always holds one plant.
+  final int cellsPerFlat;
+
+  /// Plants available to plant out: cells across every flat, or one per
+  /// pot. Falls back to [count] for sowings recorded without a container.
+  int? get plants => switch (container) {
+    GrowContainer.flat => containers * cellsPerFlat,
+    GrowContainer.pot => containers,
+    null => count,
+  };
+
   PlantingStage get stage {
     if (finishedOn != null) return PlantingStage.finished;
     if (startedIndoors && plantedOutOn == null) return PlantingStage.greenhouse;
@@ -78,6 +109,9 @@ class Planting {
     String? varietyId,
     bool? startedIndoors,
     String? Function()? layerId,
+    GrowContainer? Function()? container,
+    int? containers,
+    int? cellsPerFlat,
   }) => Planting(
     id: id,
     varietyId: varietyId ?? this.varietyId,
@@ -89,6 +123,9 @@ class Planting {
     location: location ?? this.location,
     notes: notes ?? this.notes,
     layerId: layerId == null ? this.layerId : layerId(),
+    container: container == null ? this.container : container(),
+    containers: containers ?? this.containers,
+    cellsPerFlat: cellsPerFlat ?? this.cellsPerFlat,
   );
 
   /// A copy under another ID, e.g. when moved into a farm.
@@ -103,6 +140,9 @@ class Planting {
     location: location,
     notes: notes,
     layerId: layerId,
+    container: container,
+    containers: containers,
+    cellsPerFlat: cellsPerFlat,
   );
 
   @override
@@ -117,7 +157,10 @@ class Planting {
       other.count == count &&
       other.location == location &&
       other.notes == notes &&
-      other.layerId == layerId;
+      other.layerId == layerId &&
+      other.container == container &&
+      other.containers == containers &&
+      other.cellsPerFlat == cellsPerFlat;
 
   @override
   int get hashCode => Object.hash(
@@ -131,6 +174,9 @@ class Planting {
     location,
     notes,
     layerId,
+    container,
+    containers,
+    cellsPerFlat,
   );
 }
 

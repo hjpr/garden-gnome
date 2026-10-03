@@ -10,6 +10,7 @@ extension PanelIcon on PanelId {
   IconData get icon => switch (this) {
     PanelId.tools => Icons.draw_outlined,
     PanelId.seeds => Icons.spa_outlined,
+    PanelId.greenhouse => Icons.house_siding_outlined,
     PanelId.operations => Icons.join_full_outlined,
     PanelId.settings => Icons.tune,
     PanelId.properties => Icons.info_outline,

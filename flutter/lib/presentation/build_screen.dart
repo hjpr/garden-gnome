@@ -18,6 +18,7 @@ import 'build_status_bar.dart';
 import 'canvas/drawing_canvas.dart';
 import 'dialogs.dart';
 import 'panels/layer_actions.dart';
+import 'panels/greenhouse_panel.dart' as plant;
 import 'panels/layers_panel.dart';
 import 'panels/operations_panel.dart';
 import 'panels/preferences_panel.dart';
@@ -326,6 +327,13 @@ class _BuildScreenState extends State<BuildScreen> {
         expanded: expanded,
         onExpandedChanged: setExpanded,
         child: SeedsBody(editor: editor, garden: widget.garden),
+      ),
+      PanelId.greenhouse => DockPanel(
+        index: index,
+        title: id.label,
+        expanded: expanded,
+        onExpandedChanged: setExpanded,
+        child: plant.GreenhouseBody(garden: widget.garden),
       ),
       PanelId.operations => DockPanel(
         index: index,

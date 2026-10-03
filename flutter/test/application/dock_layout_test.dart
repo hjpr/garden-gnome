@@ -10,6 +10,7 @@ void main() {
     expect(layout.left, [
       PanelId.tools,
       PanelId.seeds,
+      PanelId.greenhouse,
       PanelId.operations,
       PanelId.settings,
     ]);
@@ -41,6 +42,7 @@ void main() {
     expect(restored.left, [
       PanelId.tools,
       PanelId.seeds,
+      PanelId.greenhouse,
       PanelId.operations,
       PanelId.settings,
     ]);
@@ -56,6 +58,7 @@ void main() {
       PanelId.settings,
       PanelId.tools,
       PanelId.seeds,
+      PanelId.greenhouse,
       PanelId.operations,
     ]);
     expect(restored.right, [PanelId.layers, PanelId.properties]);

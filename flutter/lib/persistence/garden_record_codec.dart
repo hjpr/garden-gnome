@@ -201,6 +201,11 @@ Map<String, Object?> plantingToJson(Planting p) => {
   'location': p.location,
   'notes': p.notes,
   'layer': ?p.layerId,
+  if (p.container case final c?) ...{
+    'container': c.name,
+    'containers': p.containers,
+    if (c == GrowContainer.flat) 'cells_per_flat': p.cellsPerFlat,
+  },
 };
 
 /// Throws [FormatException] when a value cannot be read.
@@ -221,7 +226,16 @@ Planting plantingFromJson(Object? raw) {
     location: _optionalString(j['location'], 'planting location') ?? '',
     notes: _optionalString(j['notes'], 'planting notes') ?? '',
     layerId: _optionalString(j['layer'], 'planting layer'),
+    container: _optionalEnum(GrowContainer.values, j['container'], 'container'),
+    containers: _positive(j['containers'], 'container count'),
+    cellsPerFlat: _positive(j['cells_per_flat'], 'cells per flat'),
   );
+}
+
+int _positive(Object? value, String what) {
+  if (value == null) return 1;
+  if (value is int && value >= 1) return value;
+  throw FormatException('$what is not readable');
 }
 
 String? _date(DateTime? d) => d == null

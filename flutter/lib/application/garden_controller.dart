@@ -288,6 +288,36 @@ class GardenController extends ChangeNotifier {
     return id;
   }
 
+  /// Starts [varietyId] in the greenhouse today in [containers] flats of
+  /// [cellsPerFlat] cells, or pots of one plant each, as one Undo step.
+  String startInGreenhouse(
+    String varietyId, {
+    required GrowContainer container,
+    required int containers,
+    int cellsPerFlat = 1,
+    DateTime? on,
+  }) {
+    final name = _record.varieties[varietyId]?.name ?? 'Planting';
+    late String id;
+    farm.changeFarm('Start $name', (f) {
+      final (next, newId) = f.nextPlantingId();
+      id = newId;
+      return next.withPlanting(
+        Planting(
+          id: id,
+          varietyId: varietyId,
+          sownOn: dayOf(on ?? today),
+          startedIndoors: true,
+          container: container,
+          containers: containers < 1 ? 1 : containers,
+          cellsPerFlat: cellsPerFlat < 1 ? 1 : cellsPerFlat,
+        ),
+      );
+    });
+    toasts.show('$name started in the greenhouse', kind: ToastKind.success);
+    return id;
+  }
+
   /// Moves a greenhouse planting into the ground.
   void plantOut(String plantingId, {DateTime? on, String? location}) {
     final p = plantings[plantingId];

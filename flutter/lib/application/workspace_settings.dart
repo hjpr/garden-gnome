@@ -38,6 +38,10 @@ enum PanelId {
   /// mode only.
   seeds('Seeds', DockSide.left),
 
+  /// What is growing in the greenhouse, with flats and pots to start
+  /// more. Shown in Plant mode only.
+  greenhouse('Greenhouse', DockSide.left),
+
   /// Actions on the selected shapes, such as Boolean Union and Subtract.
   operations('Operations', DockSide.left),
   settings('Controls', DockSide.left),
@@ -53,7 +57,7 @@ enum PanelId {
 
   /// Mode filtering never changes the user's saved visibility or order.
   bool availableIn(EditMode mode) => switch (this) {
-    seeds => mode == EditMode.plant,
+    seeds || greenhouse => mode == EditMode.plant,
     operations || settings => mode == EditMode.build,
     tools || properties || layers => true,
   };
@@ -65,6 +69,7 @@ class DockLayout {
     this.left = const [
       PanelId.tools,
       PanelId.seeds,
+      PanelId.greenhouse,
       PanelId.operations,
       PanelId.settings,
     ],

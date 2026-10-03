@@ -9,6 +9,7 @@ import '../widgets/icon_controls.dart';
 import '../widgets/panel.dart' show EmptyPanelText;
 import 'calendar_presentation.dart';
 import 'garden_card.dart';
+import 'start_tray_dialog.dart';
 import 'status_chip.dart';
 import 'timeline.dart';
 
@@ -38,10 +39,23 @@ class GreenhouseBody extends StatelessWidget {
           Expanded(
             child: GardenCard(
               title: 'Growing now',
-              trailing: CalendarLegend([
-                ('Germinating', Palette.muted),
-                ('Plant out', Palette.plantOut),
-              ]),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CalendarLegend([
+                    ('Germinating', Palette.muted),
+                    ('Plant out', Palette.plantOut),
+                  ]),
+                  const SizedBox(width: 10),
+                  FilledButton.icon(
+                    onPressed: garden.profiles.isEmpty
+                        ? null
+                        : () => showStartTrayDialog(context, garden),
+                    icon: const Icon(Icons.add, size: 16),
+                    label: const Text('Flats or pots'),
+                  ),
+                ],
+              ),
               padding: EdgeInsets.zero,
               child: Timeline(
                 range: calendarRange(today),
@@ -94,7 +108,7 @@ class GreenhouseBody extends StatelessWidget {
       title: s.profile.displayName,
       subtitle: [
         'Sown ${formatDay(p.sownOn)}',
-        if (p.count != null) '${p.count} cells',
+        if (trayDescription(p) case final tray when tray.isNotEmpty) tray,
         status,
       ].join(' · '),
       trailing: Row(
@@ -188,7 +202,11 @@ class _QueueTile extends StatelessWidget {
               label: 'Start in greenhouse today',
               size: 26,
               onPressed: r.timing.isOpen
-                  ? () => garden.sow(r.profile.id, indoors: true)
+                  ? () => showStartTrayDialog(
+                      context,
+                      garden,
+                      varietyId: r.profile.id,
+                    )
                   : null,
             ),
           ],

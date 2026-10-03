@@ -7,6 +7,7 @@ import '../widgets/icon_controls.dart';
 import 'calendar_presentation.dart';
 import 'climate_bar.dart';
 import 'garden_card.dart';
+import 'start_tray_dialog.dart';
 import 'status_chip.dart';
 import 'timeline.dart';
 
@@ -128,9 +129,15 @@ class _RowActions extends StatelessWidget {
           iconData: indoors ? Icons.move_to_inbox_outlined : Icons.grass,
           label: indoors ? 'Start in greenhouse today' : 'Sow today',
           size: 26,
-          onPressed: r.timing.isOpen
-              ? () => garden.sow(r.profile.id, indoors: indoors)
-              : null,
+          onPressed: !r.timing.isOpen
+              ? null
+              : indoors
+              ? () => showStartTrayDialog(
+                  context,
+                  garden,
+                  varietyId: r.profile.id,
+                )
+              : () => garden.sow(r.profile.id, indoors: false),
         ),
       ],
     );

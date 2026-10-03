@@ -119,3 +119,18 @@ then rebuild the app. The variety list is a bundled catalog snapshot, not live
 stock availability. Some crops and cultivation-specific categories have no
 separately listed varieties. See
 `tools/johnnys-catalog/README.md`.
+
+## Greenhouse flats and pots
+- Start seed in the greenhouse with Flats or pots (Greenhouse screen,
+  the Plant mode Greenhouse panel, or Start in greenhouse in Grow).
+  Flats: how many flats and cells per flat; each cell is one plant.
+  Pots: how many pots; one plant each. The dialog shows how many plants
+  you will have to plant out.
+- In Build's Plant mode, the Greenhouse panel under Seeds lists what is
+  growing, the plants each gives, and when it is due out.
+
+## Calendars
+- Grow, Greenhouse and Harvest show today's date above the months. The
+  arrows move the view two months earlier or later; Today brings it
+  back. Darker lines mark the start of each week (Monday), fainter ones
+  each day.
