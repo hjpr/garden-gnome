@@ -943,6 +943,19 @@ class EditorController extends ChangeNotifier {
     (document) => document.withCounterFloor(_ledger).withSownOn(layerId, day),
   );
 
+  /// Plans greenhouse tray [plantingId] into planting [layerId] on
+  /// [outOn], planting [seed] there, as one Undo step.
+  void placeTray(
+    String layerId,
+    String plantingId,
+    ZoneSeed seed,
+    DateTime outOn,
+  ) => _changeZone(
+    layerId,
+    'Plan ${seed.name} out',
+    (document) => document.withTrayIn(layerId, plantingId, seed, outOn),
+  );
+
   /// Sets (or with null clears) the Transplanted date of planting
   /// [layerId] as one Undo step.
   void setTransplantedOn(String layerId, DateTime? day) => _changeZone(

@@ -122,15 +122,22 @@ separately listed varieties. See
 
 ## Greenhouse flats and pots
 - Start seed in the greenhouse with Flats or pots (Greenhouse screen,
-  the Plant mode Greenhouse panel, or Start in greenhouse in Grow).
-  Flats: how many flats and cells per flat; each cell is one plant.
-  Pots: how many pots; one plant each. The dialog shows how many plants
-  you will have to plant out.
-- In Build's Plant mode, the Greenhouse panel under Seeds lists what is
-  growing, the plants each gives, and when it is due out.
+  or Start in greenhouse in Grow). Flats: how many flats and cells per
+  flat; each cell is one plant. Pots: how many pots; one plant each.
+  The dialog shows how many plants you will have to plant out.
+- In Build's Plant mode, the Greenhouse panel under Seeds lists every
+  flat and pot still in the greenhouse, ready or not, with a Growing,
+  Ready or Overdue tag, the plants each gives, and when it is ready.
+- Drag one onto a planting to plan where it goes: the planting takes
+  that seed, and its Transplanted date is set to the day the plants
+  are ready (today if that has passed). It stays in the greenhouse
+  until that day. Removing the seed or the planting sends it back to
+  the greenhouse unplanned.
 
 ## Calendars
-- Grow, Greenhouse and Harvest show today's date above the months. The
-  arrows move the view two months earlier or later; Today brings it
-  back. Darker lines mark the start of each week (Monday), fainter ones
-  each day.
+- Grow, Greenhouse and Harvest show today's date above the months.
+  Over the calendar, scroll the mouse wheel to zoom in (fewer days,
+  day numbers appear) or out (up to about three years); drag to move
+  earlier or later. Today brings the view back. Darker lines mark the
+  start of each week (Monday), fainter ones each day; zoomed far out,
+  the darker lines mark months.

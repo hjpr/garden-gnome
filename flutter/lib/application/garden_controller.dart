@@ -321,7 +321,7 @@ class GardenController extends ChangeNotifier {
   /// Moves a greenhouse planting into the ground.
   void plantOut(String plantingId, {DateTime? on, String? location}) {
     final p = plantings[plantingId];
-    if (p == null || p.stage != PlantingStage.greenhouse) return;
+    if (p == null || !p.isInGreenhouseOn(today)) return;
     _changePlanting(
       'Plant out',
       p.copyWith(plantedOutOn: () => dayOf(on ?? today), location: location),
@@ -357,6 +357,16 @@ class GardenController extends ChangeNotifier {
   List<PlantingSchedule> schedules(PlantingStage stage) => [
     for (final p in plantings.values)
       if (p.stage == stage)
+        if (profileOf(p.varietyId) case final profile?)
+          PlantingSchedule(p, profile),
+  ]..sort((a, b) => a.planting.sownOn.compareTo(b.planting.sownOn));
+
+  /// Everything growing in the greenhouse today, ready or not, oldest
+  /// sowing first: trays not yet planted out, and planting layers whose
+  /// Transplanted date is still ahead.
+  List<PlantingSchedule> inGreenhouse() => [
+    for (final p in plantings.values)
+      if (p.isInGreenhouseOn(today))
         if (profileOf(p.varietyId) case final profile?)
           PlantingSchedule(p, profile),
   ]..sort((a, b) => a.planting.sownOn.compareTo(b.planting.sownOn));

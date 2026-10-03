@@ -23,7 +23,7 @@ class HomeBody extends StatelessWidget {
         final n = garden.record.varieties.length;
         return n == 1 ? '1 variety' : '$n varieties';
       case AppTool.greenhouse:
-        final n = garden.schedules(PlantingStage.greenhouse).length;
+        final n = garden.inGreenhouse().length;
         return n == 0 ? 'Nothing growing' : '$n growing';
       case AppTool.grow:
         final open = garden

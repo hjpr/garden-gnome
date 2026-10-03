@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -56,6 +57,11 @@ Future<(AppNavigator, GardenController)> _pumpApp(WidgetTester tester) async {
   await tester.pumpAndSettle();
   return (navigator, garden);
 }
+
+final _todayButton = find.ancestor(
+  of: find.widgetWithText(TextButton, 'Today'),
+  matching: find.byType(Visibility),
+);
 
 Finder _gardenField(String label) => find.descendant(
   of: find.byWidgetPredicate(
@@ -584,15 +590,29 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Nothing in the greenhouse.'), findsOneWidget);
 
-    // The calendar steps by two months either way and comes back.
+    // Dragging the chart moves through time; the wheel zooms; Today
+    // brings the view back.
     expect(find.byKey(const ValueKey('calendar-today')), findsOneWidget);
     expect(find.text('Wednesday, Apr 1, 2026'), findsOneWidget);
-    await tester.tap(find.byTooltip('Later'));
+    bool todayShown() => tester.widget<Visibility>(_todayButton).visible;
+    expect(todayShown(), isFalse);
+    final chart =
+        tester.getCenter(find.byType(Timeline)) + const Offset(300, 0);
+    await tester.dragFrom(chart, const Offset(-900, 0));
     await tester.pumpAndSettle();
-    expect(find.text('TODAY'), findsNothing, reason: 'today is off the view');
+    expect(todayShown(), isTrue);
     await tester.tap(find.widgetWithText(TextButton, 'Today'));
     await tester.pumpAndSettle();
-    expect(find.widgetWithText(TextButton, 'Today'), findsNothing);
+    expect(todayShown(), isFalse);
+    final mouse = TestPointer(1, PointerDeviceKind.mouse);
+    await tester.sendEventToBinding(mouse.hover(chart));
+    for (var i = 0; i < 3; i++) {
+      await tester.sendEventToBinding(mouse.scroll(const Offset(0, 100)));
+    }
+    await tester.pumpAndSettle();
+    expect(todayShown(), isTrue, reason: 'zoomed out');
+    await tester.tap(find.widgetWithText(TextButton, 'Today'));
+    await tester.pumpAndSettle();
 
     navigator.open(AppTool.harvest);
     await tester.pumpAndSettle();

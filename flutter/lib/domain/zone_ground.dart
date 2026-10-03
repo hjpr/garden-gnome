@@ -79,11 +79,19 @@ extension ZoneGround on GardenDocument {
     // takes it out.
     if (currentPlantingOf(layerId) case final sowing?) {
       next = seed == null
-          ? next.withoutPlanting(sowing.id)
+          ? next.withoutSowing(sowing)
           : next.withPlanting(sowing.copyWith(varietyId: seed.varietyId));
     }
     return next;
   }
+
+  /// [sowing] taken off the map: a greenhouse flat or pot goes back to
+  /// the greenhouse unplanned; any other sowing is removed.
+  GardenDocument withoutSowing(Planting sowing) => sowing.container == null
+      ? withoutPlanting(sowing.id)
+      : withPlanting(
+          sowing.copyWith(layerId: () => null, plantedOutOn: () => null),
+        );
 
   /// The sowing growing in planting layer [layerId] now: the latest one
   /// linked to it that is not finished. Null before a Sown date is set.
@@ -121,6 +129,48 @@ extension ZoneGround on GardenDocument {
     );
   }
 
+  /// Plans greenhouse tray [plantingId] to go out into planting layer
+  /// [layerId] on [outOn]: the layer takes [seed] and the tray becomes
+  /// its sowing, with [outOn] as its Transplanted date. Any other sowing
+  /// still growing there is taken out, as when its seed is removed; a
+  /// tray planned for another layer moves here.
+  GardenDocument withTrayIn(
+    String layerId,
+    String plantingId,
+    ZoneSeed seed,
+    DateTime outOn,
+  ) {
+    final layer = layers[layerId];
+    final properties = layer?.properties;
+    if (properties is! ZoneProperties || !properties.isGrow) {
+      throw StateError('Greenhouse plants go into plantings');
+    }
+    final tray = plantings[plantingId];
+    if (tray == null || !tray.startedIndoors || tray.finishedOn != null) {
+      throw StateError('That greenhouse sowing is gone');
+    }
+    if (seed.problem case final problem?) throw StateError(problem);
+    final out = dayOf(outOn).isBefore(tray.sownOn) ? tray.sownOn : outOn;
+    var next = properties.seed == seed
+        ? this
+        : withLayer(
+            layer!.copyWith(properties: properties.copyWith(seed: () => seed)),
+          );
+    for (final p in plantings.values) {
+      if (p.id != plantingId && p.layerId == layerId && p.finishedOn == null) {
+        next = next.withoutSowing(p);
+      }
+    }
+    final placed = tray.copyWith(
+      varietyId: seed.varietyId,
+      layerId: () => layerId,
+      plantedOutOn: () => dayOf(out),
+    );
+    return placed == tray && identical(next, this)
+        ? this
+        : next.withPlanting(placed);
+  }
+
   /// Sets when the seedlings in planting layer [layerId] went into the
   /// ground; null makes it sown in place again. Needs a Sown date first.
   GardenDocument withTransplantedOn(String layerId, DateTime? day) {
@@ -131,11 +181,12 @@ extension ZoneGround on GardenDocument {
     if (out != null && out.isBefore(p.sownOn)) {
       throw StateError('Transplanted must be on or after Sown');
     }
-    if (p.plantedOutOn == out && p.startedIndoors == (out != null)) {
-      return this;
-    }
+    // A greenhouse flat or pot stays started indoors with no date: it is
+    // simply not planned out yet.
+    final indoors = out != null || p.container != null;
+    if (p.plantedOutOn == out && p.startedIndoors == indoors) return this;
     return withPlanting(
-      p.copyWith(plantedOutOn: () => out, startedIndoors: out != null),
+      p.copyWith(plantedOutOn: () => out, startedIndoors: indoors),
     );
   }
 

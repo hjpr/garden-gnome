@@ -96,6 +96,16 @@ class Planting {
     return PlantingStage.inGround;
   }
 
+  /// Whether it is in the greenhouse on [day]: started indoors, not
+  /// finished, and not planted out yet (no Transplanted date, or one
+  /// still ahead). [stage] reads a planned Transplanted date as already
+  /// in the ground, which suits Harvest's forecast but not the greenhouse.
+  bool isInGreenhouseOn(DateTime day) {
+    if (!startedIndoors || finishedOn != null) return false;
+    final out = plantedOutOn;
+    return out == null || out.isAfter(dayOf(day));
+  }
+
   /// When it went into the ground: planted out, or sown in place.
   DateTime? get inGroundOn => startedIndoors ? plantedOutOn : sownOn;
 

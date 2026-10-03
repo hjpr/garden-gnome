@@ -1,7 +1,9 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../../domain/grow/day.dart';
 import '../theme.dart';
+import 'timeline_view.dart';
 
 /// One coloured stretch on a [Timeline] row. [ideal], when given, is
 /// drawn solid and the rest of [span] lighter.
@@ -39,10 +41,11 @@ class TimelineRow {
   final bool selected;
 }
 
-/// A calendar strip: today's date with arrows to move the view, month
-/// headings, one row per item with its windows as bars over week (major)
-/// and day (minor) lines, and a line at today. Shared by Grow,
-/// Greenhouse and Harvest so all three read the same way.
+/// A calendar strip: today's date, month headings, one row per item with
+/// its windows as bars over week (major) and day (minor) lines, and a
+/// line at today. Over the chart the mouse wheel zooms around the
+/// pointer and a drag moves through time; Today brings the view back.
+/// Shared by Grow, Greenhouse and Harvest so all three read the same way.
 class Timeline extends StatefulWidget {
   const Timeline({
     super.key,
@@ -53,6 +56,7 @@ class Timeline extends StatefulWidget {
     this.emptyText = 'Nothing to show.',
   });
 
+  /// The view shown at first and after Today.
   final DayWindow range;
   final DateTime today;
   final List<TimelineRow> rows;
@@ -61,32 +65,55 @@ class Timeline extends StatefulWidget {
 
   static const rowHeight = 40.0;
 
-  /// How far one arrow click moves the view.
-  static const stepMonths = 2;
-
   @override
   State<Timeline> createState() => _TimelineState();
 }
 
 class _TimelineState extends State<Timeline> {
-  /// Steps of [Timeline.stepMonths] from [Timeline.range]; 0 is the view
-  /// around today.
-  int _offset = 0;
+  /// The zoomed or moved view; null shows [Timeline.range].
+  TimelineView? _moved;
+  bool _dragging = false;
 
-  DayWindow get range {
-    if (_offset == 0) return widget.range;
-    DateTime shift(DateTime d) =>
-        DateTime.utc(d.year, d.month + _offset * Timeline.stepMonths, d.day);
-    return DayWindow(shift(widget.range.start), shift(widget.range.end));
-  }
+  /// Width of the chart at the last layout, for turning drags into days.
+  double _chartWidth = 1;
+
+  DateTime get _home => widget.range.start;
+
+  TimelineView get _view =>
+      _moved ??
+      TimelineView(
+        start: 0,
+        days: (daysBetween(widget.range.start, widget.range.end) + 1)
+            .toDouble(),
+      );
 
   DateTime get today => widget.today;
   List<TimelineRow> get rows => widget.rows;
   double get labelWidth => widget.labelWidth;
-  String get emptyText => widget.emptyText;
   static const rowHeight = Timeline.rowHeight;
 
-  Widget _navigator() {
+  void _onSignal(PointerSignalEvent event) {
+    if (event is! PointerScrollEvent) return;
+    final along = event.localPosition.dx - labelWidth;
+    // Over the names the wheel scrolls the list as usual.
+    if (along < 0) return;
+    GestureBinding.instance.pointerSignalResolver.register(event, (_) {
+      final dy = event.scrollDelta.dy;
+      if (dy == 0) return;
+      final factor = dy > 0 ? TimelineView.zoomStep : 1 / TimelineView.zoomStep;
+      final anchor = (along / _chartWidth).clamp(0.0, 1.0);
+      setState(() => _moved = _view.zoomed(factor, anchor));
+    });
+  }
+
+  void _onDrag(DragUpdateDetails details) {
+    final dx = details.primaryDelta ?? 0;
+    if (dx == 0) return;
+    // Dragging right pulls earlier days into view, like a map.
+    setState(() => _moved = _view.panned(-dx / _chartWidth));
+  }
+
+  Widget _header() {
     final weekday = const [
       'Monday', 'Tuesday', 'Wednesday', 'Thursday', //
       'Friday', 'Saturday', 'Sunday',
@@ -96,13 +123,6 @@ class _TimelineState extends State<Timeline> {
       child: Row(
         children: [
           SizedBox(width: labelWidth),
-          IconButton(
-            tooltip: 'Earlier',
-            visualDensity: VisualDensity.compact,
-            iconSize: 18,
-            onPressed: () => setState(() => _offset--),
-            icon: const Icon(Icons.chevron_left),
-          ),
           Expanded(
             child: Text(
               '$weekday, ${formatDay(today)}, ${today.year}',
@@ -111,93 +131,105 @@ class _TimelineState extends State<Timeline> {
               style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
             ),
           ),
-          if (_offset != 0)
-            TextButton(
-              onPressed: () => setState(() => _offset = 0),
+          // Kept in the layout while hidden so the date never shifts.
+          Visibility.maintain(
+            visible: _moved != null,
+            child: TextButton(
+              onPressed: () => setState(() => _moved = null),
               child: const Text('Today'),
             ),
-          IconButton(
-            tooltip: 'Later',
-            visualDensity: VisualDensity.compact,
-            iconSize: 18,
-            onPressed: () => setState(() => _offset++),
-            icon: const Icon(Icons.chevron_right),
           ),
+          const SizedBox(width: 6),
         ],
       ),
     );
   }
 
+  /// The chart part of a row or the heading: shows a grab hand, since a
+  /// drag there moves through time.
+  Widget _chartCell(Widget child) => MouseRegion(
+    cursor: _dragging ? SystemMouseCursors.grabbing : SystemMouseCursors.grab,
+    child: child,
+  );
+
   @override
   Widget build(BuildContext context) {
-    final range = this.range;
-    final showsToday = range.contains(today);
     return LayoutBuilder(
       builder: (context, constraints) {
         final chartWidth = (constraints.maxWidth - labelWidth).clamp(
           120.0,
           double.infinity,
         );
-        final days = daysBetween(range.start, range.end) + 1;
-        double x(DateTime d) =>
-            (daysBetween(range.start, d) / days * chartWidth).clamp(
-              0.0,
-              chartWidth,
-            );
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _navigator(),
-            SizedBox(
-              height: 32,
-              child: Row(
-                children: [
-                  SizedBox(width: labelWidth),
-                  SizedBox(
-                    width: chartWidth,
-                    child: CustomPaint(
-                      painter: _MonthsPainter(range, x, today, showsToday),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Divider(),
-            Expanded(
-              child: rows.isEmpty
-                  ? Center(child: _EmptyText(emptyText))
-                  : Stack(
-                      children: [
-                        ListView.builder(
-                          itemCount: rows.length,
-                          itemExtent: rowHeight,
-                          itemBuilder: (context, i) =>
-                              _row(rows[i], range, chartWidth, x),
-                        ),
-                        if (showsToday)
-                          Positioned(
-                            left: labelWidth + x(today) - 1,
-                            top: 0,
-                            bottom: 0,
-                            child: IgnorePointer(
-                              child: Container(width: 2, color: Palette.ink),
+        _chartWidth = chartWidth;
+        final scale = _Scale(_home, _view, chartWidth);
+        final showsToday = scale.shows(today);
+        return Listener(
+          onPointerSignal: _onSignal,
+          child: GestureDetector(
+            // Empty stretches of the chart drag too.
+            behavior: HitTestBehavior.opaque,
+            onHorizontalDragStart: (_) => setState(() => _dragging = true),
+            onHorizontalDragUpdate: _onDrag,
+            onHorizontalDragEnd: (_) => setState(() => _dragging = false),
+            onHorizontalDragCancel: () => setState(() => _dragging = false),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _header(),
+                SizedBox(
+                  height: 32,
+                  child: Row(
+                    children: [
+                      SizedBox(width: labelWidth),
+                      _chartCell(
+                        SizedBox(
+                          width: chartWidth,
+                          height: 32,
+                          child: ClipRect(
+                            child: CustomPaint(
+                              painter: _MonthsPainter(scale, today, showsToday),
                             ),
                           ),
-                      ],
-                    ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(),
+                Expanded(
+                  child: rows.isEmpty
+                      ? Center(child: _EmptyText(widget.emptyText))
+                      : Stack(
+                          children: [
+                            ListView.builder(
+                              itemCount: rows.length,
+                              itemExtent: rowHeight,
+                              itemBuilder: (context, i) => _row(rows[i], scale),
+                            ),
+                            if (showsToday)
+                              Positioned(
+                                left: labelWidth + scale.x(today) - 1,
+                                top: 0,
+                                bottom: 0,
+                                child: IgnorePointer(
+                                  child: Container(
+                                    width: 2,
+                                    color: Palette.ink,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                ),
+              ],
             ),
-          ],
+          ),
         );
       },
     );
   }
 
-  Widget _row(
-    TimelineRow row,
-    DayWindow range,
-    double chartWidth,
-    double Function(DateTime) x,
-  ) {
+  Widget _row(TimelineRow row, _Scale scale) {
     return Material(
       color: row.selected ? Palette.wash : Palette.paper,
       child: InkWell(
@@ -247,16 +279,20 @@ class _TimelineState extends State<Timeline> {
                   ),
                 ),
               ),
-              SizedBox(
-                width: chartWidth,
-                height: rowHeight,
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: CustomPaint(painter: _DayLinesPainter(range, x)),
+              _chartCell(
+                SizedBox(
+                  width: scale.width,
+                  height: rowHeight,
+                  child: ClipRect(
+                    child: Stack(
+                      children: [
+                        Positioned.fill(
+                          child: CustomPaint(painter: _DayLinesPainter(scale)),
+                        ),
+                        for (final bar in row.bars) ..._bar(bar, scale),
+                      ],
                     ),
-                    for (final bar in row.bars) ..._bar(bar, range, x),
-                  ],
+                  ),
                 ),
               ),
             ],
@@ -266,18 +302,18 @@ class _TimelineState extends State<Timeline> {
     );
   }
 
-  List<Widget> _bar(
-    TimelineBar bar,
-    DayWindow range,
-    double Function(DateTime) x,
-  ) {
-    if (bar.span.end.isBefore(range.start) ||
-        bar.span.start.isAfter(range.end)) {
+  List<Widget> _bar(TimelineBar bar, _Scale scale) {
+    final shown = scale.window;
+    if (bar.span.end.isBefore(shown.start) ||
+        bar.span.start.isAfter(shown.end)) {
       return const [];
     }
     Widget piece(DayWindow w, double alpha, double height) {
-      final left = x(w.start);
-      final width = (x(addDays(w.end, 1)) - left).clamp(3.0, double.infinity);
+      final left = scale.clampedX(w.start);
+      final width = (scale.clampedX(addDays(w.end, 1)) - left).clamp(
+        3.0,
+        double.infinity,
+      );
       return Positioned(
         left: left,
         width: width,
@@ -302,6 +338,40 @@ class _TimelineState extends State<Timeline> {
   }
 }
 
+/// Turns days into chart pixels for one view and chart width.
+class _Scale {
+  _Scale(this.home, this.view, this.width);
+
+  final DateTime home;
+  final TimelineView view;
+  final double width;
+
+  late final DayWindow window = view.window(home);
+
+  double get dayPixels => width / view.days;
+
+  /// Where the start of [day] falls; may be off either edge.
+  double x(DateTime day) =>
+      (daysBetween(home, day) - view.start) / view.days * width;
+
+  double clampedX(DateTime day) => x(day).clamp(0.0, width);
+
+  bool shows(DateTime day) {
+    final at = x(day);
+    return at >= 0 && at <= width;
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is _Scale &&
+      other.home == home &&
+      other.view == view &&
+      other.width == width;
+
+  @override
+  int get hashCode => Object.hash(home, view, width);
+}
+
 class _EmptyText extends StatelessWidget {
   const _EmptyText(this.text);
 
@@ -318,59 +388,80 @@ class _EmptyText extends StatelessWidget {
   );
 }
 
-/// Month names and ticks across the top of the timeline.
+/// Month names and ticks across the top of the timeline, day numbers
+/// when zoomed in far enough, and the TODAY badge.
 class _MonthsPainter extends CustomPainter {
-  _MonthsPainter(this.range, this.x, this.today, this.showsToday);
+  _MonthsPainter(this.scale, this.today, this.showsToday);
 
-  final DayWindow range;
-  final double Function(DateTime) x;
+  final _Scale scale;
   final DateTime today;
   final bool showsToday;
 
+  /// Day numbers need at least this many pixels per day.
+  static const _dayNumberPixels = 20.0;
+
+  TextPainter _text(String text, TextStyle style) => TextPainter(
+    text: TextSpan(text: text, style: style),
+    textDirection: TextDirection.ltr,
+  )..layout();
+
   @override
   void paint(Canvas canvas, Size size) {
+    final range = scale.window;
     final tick = Paint()
       ..color = Palette.panelBorder
       ..strokeWidth = 1;
     var month = DateTime.utc(range.start.year, range.start.month);
     while (!month.isAfter(range.end)) {
       final next = DateTime.utc(month.year, month.month + 1);
-      final left = x(month.isBefore(range.start) ? range.start : month);
-      final right = x(next.isAfter(range.end) ? addDays(range.end, 1) : next);
-      if (!month.isBefore(range.start)) {
-        canvas.drawLine(Offset(left, 0), Offset(left, size.height), tick);
+      final start = scale.x(month);
+      final left = start.clamp(0.0, size.width);
+      final right = scale.clampedX(next);
+      if (start >= 0) {
+        canvas.drawLine(Offset(start, 0), Offset(start, size.height), tick);
       }
-      final label = TextPainter(
-        text: TextSpan(
-          text: month.month == 1
-              ? '${monthName(month.month)} ${month.year}'
-              : monthName(month.month),
-          style: sectionTitleStyle,
-        ),
-        textDirection: TextDirection.ltr,
-      )..layout();
-      if (right - left > label.width + 8) {
-        // Top half: the TODAY badge takes the bottom half, so the two
-        // never collide.
-        label.paint(canvas, Offset(left + 6, 1));
+      // January always says which year starts there; zoomed far out,
+      // where "Jan 2027" no longer fits, the year alone does.
+      final names = month.month == 1
+          ? ['${monthName(month.month)} ${month.year}', '${month.year}']
+          : [monthName(month.month)];
+      for (final name in names) {
+        final label = _text(name, sectionTitleStyle);
+        final fits = right - left > label.width + 8;
+        // Top half: the TODAY badge and day numbers take the bottom half,
+        // so they never collide.
+        if (fits) label.paint(canvas, Offset(left + 6, 1));
+        label.dispose();
+        if (fits) break;
       }
-      label.dispose();
       month = next;
     }
+    if (scale.dayPixels >= _dayNumberPixels) {
+      for (var d = range.start; !d.isAfter(range.end); d = addDays(d, 1)) {
+        if (showsToday && d == today) continue;
+        final number = _text(
+          '${d.day}',
+          const TextStyle(fontSize: 10, color: Palette.faint),
+        );
+        final centre = scale.x(d) + scale.dayPixels / 2;
+        number.paint(
+          canvas,
+          Offset(centre - number.width / 2, size.height - number.height - 1),
+        );
+        number.dispose();
+      }
+    }
     if (!showsToday) return;
-    final t = x(today);
-    final todayLabel = TextPainter(
-      text: const TextSpan(
-        text: 'TODAY',
-        style: TextStyle(
-          fontSize: 9.5,
-          fontWeight: FontWeight.w700,
-          color: Colors.white,
-          letterSpacing: 0.5,
-        ),
+    final t = scale.x(today);
+    final todayLabel = _text(
+      'TODAY',
+      const TextStyle(
+        fontSize: 9.5,
+        fontWeight: FontWeight.w700,
+        color: Colors.white,
+        letterSpacing: 0.5,
       ),
-      textDirection: TextDirection.ltr,
-    )..layout();
+    );
     final box = Rect.fromCenter(
       center: Offset(t, size.height - 8),
       width: todayLabel.width + 8,
@@ -386,42 +477,46 @@ class _MonthsPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_MonthsPainter old) =>
-      old.range != range || old.today != today || old.showsToday != showsToday;
+      old.scale != scale || old.today != today || old.showsToday != showsToday;
 }
 
 /// A faint line at every day and a stronger one at the start of every
 /// week (Monday), so where a window starts and ends reads at a glance.
-/// Day lines are left out when days are too narrow to tell apart.
+/// Zoomed out, day lines are left out, then week lines give way to one
+/// line at the start of each month.
 class _DayLinesPainter extends CustomPainter {
-  _DayLinesPainter(this.range, this.x);
+  _DayLinesPainter(this.scale);
 
-  final DayWindow range;
-  final double Function(DateTime) x;
+  final _Scale scale;
 
-  /// Day lines need at least this many pixels per day.
+  /// Day lines need at least this many pixels per day, week lines this
+  /// many per week.
   static const _minDayPixels = 4.0;
+  static const _minWeekPixels = 10.0;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final week = Paint()
+    final major = Paint()
       ..color = Palette.muted.withValues(alpha: 0.55)
       ..strokeWidth = 1.5;
-    final day = Paint()
+    final minor = Paint()
       ..color = Palette.rule.withValues(alpha: 0.5)
       ..strokeWidth = 1;
-    final dayPixels = x(addDays(range.start, 1)) - x(range.start);
+    final dayPixels = scale.dayPixels;
+    final weeks = dayPixels * 7 >= _minWeekPixels;
+    final range = scale.window;
     for (var d = range.start; !d.isAfter(range.end); d = addDays(d, 1)) {
-      final monday = d.weekday == DateTime.monday;
-      if (!monday && dayPixels < _minDayPixels) continue;
-      final at = x(d).roundToDouble() + 0.5;
+      final isMajor = weeks ? d.weekday == DateTime.monday : d.day == 1;
+      if (!isMajor && dayPixels < _minDayPixels) continue;
+      final at = scale.x(d).roundToDouble() + 0.5;
       canvas.drawLine(
         Offset(at, 0),
         Offset(at, size.height),
-        monday ? week : day,
+        isMajor ? major : minor,
       );
     }
   }
 
   @override
-  bool shouldRepaint(_DayLinesPainter old) => old.range != range;
+  bool shouldRepaint(_DayLinesPainter old) => old.scale != scale;
 }

@@ -258,9 +258,12 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
         WidgetsBinding.instance.addPostFrameCallback(
           (_) => widget.editor.setViewportSize(size),
         );
-        return DragTarget<VarietyProfile>(
-          // Seeds from the Seeds panel land on grow zones (Plant mode).
-          onWillAcceptWithDetails: (_) => widget.editor.mode == EditMode.plant,
+        return DragTarget<Object>(
+          // Seeds from the Seeds panel and plants from the Greenhouse
+          // panel land on plantings (Plant mode).
+          onWillAcceptWithDetails: (details) =>
+              widget.editor.mode == EditMode.plant &&
+              (details.data is VarietyProfile || details.data is TrayDrag),
           onMove: (details) => widget.editor.setPreview(
             SeedDropPreview(
               growZoneAt(widget.editor, _worldAt(details.offset)),
@@ -269,7 +272,13 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
           onLeave: (_) => widget.editor.setPreview(null),
           onAcceptWithDetails: (details) {
             widget.editor.setPreview(null);
-            dropSeed(widget.editor, details.data, _worldAt(details.offset));
+            final world = _worldAt(details.offset);
+            switch (details.data) {
+              case VarietyProfile profile:
+                dropSeed(widget.editor, profile, world);
+              case TrayDrag tray:
+                dropTray(widget.editor, tray, world);
+            }
           },
           builder: (context, _, _) => _pointerArea(size),
         );

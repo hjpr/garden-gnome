@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:garden_gnome/domain/grow/planting.dart';
 import 'package:garden_gnome/domain/layer.dart';
 import 'package:garden_gnome/domain/zone_ground.dart';
 
@@ -44,5 +45,102 @@ void main() {
 
     editor.deleteLayer(grow);
     expect(editor.document.plantings, isEmpty);
+  });
+
+  test('a greenhouse sowing with a planned Transplanted date is still in '
+      'the greenhouse until that day', () {
+    final p = Planting(
+      id: 'planting-1',
+      varietyId: 'variety-1',
+      sownOn: DateTime.utc(2026, 9, 20),
+      startedIndoors: true,
+      plantedOutOn: DateTime.utc(2026, 10, 20),
+    );
+    expect(p.isInGreenhouseOn(DateTime.utc(2026, 10, 3)), isTrue);
+    expect(p.isInGreenhouseOn(DateTime.utc(2026, 10, 20)), isFalse);
+    expect(
+      p
+          .copyWith(plantedOutOn: () => null)
+          .isInGreenhouseOn(DateTime.utc(2027, 1, 1)),
+      isTrue,
+    );
+    expect(
+      p
+          .copyWith(startedIndoors: false)
+          .isInGreenhouseOn(DateTime.utc(2026, 10, 3)),
+      isFalse,
+    );
+  });
+
+  test('a greenhouse tray dropped on a planting is planned out there', () {
+    final (editor, _, _, grow) = garden(GroundType.flat);
+    final tray = Planting(
+      id: 'planting-1',
+      varietyId: 'variety-1',
+      sownOn: DateTime.utc(2027, 3, 1),
+      startedIndoors: true,
+      container: GrowContainer.flat,
+      containers: 2,
+      cellsPerFlat: 50,
+    );
+    editor.commit('Start', editor.documentForEditing.withPlanting(tray));
+    final out = DateTime.utc(2027, 4, 12);
+    editor.placeTray(grow, tray.id, seed(), out);
+    expect(editor.undoLabel, 'Plan Test · Crop out');
+    final placed = editor.document.plantings[tray.id]!;
+    expect(placed.layerId, grow);
+    expect(placed.plantedOutOn, out);
+    expect(placed.plants, 100);
+    expect(editor.document.currentPlantingOf(grow)!.id, tray.id);
+    expect(
+      (editor.document.layers[grow]!.properties as ZoneProperties).seed,
+      seed(),
+    );
+
+    // Taking the seed out sends the tray back to the greenhouse.
+    editor.setSeed(grow, null);
+    final back = editor.document.plantings[tray.id]!;
+    expect(back.layerId, isNull);
+    expect(back.plantedOutOn, isNull);
+    expect(back.isInGreenhouseOn(DateTime.utc(2027, 3, 5)), isTrue);
+    editor.undo();
+
+    // Clearing Transplanted keeps it a greenhouse tray.
+    editor.setTransplantedOn(grow, null);
+    expect(editor.document.plantings[tray.id]!.startedIndoors, isTrue);
+    editor.undo();
+
+    // Deleting the planting layer keeps the tray too.
+    editor.deleteLayer(grow);
+    expect(editor.document.plantings[tray.id]!.layerId, isNull);
+  });
+
+  test('a tray replaces a sowing already in the planting', () {
+    final (editor, _, _, grow) = garden(GroundType.flat);
+    editor.setSeed(grow, seed());
+    editor.setSownOn(grow, DateTime.utc(2027, 3, 1));
+    final direct = editor.document.currentPlantingOf(grow)!;
+    final tray = Planting(
+      id: 'planting-9',
+      varietyId: 'variety-2',
+      sownOn: DateTime.utc(2027, 3, 1),
+      startedIndoors: true,
+      container: GrowContainer.pot,
+      containers: 6,
+    );
+    editor.commit('Start', editor.documentForEditing.withPlanting(tray));
+    const other = ZoneSeed(
+      varietyId: 'variety-2',
+      name: 'Other',
+      size: 0.5,
+      spacing: 0.25,
+    );
+    // Planned for before it was sown: goes out the day it was sown.
+    editor.placeTray(grow, tray.id, other, DateTime.utc(2027, 2, 1));
+    expect(editor.document.plantings.containsKey(direct.id), isFalse);
+    expect(
+      editor.document.plantings[tray.id]!.plantedOutOn,
+      DateTime.utc(2027, 3, 1),
+    );
   });
 }

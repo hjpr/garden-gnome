@@ -335,13 +335,16 @@ class GardenDocument {
     }
     final removedGeometry = removed.map((id) => layers[id]!.geometryId).toSet();
     // Sowings in the removed layers go with them; finished ones stay as
-    // history without their place on the map.
+    // history without their place on the map, and greenhouse flats and
+    // pots go back to the greenhouse unplanned.
     final keptPlantings = {
       for (final p in plantings.values)
         if (!removed.contains(p.layerId))
           p.id: p
         else if (p.finishedOn != null)
-          p.id: p.copyWith(layerId: () => null),
+          p.id: p.copyWith(layerId: () => null)
+        else if (p.container != null)
+          p.id: p.copyWith(layerId: () => null, plantedOutOn: () => null),
     };
     return copyWith(
       layers: updatedLayers,

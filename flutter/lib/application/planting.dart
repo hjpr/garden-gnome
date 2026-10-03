@@ -62,15 +62,58 @@ bool plantIn(EditorController editor, String layerId, VarietyProfile profile) {
     editor.showNotice('Seeds are planted in plantings');
     return false;
   }
+  editor.selectLayer(layerId);
+  editor.showNotice(null);
+  editor.setSeed(layerId, _seedFor(editor, layerId, profile));
+  return true;
+}
+
+/// The seed [profile] gets in [layerId], keeping spacings already typed
+/// there for the same variety.
+ZoneSeed _seedFor(
+  EditorController editor,
+  String layerId,
+  VarietyProfile profile,
+) {
   final current = switch (editor.document.layers[layerId]?.properties) {
     ZoneProperties p => p.seed,
     _ => null,
   };
-  final seed = current?.varietyId == profile.id
-      ? current!
-      : seedFromProfile(profile);
+  return current?.varietyId == profile.id ? current! : seedFromProfile(profile);
+}
+
+/// A greenhouse sowing dragged from Plant mode's Greenhouse panel.
+class TrayDrag {
+  const TrayDrag({
+    required this.plantingId,
+    required this.profile,
+    required this.outOn,
+  });
+
+  final String plantingId;
+  final VarietyProfile profile;
+
+  /// When it should go out: when it is expected to be ready, or today if
+  /// that has passed.
+  final DateTime outOn;
+}
+
+/// Plans the greenhouse sowing in [tray] into the planting under [world]
+/// as one Undo step, and selects that planting. Returns false, with the
+/// reason in the status bar, when there is no planting there.
+bool dropTray(EditorController editor, TrayDrag tray, Vec world) {
+  final layerId = growZoneAt(editor, world);
+  if (layerId == null) {
+    editor.showNotice('Drop greenhouse plants inside a planting');
+    return false;
+  }
   editor.selectLayer(layerId);
   editor.showNotice(null);
-  editor.setSeed(layerId, seed);
+  editor.placeTray(
+    layerId,
+    tray.plantingId,
+    _seedFor(editor, layerId, tray.profile),
+    tray.outOn,
+  );
   return true;
 }

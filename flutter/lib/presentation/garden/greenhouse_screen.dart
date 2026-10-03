@@ -24,7 +24,7 @@ class GreenhouseBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final today = garden.today;
-    final growing = garden.schedules(PlantingStage.greenhouse);
+    final growing = garden.inGreenhouse();
     final queue = [
       for (final r in garden.recommendations(
         kinds: const {WindowKind.greenhouseSow},
