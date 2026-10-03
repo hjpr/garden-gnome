@@ -81,6 +81,45 @@ class Planting {
     location: location ?? this.location,
     notes: notes ?? this.notes,
   );
+
+  /// A copy under another ID, e.g. when moved into a farm.
+  Planting withId(String newId) => Planting(
+    id: newId,
+    varietyId: varietyId,
+    sownOn: sownOn,
+    startedIndoors: startedIndoors,
+    plantedOutOn: plantedOutOn,
+    finishedOn: finishedOn,
+    count: count,
+    location: location,
+    notes: notes,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      other is Planting &&
+      other.id == id &&
+      other.varietyId == varietyId &&
+      other.sownOn == sownOn &&
+      other.startedIndoors == startedIndoors &&
+      other.plantedOutOn == plantedOutOn &&
+      other.finishedOn == finishedOn &&
+      other.count == count &&
+      other.location == location &&
+      other.notes == notes;
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    varietyId,
+    sownOn,
+    startedIndoors,
+    plantedOutOn,
+    finishedOn,
+    count,
+    location,
+    notes,
+  );
 }
 
 /// A planting's expected dates, worked out from its variety.

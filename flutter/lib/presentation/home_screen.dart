@@ -18,7 +18,7 @@ class HomeBody extends StatelessWidget {
   String _summary(AppTool tool) {
     switch (tool) {
       case AppTool.build:
-        return 'Land, zones and ground';
+        return 'Land, beds and plantings';
       case AppTool.seedVault:
         final n = garden.record.varieties.length;
         return n == 1 ? '1 variety' : '$n varieties';
@@ -44,7 +44,7 @@ class HomeBody extends StatelessWidget {
   }
 
   static const _about = {
-    AppTool.build: 'Draw the land and mark out zones.',
+    AppTool.build: 'Draw your farm: land, beds and plantings.',
     AppTool.seedVault: 'The seed you have and how to grow it.',
     AppTool.greenhouse: 'Trays growing and when they go out.',
     AppTool.grow: 'What to sow in the next two months.',
@@ -65,6 +65,12 @@ class HomeBody extends StatelessWidget {
             const Text(
               'Garden Gnome',
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              garden.farm.farmName,
+              key: const ValueKey('farm-name'),
+              style: const TextStyle(fontSize: 14, color: Palette.muted),
             ),
             const SizedBox(height: 28),
             Wrap(

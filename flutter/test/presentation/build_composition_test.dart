@@ -146,15 +146,9 @@ void main() {
           builder: (context) => LayerActions(editor: editor),
         ),
       );
-      expect(find.byTooltip('Select a property to add a zone'), findsOneWidget);
-      await tester.tap(find.bySemanticsLabel('Add property'));
-      await tester.pumpAndSettle();
+      await addLayerFromMenu(tester, 'Property layer');
       expect(editor.selectedLayer!.kind, LayerKind.property);
       expect(editor.document.layers.length, 1);
-      expect(
-        find.byTooltip('Complete Property 1 before adding a zone'),
-        findsOneWidget,
-      );
     },
   );
 

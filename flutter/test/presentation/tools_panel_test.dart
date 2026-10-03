@@ -128,10 +128,9 @@ void main() {
       'Reference',
     ]);
     expect(Tool.ground.functions.map((f) => f.label), [
-      'Zone',
+      'Fallow',
       'Flat',
       'Row',
-      'Grow',
     ]);
     expect(Tool.feature.functions.map((f) => f.label), [
       'Raised bed',

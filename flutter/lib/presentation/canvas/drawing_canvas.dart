@@ -348,6 +348,8 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
                       renderAssets: RenderAssets.instance,
                       selectedFeatureId: editor.selectedFeature?.id,
                       viewMoving: _viewMoving,
+                      hiddenLayers: editor.hiddenLayerIds,
+                      referenceHidden: editor.referenceHidden,
                     ),
                   ),
                 );

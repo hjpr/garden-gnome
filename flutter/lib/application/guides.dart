@@ -74,7 +74,12 @@ class GuideMemory {
 /// The point, line or circle edge under [screen] on any layer, points
 /// first, then the nearest. Shape insides are ignored: guides come from
 /// the parts the pointer actually touches.
-ItemRef? guideItemAt(GardenDocument document, Camera camera, Offset screen) {
+ItemRef? guideItemAt(
+  GardenDocument document,
+  Camera camera,
+  Offset screen, {
+  bool Function(String layerId)? skip,
+}) {
   final world = camera.toWorld(screen);
   final perMetre = camera.pixelsPerMetreNow;
   ItemRef? best;
@@ -89,6 +94,7 @@ ItemRef? guideItemAt(GardenDocument document, Camera camera, Offset screen) {
   }
 
   for (final layerId in document.drawingOrder) {
+    if (skip?.call(layerId) ?? false) continue;
     final geometry = document.geometryOf(layerId);
     for (final entry in geometry.points.entries) {
       final gap = world.distanceTo(entry.value) * perMetre;

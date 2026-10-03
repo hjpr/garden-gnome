@@ -40,13 +40,12 @@ enum ToolFunction {
   /// Click two opposite corners.
   rectangle('Rectangle', 'rectangle.svg'),
 
-  /// Ground functions: click inside a zone to give it that ground. Zone
-  /// clears it back to plain dirt; Grow makes it a grow zone, which is
-  /// planted in Plant mode.
-  clearGround('Zone', 'ground-zone.svg'),
+  /// Ground functions: click inside a bed to give it that ground. Fallow
+  /// is unprepared dirt that nothing is planted on. Plantings are added
+  /// in Layers.
+  clearGround('Fallow', 'ground-zone.svg'),
   flatGround('Flat', 'ground-flat.svg'),
   rowGround('Row', 'ground-row.svg'),
-  growGround('Grow', 'ground-grow.svg'),
 
   /// Feature functions: click to place one at its usual size.
   raisedBed('Raised bed', 'raised-bed.svg'),
@@ -63,17 +62,13 @@ enum ToolFunction {
 
   /// Whether this is one of the Ground tool's functions.
   bool get setsGround =>
-      this == clearGround ||
-      this == flatGround ||
-      this == rowGround ||
-      this == growGround;
+      this == clearGround || this == flatGround || this == rowGround;
 
-  /// The ground a Ground function gives a zone; null for Zone (plain
-  /// dirt) and for other tools. Check [setsGround] first.
+  /// The ground a Ground function gives a bed; null for Fallow and
+  /// for other tools. Check [setsGround] first.
   GroundType? get groundType => switch (this) {
     flatGround => GroundType.flat,
     rowGround => GroundType.row,
-    growGround => GroundType.grow,
     _ => null,
   };
 
@@ -132,13 +127,12 @@ enum Tool {
     ToolFunction.rectangle,
   ]),
 
-  /// Prepares a zone's soil: plain (Zone), flat, or in rows, or makes it
-  /// a grow zone. Rows are sized in Properties.
+  /// Prepares a bed's soil: fallow, flat, or in rows. Rows are sized in
+  /// Properties.
   ground('Ground', 'ground.svg', [
     ToolFunction.clearGround,
     ToolFunction.flatGround,
     ToolFunction.rowGround,
-    ToolFunction.growGround,
   ]),
 
   /// Places raised beds, greenhouses and high tunnels. Their sizes are

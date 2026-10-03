@@ -193,7 +193,66 @@ void main() {
       final before = editor.document;
       click(input, const Offset(400, 300));
       expect(identical(editor.document, before), isTrue);
-      expect(editor.notice, contains('Add a reference image'));
+      expect(editor.notice, 'Upload an image in Properties first');
+    });
+
+    test('picking the tool adds an empty Reference layer and selects it', () {
+      final editor = EditorController();
+      addTearDown(editor.dispose);
+      expect(editor.document.hasReferenceLayer, isFalse);
+      editor.selectTool(Tool.reference);
+      expect(editor.document.hasReferenceLayer, isTrue);
+      expect(editor.document.references, isEmpty);
+      expect(editor.referenceLayerSelected, isTrue);
+      expect(editor.undoLabel, 'Add Reference');
+      expect(editor.referenceUploadBlocker, isNull);
+
+      // Picking it again adds nothing more.
+      editor.selectTool(Tool.select);
+      editor.selectTool(Tool.reference);
+      expect(editor.undoLabel, 'Add Reference');
+
+      editor.undo();
+      expect(editor.document.hasReferenceLayer, isFalse);
+      expect(editor.referenceLayerSelected, isFalse);
+    });
+
+    test('the empty layer is saved, and stays when its last image goes', () {
+      final editor = EditorController();
+      addTearDown(editor.dispose);
+      editor.selectTool(Tool.reference);
+      final reopened = documentFromJson(documentToJson(editor.document));
+      expect(reopened.hasReferenceLayer, isTrue);
+      expect(reopened.references, isEmpty);
+
+      editor.addReferenceImage(
+        bytes: png,
+        mimeType: 'image/png',
+        pixelWidth: 100,
+        pixelHeight: 50,
+      );
+      editor.removeReference(editor.document.references.single.id);
+      expect(editor.document.hasReferenceLayer, isTrue);
+      editor.removeReferenceLayer();
+      expect(editor.document.hasReferenceLayer, isFalse);
+    });
+
+    test('Upload image needs the Reference layer or an image selected', () {
+      final editor = EditorController()..addLayer(LayerKind.property);
+      addTearDown(editor.dispose);
+      expect(editor.referenceUploadBlocker, 'Select a reference layer first');
+      editor.selectTool(Tool.reference);
+      expect(editor.referenceUploadBlocker, isNull);
+      editor.addReferenceImage(
+        bytes: png,
+        mimeType: 'image/png',
+        pixelWidth: 100,
+        pixelHeight: 50,
+      );
+      expect(editor.referenceSelected, isTrue);
+      expect(editor.referenceUploadBlocker, isNull);
+      editor.selectLayer(editor.document.propertyIds.single);
+      expect(editor.referenceUploadBlocker, 'Select a reference layer first');
     });
   });
 

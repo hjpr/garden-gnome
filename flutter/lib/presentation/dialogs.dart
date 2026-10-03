@@ -13,6 +13,7 @@ Future<void> confirmDeleteLayer(
   final layer = editor.document.layers[layerId];
   if (layer == null) return;
   final zones = layer.children.length;
+  final kind = layer.role.label.toLowerCase();
   editor.suspendDraftSettlement = true;
   final confirmed = await showDialog<bool>(
     context: context,
@@ -20,10 +21,9 @@ Future<void> confirmDeleteLayer(
       title: Text('Delete ${layer.name}?'),
       content: Text(
         zones == 0
-            ? 'This ${layer.kind.label.toLowerCase()} will be removed. '
-                  'You can undo this.'
-            : 'This ${layer.kind.label.toLowerCase()} and its $zones '
-                  '${zones == 1 ? 'zone' : 'zones'} will be removed. '
+            ? 'This $kind will be removed. You can undo this.'
+            : 'This $kind and the $zones '
+                  '${zones == 1 ? 'layer' : 'layers'} in it will be removed. '
                   'You can undo this.',
       ),
       actions: [

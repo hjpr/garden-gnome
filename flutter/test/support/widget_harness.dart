@@ -11,6 +11,23 @@ Future<void> setTestViewport(
   addTearDown(() => tester.binding.setSurfaceSize(null));
 }
 
+/// Opens Layers > Add layer and returns the menu item called [label].
+Future<Finder> openAddLayerItem(WidgetTester tester, String label) async {
+  await tester.tap(find.bySemanticsLabel('Add layer'));
+  await tester.pumpAndSettle();
+  return find.widgetWithText(MenuItemButton, label);
+}
+
+/// Opens Layers > Add layer and picks [label].
+Future<void> addLayerFromMenu(WidgetTester tester, String label) async {
+  await tester.tap(await openAddLayerItem(tester, label));
+  await tester.pumpAndSettle();
+}
+
+/// Whether the Add layer menu item [item] can be pressed.
+bool menuItemEnabled(WidgetTester tester, Finder item) =>
+    tester.widget<MenuItemButton>(item).onPressed != null;
+
 Widget testApp({required Widget child}) => MaterialApp(
   // Avoid the platform-dependent sparkle shader without changing layout.
   theme: buildTheme().copyWith(splashFactory: InkRipple.splashFactory),

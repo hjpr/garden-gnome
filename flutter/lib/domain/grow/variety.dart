@@ -56,6 +56,7 @@ class Variety {
   VarietyProfile resolve(Crop crop) => VarietyProfile(this, crop);
 
   Variety copyWith({
+    String? id,
     String? cropId,
     String? name,
     String? Function()? source,
@@ -73,7 +74,7 @@ class Variety {
     LengthRange? Function()? betweenRowSpacingIn,
     IntRange? Function()? harvestWindowDays,
   }) => Variety(
-    id: id,
+    id: id ?? this.id,
     cropId: cropId ?? this.cropId,
     name: name ?? this.name,
     source: source == null ? this.source : source(),

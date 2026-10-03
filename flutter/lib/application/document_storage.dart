@@ -35,6 +35,14 @@ abstract interface class DocumentCodec {
   GardenDocument decode(Uint8List bytes);
 }
 
+/// Which saved farm was open last, so it reopens at start-up.
+abstract interface class LastFarmStore {
+  Future<String?> load();
+
+  /// Remembers [libraryId]; null for a farm not saved in the library.
+  Future<void> save(String? libraryId);
+}
+
 abstract interface class WorkspaceStorage {
   Future<(WorkspaceSettings, Camera)?> load(String documentId);
   Future<CounterLedger> counters(String documentId);

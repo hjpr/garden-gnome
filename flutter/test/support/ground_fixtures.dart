@@ -45,8 +45,16 @@ ZoneSeed seed({double size = 0.5, double spacing = 0.25}) => ZoneSeed(
   final soilZone = rectangleLayer(editor, input, LayerKind.zone, 2, 2, 12, 12);
   editor.setGround(soilZone, soil);
   editor.selectLayer(property);
-  final grow = rectangleLayer(editor, input, LayerKind.zone, 4, 4, 8, 10);
-  editor.setGround(grow, GroundType.grow);
+  final grow = rectangleLayer(
+    editor,
+    input,
+    LayerKind.zone,
+    4,
+    4,
+    8,
+    10,
+    role: LayerRole.planting,
+  );
   editor.selectTool(Tool.select);
   return (editor, input, soilZone, grow);
 }

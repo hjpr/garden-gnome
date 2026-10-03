@@ -17,7 +17,7 @@ import 'zone_ground.dart';
 ///   more than one line of plant footprints at the seed's pitch gets
 ///   several lines, centred on the row.
 /// - Over Flat ground, plants go on a grid: lines [ZoneSeed.pitch]
-///   apart, running the grow zone's direction, with plants
+///   apart, running the Flat zone's direction, with plants
 ///   [ZoneSeed.pitch] apart along each line.
 /// - Over plain dirt, or outside any zone, nothing is planted.
 /// - Where soil zones overlap, the topmost soil in drawing order wins,
@@ -121,7 +121,7 @@ extension ZonePlanting on GardenDocument {
           exposed,
           growRegion,
           seed,
-          properties.rows.direction,
+          soil.rows.direction,
         ),
         GroundType.grow => const <RowRun>[],
       };

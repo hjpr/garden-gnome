@@ -44,6 +44,7 @@ class SelectionTargets {
     required this.camera,
     required this.isFrozen,
     required this.overlaysEnabled,
+    this.imagesEnabled = true,
     this.selectedImage,
   });
 
@@ -51,6 +52,10 @@ class SelectionTargets {
   final Camera camera;
   final bool Function(String layerId) isFrozen;
   final bool overlaysEnabled;
+
+  /// False while the Reference layer is hidden: its images cannot be
+  /// picked.
+  final bool imagesEnabled;
   final ReferenceImage? selectedImage;
 
   List<LayerHit> landAt(Offset screen) => [
@@ -61,7 +66,7 @@ class SelectionTargets {
   SelectionTarget? at(Offset screen, {bool landOnly = false}) {
     final overlays = overlaysEnabled && !landOnly;
     final image = selectedImage;
-    if (overlays && image != null && !image.locked) {
+    if (overlays && imagesEnabled && image != null && !image.locked) {
       for (final (corner, world) in image.corners.indexed) {
         if ((camera.toScreen(world) - screen).distance <=
             referenceHandleReach) {
@@ -79,7 +84,7 @@ class SelectionTargets {
       }
     }
     if (land != null) return LandTarget(land);
-    if (overlays) {
+    if (overlays && imagesEnabled) {
       for (final image in document.references.reversed) {
         if (!image.locked && image.containsWorld(world)) {
           return ImageTarget(image);

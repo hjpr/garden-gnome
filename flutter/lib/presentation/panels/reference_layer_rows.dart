@@ -55,11 +55,15 @@ class _ReferenceRowState extends State<_ReferenceRow> {
     final editor = widget.editor;
     final images = editor.document.references;
     final selected = editor.referenceLayerSelected;
-    final allLocked = images.every((image) => image.locked);
+    final allLocked =
+        images.isNotEmpty && images.every((image) => image.locked);
+    final hidden = editor.referenceHidden;
     return Semantics(
       selected: selected,
       button: true,
-      label: 'Reference, ${images.length} images${allLocked ? ', locked' : ''}',
+      label:
+          'Reference, ${images.length} images'
+          '${allLocked ? ', locked' : ''}${hidden ? ', hidden' : ''}',
       child: MouseRegion(
         onEnter: (_) => setState(() => _hovered = true),
         onExit: (_) => setState(() => _hovered = false),
@@ -76,23 +80,25 @@ class _ReferenceRowState extends State<_ReferenceRow> {
                 children: [
                   SizedBox(
                     width: 20,
-                    child: InkResponse(
-                      onTap: widget.onToggle,
-                      radius: 12,
-                      child: Semantics(
-                        button: true,
-                        label: widget.expanded
-                            ? 'Hide images of Reference'
-                            : 'Show images of Reference',
-                        child: Icon(
-                          widget.expanded
-                              ? Icons.expand_more
-                              : Icons.chevron_right,
-                          size: 16,
-                          color: Palette.muted,
-                        ),
-                      ),
-                    ),
+                    child: images.isEmpty
+                        ? null
+                        : InkResponse(
+                            onTap: widget.onToggle,
+                            radius: 12,
+                            child: Semantics(
+                              button: true,
+                              label: widget.expanded
+                                  ? 'Hide images of Reference'
+                                  : 'Show images of Reference',
+                              child: Icon(
+                                widget.expanded
+                                    ? Icons.expand_more
+                                    : Icons.chevron_right,
+                                size: 16,
+                                color: Palette.muted,
+                              ),
+                            ),
+                          ),
                   ),
                   const ExcludeSemantics(
                     child: Icon(
@@ -120,6 +126,21 @@ class _ReferenceRowState extends State<_ReferenceRow> {
                     ),
                   ),
                   Opacity(
+                    opacity: hidden || _hovered || selected ? 1 : 0,
+                    child: IconAction(
+                      iconData: hidden
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
+                      label: hidden ? 'Show Reference' : 'Hide Reference',
+                      selected: hidden,
+                      size: 26,
+                      onPressed: () => editor.setLayerHidden(
+                        EditorController.referenceLayerKey,
+                        !hidden,
+                      ),
+                    ),
+                  ),
+                  Opacity(
                     opacity: allLocked || _hovered || selected ? 1 : 0,
                     child: IconAction(
                       iconData: allLocked
@@ -130,8 +151,9 @@ class _ReferenceRowState extends State<_ReferenceRow> {
                           : 'Lock every image',
                       selected: allLocked,
                       size: 26,
-                      onPressed: () =>
-                          editor.setAllReferencesLocked(!allLocked),
+                      onPressed: images.isEmpty
+                          ? null
+                          : () => editor.setAllReferencesLocked(!allLocked),
                     ),
                   ),
                   Opacity(

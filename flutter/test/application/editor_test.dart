@@ -183,8 +183,9 @@ void main() {
     final (editor, input) = newEditor();
     expect(
       editor.addLayerBlocker(LayerKind.zone),
-      'Select a property to add a zone',
+      'Add a property layer first',
     );
+    expect(editor.addReferenceBlocker, 'Add a property layer first');
     editor.addLayer(LayerKind.property);
     final property = editor.selectedLayerId!;
     expect(

@@ -268,6 +268,7 @@ class WorkspaceSettings {
     this.hiddenPanels = const {},
     this.minimizedPanels = const {},
     this.docks = const DockLayout(),
+    this.hiddenLayers = const {},
   });
 
   /// How lengths are shown.
@@ -292,6 +293,9 @@ class WorkspaceSettings {
   final Set<PanelId> minimizedPanels;
   final DockLayout docks;
 
+  /// Layers hidden in Layers (by ID), kept per drawing on this device.
+  final Set<String> hiddenLayers;
+
   WorkspaceSettings copyWith({
     Units? units,
     AreaUnits? areaUnits,
@@ -303,6 +307,7 @@ class WorkspaceSettings {
     Set<PanelId>? hiddenPanels,
     Set<PanelId>? minimizedPanels,
     DockLayout? docks,
+    Set<String>? hiddenLayers,
   }) => WorkspaceSettings(
     units: units ?? this.units,
     areaUnits: areaUnits ?? this.areaUnits,
@@ -314,5 +319,6 @@ class WorkspaceSettings {
     hiddenPanels: hiddenPanels ?? this.hiddenPanels,
     minimizedPanels: minimizedPanels ?? this.minimizedPanels,
     docks: docks ?? this.docks,
+    hiddenLayers: hiddenLayers ?? this.hiddenLayers,
   );
 }

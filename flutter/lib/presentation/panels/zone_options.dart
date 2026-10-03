@@ -10,6 +10,7 @@ import '../widgets/icon_controls.dart';
 import '../widgets/property_controls.dart';
 import 'layer_fields.dart';
 import 'measure_field.dart';
+import 'plant_on_field.dart';
 
 class ZoneOptions extends StatelessWidget {
   const ZoneOptions({
@@ -49,7 +50,14 @@ class ZoneOptions extends StatelessWidget {
           ),
         ],
       ),
-      _groundGroup(layer, p, editable),
+      // Ground is set with the Ground tool; only Row and Flat have
+      // settings here.
+      if (p.ground == GroundType.row) _rowGroup(layer, p, editable),
+      if (p.ground == GroundType.flat)
+        PropertyGroup(
+          title: 'GROUND',
+          children: [_directionField(layer, p, editable)],
+        ),
     ],
   ];
 
@@ -66,7 +74,7 @@ class ZoneOptions extends StatelessWidget {
     }
 
     return PropertyGroup(
-      title: 'PLANTING',
+      title: 'GROW',
       children: [
         PropertyRow(
           label: 'Seed',
@@ -95,6 +103,11 @@ class ZoneOptions extends StatelessWidget {
             ],
           ),
         ),
+        _readout(
+          'Plants',
+          layout == null ? '—' : '${layout.count}',
+          seed != null,
+        ),
         MeasureField(
           editor: editor,
           ownerId: layer.id,
@@ -121,36 +134,25 @@ class ZoneOptions extends StatelessWidget {
           minimum: Minimum.zero,
           apply: (v) => setSeed((s) => s.copyWith(spacing: v)),
         ),
-        _directionField(layer, p, editable),
-        _readout(
-          'Plants',
-          layout == null ? '—' : '${layout.count}',
-          seed != null,
-        ),
-        _readout(
-          'Planted on',
-          layout == null || layout.soils.isEmpty
-              ? '—'
-              : [
-                  for (final g in GroundType.values)
-                    if (layout.soils.contains(g)) g.label,
-                ].join(', '),
-          seed != null,
+        PropertyRow(
+          label: 'Plant on',
+          child: PlantOnField(
+            day: seed?.plantOn,
+            enabled: seedEditable,
+            onChanged: (day) => setSeed((s) => s.copyWith(plantOn: () => day)),
+          ),
         ),
       ],
     );
   }
 
-  Widget _groundGroup(Layer layer, ZoneProperties p, bool editable) {
+  Widget _rowGroup(Layer layer, ZoneProperties p, bool editable) {
     final document = editor.document;
-    final closed = document.geometryOf(layer.id).isClosed;
     final units = editor.settings.units;
     final rowUnit = units == Units.feet ? 'in' : units.symbol;
     final metresPerRowUnit = units == Units.feet ? 0.0254 : units.metresPerUnit;
     double rowToDisplay(double metres) => metres / metresPerRowUnit;
     double rowFromDisplay(double value) => value * metresPerRowUnit;
-    final rowsOn = p.ground == GroundType.row;
-    final rowsEditable = editable && rowsOn;
     final layout = document.rowLayoutOf(layer.id);
     void setRows(RowSpec Function(RowSpec) change) {
       final current = editor.document.layers[layer.id]?.properties;
@@ -162,71 +164,52 @@ class ZoneOptions extends StatelessWidget {
     return PropertyGroup(
       title: 'GROUND',
       children: [
-        PropertyRow(
-          label: 'Ground',
-          child: CompactDropdown<GroundType?>(
-            label: 'Ground',
-            value: p.ground,
-            items: {
-              null: 'Zone',
-              for (final g in GroundType.values) g: g.label,
-            },
-            onChanged:
-                editable &&
-                    closed &&
-                    editor.geometryLockNotice(layer.id) == null
-                ? (g) => editor.setGround(layer.id, g)
-                : null,
-          ),
+        MeasureField(
+          editor: editor,
+          ownerId: layer.id,
+          field: 'row-width',
+          label: 'Row width',
+          unit: rowUnit,
+          metres: p.rows.width,
+          toDisplay: rowToDisplay,
+          fromDisplay: rowFromDisplay,
+          enabled: editable,
+          minimum: Minimum.aboveZero,
+          apply: (w) => setRows((r) => r.copyWith(width: w)),
         ),
-        if (rowsOn) ...[
-          MeasureField(
-            editor: editor,
-            ownerId: layer.id,
-            field: 'row-width',
-            label: 'Row width',
-            unit: rowUnit,
-            metres: p.rows.width,
-            toDisplay: rowToDisplay,
-            fromDisplay: rowFromDisplay,
-            enabled: rowsEditable,
-            minimum: Minimum.aboveZero,
-            apply: (w) => setRows((r) => r.copyWith(width: w)),
-          ),
-          MeasureField(
-            editor: editor,
-            ownerId: layer.id,
-            field: 'row-spacing',
-            label: 'Spacing',
-            unit: rowUnit,
-            metres: p.rows.spacing,
-            toDisplay: rowToDisplay,
-            fromDisplay: rowFromDisplay,
-            enabled: rowsEditable,
-            minimum: Minimum.zero,
-            apply: (s) => setRows((r) => r.copyWith(spacing: s)),
-          ),
-          MeasureField(
-            editor: editor,
-            ownerId: layer.id,
-            field: 'row-border',
-            label: 'Border',
-            unit: rowUnit,
-            metres: p.rows.border,
-            toDisplay: rowToDisplay,
-            fromDisplay: rowFromDisplay,
-            enabled: rowsEditable,
-            minimum: Minimum.zero,
-            apply: (b) => setRows((r) => r.copyWith(border: b)),
-          ),
-          _directionField(layer, p, rowsEditable),
-          _readout('Rows', layout == null ? '—' : '${layout.rowCount}', rowsOn),
-          _readout(
-            'Row length',
-            layout == null ? '—' : units.format(layout.totalLength),
-            rowsOn,
-          ),
-        ],
+        MeasureField(
+          editor: editor,
+          ownerId: layer.id,
+          field: 'row-spacing',
+          label: 'Spacing',
+          unit: rowUnit,
+          metres: p.rows.spacing,
+          toDisplay: rowToDisplay,
+          fromDisplay: rowFromDisplay,
+          enabled: editable,
+          minimum: Minimum.zero,
+          apply: (s) => setRows((r) => r.copyWith(spacing: s)),
+        ),
+        MeasureField(
+          editor: editor,
+          ownerId: layer.id,
+          field: 'row-border',
+          label: 'Border',
+          unit: rowUnit,
+          metres: p.rows.border,
+          toDisplay: rowToDisplay,
+          fromDisplay: rowFromDisplay,
+          enabled: editable,
+          minimum: Minimum.zero,
+          apply: (b) => setRows((r) => r.copyWith(border: b)),
+        ),
+        _directionField(layer, p, editable),
+        _readout('Rows', layout == null ? '—' : '${layout.rowCount}', true),
+        _readout(
+          'Row length',
+          layout == null ? '—' : units.format(layout.totalLength),
+          true,
+        ),
       ],
     );
   }

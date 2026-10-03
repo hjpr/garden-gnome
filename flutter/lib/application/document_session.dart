@@ -45,6 +45,7 @@ class DocumentSession extends ChangeNotifier {
     required this.library,
     required this.workspace,
     required this.codec,
+    this.lastFarm,
     EditorController? editor,
   }) : toasts = editor?.toasts ?? ToastCenter() {
     _editor = editor ?? EditorController(toasts: toasts);
@@ -53,6 +54,7 @@ class DocumentSession extends ChangeNotifier {
   final DrawingLibrary library;
   final WorkspaceStorage workspace;
   final DocumentCodec codec;
+  final LastFarmStore? lastFarm;
 
   Future<void> _saveTail = Future.value();
   (EditorController editor, String id, int sequence)? _pendingSave;
@@ -127,6 +129,7 @@ class DocumentSession extends ChangeNotifier {
       if (!identical(editor, _editor)) return message;
       if (snapshot.id != editor.document.id) editor.adoptIdentity(snapshot.id);
       editor.markSaved(snapshot, libraryId: id, title: title);
+      await _rememberLastFarm(id);
       await _rememberWorkspace();
       notifyListeners();
       return message;
@@ -140,10 +143,33 @@ class DocumentSession extends ChangeNotifier {
     }
   }
 
-  /// Starts a fresh, empty drawing.
+  /// Starts a fresh, empty farm.
   Future<void> newDrawing() async {
     await _rememberWorkspace();
     _replaceEditor(EditorController(toasts: toasts));
+    await _rememberLastFarm(null);
+  }
+
+  /// Reopens the farm that was open last, if it was saved and can still
+  /// be read; otherwise the blank farm stays. Called once at start-up.
+  Future<void> reopenLastFarm() async {
+    try {
+      final id = await lastFarm?.load();
+      if (id == null) return;
+      final entry = (await library.list()).where((e) => e.id == id);
+      if (entry.isEmpty) return;
+      await open(entry.first);
+    } catch (_) {
+      // A farm that cannot be reopened leaves the blank one open.
+    }
+  }
+
+  Future<void> _rememberLastFarm(String? libraryId) async {
+    try {
+      await lastFarm?.save(libraryId);
+    } catch (_) {
+      // Only start-up convenience is lost.
+    }
   }
 
   /// Opens a drawing from the browser library.
@@ -152,6 +178,7 @@ class DocumentSession extends ChangeNotifier {
     try {
       candidate = await library.open(entry.id);
       await _load(candidate, title: entry.title, libraryId: entry.id);
+      await _rememberLastFarm(entry.id);
     } on StorageError catch (e) {
       return Failed(e.message);
     } on DocumentFormatError catch (e) {
@@ -167,6 +194,7 @@ class DocumentSession extends ChangeNotifier {
       candidate = codec.decode(bytes);
       final title = fileName.replaceFirst(RegExp(r'\.ggnome$'), '');
       await _load(candidate, title: title, libraryId: null);
+      await _rememberLastFarm(null);
     } on DocumentFormatError catch (e) {
       return Failed(e.message);
     } on StorageError catch (e) {

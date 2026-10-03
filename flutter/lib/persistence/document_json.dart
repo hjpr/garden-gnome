@@ -5,9 +5,13 @@ import '../application/storage_error.dart';
 import '../domain/document.dart';
 import '../domain/feature.dart';
 import '../domain/geometry.dart';
+import '../domain/grow/climate.dart';
+import '../domain/grow/planting.dart';
 import '../domain/layer.dart';
 import '../domain/reference_image.dart';
 import '../domain/vec.dart';
+import 'garden_record_codec.dart'
+    show climateFromJson, climateToJson, plantingFromJson, plantingToJson;
 
 // Raise it whenever an older reader would lose or misread something, so it
 // refuses the file instead of re-saving it lossy.
@@ -15,7 +19,12 @@ import '../domain/vec.dart';
 // 2: zone ground (flat/row) and row sizes, features; patterns removed.
 // 3: grow zones (ground "grow") and the seed planted in them.
 // 4: explicit plant diameter and empty gap, replacing centre distances.
-const int schemaVersion = 4;
+// 5: property soil drainage and soil sample removed (older readers
+//    require them).
+// 6: an empty Reference layer is kept (older readers would drop it).
+// 7: a planting's plant-on date (older readers would drop it).
+// 8: the farm's climate and plantings (older readers would drop them).
+const int schemaVersion = 8;
 
 /// The oldest version still opened. Version 1 files open with their
 /// patterns and free-text ground notes dropped.
@@ -41,9 +50,13 @@ Map<String, Object?> documentToJson(GardenDocument d) => {
   },
   'geometries': {for (final g in d.geometries.values) g.id: _geometryToJson(g)},
   'image_counter': d.imageCounter,
+  'reference_layer': d.hasReferenceLayer,
   'references': [for (final image in d.references) _referenceToJson(image)],
   'feature_counter': d.featureCounter,
   'features': [for (final f in d.features) _featureToJson(f)],
+  'climate': climateToJson(d.climate),
+  'planting_counter': d.plantingCounter,
+  'plantings': [for (final p in d.plantings.values) plantingToJson(p)],
 };
 
 Map<String, Object?> _featureToJson(Feature f) => {
@@ -84,20 +97,7 @@ Map<String, Object?> _layerToJson(Layer layer) => {
   'geometry_id': layer.geometryId,
   'locked': layer.locked,
   'properties': switch (layer.properties) {
-    PropertyProperties p => {
-      'color': p.color.name,
-      'drainage': p.drainage?.name,
-      'soil': {
-        'ph': p.soil.ph,
-        'phosphorus': p.soil.phosphorus,
-        'potassium': p.soil.potassium,
-        'calcium': p.soil.calcium,
-        'magnesium': p.soil.magnesium,
-        'cation_exchange': p.soil.cationExchange,
-        'conductivity': p.soil.conductivity,
-        'organic_matter': p.soil.organicMatter,
-      },
-    },
+    PropertyProperties p => {'color': p.color.name},
     ZoneProperties p => {
       'color': p.color.name,
       'ground': p.ground?.name,
@@ -113,6 +113,7 @@ Map<String, Object?> _layerToJson(Layer layer) => {
           'variety_id': seed.varietyId,
           'name': seed.name,
           'size': seed.size,
+          if (seed.plantOn case final day?) 'plant_on': _dayToJson(day),
           'spacing': seed.spacing,
         },
     },
@@ -255,6 +256,8 @@ GardenDocument documentFromJson(
     }
   }
 
+  final (climate, plantings, plantingCounter) = _farmFromJson(root, version);
+
   final nameCounters = <LayerKind, int>{};
   _map(root['name_counters'], 'name counters').forEach((k, v) {
     nameCounters[_enum(LayerKind.values, k, 'layer kind')] = _count(v);
@@ -267,9 +270,14 @@ GardenDocument documentFromJson(
     propertyIds: _strings(root['property_ids'], 'properties'),
     nameCounters: nameCounters,
     references: references,
+    referenceLayer:
+        version >= 6 && _bool(root['reference_layer'], 'Reference layer'),
     imageCounter: imageCounter,
     features: features,
     featureCounter: featureCounter,
+    climate: climate,
+    plantings: plantings,
+    plantingCounter: plantingCounter,
   );
   _checkStructure(document);
   return document;
@@ -313,6 +321,7 @@ ZoneSeed _seedFromJson(Map<String, Object?> json, int version) {
     name: _string(json['name'], 'seed name'),
     size: size,
     spacing: spacing,
+    plantOn: json['plant_on'] == null ? null : _dayFromJson(json['plant_on']),
   );
   if (seed.problem != null) {
     throw const DocumentFormatError('Damaged file: seed spacing');
@@ -372,14 +381,64 @@ Layer _layerShell(
   );
 }
 
+/// Files before version 5 also hold soil drainage and soil sample
+/// values; those features were removed and the values are ignored.
 PropertyProperties _propertyFromJson(Map<String, Object?> props) =>
     PropertyProperties(
       color: _enum(OutlineColor.values, props['color'], 'color'),
-      drainage: props['drainage'] == null
-          ? null
-          : _enum(SoilDrainage.values, props['drainage'], 'drainage'),
-      soil: _soilFromJson(_map(props['soil'], 'soil')),
     );
+
+/// The farm's climate and plantings; files before version 8 have none.
+(Climate, Map<String, Planting>, int) _farmFromJson(
+  Map<String, Object?> root,
+  int version,
+) {
+  if (version < 8) return (const Climate(), const {}, 0);
+  try {
+    final climate = climateFromJson(_map(root['climate'], 'climate'));
+    final counter = _count(root['planting_counter']);
+    final plantings = <String, Planting>{};
+    for (final raw in _list(root['plantings'], 'plantings')) {
+      final p = plantingFromJson(raw);
+      final number = int.tryParse(p.id.substring(p.id.lastIndexOf('-') + 1));
+      if (!p.id.startsWith('planting-') ||
+          number == null ||
+          number > counter ||
+          plantings.containsKey(p.id)) {
+        throw const DocumentFormatError(
+          'Damaged file: a planting ID is not valid',
+        );
+      }
+      plantings[p.id] = p;
+    }
+    return (climate, plantings, counter);
+  } on FormatException catch (e) {
+    throw DocumentFormatError('Damaged file: ${e.message}');
+  }
+}
+
+String _dayToJson(DateTime day) =>
+    '${day.year.toString().padLeft(4, '0')}-'
+    '${day.month.toString().padLeft(2, '0')}-'
+    '${day.day.toString().padLeft(2, '0')}';
+
+DateTime _dayFromJson(Object? value) {
+  final match = value is String
+      ? RegExp(r'^(\d{4})-(\d{2})-(\d{2})$').firstMatch(value)
+      : null;
+  if (match == null) {
+    throw const DocumentFormatError('Damaged file: a planting date');
+  }
+  final day = DateTime.utc(
+    int.parse(match[1]!),
+    int.parse(match[2]!),
+    int.parse(match[3]!),
+  );
+  if (_dayToJson(day) != value) {
+    throw const DocumentFormatError('Damaged file: a planting date');
+  }
+  return day;
+}
 
 RowSpec _rowsFromJson(Map<String, Object?> json) {
   final rows = RowSpec(
@@ -412,17 +471,6 @@ Feature _featureFromJson(Map<String, Object?> json) {
   }
   return feature;
 }
-
-SoilSample _soilFromJson(Map<String, Object?> json) => SoilSample(
-  ph: _optionalNumber(json['ph']),
-  phosphorus: _optionalNumber(json['phosphorus']),
-  potassium: _optionalNumber(json['potassium']),
-  calcium: _optionalNumber(json['calcium']),
-  magnesium: _optionalNumber(json['magnesium']),
-  cationExchange: _optionalNumber(json['cation_exchange']),
-  conductivity: _optionalNumber(json['conductivity']),
-  organicMatter: _optionalNumber(json['organic_matter']),
-);
 
 /// A Bézier handle offset, or null when the line has none.
 Vec? _optionalHandle(Object? value) {

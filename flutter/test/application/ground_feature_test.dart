@@ -16,7 +16,9 @@ void main() {
     test('clicking inside a zone sets its ground as one Undo step', () {
       final (editor, input, _, zone) = farm();
       editor.selectTool(Tool.ground);
-      expect(editor.function, ToolFunction.clearGround, reason: 'Zone first');
+      expect(editor.function, ToolFunction.clearGround, reason: 'Fallow first');
+      click(input, 5, 5);
+      expect(editor.document.storedGroundOf(zone), isNull);
       editor.selectFunction(ToolFunction.flatGround);
       click(input, 5, 5);
       expect(editor.document.storedGroundOf(zone), GroundType.flat);
@@ -38,9 +40,9 @@ void main() {
       expect(editor.notice, contains('Click inside'));
 
       editor.selectLayer(property);
-      expect(toolPrompt(editor), 'Ground is set on zones. Select a zone');
+      expect(toolPrompt(editor), 'Ground is set on beds. Select a bed');
       click(input, 15, 15);
-      expect(editor.notice, CanvasInput.groundNeedsZone);
+      expect(editor.notice, CanvasInput.groundNeedsBed);
     });
 
     test('Properties and the tool share one value; rows keep their sizes', () {

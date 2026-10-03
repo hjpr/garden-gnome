@@ -28,6 +28,35 @@ enum LayerKind {
   bool get exclusive => this == LayerKind.property;
 }
 
+/// What a layer is for, as the gardener sees it. Beds and plantings are
+/// both zones underneath (they share drawing rules), but they are added,
+/// listed and edited as separate kinds so their purpose is never hidden.
+enum LayerRole {
+  /// Land you hold.
+  property('Property'),
+
+  /// Ground inside a property: Fallow, Flat, or Row.
+  bed('Bed'),
+
+  /// What grows where: drawn over beds and planted from the Seed Vault.
+  planting('Planting');
+
+  const LayerRole(this.label);
+
+  final String label;
+
+  LayerKind get kind =>
+      this == LayerRole.property ? LayerKind.property : LayerKind.zone;
+
+  /// The settings a new layer of this role starts with. A new bed is
+  /// Flat, so a planting drawn over it grows straight away.
+  LayerProperties get defaults => switch (this) {
+    LayerRole.property => const PropertyProperties(),
+    LayerRole.bed => const ZoneProperties(ground: GroundType.flat),
+    LayerRole.planting => const ZoneProperties(ground: GroundType.grow),
+  };
+}
+
 /// Outline colours offered for properties and zones, in menu order.
 enum OutlineColor {
   green('Green', 0xFF465B3C),
@@ -56,82 +85,6 @@ enum OutlineColor {
   static const zoneChoices = [sage, olive, blue, brown, purple, orange];
 }
 
-enum SoilDrainage {
-  excessive('Excessive'),
-  good('Good'),
-  moderate('Moderate'),
-  fair('Fair'),
-  poor('Poor');
-
-  const SoilDrainage(this.label);
-
-  final String label;
-}
-
-/// Soil sample values recorded for a property. Every value is optional.
-class SoilSample {
-  const SoilSample({
-    this.ph,
-    this.phosphorus,
-    this.potassium,
-    this.calcium,
-    this.magnesium,
-    this.cationExchange,
-    this.conductivity,
-    this.organicMatter,
-  });
-
-  final double? ph;
-  final double? phosphorus;
-  final double? potassium;
-  final double? calcium;
-  final double? magnesium;
-  final double? cationExchange;
-  final double? conductivity;
-  final double? organicMatter;
-
-  /// One entry per value, in display order, for listing and editing.
-  static const fields = <(String, String)>[
-    ('ph', 'pH'),
-    ('phosphorus', 'Phosphorus'),
-    ('potassium', 'Potassium'),
-    ('calcium', 'Calcium'),
-    ('magnesium', 'Magnesium'),
-    // Short labels fit the Properties column.
-    ('cationExchange', 'CEC'),
-    ('conductivity', 'Conductivity'),
-    ('organicMatter', 'Org. matter'),
-  ];
-
-  double? valueOf(String field) => switch (field) {
-    'ph' => ph,
-    'phosphorus' => phosphorus,
-    'potassium' => potassium,
-    'calcium' => calcium,
-    'magnesium' => magnesium,
-    'cationExchange' => cationExchange,
-    'conductivity' => conductivity,
-    'organicMatter' => organicMatter,
-    _ => throw ArgumentError.value(field, 'field'),
-  };
-
-  /// A copy with one value replaced (null clears it).
-  SoilSample withValue(String field, double? value) {
-    double? pick(String name) => name == field ? value : valueOf(name);
-    valueOf(field); // Rejects unknown names.
-    return SoilSample(
-      ph: pick('ph'),
-      phosphorus: pick('phosphorus'),
-      potassium: pick('potassium'),
-      calcium: pick('calcium'),
-      magnesium: pick('magnesium'),
-      cationExchange: pick('cationExchange'),
-      conductivity: pick('conductivity'),
-      organicMatter: pick('organicMatter'),
-    );
-  }
-}
-
 /// Settings a user edits in a layer's Properties panel.
 sealed class LayerProperties {
   const LayerProperties();
@@ -144,25 +97,12 @@ sealed class LayerProperties {
 
 /// Settings for a property layer.
 class PropertyProperties extends LayerProperties {
-  const PropertyProperties({
-    this.color = OutlineColor.green,
-    this.drainage,
-    this.soil = const SoilSample(),
-  });
+  const PropertyProperties({this.color = OutlineColor.green});
 
   final OutlineColor color;
-  final SoilDrainage? drainage;
-  final SoilSample soil;
 
-  PropertyProperties copyWith({
-    OutlineColor? color,
-    SoilDrainage? Function()? drainage,
-    SoilSample? soil,
-  }) => PropertyProperties(
-    color: color ?? this.color,
-    drainage: drainage == null ? this.drainage : drainage(),
-    soil: soil ?? this.soil,
-  );
+  PropertyProperties copyWith({OutlineColor? color}) =>
+      PropertyProperties(color: color ?? this.color);
 }
 
 /// Settings for a zone layer.
@@ -182,8 +122,8 @@ class ZoneProperties extends LayerProperties {
   final GroundType? ground;
 
   /// Row size and heading. Used while [ground] is [GroundType.row], and
-  /// kept when it is not, so switching back restores them. A grow zone
-  /// uses only the direction, to line up plants on flat ground.
+  /// kept when it is not, so switching back restores them. Flat ground
+  /// uses only the direction, to line up the plants grow zones put on it.
   final RowSpec rows;
 
   /// The crop growing here, as a label.
@@ -227,6 +167,12 @@ class Layer {
   final String id;
   final LayerKind kind;
   final String name;
+
+  LayerRole get role => switch (properties) {
+    PropertyProperties() => LayerRole.property,
+    ZoneProperties(:final isGrow) =>
+      isGrow ? LayerRole.planting : LayerRole.bed,
+  };
 
   /// The property this layer is listed under; null for properties.
   final String? parentId;

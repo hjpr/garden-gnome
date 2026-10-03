@@ -111,4 +111,14 @@ class Climate {
         ? this.firstFallFrost
         : firstFallFrost(),
   );
+
+  @override
+  bool operator ==(Object other) =>
+      other is Climate &&
+      other.zone == zone &&
+      other.lastSpringFrost == lastSpringFrost &&
+      other.firstFallFrost == firstFallFrost;
+
+  @override
+  int get hashCode => Object.hash(zone, lastSpringFrost, firstFallFrost);
 }

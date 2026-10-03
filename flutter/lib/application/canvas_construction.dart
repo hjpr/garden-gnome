@@ -221,20 +221,20 @@ extension _ConstructionInput on CanvasInput {
   }
 
   HoverPreview? _groundHover(String layerId, Geometry geometry, Offset screen) {
-    if (editor.document.layers[layerId]?.kind != LayerKind.zone) return null;
+    if (editor.document.layers[layerId]?.role != LayerRole.bed) return null;
     final id = _shapeUnder(geometry, screen);
     return id == null ? null : HoverPreview(id);
   }
 
   void _groundClick(String layerId, Geometry geometry, Offset screen) {
-    if (editor.document.layers[layerId]?.kind != LayerKind.zone) {
-      return editor.showNotice(CanvasInput.groundNeedsZone);
+    if (editor.document.layers[layerId]?.role != LayerRole.bed) {
+      return editor.showNotice(CanvasInput.groundNeedsBed);
     }
     if (geometry.region == null) {
       return editor.showNotice('Close a shape before setting its ground');
     }
     if (_shapeUnder(geometry, screen) == null) {
-      return editor.showNotice('Click inside one of this zone\'s shapes');
+      return editor.showNotice('Click inside one of this bed\'s shapes');
     }
     editor.showNotice(null);
     editor.setGround(layerId, editor.function.groundType);

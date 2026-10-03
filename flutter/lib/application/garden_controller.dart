@@ -9,19 +9,22 @@ import '../domain/grow/garden_record.dart';
 import '../domain/grow/planting.dart';
 import '../domain/grow/planting_windows.dart';
 import '../domain/grow/variety.dart';
+import 'farm.dart';
 import 'garden_record_store.dart';
 import 'toasts.dart';
 
 /// Runs the Seed Vault, Grow, Greenhouse and Harvest tools.
 ///
-/// Holds the crop catalog and the gardener's record, sends every change
-/// through [_change] (which saves it), and answers the questions the
+/// The Seed Vault is the gardener's, kept in this browser's record and
+/// changed through [_change] (which saves it). Climate and plantings
+/// belong to the open farm: they are read from [farm] and changed as
+/// farm edits, saved when the farm is saved. Answers the questions the
 /// screens ask: what to plant now, what is in the greenhouse, what is
 /// coming ready to pick.
 ///
-/// Changes are refused until the initial load finishes. A stored record
-/// this build cannot read is left where it is: the tools
-/// open empty but refuse changes, so the record is never written over.
+/// Vault changes are refused until the initial load finishes. A stored
+/// record this build cannot read is left where it is: the vault opens
+/// empty but refuses changes, so the record is never written over.
 class GardenController extends ChangeNotifier {
   GardenController({
     required this.store,
@@ -29,11 +32,18 @@ class GardenController extends ChangeNotifier {
     CropCatalog? catalog,
     GardenRecord? record,
     DateTime Function()? clock,
+    FarmAccess? farm,
   }) : _catalog = catalog ?? CropCatalog.empty,
        _record = record ?? GardenRecord(),
-       _clock = clock ?? DateTime.now;
+       _clock = clock ?? DateTime.now,
+       farm = farm ?? DetachedFarm() {
+    this.farm.addListener(_onFarmChanged);
+  }
 
   final GardenRecordStore store;
+
+  /// The open farm, whose climate and plantings the tools show.
+  final FarmAccess farm;
   final ToastCenter toasts;
   final DateTime Function() _clock;
 
@@ -68,13 +78,83 @@ class GardenController extends ChangeNotifier {
       toasts.show('$e. Changes are not being kept', kind: ToastKind.error);
     }
     _loaded = true;
+    _moveOldPlantingsIntoFarm();
     notifyListeners();
+  }
+
+  // --------------------------------------------- moving the old record
+
+  /// The farm editor the old record's plantings were moved into this run,
+  /// and the planting counter that holds them. Once that farm is saved,
+  /// the old copies are cleared from the record.
+  (Object, int)? _moved;
+  bool _moveTried = false;
+
+  /// Before farms held their own plantings and climate, they were kept in
+  /// this browser's record. They move, once, into the farm open now, as
+  /// one Undo step. The record keeps its copy until the farm is saved, so
+  /// leaving without saving loses nothing: they move again next time.
+  void _moveOldPlantingsIntoFarm() {
+    if (_moveTried || _recordProblem != null) return;
+    _moveTried = true;
+    final old = _record.plantings.values.toList();
+    final climate = _record.climate;
+    final hasClimate = climate != const Climate();
+    if (old.isEmpty && !hasClimate) return;
+    farm.changeFarm('Move plantings into this farm', (f) {
+      var next = f;
+      if (hasClimate && f.climate == const Climate()) {
+        next = next.withClimate(climate);
+      }
+      for (final p in old) {
+        final (withId, id) = next.nextPlantingId();
+        next = withId.withPlanting(p.withId(id));
+      }
+      return next;
+    });
+    _moved = (farm.farmIdentity, farm.farm.plantingCounter);
+    if (old.isNotEmpty) {
+      toasts.show(
+        'Moved ${old.length} ${old.length == 1 ? 'planting' : 'plantings'} '
+        'into ${farm.farmName}. Save it to keep them with this farm',
+      );
+    }
+    _settleMovedPlantings();
+  }
+
+  void _settleMovedPlantings() {
+    final (identity, counter) = _moved ?? (null, 0);
+    if (identity == null ||
+        !identical(identity, farm.farmIdentity) ||
+        farm.farmUnsaved ||
+        farm.farm.plantingCounter < counter) {
+      return;
+    }
+    _moved = null;
+    _change(_record.copyWith(plantings: const {}, climate: const Climate()));
+  }
+
+  void _onFarmChanged() {
+    _settleMovedPlantings();
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    farm.removeListener(_onFarmChanged);
+    super.dispose();
   }
 
   /// Today, as a calendar day.
   DateTime get today => dayOf(_clock());
 
-  PlantingPlanner get planner => PlantingPlanner(_record.climate);
+  /// The open farm's climate.
+  Climate get climate => farm.farm.climate;
+
+  /// The open farm's plantings, by ID.
+  Map<String, Planting> get plantings => farm.farm.plantings;
+
+  PlantingPlanner get planner => PlantingPlanner(climate);
 
   void _change(GardenRecord next) {
     if (!_loaded) {
@@ -103,20 +183,20 @@ class GardenController extends ChangeNotifier {
 
   // ------------------------------------------------------------- climate
 
-  void setZone(HardinessZone zone) =>
-      _change(_record.copyWith(climate: _record.climate.copyWith(zone: zone)));
+  void _changeClimate(Climate next) {
+    if (next == climate) return;
+    farm.changeFarm('Change climate', (f) => f.withClimate(next));
+  }
 
-  /// Sets the gardener's own frost dates; null goes back to the zone's.
+  void setZone(HardinessZone zone) =>
+      _changeClimate(climate.copyWith(zone: zone));
+
+  /// Sets the farm's own frost dates; null goes back to the zone's.
   void setFrostDates({
     MonthDay? Function()? lastSpring,
     MonthDay? Function()? firstFall,
-  }) => _change(
-    _record.copyWith(
-      climate: _record.climate.copyWith(
-        lastSpringFrost: lastSpring,
-        firstFallFrost: firstFall,
-      ),
-    ),
+  }) => _changeClimate(
+    climate.copyWith(lastSpringFrost: lastSpring, firstFallFrost: firstFall),
   );
 
   // ---------------------------------------------------------- seed vault
@@ -143,12 +223,31 @@ class GardenController extends ChangeNotifier {
     return id;
   }
 
+  /// Adds [incoming] varieties under new IDs, as one change. A variety
+  /// already in the vault (same crop and name) or whose crop is not in the
+  /// catalog is skipped. Returns how many were added and skipped.
+  (int, int) importVarieties(List<Variety> incoming) {
+    String key(Variety v) => '${v.cropId}|${v.name.trim().toLowerCase()}';
+    final known = {for (final v in _record.varieties.values) key(v)};
+    var next = _record;
+    var added = 0;
+    for (final v in incoming) {
+      if (_catalog[v.cropId] == null || !known.add(key(v))) continue;
+      final (withId, id) = next.nextId('variety');
+      next = withId.withVariety(v.copyWith(id: id));
+      added++;
+    }
+    if (added > 0) _change(next);
+    return (added, incoming.length - added);
+  }
+
   void updateVariety(Variety variety) {
     if (!_record.varieties.containsKey(variety.id)) return;
     _change(_record.withVariety(variety));
   }
 
-  /// Removes the variety and its plantings.
+  /// Removes the variety from the vault. Farm plantings of it stay in
+  /// their farms but are no longer shown.
   void removeVariety(String id) {
     final name = _record.varieties[id]?.name;
     _change(_record.withoutVariety(id));
@@ -157,7 +256,8 @@ class GardenController extends ChangeNotifier {
 
   // ------------------------------------------------------------ plantings
 
-  /// Records a sowing of [varietyId] today, in the greenhouse or in place.
+  /// Records a sowing of [varietyId] on the open farm today, in the
+  /// greenhouse or in place, as one Undo step.
   String sow(
     String varietyId, {
     required bool indoors,
@@ -165,9 +265,12 @@ class GardenController extends ChangeNotifier {
     int? count,
     String location = '',
   }) {
-    final (next, id) = _record.nextId('planting');
-    _change(
-      next.withPlanting(
+    final name = _record.varieties[varietyId]?.name ?? 'Planting';
+    late String id;
+    farm.changeFarm('Sow $name', (f) {
+      final (next, newId) = f.nextPlantingId();
+      id = newId;
+      return next.withPlanting(
         Planting(
           id: id,
           varietyId: varietyId,
@@ -176,9 +279,8 @@ class GardenController extends ChangeNotifier {
           count: count,
           location: location,
         ),
-      ),
-    );
-    final name = _record.varieties[varietyId]?.name ?? 'Planting';
+      );
+    });
     toasts.show(
       indoors ? '$name started in the greenhouse' : '$name sown',
       kind: ToastKind.success,
@@ -188,35 +290,42 @@ class GardenController extends ChangeNotifier {
 
   /// Moves a greenhouse planting into the ground.
   void plantOut(String plantingId, {DateTime? on, String? location}) {
-    final p = _record.plantings[plantingId];
+    final p = plantings[plantingId];
     if (p == null || p.stage != PlantingStage.greenhouse) return;
-    _change(
-      _record.withPlanting(
-        p.copyWith(plantedOutOn: () => dayOf(on ?? today), location: location),
-      ),
+    _changePlanting(
+      'Plant out',
+      p.copyWith(plantedOutOn: () => dayOf(on ?? today), location: location),
     );
   }
 
+  void _changePlanting(String label, Planting next) =>
+      farm.changeFarm(label, (f) => f.withPlanting(next));
+
   /// Marks a planting as done: harvested or pulled.
   void finish(String plantingId, {DateTime? on}) {
-    final p = _record.plantings[plantingId];
+    final p = plantings[plantingId];
     if (p == null) return;
-    _change(
-      _record.withPlanting(p.copyWith(finishedOn: () => dayOf(on ?? today))),
+    _changePlanting(
+      'Finish planting',
+      p.copyWith(finishedOn: () => dayOf(on ?? today)),
     );
   }
 
   void updatePlanting(Planting planting) {
-    if (!_record.plantings.containsKey(planting.id)) return;
-    _change(_record.withPlanting(planting));
+    final current = plantings[planting.id];
+    if (current == null || current == planting) return;
+    _changePlanting('Change planting', planting);
   }
 
-  void removePlanting(String id) => _change(_record.withoutPlanting(id));
+  void removePlanting(String id) {
+    if (!plantings.containsKey(id)) return;
+    farm.changeFarm('Remove planting', (f) => f.withoutPlanting(id));
+  }
 
   /// Plantings at [stage] with their expected dates, oldest sowing first.
   /// Plantings whose variety has gone are left out.
   List<PlantingSchedule> schedules(PlantingStage stage) => [
-    for (final p in _record.plantings.values)
+    for (final p in plantings.values)
       if (p.stage == stage)
         if (profileOf(p.varietyId) case final profile?)
           PlantingSchedule(p, profile),

@@ -1,12 +1,18 @@
 # Build screen: quick guide
 
-The Build screen is where you draw your land. There are two kinds of
-layer:
+The Build screen is where you draw your land. Layers lists each kind of
+layer on its own, so what a layer is for is always visible:
 
 - Property: land you hold. Properties may not overlap one another.
-- Zone: how part of a property is used, such as beds, an orchard or a
-  shady corner. A zone must stay inside the property it belongs to, but
-  within it zones may overlap and touch each other freely.
+- Bed: ground inside a property: Fallow, Flat, or Row.
+- Planting: what grows where. Draw it over beds and plant it from the
+  Seed Vault; plants follow the bed underneath.
+- Reference: pictures to trace over (see Reference below).
+
+Beds and plantings (together called zones below) must stay inside the
+property they belong to, but within it they may overlap and touch each
+other freely. In Layers each property lists its BEDS, then its
+PLANTINGS.
 
 A shape only counts once its outline is closed. When it closes, it gets a
 light fill and shows as Active. An open outline is Inactive.
@@ -30,17 +36,25 @@ and it becomes Active again.
 
 ## Getting started
 
-1. In Layers (right side), press + Property. A new property appears in
-   the list.
+1. In Layers (right side), press + Add layer and choose Property layer.
+   A new property appears in the list.
 2. In Drawing tools (left side), choose Line, then Straight.
 3. Click on the grid to place the first corner, then click again for each
    next corner.
 4. Click the first corner again to close the shape. It turns Active.
    (Or choose Circle and click twice for a round property.)
-5. To add a zone, press Zone in Layers, then draw it the same way.
+5. Choose Add layer > Bed layer and draw your beds the same way. A new
+   bed is Flat; switch it to Fallow or Row with the Ground tool.
+6. Choose Add layer > Planting layer and draw where a crop goes, over
+   the beds. Plant it in Plant mode (see the garden tools guide).
+   Add layer > Reference layer uploads a picture to trace over.
 
-A zone goes under the selected property, or under the property of the
-selected zone. It can only be added once that property is Active.
+Until there is a property, every choice but Property layer is greyed
+out.
+
+A bed or planting goes under the selected property, or under the
+property of the selected bed or planting. It can only be added once that
+property is Active.
 
 
 ## The screen
@@ -207,15 +221,15 @@ Operations > Align (under Boolean)
 - Moving a whole property shape carries its zones' shapes inside it
   along, as a drag does. Items that share points cannot be aligned.
 
-Ground (zones only)
-- Flat or Row, then click inside the selected zone. The whole zone gets
-  that ground; the tool stays chosen. Properties > GROUND has the same
-  choice, plus Zone to clear it. Each change is one Undo step.
+Ground (beds only)
+- Fallow, Flat or Row, then click inside the selected bed. The whole bed
+  gets that ground; the tool stays chosen. Each change is one Undo step.
+  Plantings are added in Layers, not with this tool.
 - Row ground uses Row width, Spacing (the path between rows) and
   Direction (degrees clockwise from up the screen: 0 runs rows up and
   down, 90 left to right). These controls appear only for Row ground,
   and keep their values when you switch away.
-- Rows are laid edge to edge from one side of each of the zone's shapes.
+- Rows are laid edge to edge from one side of each of the bed's shapes.
   Properties shows how many rows fit and their total length.
 
 Feature
@@ -233,10 +247,15 @@ Feature
   The number in Properties is kept exactly as typed.
 
 Reference (pictures to trace over)
-- Choose Reference (or press R). Properties always shows the same
-  layout: Upload image, the selected picture's name with a bin, then
-  Opacity and Distance. With no picture selected they are greyed out.
-- Upload image: pick a PNG, JPEG or WebP site plan or photo (up to 20 MB).
+- Choose Reference (or press R). If the drawing has no Reference layer
+  yet, an empty one is added at the bottom of Layers and selected (one
+  Undo step). Properties always shows the same layout: Upload image,
+  the selected picture's name with a bin, then Opacity and Distance.
+  With no picture selected they are greyed out.
+- Upload image: with the Reference layer or one of its pictures
+  selected, pick a PNG, JPEG or WebP site plan or photo (up to 20 MB).
+  With anything else selected, the status bar asks you to select a
+  reference layer first.
   It is placed in the middle of the view, sized to fit, under all the
   land, and named after its file. Upload again to add more pictures.
 - Click the name to rename it; Enter or clicking away saves, Esc cancels,
@@ -304,17 +323,22 @@ your chosen units. The grid always uses round sizes: 0.5, 1, 5, 10 or
 
 - Click a layer in Layers to work on it. Its details show in Properties.
 - In Properties you can rename the layer (pencil button). Properties have
-  a colour option; soil drainage and soil sample controls are hidden for
-  now, without removing previously saved values.
-- A zone's bar above its name shows its ground type: grey for Zone, burnt
-  orange for Flat, mint green for Row, and emerald green for Grow. Zone
-  and Flat show colour and ground options; Row adds row controls. Grow
-  shows only planting options. The free-text Crop field is hidden.
+  a colour option.
+- A bed's bar above its name shows its ground: grey for Fallow bed, burnt
+  orange for Flat bed, mint green for Row bed. A fallow bed shows only
+  colour; Flat adds Direction, the heading of the plant grid that
+  plantings lay on it; Row adds row controls. A planting shows only the
+  GROW options.
 - Net area excludes holes and includes curved edges; it is displayed in
   m² or ft² with your chosen units. Where a zone's shapes overlap, the
   shared ground counts once.
+- The eye (shown when you point at a layer) hides it: it is not drawn,
+  clicks pass through it, and it cannot be drawn on until shown again.
+  Hiding a property hides its beds and plantings; the Reference row has
+  its own eye. Hidden layers stay hidden for this drawing on this
+  device, and hiding is not an Undo step.
 - The bin icon (shown when you point at a layer) deletes it. Deleting a
-  property deletes its zones too. You are asked first.
+  property deletes its beds and plantings too. You are asked first.
 - The padlock next to the bin locks a layer once it is finished. A
   locked layer, and every zone under a locked property, cannot be drawn
   on, moved, renamed, changed, or deleted, and Select clicks pass through

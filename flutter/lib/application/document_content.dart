@@ -12,7 +12,11 @@ bool sameContent(GardenDocument a, GardenDocument b) {
     return false;
   }
   if (!listEquals(a.references, b.references)) return false;
+  if (a.hasReferenceLayer != b.hasReferenceLayer) return false;
   if (!listEquals(a.features, b.features)) return false;
+  if (a.climate != b.climate || !mapEquals(a.plantings, b.plantings)) {
+    return false;
+  }
   if (a.layers.length != b.layers.length) return false;
   for (final entry in a.layers.entries) {
     if (!identical(entry.value, b.layers[entry.key])) return false;

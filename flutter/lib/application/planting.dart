@@ -17,7 +17,10 @@ ZoneSeed seedFromProfile(VarietyProfile profile) {
     varietyId: profile.id,
     name: profile.displayName,
     size: size,
-    spacing: math.max(0, profile.betweenRowSpacingIn.min * metresPerInch - size),
+    spacing: math.max(
+      0,
+      profile.betweenRowSpacingIn.min * metresPerInch - size,
+    ),
   );
 }
 
@@ -31,7 +34,7 @@ double _positive(num inches) => inches < 0.5 ? 0.5 : inches.toDouble();
 String? growZoneAt(EditorController editor, Vec world) {
   final document = editor.document;
   for (final id in document.drawingOrder.reversed) {
-    if (!editor.isGrowZone(id) || editor.isFrozen(id)) continue;
+    if (!editor.isGrowZone(id) || editor.isUnreachable(id)) continue;
     final region = document.geometryOf(id).region;
     if (region != null && region.locate(world) == PointLocation.inside) {
       return id;
@@ -46,7 +49,7 @@ String? growZoneAt(EditorController editor, Vec world) {
 bool dropSeed(EditorController editor, VarietyProfile profile, Vec world) {
   final layerId = growZoneAt(editor, world);
   if (layerId == null) {
-    editor.showNotice('Drop seeds inside a grow zone');
+    editor.showNotice('Drop seeds inside a planting');
     return false;
   }
   return plantIn(editor, layerId, profile);
@@ -56,7 +59,7 @@ bool dropSeed(EditorController editor, VarietyProfile profile, Vec world) {
 /// the same variety are kept, so dropping it again changes nothing.
 bool plantIn(EditorController editor, String layerId, VarietyProfile profile) {
   if (!editor.isGrowZone(layerId)) {
-    editor.showNotice('Seeds are planted in grow zones');
+    editor.showNotice('Seeds are planted in plantings');
     return false;
   }
   final current = switch (editor.document.layers[layerId]?.properties) {

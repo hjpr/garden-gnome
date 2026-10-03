@@ -36,6 +36,8 @@ class SceneState {
     this.renderAssets,
     this.selectedFeatureId,
     this.viewMoving = false,
+    this.hiddenLayers = const {},
+    this.referenceHidden = false,
   });
 
   final GardenDocument document;
@@ -93,4 +95,12 @@ class SceneState {
   /// Whether the view is panning or zooming right now. Render then skips
   /// the costly blended ground edges and draws them once it settles.
   final bool viewMoving;
+
+  /// Layers hidden in Layers, with their properties' zones: not drawn.
+  final Set<String> hiddenLayers;
+
+  /// Whether the Reference layer is hidden.
+  final bool referenceHidden;
+
+  bool shows(String layerId) => !hiddenLayers.contains(layerId);
 }

@@ -1,11 +1,14 @@
 import 'feature.dart';
 import 'geometry.dart';
+import 'grow/climate.dart';
+import 'grow/planting.dart';
 import 'layer.dart';
 import 'reference_image.dart';
 
 typedef IdGenerator = String Function();
 
-/// A complete garden drawing: its layers and their geometry.
+/// A farm: its land (layers and their geometry), its climate, and what
+/// is planted on it. The open document is the farm every tool works on.
 ///
 /// Documents are immutable. Every edit produces a new document, which lets
 /// history keep earlier versions without copying unchanged layers.
@@ -17,15 +20,44 @@ class GardenDocument {
     List<String> propertyIds = const [],
     Map<LayerKind, int> nameCounters = const {},
     List<ReferenceImage> references = const [],
+    bool referenceLayer = false,
     this.imageCounter = 0,
     List<Feature> features = const [],
     this.featureCounter = 0,
-  }) : references = List.unmodifiable(references),
+    this.climate = const Climate(),
+    Map<String, Planting> plantings = const {},
+    this.plantingCounter = 0,
+  }) : plantings = Map.unmodifiable(plantings),
+       hasReferenceLayer = referenceLayer || references.isNotEmpty,
+       references = List.unmodifiable(references),
        features = List.unmodifiable(features),
        layers = Map.unmodifiable(layers),
        geometries = Map.unmodifiable(geometries),
        propertyIds = List.unmodifiable(propertyIds),
        nameCounters = Map.unmodifiable(nameCounters);
+
+  /// Hardiness zone and frost dates where the farm is.
+  final Climate climate;
+
+  /// Every sowing on this farm, from greenhouse tray to harvest.
+  final Map<String, Planting> plantings;
+
+  /// Highest planting number issued, so IDs are never reused.
+  final int plantingCounter;
+
+  GardenDocument withClimate(Climate next) => _rebuild(climate: next);
+
+  GardenDocument withPlanting(Planting p) =>
+      _rebuild(plantings: {...plantings, p.id: p});
+
+  GardenDocument withoutPlanting(String id) =>
+      _rebuild(plantings: {...plantings}..remove(id));
+
+  /// An ID for a new planting: "planting-N" past every one issued.
+  (GardenDocument, String) nextPlantingId() {
+    final number = plantingCounter + 1;
+    return (_rebuild(plantingCounter: number), 'planting-$number');
+  }
 
   /// Raised beds, greenhouses and high tunnels, drawn over all land in
   /// this order (later ones on top).
@@ -67,9 +99,13 @@ class GardenDocument {
     List<String>? propertyIds,
     Map<LayerKind, int>? nameCounters,
     List<ReferenceImage>? references,
+    bool? referenceLayer,
     int? imageCounter,
     List<Feature>? features,
     int? featureCounter,
+    Climate? climate,
+    Map<String, Planting>? plantings,
+    int? plantingCounter,
   }) => GardenDocument(
     id: id ?? this.id,
     layers: layers ?? this.layers,
@@ -77,9 +113,13 @@ class GardenDocument {
     propertyIds: propertyIds ?? this.propertyIds,
     nameCounters: nameCounters ?? this.nameCounters,
     references: references ?? this.references,
+    referenceLayer: referenceLayer ?? hasReferenceLayer,
     imageCounter: imageCounter ?? this.imageCounter,
     features: features ?? this.features,
     featureCounter: featureCounter ?? this.featureCounter,
+    climate: climate ?? this.climate,
+    plantings: plantings ?? this.plantings,
+    plantingCounter: plantingCounter ?? this.plantingCounter,
   );
 
   final String id;
@@ -95,6 +135,19 @@ class GardenDocument {
   /// The Reference layer: pictures traced over, drawn under all land.
   /// Bottom first, so later images are drawn on top of earlier ones.
   final List<ReferenceImage> references;
+
+  /// Whether the drawing has a Reference layer. It can be empty: it stays
+  /// when its last image is removed, until the layer itself is deleted.
+  final bool hasReferenceLayer;
+
+  /// Adds an empty Reference layer.
+  GardenDocument withReferenceLayer() =>
+      hasReferenceLayer ? this : _rebuild(referenceLayer: true);
+
+  /// Removes the Reference layer and every image in it.
+  GardenDocument withoutReferenceLayer() => hasReferenceLayer
+      ? _rebuild(references: const [], referenceLayer: false)
+      : this;
 
   /// Highest reference image number issued, so IDs are never reused.
   final int imageCounter;
@@ -203,21 +256,39 @@ class GardenDocument {
 
   /// Adds an empty layer with the next automatic name.
   ///
+  /// [role] names it ("Bed 3") and gives its starting settings; without
+  /// it the layer is named after its kind with that kind's defaults.
   /// Returns the new document and the new layer's ID.
   (GardenDocument, String) addLayer(
     LayerKind kind, {
     String? parentId,
     required IdGenerator newId,
+    LayerRole? role,
   }) {
-    if (kind.parentKind != layers[parentId]?.kind) {
+    if (kind.parentKind != layers[parentId]?.kind ||
+        (role != null && role.kind != kind)) {
       throw ArgumentError('A ${kind.label} needs a ${kind.parentKind?.label}');
     }
+    final prefix = role?.label ?? kind.label;
     var counter = nameCounters[kind] ?? 0;
     String name;
-    do {
+    if (role != null && role != LayerRole.property) {
+      // Beds and plantings share the zone counter, so each is numbered on
+      // its own, after the highest of its kind in the drawing.
+      var highest = 0;
+      for (final layer in layers.values) {
+        if (!layer.name.startsWith('$prefix ')) continue;
+        final number = int.tryParse(layer.name.substring(prefix.length + 1));
+        if (number != null && number > highest) highest = number;
+      }
+      name = '$prefix ${highest + 1}';
       counter++;
-      name = '${kind.label} $counter';
-    } while (layers.values.any((l) => l.kind == kind && l.name == name));
+    } else {
+      do {
+        counter++;
+        name = '$prefix $counter';
+      } while (layers.values.any((l) => l.kind == kind && l.name == name));
+    }
 
     final layer = Layer(
       id: newId(),
@@ -225,7 +296,7 @@ class GardenDocument {
       name: name,
       parentId: parentId,
       geometryId: newId(),
-      properties: LayerProperties.defaultsFor(kind),
+      properties: role?.defaults ?? LayerProperties.defaultsFor(kind),
     );
     final geometry = Geometry(
       id: layer.geometryId,
@@ -298,6 +369,11 @@ class GardenDocument {
       featureNumbers = ledger.features;
       changed = true;
     }
+    var plantingNumbers = plantingCounter;
+    if (ledger.plantings > plantingNumbers) {
+      plantingNumbers = ledger.plantings;
+      changed = true;
+    }
     final updated = {...geometries};
     for (final entry in geometries.entries) {
       final known = ledger.geometry[entry.key];
@@ -314,6 +390,7 @@ class GardenDocument {
       nameCounters: names,
       imageCounter: images,
       featureCounter: featureNumbers,
+      plantingCounter: plantingNumbers,
     );
   }
 }
@@ -332,6 +409,9 @@ class CounterLedger {
   /// Highest feature number issued.
   int features = 0;
 
+  /// Highest planting number issued.
+  int plantings = 0;
+
   /// Takes the higher of each number here and in [other].
   void merge(CounterLedger other) {
     other.geometry.forEach((id, counters) {
@@ -343,6 +423,7 @@ class CounterLedger {
     });
     if (other.images > images) images = other.images;
     if (other.features > features) features = other.features;
+    if (other.plantings > plantings) plantings = other.plantings;
   }
 
   void record(GardenDocument document) {
@@ -358,6 +439,9 @@ class CounterLedger {
     if (document.imageCounter > images) images = document.imageCounter;
     if (document.featureCounter > features) {
       features = document.featureCounter;
+    }
+    if (document.plantingCounter > plantings) {
+      plantings = document.plantingCounter;
     }
   }
 }

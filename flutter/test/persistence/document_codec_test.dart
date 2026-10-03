@@ -46,10 +46,7 @@ GardenDocument sampleDocument() {
   return doc.withLayer(
     doc.layers[property]!.copyWith(
       name: 'North property',
-      properties: const PropertyProperties(
-        color: OutlineColor.blue,
-        drainage: SoilDrainage.good,
-      ),
+      properties: const PropertyProperties(color: OutlineColor.blue),
     ),
   );
 }
@@ -106,12 +103,37 @@ void main() {
     );
   });
 
+  test('schema 4 files open with soil drainage and sample values dropped', () {
+    final json = documentToJson(sampleDocument())..['schema_version'] = 4;
+    final property = (json['layers'] as Map).values.cast<Map>().singleWhere(
+      (layer) => layer['kind'] == 'property',
+    );
+    property['properties'] = <String, Object?>{
+      ...property['properties'] as Map<String, Object?>,
+      'drainage': 'good',
+      'soil': {'ph': 6.5, 'organic_matter': 3.2},
+    };
+    final opened = mapping.documentFromJson(json);
+    final props =
+        opened.layers.values
+                .singleWhere((layer) => layer.kind == LayerKind.property)
+                .properties
+            as PropertyProperties;
+    expect(props.color, OutlineColor.blue);
+    final saved = documentToJson(opened)['layers'] as Map;
+    final savedProps = saved.values.cast<Map>().singleWhere(
+      (layer) => layer['kind'] == 'property',
+    )['properties'];
+    expect(savedProps, {'color': 'blue'});
+  });
+
   test('ZIP assets resolve through the JSON mapping boundary', () {
     final json = documentToJson(sampleDocument());
     final png = base64Decode(
       'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a2uoAAAAASUVORK5CYII=',
     );
     json['image_counter'] = 1;
+    json['reference_layer'] = true;
     json['references'] = [
       {
         'id': 'image-1',

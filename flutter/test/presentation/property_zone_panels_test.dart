@@ -42,31 +42,79 @@ void drawSquare(EditorController editor, String layerId) {
 }
 
 void main() {
-  testWidgets(
-    'grow planting retains direction without showing ground controls',
-    (tester) async {
-      final (editor, _, _, grow) = garden(GroundType.flat);
-      editor.setSeed(grow, seed());
-      await tester.pumpWidget(
-        editorPanel(
-          editor: editor,
-          builder: (_) => PropertiesBody(editor: editor),
-        ),
-      );
-      final direction = find.descendant(
-        of: find.widgetWithText(PropertyRow, 'Direction (°)'),
-        matching: find.byType(TextField),
-      );
-      expect(direction, findsOneWidget);
-      expect(find.text('GROUND'), findsNothing);
-      await tester.enterText(direction, '90');
-      await tester.testTextInput.receiveAction(TextInputAction.done);
-      await tester.pumpAndSettle();
-      expect(editor.document.rowsOf(grow)!.direction, 90);
-      final line = editor.document.plantLayoutOf(grow)!.lines.first;
-      expect(line.start.y, closeTo(line.end.y, 1e-9));
-    },
-  );
+  testWidgets('Flat ground owns the planting direction; grow zones show none', (
+    tester,
+  ) async {
+    final (editor, _, flat, grow) = garden(GroundType.flat);
+    editor.setSeed(grow, seed());
+    editor.selectLayer(grow);
+    await tester.pumpWidget(
+      editorPanel(
+        editor: editor,
+        builder: (_) => PropertiesBody(editor: editor),
+      ),
+    );
+    final direction = find.descendant(
+      of: find.widgetWithText(PropertyRow, 'Direction (°)'),
+      matching: find.byType(TextField),
+    );
+    expect(direction, findsNothing);
+
+    editor.selectLayer(flat);
+    await tester.pumpAndSettle();
+    expect(find.text('GROUND'), findsOneWidget);
+    expect(direction, findsOneWidget);
+    await tester.enterText(direction, '90');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    expect(editor.document.rowsOf(flat)!.direction, 90);
+    final line = editor.document.plantLayoutOf(grow)!.lines.first;
+    expect(line.start.y, closeTo(line.end.y, 1e-9));
+  });
+
+  testWidgets('Plants sits under Seed; Plant on picks a day in a calendar', (
+    tester,
+  ) async {
+    final (editor, _, _, grow) = garden(GroundType.flat);
+    await tester.pumpWidget(
+      editorPanel(
+        editor: editor,
+        builder: (_) => PropertiesBody(editor: editor),
+      ),
+    );
+    final plantOn = find.byKey(const ValueKey('plant-on'));
+    expect(tester.widget<InkWell>(plantOn).onTap, isNull, reason: 'no seed');
+    expect(find.text('Planted on'), findsNothing);
+
+    editor.setSeed(grow, seed());
+    await tester.pumpAndSettle();
+    double top(String label) =>
+        tester.getTopLeft(find.widgetWithText(PropertyRow, label)).dy;
+    expect(top('Seed'), lessThan(top('Plants')));
+    expect(top('Plants'), lessThan(top('Size (ft)')));
+    expect(top('Spacing (ft)'), lessThan(top('Plant on')));
+
+    await tester.tap(plantOn);
+    await tester.pumpAndSettle();
+    expect(find.byType(DatePickerDialog), findsOneWidget);
+    await tester.tap(find.text('15'));
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    final day = (editor.document.layers[grow]!.properties as ZoneProperties)
+        .seed!
+        .plantOn!;
+    final now = DateTime.now();
+    expect(day, DateTime.utc(now.year, now.month, 15));
+    expect(find.textContaining(', ${now.year}'), findsOneWidget);
+    editor.undo();
+    await tester.pumpAndSettle();
+    expect(
+      (editor.document.layers[grow]!.properties as ZoneProperties)
+          .seed!
+          .plantOn,
+      isNull,
+    );
+  });
 
   testWidgets('typing plant spacing changes row layout and supports Undo', (
     tester,
@@ -140,10 +188,9 @@ void main() {
       );
       final bar = find.byKey(const ValueKey('ground-type-bar'));
       for (final (ground, label, color) in [
-        (null, 'Zone', const Color(0xFF6B7280)),
-        (GroundType.flat, 'Flat', const Color(0xFFBF5700)),
-        (GroundType.row, 'Row', const Color(0xFF98DFC2)),
-        (GroundType.grow, 'Grow', const Color(0xFF00875A)),
+        (null, 'Fallow bed', const Color(0xFF6B7280)),
+        (GroundType.flat, 'Flat bed', const Color(0xFFBF5700)),
+        (GroundType.row, 'Row bed', const Color(0xFF98DFC2)),
       ]) {
         editor.setGround(zone, ground);
         await tester.pumpAndSettle();
@@ -164,31 +211,21 @@ void main() {
       }
       editor.undo();
       await tester.pumpAndSettle();
-      expect(tester.widget<Container>(bar).color, const Color(0xFF98DFC2));
+      expect(tester.widget<Container>(bar).color, const Color(0xFFBF5700));
       editor.selectLayer(property);
       await tester.pumpAndSettle();
       expect(bar, findsNothing);
     },
   );
 
-  testWidgets(
-    'property options hide soil fields without clearing saved values',
-    (tester) async {
-      final (editor, _, property, _) = farm();
-      editor.selectLayer(property);
-      const properties = PropertyProperties(
-        drainage: SoilDrainage.good,
-        soil: SoilSample(ph: 6.5),
-      );
-      editor.updateProperties(property, properties);
-      await tester.pumpWidget(panels(editor));
-      expect(find.text('Color'), findsOneWidget);
-      expect(find.text('Soil drainage'), findsNothing);
-      expect(find.text('SOIL SAMPLE'), findsNothing);
-      expect(find.text('pH'), findsNothing);
-      expect(editor.selectedLayer!.properties, same(properties));
-    },
-  );
+  testWidgets('property options show only the colour', (tester) async {
+    final (editor, _, property, _) = farm();
+    editor.selectLayer(property);
+    await tester.pumpWidget(panels(editor));
+    expect(find.text('Color'), findsOneWidget);
+    expect(find.text('Soil drainage'), findsNothing);
+    expect(find.text('SOIL SAMPLE'), findsNothing);
+  });
 
   testWidgets(
     'row dimensions use inches in feet drawings and metres otherwise',
@@ -313,7 +350,7 @@ void main() {
     expect(find.text('Border (in)'), findsNothing);
   });
 
-  testWidgets('grow zones show only planting options in both modes', (
+  testWidgets('grow zones show only grow options in both modes', (
     tester,
   ) async {
     final (editor, _, _, grow) = garden(GroundType.flat);
@@ -328,7 +365,7 @@ void main() {
     expect(find.byType(CompactDropdown<GroundType?>), findsNothing);
     expect(find.text('OPTIONS'), findsNothing);
     expect(find.text('GROUND'), findsNothing);
-    expect(find.text('PLANTING'), findsOneWidget);
+    expect(find.text('GROW'), findsOneWidget);
     expect(find.text('Spacing (ft)'), findsOneWidget);
     final spacing = find.descendant(
       of: find
@@ -349,42 +386,81 @@ void main() {
     expect(find.byType(CompactDropdown<GroundType?>), findsNothing);
     expect(find.text('OPTIONS'), findsNothing);
     expect(find.text('GROUND'), findsNothing);
-    expect(find.text('PLANTING'), findsOneWidget);
+    expect(find.text('GROW'), findsOneWidget);
   });
 
-  testWidgets('Layers adds a property, then zones under it', (tester) async {
+  testWidgets('Layers adds a property, then beds and plantings in groups', (
+    tester,
+  ) async {
     final editor = EditorController();
     addTearDown(editor.dispose);
     await tester.pumpWidget(panels(editor));
     expect(find.text('Add a property to start.'), findsOneWidget);
-    expect(
-      find.byTooltip('Select a property to add a zone'),
-      findsOneWidget,
-      reason: 'Zone is greyed out with nothing selected',
-    );
+    // With no property, only Property layer can be picked.
+    final propertyItem = await openAddLayerItem(tester, 'Property layer');
+    expect(menuItemEnabled(tester, propertyItem), isTrue);
+    for (final label in ['Bed layer', 'Planting layer', 'Reference layer']) {
+      final item = find.widgetWithText(MenuItemButton, label);
+      expect(menuItemEnabled(tester, item), isFalse, reason: label);
+    }
+    expect(find.byTooltip('Add a property layer first'), findsNWidgets(3));
 
-    await tester.tap(find.bySemanticsLabel('Add property'));
+    await tester.tap(propertyItem);
     await tester.pumpAndSettle();
     final property = editor.selectedLayerId!;
     expect(editor.document.layers[property]!.name, 'Property 1');
+    final bedItem = await openAddLayerItem(tester, 'Bed layer');
+    expect(menuItemEnabled(tester, bedItem), isFalse);
     expect(
-      find.byTooltip('Complete Property 1 before adding a zone'),
+      find.byTooltip('Complete Property 1 before adding a bed'),
       findsOneWidget,
     );
+    expect(
+      menuItemEnabled(
+        tester,
+        find.widgetWithText(MenuItemButton, 'Reference layer'),
+      ),
+      isTrue,
+    );
+    await tester.tapAt(const Offset(5, 5));
+    await tester.pumpAndSettle();
     drawSquare(editor, property);
     await tester.pumpAndSettle();
-    expect(find.byTooltip('Add zone'), findsOneWidget);
 
-    await tester.tap(find.bySemanticsLabel('Add zone'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.bySemanticsLabel('Add zone'));
-    await tester.pumpAndSettle();
+    await addLayerFromMenu(tester, 'Bed layer');
+    editor.selectLayer(property);
+    await addLayerFromMenu(tester, 'Planting layer');
+    editor.selectLayer(property);
+    await addLayerFromMenu(tester, 'Bed layer');
     final zones = editor.document.layers[property]!.children;
     expect(zones.map((id) => editor.document.layers[id]!.name), [
-      'Zone 1',
-      'Zone 2',
+      'Bed 1',
+      'Planting 1',
+      'Bed 2',
     ]);
-    expect(find.bySemanticsLabel(RegExp(r'^Zone 2, Zone, ')), findsOneWidget);
+    expect(
+      editor.document.layers[zones.first]!.properties,
+      isA<ZoneProperties>().having((p) => p.ground, 'ground', GroundType.flat),
+      reason: 'a new bed is Flat, so plantings over it grow',
+    );
+    expect(editor.isGrowZone(zones[1]), isTrue);
+    expect(find.bySemanticsLabel(RegExp(r'^Bed 2, Bed, ')), findsOneWidget);
+    expect(
+      find.bySemanticsLabel(RegExp(r'^Planting 1, Planting, ')),
+      findsOneWidget,
+    );
+    // Beds are listed together, then plantings, whatever order they came in.
+    double top(String text) => tester
+        .getTopLeft(
+          find.descendant(
+            of: find.byType(LayersBody),
+            matching: find.text(text),
+          ),
+        )
+        .dy;
+    expect(top('BEDS'), lessThan(top('Bed 1')));
+    expect(top('Bed 2'), lessThan(top('PLANTINGS')));
+    expect(top('PLANTINGS'), lessThan(top('Planting 1')));
   });
 
   testWidgets('zone options follow the ground type without a Crop field', (
@@ -402,10 +478,18 @@ void main() {
     for (final ground in [null, GroundType.flat, GroundType.row]) {
       editor.setGround(zone, ground);
       await tester.pumpAndSettle();
-      for (final label in ['Color', 'Ground']) {
-        expect(find.text(label), findsOneWidget, reason: label);
-      }
-      for (final label in ['Crop', 'PLANTING', 'Size (ft)']) {
+      expect(find.text('Color'), findsOneWidget);
+      // Ground is set with the Ground tool; Row and Flat have settings.
+      expect(find.byType(CompactDropdown<GroundType?>), findsNothing);
+      expect(
+        find.text('GROUND'),
+        ground == null ? findsNothing : findsOneWidget,
+      );
+      expect(
+        find.text('Direction (°)'),
+        ground == null ? findsNothing : findsOneWidget,
+      );
+      for (final label in ['Crop', 'GROW', 'Size (ft)']) {
         expect(find.text(label), findsNothing, reason: label);
       }
       expect(
@@ -455,7 +539,7 @@ void main() {
       ),
     );
     expect(find.text('Row width (in)'), findsNothing);
-    expect(find.text('PLANTING'), findsNothing);
+    expect(find.text('GROW'), findsNothing);
 
     editor.setGround(zone, GroundType.row);
     await tester.pumpAndSettle();

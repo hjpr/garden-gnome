@@ -18,7 +18,7 @@ class ClimateBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final climate = garden.record.climate;
+    final climate = garden.climate;
     Widget frost(
       String label,
       MonthDay? own,

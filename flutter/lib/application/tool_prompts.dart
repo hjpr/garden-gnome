@@ -16,7 +16,7 @@ String toolPrompt(EditorController editor) {
   if (editor.mode == EditMode.plant &&
       (editor.selectedLayerId == null ||
           !editor.isGrowZone(editor.selectedLayerId!))) {
-    return 'Select a grow zone to draw on, or add one in Layers';
+    return 'Select a planting to work on it';
   }
   if (editor.selectedLayer == null) {
     return editor.document.propertyIds.isEmpty
@@ -67,18 +67,16 @@ String toolPrompt(EditorController editor) {
       'Click one side of the circle',
     (Tool.circle, ToolFunction.twoPointCircle) =>
       'Click the opposite side. Esc to cancel',
-    (Tool.ground, _) when editor.selectedLayer?.kind != LayerKind.zone =>
-      'Ground is set on zones. Select a zone',
+    (Tool.ground, _) when editor.selectedLayer?.role != LayerRole.bed =>
+      'Ground is set on beds. Select a bed',
     (Tool.ground, _)
         when editor.document.geometryOf(editor.selectedLayerId!).region ==
             null =>
       'Close a shape before setting its ground',
     (Tool.ground, ToolFunction.clearGround) =>
-      'Click inside the zone to clear it back to plain dirt',
-    (Tool.ground, ToolFunction.growGround) =>
-      'Click inside the zone to make it a grow zone. Plant it in Plant mode',
+      'Click inside the bed to leave it fallow',
     (Tool.ground, final function) =>
-      'Click inside the zone to make its ground ${function.label}',
+      'Click inside the bed to make its ground ${function.label}',
     _ => '',
   };
 }

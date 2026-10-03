@@ -150,12 +150,14 @@ void main() {
       const settings = WorkspaceSettings(
         units: Units.metres,
         viewMode: ViewMode.render,
+        hiddenLayers: {'layer-a', 'reference'},
       );
       await store.save('drawing', settings, const Camera(height: 42), ledger);
       SharedPreferences.resetStatic();
       final restored = await store.load('drawing');
       expect(restored!.$1.units, Units.metres);
       expect(restored.$1.viewMode, ViewMode.render);
+      expect(restored.$1.hiddenLayers, {'layer-a', 'reference'});
       expect(restored.$2.height, 42);
       final counters = await store.counters('drawing');
       expect(counters.names[LayerKind.property], 5);

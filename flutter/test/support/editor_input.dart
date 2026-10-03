@@ -66,6 +66,7 @@ void selectShapes(CanvasInput input, List<Vec> at) {
 }
 
 /// A layer of [kind] with a closed rectangle, drawn with the Polygon tool.
+/// [role] adds it as a bed or planting, as Layers > Add layer does.
 String rectangleLayer(
   EditorController editor,
   CanvasInput input,
@@ -73,9 +74,10 @@ String rectangleLayer(
   double x0,
   double y0,
   double x1,
-  double y1,
-) {
-  editor.addLayer(kind);
+  double y1, {
+  LayerRole? role,
+}) {
+  editor.addLayer(kind, role: role);
   final id = editor.selectedLayerId!;
   editor.selectTool(Tool.polygon);
   editor.selectFunction(ToolFunction.rectangle);

@@ -19,13 +19,9 @@ const int gardenRecordVersion = 1;
 String encodeGardenRecord(GardenRecord record) => jsonEncode({
   'version': gardenRecordVersion,
   'counter': record.counter,
-  'climate': {
-    'zone': record.climate.zone.code,
-    'last_spring_frost': record.climate.lastSpringFrost?.code,
-    'first_fall_frost': record.climate.firstFallFrost?.code,
-  },
+  'climate': climateToJson(record.climate),
   'varieties': [for (final v in record.varieties.values) _variety(v)],
-  'plantings': [for (final p in record.plantings.values) _planting(p)],
+  'plantings': [for (final p in record.plantings.values) plantingToJson(p)],
 });
 
 /// Reads a stored record. This is the gardener's own data, so anything
@@ -58,6 +54,48 @@ GardenRecord decodeGardenRecord(String text) {
   }
 }
 
+const String seedVaultFormat = 'garden-gnome-seed-vault';
+const int seedVaultVersion = 1;
+
+/// The Seed Vault on its own, for keeping a copy or moving it to another
+/// browser. Plantings and climate belong to a farm, so they are left out.
+String encodeSeedVault(Iterable<Variety> varieties) =>
+    const JsonEncoder.withIndent('  ').convert({
+      'format': seedVaultFormat,
+      'version': seedVaultVersion,
+      'varieties': [for (final v in varieties) _variety(v)],
+    });
+
+/// Reads an exported Seed Vault. Anything not written by [encodeSeedVault]
+/// is refused whole, so a bad file adds nothing.
+List<Variety> decodeSeedVault(String text) {
+  const damaged = GardenRecordFormatError('That is not a Seed Vault file');
+  final Object? decoded;
+  try {
+    decoded = jsonDecode(text);
+  } catch (_) {
+    throw damaged;
+  }
+  if (decoded is! Map || decoded['format'] != seedVaultFormat) throw damaged;
+  final version = decoded['version'];
+  if (version is! int || version < 1) throw damaged;
+  if (version > seedVaultVersion) {
+    throw const GardenRecordFormatError(
+      'That Seed Vault was saved by a newer Garden Gnome',
+    );
+  }
+  try {
+    return [
+      for (final raw in _list(decoded['varieties'], 'varieties'))
+        _readVariety(raw),
+    ];
+  } on FormatException catch (e) {
+    throw GardenRecordFormatError(
+      'The Seed Vault file is damaged: ${e.message}',
+    );
+  }
+}
+
 GardenRecord _record(Map<String, Object?> json) {
   final climate = _map(json['climate'] ?? const <String, Object?>{}, 'climate');
   final varieties = _unique(
@@ -71,7 +109,7 @@ GardenRecord _record(Map<String, Object?> json) {
   final plantings = _unique(
     [
       for (final raw in _list(json['plantings'], 'plantings'))
-        _readPlanting(raw),
+        plantingFromJson(raw),
     ],
     (p) => p.id,
     'planting',
@@ -90,11 +128,7 @@ GardenRecord _record(Map<String, Object?> json) {
   );
   return GardenRecord(
     counter: counter,
-    climate: Climate(
-      zone: _zone(climate['zone']),
-      lastSpringFrost: _monthDay(climate['last_spring_frost']),
-      firstFallFrost: _monthDay(climate['first_fall_frost']),
-    ),
+    climate: climateFromJson(climate),
     varieties: varieties,
     plantings: plantings,
   );
@@ -143,7 +177,20 @@ Variety _readVariety(Object? raw) {
   );
 }
 
-Map<String, Object?> _planting(Planting p) => {
+Map<String, Object?> climateToJson(Climate c) => {
+  'zone': c.zone.code,
+  'last_spring_frost': c.lastSpringFrost?.code,
+  'first_fall_frost': c.firstFallFrost?.code,
+};
+
+/// Throws [FormatException] when a value cannot be read.
+Climate climateFromJson(Map<String, Object?> json) => Climate(
+  zone: _zone(json['zone']),
+  lastSpringFrost: _monthDay(json['last_spring_frost']),
+  firstFallFrost: _monthDay(json['first_fall_frost']),
+);
+
+Map<String, Object?> plantingToJson(Planting p) => {
   'id': p.id,
   'variety': p.varietyId,
   'sown': _date(p.sownOn),
@@ -155,7 +202,8 @@ Map<String, Object?> _planting(Planting p) => {
   'notes': p.notes,
 };
 
-Planting _readPlanting(Object? raw) {
+/// Throws [FormatException] when a value cannot be read.
+Planting plantingFromJson(Object? raw) {
   final j = _map(raw, 'planting');
   return Planting(
     id: _string(j['id'], 'planting ID'),

@@ -348,7 +348,7 @@ class _BuildScreenState extends State<BuildScreen> {
             ? editor.selectedFeature!.kind.label
             : editor.showsReference
             ? 'Reference'
-            : editor.selectedLayer?.kind.label,
+            : editor.selectedLayer?.role.label,
         expanded: expanded,
         onExpandedChanged: setExpanded,
         child: PropertiesBody(editor: editor),

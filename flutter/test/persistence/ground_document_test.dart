@@ -143,13 +143,29 @@ void main() {
     expect(p.seed, seed());
   });
 
-  test('seed diameter and empty gap round-trip explicitly in schema 4', () {
+  test('a planting\'s plant-on date is saved as a calendar day', () {
+    final (editor, _, _, grow) = garden(GroundType.row);
+    final planted = seed().copyWith(plantOn: () => DateTime.utc(2027, 4, 15));
+    editor.setSeed(grow, planted);
+    final json = documentToJson(editor.document);
+    final props = ((json['layers'] as Map)[grow] as Map)['properties'] as Map;
+    expect((props['seed'] as Map)['plant_on'], '2027-04-15');
+    final opened = documentFromJson(json);
+    expect(
+      (opened.layers[grow]!.properties as ZoneProperties).seed!.plantOn,
+      DateTime.utc(2027, 4, 15),
+    );
+    (props['seed'] as Map)['plant_on'] = '2027-02-31';
+    expect(() => documentFromJson(json), throwsA(isA<DocumentFormatError>()));
+  });
+
+  test('seed diameter and empty gap round-trip explicitly', () {
     final (editor, _, _, grow) = garden(GroundType.row);
     for (final gap in [0.0, 0.75]) {
       final planted = seed(size: 0.5, spacing: gap);
       editor.setSeed(grow, planted);
       final json = documentToJson(editor.document);
-      expect(json['schema_version'], 4);
+      expect(json['schema_version'], schemaVersion);
       final props = ((json['layers'] as Map)[grow] as Map)['properties'] as Map;
       expect(props['seed'], {
         'variety_id': planted.varietyId,
@@ -168,15 +184,20 @@ void main() {
       final json = documentToJson(editor.document)..['schema_version'] = 3;
       final props = ((json['layers'] as Map)[grow] as Map)['properties'] as Map;
       props['seed'] = {
-        'variety_id': 'legacy', 'name': 'Legacy',
-        'in_row': 0.5, 'between_rows': between,
+        'variety_id': 'legacy',
+        'name': 'Legacy',
+        'in_row': 0.5,
+        'between_rows': between,
       };
       final opened = documentFromJson(json);
       final planted = (opened.layers[grow]!.properties as ZoneProperties).seed!;
       expect(planted.size, 0.5);
       expect(planted.spacing, between <= 0.5 ? 0 : 0.75);
       final reopened = decodeGgnome(encodeGgnome(opened));
-      expect((reopened.layers[grow]!.properties as ZoneProperties).seed, planted);
+      expect(
+        (reopened.layers[grow]!.properties as ZoneProperties).seed,
+        planted,
+      );
     }
   });
 
@@ -185,12 +206,19 @@ void main() {
     for (final field in ['in_row', 'between_rows']) {
       for (final value in [0, -1, double.nan, double.infinity, '1', null]) {
         final json = documentToJson(editor.document)..['schema_version'] = 3;
-        final props = ((json['layers'] as Map)[grow] as Map)['properties'] as Map;
+        final props =
+            ((json['layers'] as Map)[grow] as Map)['properties'] as Map;
         props['seed'] = <String, Object?>{
-          'variety_id': 'v', 'name': 'Legacy',
-          'in_row': 0.5, 'between_rows': 1.0, field: value,
+          'variety_id': 'v',
+          'name': 'Legacy',
+          'in_row': 0.5,
+          'between_rows': 1.0,
+          field: value,
         };
-        expect(() => documentFromJson(json), throwsA(isA<DocumentFormatError>()));
+        expect(
+          () => documentFromJson(json),
+          throwsA(isA<DocumentFormatError>()),
+        );
       }
     }
   });
@@ -200,12 +228,17 @@ void main() {
     editor.setSeed(grow, seed());
     for (final field in ['size', 'spacing']) {
       for (final value in [-1, double.nan, double.infinity, '5', null]) {
-        final json = jsonDecode(jsonEncode(documentToJson(editor.document)))
-            as Map<String, Object?>;
-        final props = ((json['layers'] as Map)[grow] as Map)['properties'] as Map;
+        final json =
+            jsonDecode(jsonEncode(documentToJson(editor.document)))
+                as Map<String, Object?>;
+        final props =
+            ((json['layers'] as Map)[grow] as Map)['properties'] as Map;
         (props['seed'] as Map)[field] = value;
-        expect(() => documentFromJson(json), throwsA(isA<DocumentFormatError>()),
-            reason: '$field=$value');
+        expect(
+          () => documentFromJson(json),
+          throwsA(isA<DocumentFormatError>()),
+          reason: '$field=$value',
+        );
       }
     }
   });

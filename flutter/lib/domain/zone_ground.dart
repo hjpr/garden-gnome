@@ -42,8 +42,11 @@ extension ZoneGround on GardenDocument {
   GardenDocument withGround(String layerId, GroundType? ground) {
     final layer = layers[layerId]!;
     final properties = layer.properties;
-    if (properties is! ZoneProperties) {
-      throw StateError('Ground is set on zones. Add a zone first');
+    if (properties is! ZoneProperties || properties.isGrow) {
+      throw StateError('Ground is set on beds. Select a bed');
+    }
+    if (ground == GroundType.grow) {
+      throw StateError('Add a planting in Layers to plant here');
     }
     if (properties.ground == ground) return this;
     if (!geometryOf(layerId).isClosed) {
@@ -63,7 +66,7 @@ extension ZoneGround on GardenDocument {
     final layer = layers[layerId]!;
     final properties = layer.properties;
     if (properties is! ZoneProperties || !properties.isGrow) {
-      throw StateError('Seeds are planted in grow zones');
+      throw StateError('Seeds are planted in plantings');
     }
     if (seed?.problem case final problem?) throw StateError(problem);
     if (properties.seed == seed) return this;

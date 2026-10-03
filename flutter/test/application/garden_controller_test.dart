@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:garden_gnome/application/farm.dart';
 import 'package:garden_gnome/application/garden_controller.dart';
 import 'package:garden_gnome/application/toasts.dart';
+import 'package:garden_gnome/domain/document.dart';
 import 'package:garden_gnome/domain/grow/climate.dart';
 import 'package:garden_gnome/domain/grow/crop.dart';
 import 'package:garden_gnome/domain/grow/day.dart';
@@ -24,8 +26,9 @@ GardenController _garden(MemoryGardenRecordStore store, DateTime today) =>
     );
 
 void main() {
-  test('early climate edits cannot overwrite the stored garden', () async {
+  test('old shared plantings and climate move into the open farm', () async {
     final saved = GardenRecord(
+      climate: const Climate(zone: HardinessZone(5, 'b')),
       varieties: const {
         'variety-1': Variety(
           id: 'variety-1',
@@ -45,41 +48,46 @@ void main() {
       counter: 2,
     );
     final store = MemoryGardenRecordStore(saved);
-    final storedText = store.storedText;
-    final garden = _garden(store, DateTime(2026, 4, 1));
-    addTearDown(garden.dispose);
-    addTearDown(garden.toasts.dispose);
+    final farm = _UnsavedFarm();
+    final garden = GardenController(
+      store: store,
+      toasts: ToastCenter(),
+      catalog: testCatalog,
+      clock: () => DateTime(2026, 4, 1),
+      farm: farm,
+    );
     final catalog = Completer<CropCatalog>();
     final loading = garden.load(catalog: () => catalog.future);
 
-    garden.setZone(const HardinessZone(5, 'b'));
+    // The vault refuses changes until the record is read.
+    garden.addVariety('lettuce', 'Early');
     await Future<void>.delayed(Duration.zero);
     expect(garden.loaded, isFalse);
-    expect(store.storedText, storedText);
     expect(store.saves, 0);
-    expect(garden.record.climate.zone, saved.climate.zone);
     expect(garden.toasts.toasts.last.message, contains('loading'));
 
     catalog.complete(testCatalog);
     await loading;
-    expect(garden.loaded, isTrue);
-    expect(garden.record.varieties['variety-1']!.name, 'Big Beef');
-    expect(garden.record.plantings['planting-2']!.count, 72);
-    expect(garden.record.counter, 2);
-    expect(store.saves, 0);
+    expect(garden.record.varieties.keys, ['variety-1']);
+    final moved = garden.plantings.values.single;
+    expect(moved.id, 'planting-1', reason: 'numbered by the farm');
+    expect(moved.count, 72);
+    expect(garden.climate.zone.code, '5b');
+    expect(farm.labels, ['Move plantings into this farm']);
+    // Until the farm is saved, the record keeps its copy.
+    expect((await store.load()).plantings, hasLength(1));
 
-    garden.setZone(const HardinessZone(5, 'b'));
+    farm.saved();
     await Future<void>.delayed(Duration.zero);
-    final persisted = await store.load();
-    expect(store.saves, 1);
-    expect(persisted.climate.zone.code, '5b');
-    expect(persisted.varieties['variety-1']!.name, 'Big Beef');
-    expect(persisted.plantings['planting-2']!.count, 72);
-    expect(persisted.counter, 2);
+    final after = await store.load();
+    expect(after.plantings, isEmpty);
+    expect(after.climate, const Climate());
+    expect(after.varieties.keys, ['variety-1']);
+    expect(garden.plantings, hasLength(1));
   });
 
   test(
-    'changes are refused before and during the initial record read',
+    'vault changes are refused before and during the initial record read',
     () async {
       final store = MemoryGardenRecordStore(GardenRecord(counter: 7));
       final storedText = store.storedText;
@@ -87,50 +95,66 @@ void main() {
       addTearDown(garden.dispose);
       addTearDown(garden.toasts.dispose);
 
-      garden.setZone(const HardinessZone(5, 'b'));
+      garden.addVariety('lettuce', 'Early');
       expect(store.saves, 0);
       final loading = garden.load();
       expect(garden.loaded, isFalse);
-      garden.setFrostDates(lastSpring: () => const MonthDay(4, 20));
+      garden.addVariety('lettuce', 'Also early');
       await loading;
 
       expect(garden.loaded, isTrue);
       expect(garden.record.counter, 7);
-      expect(garden.record.climate.lastSpringFrost, isNull);
+      expect(garden.record.varieties, isEmpty);
       expect(store.storedText, storedText);
       expect(store.saves, 0);
     },
   );
 
-  test('vault, sowing, planting out and finishing are saved', () async {
-    final store = MemoryGardenRecordStore();
-    final garden = _garden(store, DateTime(2026, 3, 20, 15, 30));
-    await garden.load();
-    final id = garden.addVariety('tomatoes', ' Big Beef ');
-    expect(garden.profileOf(id)!.displayName, 'Big Beef · Tomatoes');
+  test(
+    'sowing, planting out, finishing and climate belong to the farm',
+    () async {
+      final store = MemoryGardenRecordStore();
+      final farm = DetachedFarm();
+      final garden = GardenController(
+        store: store,
+        toasts: ToastCenter(),
+        catalog: testCatalog,
+        clock: () => DateTime(2026, 3, 20, 15, 30),
+        farm: farm,
+      );
+      await garden.load();
+      final id = garden.addVariety('tomatoes', ' Big Beef ');
+      expect(garden.profileOf(id)!.displayName, 'Big Beef · Tomatoes');
 
-    final p = garden.sow(id, indoors: true, count: 72);
-    expect(garden.schedules(PlantingStage.greenhouse).single.planting.id, p);
-    garden.plantOut(p, on: DateTime(2026, 5, 2));
-    expect(garden.schedules(PlantingStage.greenhouse), isEmpty);
-    expect(garden.schedules(PlantingStage.inGround).single.planting.count, 72);
+      final p = garden.sow(id, indoors: true, count: 72);
+      expect(farm.farm.plantings[p]!.count, 72);
+      expect(garden.schedules(PlantingStage.greenhouse).single.planting.id, p);
+      garden.plantOut(p, on: DateTime(2026, 5, 2));
+      expect(garden.schedules(PlantingStage.greenhouse), isEmpty);
+      expect(
+        garden.schedules(PlantingStage.inGround).single.planting.count,
+        72,
+      );
+      garden.setZone(const HardinessZone(5, 'b'));
+      expect(farm.farm.climate.zone.code, '5b');
 
-    garden.setZone(const HardinessZone(5, 'b'));
-    await Future<void>.delayed(Duration.zero);
-    final reopened = _garden(store, DateTime(2026, 5, 3));
-    await reopened.load();
-    expect(reopened.record.climate.zone.code, '5b');
-    final back = reopened.record.plantings[p]!;
-    expect(back.sownOn, DateTime.utc(2026, 3, 20));
-    expect(back.plantedOutOn, DateTime.utc(2026, 5, 2));
+      await Future<void>.delayed(Duration.zero);
+      final stored = await store.load();
+      expect(stored.plantings, isEmpty, reason: 'not kept in the browser');
+      expect(stored.climate, const Climate());
 
-    reopened.finish(p);
-    expect(reopened.schedules(PlantingStage.inGround), isEmpty);
-    // Ids are never reused, even after removal.
-    reopened.removeVariety(id);
-    expect(reopened.record.plantings, isEmpty);
-    expect(reopened.addVariety('lettuce', ''), isNot(id));
-  });
+      final back = farm.farm.plantings[p]!;
+      expect(back.sownOn, DateTime.utc(2026, 3, 20));
+      expect(back.plantedOutOn, DateTime.utc(2026, 5, 2));
+      garden.finish(p);
+      expect(garden.schedules(PlantingStage.inGround), isEmpty);
+
+      // Removing a variety hides its plantings; vault IDs are never reused.
+      garden.removeVariety(id);
+      expect(garden.schedules(PlantingStage.finished), isEmpty);
+      expect(garden.addVariety('lettuce', ''), isNot(id));
+    },
+  );
 
   test('overrides typed on a variety are saved', () async {
     final store = MemoryGardenRecordStore();
@@ -163,7 +187,6 @@ void main() {
       expect(garden.loaded, isTrue);
       expect(garden.recordProblem, contains('newer'));
       garden.addVariety('lettuce', 'Lost');
-      garden.setZone(const HardinessZone(5, 'b'));
       await Future<void>.delayed(Duration.zero);
       expect(garden.record.varieties, isEmpty);
       expect(store.saves, 0);
@@ -198,4 +221,28 @@ void main() {
     expect(dayOf(garden.today), DateTime.utc(2026, 5, 1));
     expect(garden.recommendations().where((r) => r.timing.isOpen), isNotEmpty);
   });
+}
+
+/// A farm with unsaved changes until [saved] is called.
+class _UnsavedFarm extends DetachedFarm {
+  bool _unsaved = false;
+  final labels = <String>[];
+
+  @override
+  bool get farmUnsaved => _unsaved;
+
+  @override
+  void changeFarm(
+    String label,
+    GardenDocument Function(GardenDocument farm) change,
+  ) {
+    labels.add(label);
+    _unsaved = true;
+    super.changeFarm(label, change);
+  }
+
+  void saved() {
+    _unsaved = false;
+    notifyListeners();
+  }
 }

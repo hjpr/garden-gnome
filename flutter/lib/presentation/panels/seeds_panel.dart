@@ -98,14 +98,14 @@ class _SeedTile extends StatelessWidget {
       ),
       childWhenDragging: Opacity(opacity: 0.4, child: tile),
       child: Tooltip(
-        message: 'Drag onto a grow zone',
+        message: 'Drag onto a planting',
         waitDuration: const Duration(milliseconds: 600),
         child: InkWell(
           borderRadius: BorderRadius.circular(Metrics.radius),
           hoverColor: Palette.hover,
           mouseCursor: SystemMouseCursors.grab,
           onTap: planted == null
-              ? () => editor.showNotice('Drag seeds onto a grow zone')
+              ? () => editor.showNotice('Drag seeds onto a planting')
               : () => plantIn(editor, planted.id, profile),
           child: tile,
         ),

@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:garden_gnome/application/alignment.dart';
+import 'package:garden_gnome/application/canvas_input.dart';
 import 'package:garden_gnome/application/curve_handles.dart';
 import 'package:garden_gnome/application/editor_controller.dart';
 import 'package:garden_gnome/application/planting.dart';
@@ -20,20 +21,31 @@ const inch = 0.0254;
 
 void main() {
   group('Ground tool functions', () {
-    test('Zone clears ground and Grow makes a grow zone', () {
-      final (editor, input, soil, _) = garden(GroundType.flat);
+    test('Fallow clears a bed, and no ground turns a bed into a planting', () {
+      final (editor, input, soil, grow) = garden(GroundType.flat);
       editor.selectLayer(soil);
       editor.selectTool(Tool.ground);
       editor.selectFunction(ToolFunction.clearGround);
       click(input, 3, 3);
-      expect(editor.undoLabel, 'Clear ground');
+      expect(editor.undoLabel, 'Fallow ground');
+      expect(editor.document.layers[soil]!.role, LayerRole.bed);
       expect(
         (editor.document.layers[soil]!.properties as ZoneProperties).ground,
         isNull,
       );
-      editor.selectFunction(ToolFunction.growGround);
-      click(input, 3, 3);
-      expect(editor.isGrowZone(soil), isTrue);
+      expect(
+        ToolFunction.values.where((f) => f.groundType == GroundType.grow),
+        isEmpty,
+      );
+      editor.setGround(soil, GroundType.grow);
+      expect(editor.isGrowZone(soil), isFalse);
+      expect(editor.notice, 'Add a planting in Layers to plant here');
+
+      // The Ground tool leaves plantings alone.
+      editor.selectLayer(grow);
+      click(input, 6, 6);
+      expect(editor.notice, CanvasInput.groundNeedsBed);
+      expect(editor.isGrowZone(grow), isTrue);
     });
   });
 
@@ -43,7 +55,10 @@ void main() {
       editor.setSeed(grow, seed(size: 0.5, spacing: 0));
       final layout = editor.document.plantLayoutOf(grow)!;
       expect(layout.count, 96); // Eight lines of twelve touching plants.
-      expect(layout.positions.map((p) => p.x).reduce((a, b) => a < b ? a : b), 4.25);
+      expect(
+        layout.positions.map((p) => p.x).reduce((a, b) => a < b ? a : b),
+        4.25,
+      );
       final before = editor.document;
       editor.setSeed(grow, seed(size: 0.5, spacing: -0.1));
       expect(editor.document, same(before));
@@ -51,12 +66,12 @@ void main() {
     });
 
     test('one footprint fits without needing a trailing empty gap', () {
-      final (editor, _, _, grow) = garden(GroundType.flat);
+      final (editor, _, flat, grow) = garden(GroundType.flat);
       editor.setSeed(grow, seed(size: 4, spacing: 100));
       expect(editor.document.plantLayoutOf(grow)!.positions, [const Vec(6, 7)]);
       editor.setSeed(grow, seed(size: 4.01, spacing: 100));
       expect(editor.document.plantLayoutOf(grow)!.count, 0);
-      editor.setRows(grow, const RowSpec(direction: 90));
+      editor.setRows(flat, const RowSpec(direction: 90));
       editor.setSeed(grow, seed(size: 5, spacing: 100));
       // Across span is 6 m, but the 4 m run cannot fit a 5 m diameter.
       expect(editor.document.plantLayoutOf(grow)!.count, 0);
@@ -85,8 +100,12 @@ void main() {
       // footprints with three 1 m empty gaps (5 m occupied in total).
       expect(layout.count, 16);
       for (final line in layout.lines) {
-        final ys = layout.positions.where((p) => p.x == line.start.x)
-            .map((p) => p.y).toList()..sort();
+        final ys =
+            layout.positions
+                .where((p) => p.x == line.start.x)
+                .map((p) => p.y)
+                .toList()
+              ..sort();
         expect(ys, [4.75, 6.25, 7.75, 9.25]);
       }
       editor.setSeed(grow, seed(size: 0.5, spacing: 0));
@@ -122,7 +141,12 @@ void main() {
       editor.setSeed(grow, seed(size: 0.5, spacing: 1));
       final layout = editor.document.plantLayoutOf(grow)!;
       expect(layout.positions.map((p) => p.x).toSet(), {4.5, 6, 7.5});
-      expect(layout.positions.map((p) => p.y).toSet(), {4.75, 6.25, 7.75, 9.25});
+      expect(layout.positions.map((p) => p.y).toSet(), {
+        4.75,
+        6.25,
+        7.75,
+        9.25,
+      });
       for (final p in layout.positions) {
         expect(p.x - 0.25, greaterThanOrEqualTo(4));
         expect(p.x + 0.25, lessThanOrEqualTo(8));
@@ -196,8 +220,16 @@ void main() {
       // A second grow zone half over the 2–12 flat zone, half off it.
       final property = editor.document.propertyIds.single;
       editor.selectLayer(property);
-      final half = rectangleLayer(editor, input, LayerKind.zone, 10, 4, 14, 6);
-      editor.setGround(half, GroundType.grow);
+      final half = rectangleLayer(
+        editor,
+        input,
+        LayerKind.zone,
+        10,
+        4,
+        14,
+        6,
+        role: LayerRole.planting,
+      );
       editor.setSeed(half, seed(size: 0.5, spacing: 1));
       final layout = editor.document.plantLayoutOf(half)!;
       // Lines at 10.5, 12 and 13.5; only 10.5 is inside soil.
@@ -406,19 +438,28 @@ void main() {
   });
 
   group('Dropping seeds', () {
-    test('catalog defaults clamp overlapping and broadcast recommendations', () {
-      for (final (inRow, between, size) in [(8, 4, 8.0), (0, 0, 0.5)]) {
-        final planted = seedFromProfile(VarietyProfile(
-          Variety(id: 'v', cropId: 'lettuce', name: 'Test',
-            inRowSpacingIn: LengthRange.single(inRow),
-            betweenRowSpacingIn: LengthRange.single(between)),
-          testLettuce,
-        ));
-        expect(planted.size, closeTo(size * inch, 1e-9));
-        expect(planted.spacing, 0);
-        expect(planted.problem, isNull);
-      }
-    });
+    test(
+      'catalog defaults clamp overlapping and broadcast recommendations',
+      () {
+        for (final (inRow, between, size) in [(8, 4, 8.0), (0, 0, 0.5)]) {
+          final planted = seedFromProfile(
+            VarietyProfile(
+              Variety(
+                id: 'v',
+                cropId: 'lettuce',
+                name: 'Test',
+                inRowSpacingIn: LengthRange.single(inRow),
+                betweenRowSpacingIn: LengthRange.single(between),
+              ),
+              testLettuce,
+            ),
+          );
+          expect(planted.size, closeTo(size * inch, 1e-9));
+          expect(planted.spacing, 0);
+          expect(planted.problem, isNull);
+        }
+      },
+    );
 
     final profile = VarietyProfile(
       const Variety(id: 'variety-7', cropId: 'lettuce', name: 'Buttercrunch'),
@@ -447,7 +488,7 @@ void main() {
       final (editor, _, _, _) = garden(GroundType.flat);
       editor.setMode(EditMode.plant);
       expect(dropSeed(editor, profile, const Vec(3, 3)), isFalse);
-      expect(editor.notice, 'Drop seeds inside a grow zone');
+      expect(editor.notice, 'Drop seeds inside a planting');
     });
 
     test('dropping the same variety again keeps changed spacings', () {

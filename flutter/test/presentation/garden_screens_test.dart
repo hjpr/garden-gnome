@@ -313,7 +313,7 @@ void main() {
     await tester.pumpAndSettle();
     final spring = _gardenField('Last frost');
     final fall = _gardenField('First frost');
-    final defaultSpring = garden.record.climate.zone.lastSpringFrost.toString();
+    final defaultSpring = garden.climate.zone.lastSpringFrost.toString();
     expect(
       tester.widget<TextField>(spring).decoration!.hintText,
       defaultSpring,
@@ -321,27 +321,27 @@ void main() {
     await tester.enterText(spring, '4/20');
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle();
-    expect(garden.record.climate.lastSpringFrost, const MonthDay(4, 20));
+    expect(garden.climate.lastSpringFrost, const MonthDay(4, 20));
 
     await tester.enterText(fall, 'Oct 10');
     await tester.tap(spring);
     await tester.pumpAndSettle();
-    expect(garden.record.climate.firstFallFrost, const MonthDay(10, 10));
+    expect(garden.climate.firstFallFrost, const MonthDay(10, 10));
     await tester.enterText(spring, 'not a date');
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle();
-    expect(garden.record.climate.lastSpringFrost, const MonthDay(4, 20));
+    expect(garden.climate.lastSpringFrost, const MonthDay(4, 20));
     expect(find.text('e.g. Apr 20'), findsOneWidget);
 
     await tester.enterText(spring, '');
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle();
-    expect(garden.record.climate.lastSpringFrost, isNull);
+    expect(garden.climate.lastSpringFrost, isNull);
     expect(
       tester.widget<TextField>(spring).decoration!.hintText,
       defaultSpring,
     );
-    expect(garden.record.climate.firstFallFrost, const MonthDay(10, 10));
+    expect(garden.climate.firstFallFrost, const MonthDay(10, 10));
   });
 
   testWidgets(

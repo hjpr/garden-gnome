@@ -9,6 +9,7 @@ extension _PlantPainter on ScenePainter {
 
   void _paintPlants(Canvas canvas, Size size, GardenDocument document) {
     for (final layerId in document.drawingOrder) {
+      if (!scene.shows(layerId)) continue;
       final layout = document.plantLayoutOf(layerId);
       if (layout == null || layout.count == 0) continue;
       _paintPlantLayout(canvas, size, layout);
@@ -61,6 +62,7 @@ extension _PlantPainter on ScenePainter {
   /// land, so they read as a plan laid over the soil.
   void _paintGrowOutlines(Canvas canvas, GardenDocument document) {
     for (final layerId in document.drawingOrder) {
+      if (!scene.shows(layerId)) continue;
       final layer = document.layers[layerId]!;
       final properties = layer.properties;
       if (properties is! ZoneProperties || !properties.isGrow) continue;

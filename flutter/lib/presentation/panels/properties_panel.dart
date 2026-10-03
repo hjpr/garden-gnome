@@ -106,7 +106,11 @@ class _GroundTypeBar extends StatelessWidget {
       GroundType.row => Palette.groundRow,
       GroundType.grow => Palette.groundGrow,
     };
-    final label = ground?.label ?? 'Zone';
+    final label = switch (ground) {
+      null => 'Fallow bed',
+      GroundType.grow => 'Planting',
+      final g => '${g.label} bed',
+    };
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Semantics(

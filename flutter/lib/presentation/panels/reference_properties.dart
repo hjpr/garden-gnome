@@ -1,14 +1,13 @@
-import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../application/editor_controller.dart';
 import '../../domain/reference_image.dart';
-import '../canvas/reference_image_cache.dart';
 import '../theme.dart';
 import '../widgets/draft_text_field.dart';
 import '../widgets/icon_controls.dart';
 import '../widgets/property_controls.dart';
+import 'reference_upload.dart';
 
 /// Properties for the Reference layer, always laid out the same way:
 /// an Upload image button, the selected image's name (click to rename,
@@ -29,54 +28,16 @@ class _ReferencePropertiesState extends State<ReferenceProperties> {
 
   EditorController get _editor => widget.editor;
 
-  /// Picks a picture, checks it, and adds it on top of the Reference
-  /// layer. Cancelling the picker, or a picture that cannot be used,
-  /// changes nothing.
+  /// Picks a picture and adds it on top of the Reference layer, showing
+  /// why under the button when it cannot be used.
   Future<void> _upload() async {
-    const group = XTypeGroup(
-      label: 'Images',
-      extensions: ['png', 'jpg', 'jpeg', 'webp'],
-      mimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
-    );
-    final file = await openFile(acceptedTypeGroups: [group]);
-    if (file == null || !mounted) return;
+    final blocker = _editor.referenceUploadBlocker;
+    if (blocker != null) return _editor.showNotice(blocker);
     setState(() {
       _loading = true;
       _error = null;
     });
-    final editor = _editor;
-    final document = editor.document;
-    String? problem;
-    try {
-      final bytes = await file.readAsBytes();
-      final mimeType = imageMimeType(bytes);
-      if (bytes.length > maxReferenceBytes) {
-        problem = 'That image is over 20 MB. Choose a smaller one';
-      } else if (mimeType == null) {
-        problem = 'Choose a PNG, JPEG or WebP image';
-      } else {
-        final size = await decodeImageSize(bytes);
-        if (size == null) {
-          problem = 'That image could not be read';
-        } else if (size.width * size.height > maxReferencePixels) {
-          problem = 'That image is over 40 megapixels. Choose a smaller one';
-        } else if (!identical(editor.document, document)) {
-          // The drawing changed while the file loaded (another drawing
-          // opened, or an Undo); do not drop the picture into it.
-          problem = 'The drawing changed while loading. Try again';
-        } else {
-          editor.addReferenceImage(
-            fileName: file.name,
-            bytes: bytes,
-            mimeType: mimeType,
-            pixelWidth: size.width,
-            pixelHeight: size.height,
-          );
-        }
-      }
-    } catch (_) {
-      problem = 'That image could not be read';
-    }
+    final problem = await uploadReferenceImage(_editor);
     if (!mounted) return;
     setState(() {
       _loading = false;

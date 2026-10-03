@@ -63,9 +63,9 @@ class ScenePainter extends CustomPainter {
     } else {
       canvas.drawColor(Palette.canvas, BlendMode.src);
       _paintGrid(canvas, size);
-      _paintReference(canvas);
+      if (!scene.referenceHidden) _paintReference(canvas);
       for (final layerId in document.drawingOrder) {
-        land.paintLayer(canvas, document, layerId);
+        if (scene.shows(layerId)) land.paintLayer(canvas, document, layerId);
       }
     }
     // Plants sit on the ground, under raised beds and tunnels.
@@ -74,13 +74,17 @@ class ScenePainter extends CustomPainter {
     _paintFeatures(canvas);
     if (render) {
       final selected = scene.selectedLayerId;
-      if (selected != null && document.layers.containsKey(selected)) {
+      if (selected != null &&
+          document.layers.containsKey(selected) &&
+          scene.shows(selected)) {
         land.paintLayer(canvas, document, selected, outlineOnly: true);
       }
     }
 
     final selectedId = scene.selectedLayerId;
-    if (selectedId != null && document.layers.containsKey(selectedId)) {
+    if (selectedId != null &&
+        document.layers.containsKey(selectedId) &&
+        scene.shows(selectedId)) {
       land.paintSelectedLayerDetail(canvas, document.geometryOf(selectedId));
       if (scene.showCurveHandles) {
         _paintCurveHandles(canvas, document.geometryOf(selectedId));

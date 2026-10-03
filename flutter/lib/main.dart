@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'application/app_tools.dart';
 import 'application/document_session.dart';
+import 'application/farm.dart';
 import 'application/garden_controller.dart';
 import 'persistence/crop_catalog_loader.dart';
 import 'persistence/document_codec.dart';
@@ -21,13 +22,21 @@ void main() {
     library: BrowserDrawingLibrary(),
     workspace: WorkspaceStore(),
     codec: const GgnomeCodec(),
+    lastFarm: LastFarmPreference(),
   );
-  // One toast stack for every tool.
+  // One toast stack for every tool. The growing tools work on the farm
+  // open in Build.
   final garden = GardenController(
     store: BrowserGardenRecordStore(),
     toasts: session.toasts,
+    farm: SessionFarm(session),
   );
-  unawaited(garden.load(catalog: loadBundledCatalog));
+  // The last farm opens before the garden loads, so plantings from the
+  // old shared record move into it rather than a blank farm.
+  unawaited(() async {
+    await session.reopenLastFarm();
+    await garden.load(catalog: loadBundledCatalog);
+  }());
   runApp(
     GardenGnomeApp(session: session, garden: garden, navigator: AppNavigator()),
   );

@@ -27,6 +27,7 @@ extension _RenderPainter on ScenePainter {
       _RenderColours.wildGrass,
     );
     for (final layerId in document.drawingOrder) {
+      if (!scene.shows(layerId)) continue;
       final layer = document.layers[layerId]!;
       final region = document.geometryOf(layerId).region;
       if (region == null) continue;

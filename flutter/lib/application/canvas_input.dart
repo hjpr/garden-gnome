@@ -85,7 +85,12 @@ class CanvasInput {
     if (_press != null) return;
     if (editor.settings.guidesEnabled) {
       editor.hoverGuideItem(
-        guideItemAt(editor.document, editor.camera, screen),
+        guideItemAt(
+          editor.document,
+          editor.camera,
+          screen,
+          skip: editor.isLayerHidden,
+        ),
       );
     }
     _hoverGrip = editor.tool == Tool.select ? _boxGripAt(screen) : null;
@@ -108,7 +113,7 @@ class CanvasInput {
       return editor.setPreview(_featurePlacePreview(screen));
     }
     final layerId = editor.selectedLayerId;
-    if (layerId == null || editor.isFrozen(layerId)) {
+    if (layerId == null || editor.isUnreachable(layerId)) {
       return editor.setPreview(null);
     }
     final geometry = editor.document.geometryOf(layerId);
@@ -319,7 +324,7 @@ class CanvasInput {
       }
       return editor.showNotice('Select or add a layer to draw on');
     }
-    final locked = editor.lockNotice(layerId);
+    final locked = editor.lockNotice(layerId) ?? editor.hiddenNotice(layerId);
     if (locked != null) return editor.showNotice(locked);
     final geometry = editor.document.geometryOf(layerId);
     switch ((editor.tool, editor.function)) {
@@ -391,15 +396,16 @@ class CanvasInput {
   SelectionTargets get _selectionTargets => SelectionTargets(
     document: editor.document,
     camera: editor.camera,
-    isFrozen: editor.isFrozen,
+    isFrozen: editor.isUnreachable,
     overlaysEnabled: editor.mode == EditMode.build,
+    imagesEnabled: !editor.referenceHidden,
     selectedImage: editor.selectedImage,
   );
 
   List<LayerHit> _selectHits(Offset screen) => _selectionTargets.landAt(screen);
 
   static const noLayersToast = 'Add a Property layer to start drawing.';
-  static const groundNeedsZone = 'Ground is set on zones. Select a zone';
+  static const groundNeedsBed = 'Ground is set on beds. Select a bed';
   static const tooClose = DrawingInput.tooClose;
 
   bool _crowded(Geometry geometry, Vec position) =>

@@ -16,6 +16,23 @@ import '../domain/vec.dart';
 ///
 /// Stored apart from the drawing, so they never mark it as changed. Also
 /// keeps the highest ID numbers used, so Undo never lets one be reused.
+/// The last farm open, kept in this browser.
+class LastFarmPreference implements LastFarmStore {
+  static const _key = 'garden_gnome.last_farm';
+
+  @override
+  Future<String?> load() async =>
+      (await SharedPreferences.getInstance()).getString(_key);
+
+  @override
+  Future<void> save(String? libraryId) async {
+    final prefs = await SharedPreferences.getInstance();
+    libraryId == null
+        ? await prefs.remove(_key)
+        : await prefs.setString(_key, libraryId);
+  }
+}
+
 class WorkspaceStore implements WorkspaceStorage {
   static const _prefix = 'garden_gnome.workspace.';
 
@@ -51,6 +68,7 @@ class WorkspaceStore implements WorkspaceStorage {
         menuScale: MenuScale.values.byName(json['menu_scale'] as String),
         hiddenPanels: _panels(json['hidden']),
         minimizedPanels: _panels(json['minimized']),
+        hiddenLayers: _names(json['hidden_layers']).toSet(),
         docks: DockLayout.restore(
           left: _names(json['left_order']),
           right: _names(json['right_order']),
@@ -108,6 +126,7 @@ class WorkspaceStore implements WorkspaceStorage {
         'menu_scale': settings.menuScale.name,
         'hidden': [for (final p in settings.hiddenPanels) p.name],
         'minimized': [for (final p in settings.minimizedPanels) p.name],
+        'hidden_layers': [...settings.hiddenLayers],
         'left_order': [for (final p in settings.docks.left) p.name],
         'right_order': [for (final p in settings.docks.right) p.name],
         'folded_docks': [for (final d in settings.docks.folded) d.name],

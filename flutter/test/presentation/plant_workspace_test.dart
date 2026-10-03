@@ -164,9 +164,8 @@ void main() {
         builder: (_) => LayerActions(editor: editor),
       ),
     );
-    expect(find.text('Property'), findsOneWidget);
-    expect(find.text('Zone'), findsOneWidget);
-    expect(find.byIcon(Icons.add), findsNWidgets(2));
+    expect(find.text('Add layer'), findsOneWidget);
+    expect(find.byIcon(Icons.add), findsOneWidget);
 
     editor.setMode(EditMode.plant);
     await tester.pumpAndSettle();
@@ -177,9 +176,8 @@ void main() {
 
     editor.setMode(EditMode.build);
     await tester.pumpAndSettle();
-    expect(find.text('Property'), findsOneWidget);
-    expect(find.text('Zone'), findsOneWidget);
-    expect(find.byIcon(Icons.add), findsNWidgets(2));
+    expect(find.text('Add layer'), findsOneWidget);
+    expect(find.byIcon(Icons.add), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -211,7 +209,7 @@ void main() {
     expect(find.text('Lasso'), findsNothing);
     expect(
       find.text(
-        'Select grow zones to plant seeds. Edit geometry in Build mode.',
+        'Select plantings to plant seeds. Edit geometry in Build mode.',
       ),
       findsOneWidget,
     );

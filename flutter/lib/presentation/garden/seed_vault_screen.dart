@@ -1,9 +1,15 @@
+import 'dart:convert';
+
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 
 import '../../application/garden_controller.dart';
+import '../../application/toasts.dart';
 import '../../domain/grow/crop.dart';
 import '../../domain/grow/variety.dart';
+import '../../persistence/garden_record_codec.dart';
 import '../theme.dart';
+import '../widgets/icon_controls.dart';
 import '../widgets/panel.dart' show EmptyPanelText;
 import 'add_variety_dialog.dart';
 import 'garden_card.dart';
@@ -58,6 +64,41 @@ class _SeedVaultBodyState extends State<SeedVaultBody> {
     setState(() => _selectedId = _garden.addVariety(result.$1, result.$2));
   }
 
+  /// Saves every variety as a .seedvault file the gardener keeps.
+  Future<void> _export() async {
+    const name = 'Seed Vault.seedvault';
+    try {
+      await XFile.fromData(
+        utf8.encode(encodeSeedVault(_garden.record.varieties.values)),
+        name: name,
+        mimeType: 'application/json',
+      ).saveTo(name);
+      _garden.toasts.show('Exported $name');
+    } catch (_) {
+      _garden.toasts.show('Export failed', kind: ToastKind.error);
+    }
+  }
+
+  /// Adds the varieties from a .seedvault file to this vault. Varieties
+  /// already here are skipped, so importing twice adds nothing.
+  Future<void> _import() async {
+    const group = XTypeGroup(label: 'Seed Vault', extensions: ['seedvault']);
+    final file = await openFile(acceptedTypeGroups: [group]);
+    if (file == null) return;
+    try {
+      final varieties = decodeSeedVault(await file.readAsString());
+      final (added, skipped) = _garden.importVarieties(varieties);
+      _garden.toasts.show(
+        'Imported $added ${added == 1 ? 'variety' : 'varieties'}'
+        '${skipped > 0 ? ' ($skipped already here or unknown)' : ''}',
+      );
+    } on GardenRecordFormatError catch (e) {
+      _garden.toasts.show('$e', kind: ToastKind.error);
+    } catch (_) {
+      _garden.toasts.show('That file could not be read', kind: ToastKind.error);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final list = _filtered;
@@ -108,10 +149,33 @@ class _SeedVaultBodyState extends State<SeedVaultBody> {
                   const Divider(),
                   Padding(
                     padding: const EdgeInsets.all(8),
-                    child: FilledButton.icon(
-                      onPressed: _garden.catalog.crops.isEmpty ? null : _add,
-                      icon: const Icon(Icons.add, size: 18),
-                      label: const Text('Add variety'),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: FilledButton.icon(
+                            onPressed: _garden.catalog.crops.isEmpty
+                                ? null
+                                : _add,
+                            icon: const Icon(Icons.add, size: 18),
+                            label: const Text('Add variety'),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        IconAction(
+                          iconData: Icons.file_upload_outlined,
+                          label: 'Import Seed Vault',
+                          onPressed: _garden.catalog.crops.isEmpty
+                              ? null
+                              : _import,
+                        ),
+                        IconAction(
+                          iconData: Icons.file_download_outlined,
+                          label: 'Export Seed Vault',
+                          onPressed: _garden.record.varieties.isEmpty
+                              ? null
+                              : _export,
+                        ),
+                      ],
                     ),
                   ),
                 ],

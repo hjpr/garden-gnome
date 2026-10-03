@@ -37,7 +37,7 @@ class ToolsBody extends StatelessWidget {
           const Padding(
             padding: EdgeInsets.only(top: 12),
             child: Text(
-              'Select grow zones to plant seeds. Edit geometry in Build mode.',
+              'Select plantings to plant seeds. Edit geometry in Build mode.',
               style: TextStyle(fontSize: 12, color: Palette.muted),
             ),
           ),

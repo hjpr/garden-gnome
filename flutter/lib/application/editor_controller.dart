@@ -354,9 +354,13 @@ class EditorController extends ChangeNotifier {
     if (tool != Tool.select && tool != Tool.reference) _clearImageSelection();
     if (tool != Tool.select && tool != Tool.feature) _selectedFeatureId = null;
     if (tool == Tool.reference) {
-      // Its settings, and the Add image button, are in Properties.
+      // Its settings, and the Upload image button, are in Properties.
       _openProperties();
       _selection.clear();
+      if (!_document.hasReferenceLayer) {
+        commit('Add Reference', documentForEditing.withReferenceLayer());
+        return selectReferenceLayer();
+      }
     }
     notifyListeners();
   }
@@ -698,6 +702,56 @@ class EditorController extends ChangeNotifier {
     notifyListeners();
   }
 
+  // ------------------------------------------------------------ visibility
+
+  /// The Reference layer's ID in [WorkspaceSettings.hiddenLayers].
+  static const referenceLayerKey = 'reference';
+
+  /// Whether [layerId] is hidden, on its own or with its property. Hidden
+  /// layers are not drawn and clicks pass through them. Hiding is a view
+  /// choice: it is not an Undo step and does not change the drawing.
+  bool isLayerHidden(String layerId) {
+    final hidden = _settings.hiddenLayers;
+    if (hidden.contains(layerId)) return true;
+    final parent = _document.layers[layerId]?.parentId;
+    return parent != null && hidden.contains(parent);
+  }
+
+  bool get referenceHidden =>
+      _settings.hiddenLayers.contains(referenceLayerKey);
+
+  /// Every layer that is hidden right now, including zones of a hidden
+  /// property.
+  Set<String> get hiddenLayerIds => {
+    for (final id in _document.layers.keys)
+      if (isLayerHidden(id)) id,
+  };
+
+  /// Shows or hides a layer, or the Reference layer by [referenceLayerKey].
+  void setLayerHidden(String layerId, bool hidden) {
+    final set = {..._settings.hiddenLayers};
+    if (!(hidden ? set.add(layerId) : set.remove(layerId))) return;
+    _cancelOperation();
+    if (hidden && layerId == referenceLayerKey) _clearImageSelection();
+    if (hidden &&
+        _document.layers.containsKey(layerId) &&
+        _document.subtree(layerId).contains(_selectedLayerId)) {
+      _selection.clear();
+    }
+    updateSettings(_settings.copyWith(hiddenLayers: set));
+  }
+
+  /// Why the canvas cannot act on [layerId] because it is hidden, or null.
+  String? hiddenNotice(String layerId) => isLayerHidden(layerId)
+      ? '${_document.layers[layerId]?.name ?? 'This layer'} is hidden. '
+            'Show it in Layers to work on it'
+      : null;
+
+  /// Whether the canvas skips [layerId]: locked, frozen by Plant mode, or
+  /// hidden.
+  bool isUnreachable(String layerId) =>
+      isFrozen(layerId) || isLayerHidden(layerId);
+
   /// Whether [layerId] is a grow zone.
   bool isGrowZone(String layerId) =>
       switch (_document.layers[layerId]?.properties) {
@@ -741,17 +795,19 @@ class EditorController extends ChangeNotifier {
     );
   }
 
-  /// Adds a property, or a zone under the selected property.
-  void addLayer(LayerKind kind) {
-    final blocker = addLayerBlocker(kind);
+  /// Adds a property, or a zone under the selected property. Layers adds
+  /// by [role] (a bed or a planting); without one a zone is plain ground.
+  void addLayer(LayerKind kind, {LayerRole? role}) {
+    final blocker = addLayerBlocker(kind, role: role);
     if (blocker != null) return showNotice(blocker);
     drafts.settleForLayerSwitch();
     final (next, layerId) = documentForEditing.addLayer(
       kind,
       parentId: kind == LayerKind.property ? null : _homePropertyId,
       newId: newUuid,
+      role: role,
     );
-    commit('Add ${kind.label}', next);
+    commit('Add ${role?.label ?? kind.label}', next);
     _cancelOperation();
     _selectedLayerId = layerId;
     _selection.clear();
@@ -774,10 +830,11 @@ class EditorController extends ChangeNotifier {
   /// A zone is listed under the selected property (or the property of the
   /// selected zone) and must stay within it, so that property must be
   /// unlocked and complete first.
-  String? addLayerBlocker(LayerKind kind) {
+  String? addLayerBlocker(LayerKind kind, {LayerRole? role}) {
     if (_mode == EditMode.plant) return plantModeNotice;
     if (kind.parentKind == null) return null;
-    final label = kind.label.toLowerCase();
+    if (_document.propertyIds.isEmpty) return 'Add a property layer first';
+    final label = (role?.label ?? kind.label).toLowerCase();
     final propertyId = _homePropertyId;
     if (propertyId == null) return 'Select a property to add a $label';
     final locked = lockNotice(propertyId);
@@ -786,6 +843,15 @@ class EditorController extends ChangeNotifier {
       return 'Complete ${_document.layers[propertyId]!.name} before adding '
           'a $label';
     }
+    return null;
+  }
+
+  /// Why a reference image cannot be added from Layers > Add layer, or
+  /// null if it can. Pictures are traced into land, so a property comes
+  /// first.
+  String? get addReferenceBlocker {
+    if (_mode == EditMode.plant) return plantModeNotice;
+    if (_document.propertyIds.isEmpty) return 'Add a property layer first';
     return null;
   }
 
@@ -865,7 +931,7 @@ class EditorController extends ChangeNotifier {
     if (_mode == EditMode.plant) return showNotice(plantModeNotice);
     _changeZone(
       layerId,
-      ground == null ? 'Clear ground' : '${ground.label} ground',
+      ground == null ? 'Fallow ground' : '${ground.label} ground',
       (document) => document.withGround(layerId, ground),
     );
   }
@@ -1114,7 +1180,7 @@ class EditorController extends ChangeNotifier {
 
   /// Whether the Reference layer row is the selected row in Layers.
   bool get referenceLayerSelected =>
-      _referenceLayerSelected && _document.references.isNotEmpty;
+      _referenceLayerSelected && _document.hasReferenceLayer;
 
   /// Whether Properties shows the Reference layer rather than a land layer.
   bool get showsReference =>
@@ -1167,10 +1233,24 @@ class EditorController extends ChangeNotifier {
 
   /// Why the Reference tool cannot draw a line right now, or null.
   String? get referenceBlocker {
+    if (referenceHidden) {
+      return 'Reference is hidden. Show it in Layers to work on it';
+    }
     final images = _document.references;
-    if (images.isEmpty) return 'Add a reference image in Properties first';
+    if (images.isEmpty) return 'Upload an image in Properties first';
     if (images.every((image) => image.locked)) {
       return 'Every reference image is locked';
+    }
+    return null;
+  }
+
+  /// Why Properties > Upload image cannot add a picture now, or null.
+  /// The picture goes into the Reference layer, so that layer or one of
+  /// its images must be the selection.
+  String? get referenceUploadBlocker {
+    if (_mode == EditMode.plant) return plantModeNotice;
+    if (!referenceSelected && !referenceLayerSelected) {
+      return 'Select a reference layer first';
     }
     return null;
   }
@@ -1210,16 +1290,11 @@ class EditorController extends ChangeNotifier {
     commit('Remove reference image', _document.withoutReferenceImage(imageId));
   }
 
-  /// Takes every image out, so the Reference layer disappears. One Undo
-  /// step.
+  /// Deletes the Reference layer with every image in it. One Undo step.
   void removeReferenceLayer() {
     if (_mode == EditMode.plant) return showNotice(plantModeNotice);
-    if (_document.references.isEmpty) return;
-    var next = _document;
-    for (final image in _document.references) {
-      next = next.withoutReferenceImage(image.id);
-    }
-    commit('Delete Reference', next);
+    if (!_document.hasReferenceLayer) return;
+    commit('Delete Reference', _document.withoutReferenceLayer());
   }
 
   /// Locks or unlocks every image in the Reference layer, as one Undo
@@ -1423,7 +1498,7 @@ class EditorController extends ChangeNotifier {
       _selectedImageId = null;
       _referenceOpacityDraft = null;
     }
-    if (_document.references.isEmpty) _referenceLayerSelected = false;
+    if (!_document.hasReferenceLayer) _referenceLayerSelected = false;
     if (_document.referenceById(_construction.referenceImageId) == null) {
       _construction.referenceImageId = null;
       _construction.referenceStart = null;

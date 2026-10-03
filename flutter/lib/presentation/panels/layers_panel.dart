@@ -10,8 +10,9 @@ import '../widgets/icon_controls.dart';
 import '../widgets/panel.dart';
 import 'reference_layer_rows.dart';
 
-/// Each property with its zones listed under it. A layer expands to show
-/// its shapes, top of the stack first.
+/// Each property with its beds, then its plantings, listed under it in
+/// their own groups. A layer expands to show its shapes, top of the stack
+/// first.
 class LayersBody extends StatefulWidget {
   const LayersBody({super.key, required this.editor});
 
@@ -32,7 +33,7 @@ class _LayersBodyState extends State<LayersBody> {
   @override
   Widget build(BuildContext context) {
     final document = editor.document;
-    final reference = document.references.isEmpty
+    final reference = !document.hasReferenceLayer
         ? null
         : ReferenceLayerRows(
             editor: editor,
@@ -49,27 +50,40 @@ class _LayersBodyState extends State<LayersBody> {
         ],
       );
     }
+    Iterable<Widget> rowsFor(String id) sync* {
+      yield _LayerRow(
+        editor: editor,
+        layer: document.layers[id]!,
+        expanded: _expanded.contains(id),
+        onToggle: () => setState(
+          () =>
+              _expanded.contains(id) ? _expanded.remove(id) : _expanded.add(id),
+        ),
+      );
+      if (_expanded.contains(id)) {
+        for (final shapeId in document.geometryOf(id).stack.reversed) {
+          yield _ShapeRow(
+            editor: editor,
+            layer: document.layers[id]!,
+            shapeId: shapeId,
+          );
+        }
+      }
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        for (final id in document.drawingOrder) ...[
-          _LayerRow(
-            editor: editor,
-            layer: document.layers[id]!,
-            expanded: _expanded.contains(id),
-            onToggle: () => setState(
-              () => _expanded.contains(id)
-                  ? _expanded.remove(id)
-                  : _expanded.add(id),
-            ),
-          ),
-          if (_expanded.contains(id))
-            for (final shapeId in document.geometryOf(id).stack.reversed)
-              _ShapeRow(
-                editor: editor,
-                layer: document.layers[id]!,
-                shapeId: shapeId,
-              ),
+        for (final propertyId in document.propertyIds) ...[
+          ...rowsFor(propertyId),
+          for (final role in const [LayerRole.bed, LayerRole.planting])
+            if (document.layers[propertyId]!.children
+                    .where((id) => document.layers[id]!.role == role)
+                    .toList()
+                case final members when members.isNotEmpty) ...[
+              _GroupHeading(role == LayerRole.bed ? 'BEDS' : 'PLANTINGS'),
+              for (final id in members) ...rowsFor(id),
+            ],
         ],
         // The reference picture is drawn under all land, so it is listed
         // last.
@@ -77,6 +91,19 @@ class _LayersBodyState extends State<LayersBody> {
       ],
     );
   }
+}
+
+/// A small-caps label over a property's beds or plantings.
+class _GroupHeading extends StatelessWidget {
+  const _GroupHeading(this.title);
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(14, 6, 0, 2),
+    child: Text(title, style: sectionTitleStyle.copyWith(fontSize: 10)),
+  );
 }
 
 class _LayerRow extends StatefulWidget {
@@ -117,14 +144,18 @@ class _LayerRowState extends State<_LayerRow> {
     // Locked by a layer around this one: shown, but toggled on that layer.
     final lockedAbove = !layer.locked && editor.document.isLocked(layer.id);
     final locked = layer.locked || lockedAbove;
+    final ownHidden = editor.settings.hiddenLayers.contains(layer.id);
+    final hidden = editor.isLayerHidden(layer.id);
+    final hiddenAbove = hidden && !ownHidden;
     final status = [
       problem != null ? 'invalid' : (active ? 'active' : 'inactive'),
       if (locked) 'locked',
+      if (hidden) 'hidden',
     ].join(', ');
     return Semantics(
       selected: selected,
       button: true,
-      label: '${layer.name}, ${layer.kind.label}, $status',
+      label: '${layer.name}, ${layer.role.label}, $status',
       child: MouseRegion(
         onEnter: (_) => setState(() => _hovered = true),
         onExit: (_) => setState(() => _hovered = false),
@@ -193,7 +224,7 @@ class _LayerRowState extends State<_LayerRow> {
                             : FontWeight.w400,
                         color: selected
                             ? Palette.accent
-                            : (locked ? Palette.muted : Palette.ink),
+                            : (locked || hidden ? Palette.muted : Palette.ink),
                       ),
                     ),
                   ),
@@ -211,9 +242,30 @@ class _LayerRowState extends State<_LayerRow> {
                         ),
                       ),
                     ),
-                  // Lock stays visible while locked so the state reads at a
-                  // glance; otherwise, like Delete, it shows on hover or
-                  // selection to keep the list calm.
+                  // Eye and lock stay visible while hidden or locked so the
+                  // state reads at a glance; otherwise, like Delete, they
+                  // show on hover or selection to keep the list calm.
+                  Opacity(
+                    opacity: hidden || _hovered || selected ? 1 : 0,
+                    child: IconAction(
+                      iconData: hidden
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
+                      label: ownHidden
+                          ? 'Show ${layer.name}'
+                          : 'Hide ${layer.name}',
+                      tooltip: hiddenAbove
+                          ? '${editor.document.layers[layer.parentId]!.name} is hidden'
+                          : (ownHidden
+                                ? 'Show ${layer.name}'
+                                : 'Hide ${layer.name}'),
+                      selected: ownHidden,
+                      size: 26,
+                      onPressed: hiddenAbove
+                          ? null
+                          : () => editor.setLayerHidden(layer.id, !ownHidden),
+                    ),
+                  ),
                   Opacity(
                     opacity: locked || _hovered || selected ? 1 : 0,
                     child: IconAction(
