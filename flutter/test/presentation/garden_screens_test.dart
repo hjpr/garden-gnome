@@ -565,7 +565,7 @@ void main() {
     expect(range, calendarRange(garden.today));
     // Apr 1 in zone 6a: tomato trays are ideal to start now.
     expect(find.textContaining('Start in greenhouse · Spring'), findsOneWidget);
-    await tester.tap(find.byTooltip('Start in greenhouse today'));
+    await tester.tap(find.byTooltip('Start in greenhouse'));
     await tester.pumpAndSettle();
     // Two flats of 50 cells.
     await tester.enterText(find.byKey(const ValueKey('tray-Flats')), '2');
@@ -587,6 +587,25 @@ void main() {
     expect(find.textContaining('Sown Apr 1'), findsOneWidget);
     expect(find.textContaining('2 flats × 50 = 100 plants'), findsOneWidget);
     await tester.tap(find.byTooltip('Planted out today'));
+    await tester.pumpAndSettle();
+
+    // From Start next the seed is fixed; Add plant asks for it. Both
+    // start today unless the date is changed.
+    await tester.tap(find.byTooltip('Start in greenhouse'));
+    await tester.pumpAndSettle();
+    expect(find.text('Start Big Beef · Tomatoes'), findsOneWidget);
+    expect(
+      find.widgetWithText(DropdownButtonFormField<String>, 'Seed'),
+      findsNothing,
+    );
+    expect(find.text('Apr 1, 2026'), findsOneWidget, reason: 'today');
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Add plant'));
+    await tester.pumpAndSettle();
+    expect(find.text('Start in greenhouse'), findsOneWidget);
+    expect(find.text('Seed'), findsOneWidget);
+    await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
     expect(find.text('Nothing in the greenhouse.'), findsOneWidget);
 

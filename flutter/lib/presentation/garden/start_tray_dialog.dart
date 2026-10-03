@@ -4,11 +4,13 @@ import 'package:flutter/services.dart';
 import '../../application/garden_controller.dart';
 import '../../domain/grow/planting.dart';
 import '../../domain/grow/variety.dart';
+import '../panels/day_field.dart';
 import '../theme.dart';
 
-/// Asks what a variety is started in (flats with so many cells each, or
-/// pots of one plant) and starts it in the greenhouse today. With no
-/// [varietyId], the variety is picked in the dialog too.
+/// Asks when a variety is started (today unless changed) and what in
+/// (flats with so many cells each, or pots of one plant), then starts it
+/// in the greenhouse. With [varietyId] the seed is fixed, as when it comes
+/// from Start next; without it the seed is picked in the dialog too.
 Future<void> showStartTrayDialog(
   BuildContext context,
   GardenController garden, {
@@ -30,6 +32,7 @@ class _StartTrayDialog extends StatefulWidget {
 
 class _StartTrayDialogState extends State<_StartTrayDialog> {
   late String? _variety = widget.varietyId;
+  late DateTime _on = widget.garden.today;
   GrowContainer _container = GrowContainer.flat;
   final _count = TextEditingController(text: '1');
   final _cells = TextEditingController(text: '72');
@@ -63,6 +66,7 @@ class _StartTrayDialogState extends State<_StartTrayDialog> {
       container: _container,
       containers: count,
       cellsPerFlat: _container == GrowContainer.flat ? _read(_cells)! : 1,
+      on: _on,
     );
     Navigator.pop(context);
   }
@@ -90,7 +94,9 @@ class _StartTrayDialogState extends State<_StartTrayDialog> {
     final flat = _container == GrowContainer.flat;
     return AlertDialog(
       title: Text(
-        chosen == null ? 'Start in greenhouse' : 'Start ${chosen.displayName}',
+        widget.varietyId == null || chosen == null
+            ? 'Start in greenhouse'
+            : 'Start ${chosen.displayName}',
       ),
       content: SizedBox(
         width: 340,
@@ -110,6 +116,15 @@ class _StartTrayDialogState extends State<_StartTrayDialog> {
               ),
               const SizedBox(height: 12),
             ],
+            Text('Start date', style: sectionTitleStyle),
+            const SizedBox(height: 4),
+            DayField(
+              label: 'Start date',
+              day: _on,
+              enabled: true,
+              onChanged: (day) => setState(() => _on = day),
+            ),
+            const SizedBox(height: 14),
             SegmentedButton<GrowContainer>(
               segments: [
                 for (final c in GrowContainer.values)

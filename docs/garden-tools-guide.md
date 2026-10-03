@@ -121,10 +121,15 @@ separately listed varieties. See
 `tools/johnnys-catalog/README.md`.
 
 ## Greenhouse flats and pots
-- Start seed in the greenhouse with Flats or pots (Greenhouse screen,
-  or Start in greenhouse in Grow). Flats: how many flats and cells per
-  flat; each cell is one plant. Pots: how many pots; one plant each.
-  The dialog shows how many plants you will have to plant out.
+- Greenhouse's Start next lists seed to start within two months. Its
+  start button opens the dialog with that seed already chosen. Add plant
+  (top of Start next) starts anything else; pick the seed in the dialog.
+  Start in greenhouse in Grow opens the same dialog.
+- The dialog asks for the Start date (today unless you change it, so
+  you can enter what you will start in a few days), then Flats or Pots.
+  Flats: how many flats and cells per flat; each cell is one plant.
+  Pots: how many pots; one plant each. It shows how many plants you
+  will have to plant out.
 - In Build's Plant mode, the Greenhouse panel under Seeds lists every
   flat and pot still in the greenhouse, ready or not, with a Growing,
   Ready or Overdue tag, the plants each gives, and when it is ready.

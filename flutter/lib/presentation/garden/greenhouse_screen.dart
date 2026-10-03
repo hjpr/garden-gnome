@@ -39,23 +39,10 @@ class GreenhouseBody extends StatelessWidget {
           Expanded(
             child: GardenCard(
               title: 'Growing now',
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CalendarLegend([
-                    ('Germinating', Palette.muted),
-                    ('Plant out', Palette.plantOut),
-                  ]),
-                  const SizedBox(width: 10),
-                  FilledButton.icon(
-                    onPressed: garden.profiles.isEmpty
-                        ? null
-                        : () => showStartTrayDialog(context, garden),
-                    icon: const Icon(Icons.add, size: 16),
-                    label: const Text('Flats or pots'),
-                  ),
-                ],
-              ),
+              trailing: CalendarLegend([
+                ('Germinating', Palette.muted),
+                ('Plant out', Palette.plantOut),
+              ]),
               padding: EdgeInsets.zero,
               child: Timeline(
                 range: calendarRange(today),
@@ -72,14 +59,36 @@ class GreenhouseBody extends StatelessWidget {
             child: GardenCard(
               title: 'Start next',
               padding: EdgeInsets.zero,
-              child: queue.isEmpty
-                  ? const EmptyPanelText('Nothing to start within two months.')
-                  : ListView(
-                      children: [
-                        for (final r in queue)
-                          _QueueTile(garden: garden, recommendation: r),
-                      ],
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Anything the recommendations do not list is started
+                  // here, with the seed picked in the dialog.
+                  Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: OutlinedButton.icon(
+                      onPressed: garden.profiles.isEmpty
+                          ? null
+                          : () => showStartTrayDialog(context, garden),
+                      icon: const Icon(Icons.add, size: 16),
+                      label: const Text('Add plant'),
                     ),
+                  ),
+                  const Divider(),
+                  Expanded(
+                    child: queue.isEmpty
+                        ? const EmptyPanelText(
+                            'Nothing to start within two months.',
+                          )
+                        : ListView(
+                            children: [
+                              for (final r in queue)
+                                _QueueTile(garden: garden, recommendation: r),
+                            ],
+                          ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -199,15 +208,11 @@ class _QueueTile extends StatelessWidget {
             StatusChip(r.timing.label, color: timingColor(r.timing)),
             IconAction(
               iconData: Icons.move_to_inbox_outlined,
-              label: 'Start in greenhouse today',
+              // Upcoming ones too: the start date can be set ahead.
+              label: 'Start in greenhouse',
               size: 26,
-              onPressed: r.timing.isOpen
-                  ? () => showStartTrayDialog(
-                      context,
-                      garden,
-                      varietyId: r.profile.id,
-                    )
-                  : null,
+              onPressed: () =>
+                  showStartTrayDialog(context, garden, varietyId: r.profile.id),
             ),
           ],
         ),

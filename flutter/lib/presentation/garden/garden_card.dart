@@ -54,7 +54,9 @@ class GardenCard extends StatelessWidget {
                 ),
               ),
             ),
-          if (title != null) const Divider(),
+          // The same line as the card's border, so the title reads as its
+          // own section.
+          if (title != null) const Divider(color: Palette.panelBorder),
           if (fill)
             Expanded(
               child: Padding(padding: padding, child: child),

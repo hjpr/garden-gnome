@@ -127,7 +127,7 @@ class _RowActions extends StatelessWidget {
         const SizedBox(width: 4),
         IconAction(
           iconData: indoors ? Icons.move_to_inbox_outlined : Icons.grass,
-          label: indoors ? 'Start in greenhouse today' : 'Sow today',
+          label: indoors ? 'Start in greenhouse' : 'Sow today',
           size: 26,
           onPressed: !r.timing.isOpen
               ? null
