@@ -1,11 +1,11 @@
 # Garden Gnome (Flutter)
 
-The current web app: Home, Build, Seed Vault, Greenhouse, Grow and Harvest.
-Build draws **properties and zones**, including curved boundaries, holes,
+The current web app: Home, Plan, Seed Vault, Greenhouse, Grow and Harvest.
+Plan draws **properties and zones**, including curved boundaries, holes,
 ground/rows, features and reference images. Plant mode places varieties on
 grow zones; the other tools track varieties, sowing and harvest calendars.
 
-User guides: [Build](../docs/build-guide.md) and
+User guides: [Plan](../docs/plan-guide.md) and
 [garden tools](../docs/garden-tools-guide.md).
 
 ## Run and verify
