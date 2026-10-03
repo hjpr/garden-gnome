@@ -77,9 +77,14 @@ has Home.
   if that difference is negative. Type to change either for this
   planting. Plants over Row ground follow the rows; over Flat ground
   they follow that bed's Direction (set in its Properties > GROUND).
-  Plants (under Seed) shows how many fit. Plant on is the day it goes
-  in the ground: click it to pick a day from the calendar. It is saved
-  with the drawing. The bin removes the seed.
+  Plants (under Seed) shows how many fit. Sown and Transplanted are
+  dates: click one to pick a day from the calendar. Sown alone means
+  sown in place; adding Transplanted means it was started elsewhere and
+  set out that day (the × clears it). Transplanted needs a Sown date and
+  cannot be earlier. Either date makes the planting show in Harvest,
+  named after the planting layer, counting from Transplanted when set,
+  otherwise from Sown. Changing the seed changes that sowing; removing
+  the seed or deleting the layer removes it. The bin removes the seed.
 
 ## Grow
 - Set Hardiness to your USDA zone. Last frost and First frost show the

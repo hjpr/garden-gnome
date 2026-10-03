@@ -123,7 +123,6 @@ class ZoneSeed {
     required this.name,
     required this.size,
     required this.spacing,
-    this.plantOn,
   });
 
   /// The Seed Vault variety's ID.
@@ -137,10 +136,6 @@ class ZoneSeed {
 
   /// Empty edge-to-edge gap between plants and plant lines, in metres.
   final double spacing;
-
-  /// The day it goes in the ground (midnight UTC), from which its growing
-  /// and harvest dates are counted; null until chosen.
-  final DateTime? plantOn;
 
   /// Centre-to-centre distance along and across planting lines.
   double get pitch => size + spacing;
@@ -157,16 +152,11 @@ class ZoneSeed {
     return null;
   }
 
-  ZoneSeed copyWith({
-    double? size,
-    double? spacing,
-    DateTime? Function()? plantOn,
-  }) => ZoneSeed(
+  ZoneSeed copyWith({double? size, double? spacing}) => ZoneSeed(
     varietyId: varietyId,
     name: name,
     size: size ?? this.size,
     spacing: spacing ?? this.spacing,
-    plantOn: plantOn == null ? this.plantOn : plantOn(),
   );
 
   @override
@@ -175,9 +165,8 @@ class ZoneSeed {
       other.varietyId == varietyId &&
       other.name == name &&
       other.size == size &&
-      other.spacing == spacing &&
-      other.plantOn == plantOn;
+      other.spacing == spacing;
 
   @override
-  int get hashCode => Object.hash(varietyId, name, size, spacing, plantOn);
+  int get hashCode => Object.hash(varietyId, name, size, spacing);
 }

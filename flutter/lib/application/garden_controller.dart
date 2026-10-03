@@ -331,6 +331,9 @@ class GardenController extends ChangeNotifier {
           PlantingSchedule(p, profile),
   ]..sort((a, b) => a.planting.sownOn.compareTo(b.planting.sownOn));
 
+  /// The name of the planting layer [p] grows in, or null.
+  String? layerNameOf(Planting p) => farm.farm.layers[p.layerId]?.name;
+
   /// What to sow or plant within two months either side of today.
   List<Recommendation> recommendations({
     Set<WindowKind> kinds = const {...WindowKind.values},

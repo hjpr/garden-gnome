@@ -82,6 +82,7 @@ class HarvestBody extends StatelessWidget {
                   ? 'Planted out ${formatDay(p.plantedOutOn!)}'
                   : 'Sown ${formatDay(p.sownOn)}')
             : 'In greenhouse',
+        ?garden.layerNameOf(p),
         if (p.location.isNotEmpty) p.location,
         status,
       ].join(' · '),

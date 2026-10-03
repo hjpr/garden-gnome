@@ -2,9 +2,10 @@
 
 Agreed design for how Build, Seed Vault, Greenhouse, Grow and Harvest fit
 together. Built: one farm, one file; climate and plantings in the farm;
-last farm reopens; moving old data; Seed Vault export and import. Not
-built yet: the shared planting record (Sown and Transplanted dates on a
-planting layer) and the greenhouse layer.
+last farm reopens; moving old data; Seed Vault export and import. Planting
+layers' Sown and Transplanted dates write to the shared planting record
+(linked by layer). Not built yet: picking a planting layer when planting
+out a greenhouse tray, and the greenhouse layer.
 
 ## One farm, one file
 

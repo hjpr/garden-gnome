@@ -334,6 +334,15 @@ class GardenDocument {
       );
     }
     final removedGeometry = removed.map((id) => layers[id]!.geometryId).toSet();
+    // Sowings in the removed layers go with them; finished ones stay as
+    // history without their place on the map.
+    final keptPlantings = {
+      for (final p in plantings.values)
+        if (!removed.contains(p.layerId))
+          p.id: p
+        else if (p.finishedOn != null)
+          p.id: p.copyWith(layerId: () => null),
+    };
     return copyWith(
       layers: updatedLayers,
       geometries: {
@@ -341,7 +350,7 @@ class GardenDocument {
           if (!removedGeometry.contains(entry.key)) entry.key: entry.value,
       },
       propertyIds: propertyIds.where((id) => id != layerId).toList(),
-    );
+    )._rebuild(plantings: keptPlantings);
   }
 
   /// Raises every ID counter to at least the values in [other], so numbers

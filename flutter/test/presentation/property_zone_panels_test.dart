@@ -72,7 +72,7 @@ void main() {
     expect(line.start.y, closeTo(line.end.y, 1e-9));
   });
 
-  testWidgets('Plants sits under Seed; Plant on picks a day in a calendar', (
+  testWidgets('Plants sits under Seed; Sown and Transplanted are dates', (
     tester,
   ) async {
     final (editor, _, _, grow) = garden(GroundType.flat);
@@ -82,9 +82,9 @@ void main() {
         builder: (_) => PropertiesBody(editor: editor),
       ),
     );
-    final plantOn = find.byKey(const ValueKey('plant-on'));
-    expect(tester.widget<InkWell>(plantOn).onTap, isNull, reason: 'no seed');
-    expect(find.text('Planted on'), findsNothing);
+    final sown = find.byKey(const ValueKey('day-Sown'));
+    final transplanted = find.byKey(const ValueKey('day-Transplanted'));
+    expect(tester.widget<InkWell>(sown).onTap, isNull, reason: 'no seed');
 
     editor.setSeed(grow, seed());
     await tester.pumpAndSettle();
@@ -92,28 +92,44 @@ void main() {
         tester.getTopLeft(find.widgetWithText(PropertyRow, label)).dy;
     expect(top('Seed'), lessThan(top('Plants')));
     expect(top('Plants'), lessThan(top('Size (ft)')));
-    expect(top('Spacing (ft)'), lessThan(top('Plant on')));
+    expect(top('Spacing (ft)'), lessThan(top('Sown')));
+    expect(top('Sown'), lessThan(top('Transplanted')));
+    expect(
+      tester.widget<InkWell>(transplanted).onTap,
+      isNull,
+      reason: 'needs a Sown date first',
+    );
 
-    await tester.tap(plantOn);
+    await tester.tap(sown);
     await tester.pumpAndSettle();
     expect(find.byType(DatePickerDialog), findsOneWidget);
-    await tester.tap(find.text('15'));
+    await tester.tap(find.text('10'));
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
-    final day = (editor.document.layers[grow]!.properties as ZoneProperties)
-        .seed!
-        .plantOn!;
     final now = DateTime.now();
-    expect(day, DateTime.utc(now.year, now.month, 15));
-    expect(find.textContaining(', ${now.year}'), findsOneWidget);
+    final sowing = editor.document.currentPlantingOf(grow)!;
+    expect(sowing.sownOn, DateTime.utc(now.year, now.month, 10));
+    expect(sowing.startedIndoors, isFalse, reason: 'sown in place');
+
+    await tester.tap(transplanted);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('20'));
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    final out = editor.document.currentPlantingOf(grow)!;
+    expect(out.plantedOutOn, DateTime.utc(now.year, now.month, 20));
+    expect(out.startedIndoors, isTrue);
+
+    await tester.tap(find.byTooltip('Clear Transplanted'));
+    await tester.pumpAndSettle();
+    expect(editor.document.currentPlantingOf(grow)!.plantedOutOn, isNull);
+    expect(editor.document.currentPlantingOf(grow)!.startedIndoors, isFalse);
+
+    editor.undo();
+    editor.undo();
     editor.undo();
     await tester.pumpAndSettle();
-    expect(
-      (editor.document.layers[grow]!.properties as ZoneProperties)
-          .seed!
-          .plantOn,
-      isNull,
-    );
+    expect(editor.document.currentPlantingOf(grow), isNull);
   });
 
   testWidgets('typing plant spacing changes row layout and supports Undo', (

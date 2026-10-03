@@ -1,4 +1,6 @@
 import 'document.dart';
+import 'grow/day.dart';
+import 'grow/planting.dart';
 import 'layer.dart';
 import 'row_layout.dart';
 
@@ -70,9 +72,79 @@ extension ZoneGround on GardenDocument {
     }
     if (seed?.problem case final problem?) throw StateError(problem);
     if (properties.seed == seed) return this;
-    return withLayer(
+    var next = withLayer(
       layer.copyWith(properties: properties.copyWith(seed: () => seed)),
     );
+    // The sowing follows the seed: another variety changes it, no seed
+    // takes it out.
+    if (currentPlantingOf(layerId) case final sowing?) {
+      next = seed == null
+          ? next.withoutPlanting(sowing.id)
+          : next.withPlanting(sowing.copyWith(varietyId: seed.varietyId));
+    }
+    return next;
+  }
+
+  /// The sowing growing in planting layer [layerId] now: the latest one
+  /// linked to it that is not finished. Null before a Sown date is set.
+  Planting? currentPlantingOf(String layerId) {
+    Planting? best;
+    for (final p in plantings.values) {
+      if (p.layerId != layerId || p.finishedOn != null) continue;
+      if (best == null || p.sownOn.isAfter(best.sownOn)) best = p;
+    }
+    return best;
+  }
+
+  /// Sets when the seed in planting layer [layerId] was (or will be)
+  /// sown, creating its sowing if there is none. Sown in place unless a
+  /// Transplanted date is set.
+  GardenDocument withSownOn(String layerId, DateTime day) {
+    final seed = _plantingSeed(layerId);
+    final sown = dayOf(day);
+    if (currentPlantingOf(layerId) case final p?) {
+      final transplanted = p.plantedOutOn;
+      if (transplanted != null && transplanted.isBefore(sown)) {
+        throw StateError('Sown must be on or before Transplanted');
+      }
+      return p.sownOn == sown ? this : withPlanting(p.copyWith(sownOn: sown));
+    }
+    final (next, id) = nextPlantingId();
+    return next.withPlanting(
+      Planting(
+        id: id,
+        varietyId: seed.varietyId,
+        sownOn: sown,
+        startedIndoors: false,
+        layerId: layerId,
+      ),
+    );
+  }
+
+  /// Sets when the seedlings in planting layer [layerId] went into the
+  /// ground; null makes it sown in place again. Needs a Sown date first.
+  GardenDocument withTransplantedOn(String layerId, DateTime? day) {
+    _plantingSeed(layerId);
+    final p = currentPlantingOf(layerId);
+    if (p == null) throw StateError('Set the Sown date first');
+    final out = day == null ? null : dayOf(day);
+    if (out != null && out.isBefore(p.sownOn)) {
+      throw StateError('Transplanted must be on or after Sown');
+    }
+    if (p.plantedOutOn == out && p.startedIndoors == (out != null)) {
+      return this;
+    }
+    return withPlanting(
+      p.copyWith(plantedOutOn: () => out, startedIndoors: out != null),
+    );
+  }
+
+  ZoneSeed _plantingSeed(String layerId) {
+    final properties = layers[layerId]?.properties;
+    if (properties is! ZoneProperties || !properties.isGrow) {
+      throw StateError('Dates are set on plantings');
+    }
+    return properties.seed ?? (throw StateError('Plant a seed here first'));
   }
 
   /// This document with [layerId]'s row settings replaced. Returns this

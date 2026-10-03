@@ -143,20 +143,38 @@ void main() {
     expect(p.seed, seed());
   });
 
-  test('a planting\'s plant-on date is saved as a calendar day', () {
+  test('a planting layer\'s sowing is saved with its layer', () {
     final (editor, _, _, grow) = garden(GroundType.row);
-    final planted = seed().copyWith(plantOn: () => DateTime.utc(2027, 4, 15));
-    editor.setSeed(grow, planted);
+    editor.setSeed(grow, seed());
+    editor.setSownOn(grow, DateTime.utc(2027, 3, 1));
+    editor.setTransplantedOn(grow, DateTime.utc(2027, 4, 15));
+    final opened = decodeGgnome(encodeGgnome(editor.document));
+    final sowing = opened.currentPlantingOf(grow)!;
+    expect(sowing.layerId, grow);
+    expect(sowing.sownOn, DateTime.utc(2027, 3, 1));
+    expect(sowing.plantedOutOn, DateTime.utc(2027, 4, 15));
+    expect(sowing.startedIndoors, isTrue);
+  });
+
+  test('a version 7 Plant on date opens as a sowing in place', () {
+    final (editor, _, _, grow) = garden(GroundType.row);
+    editor.setSeed(grow, seed());
     final json = documentToJson(editor.document);
+    json['schema_version'] = 7;
+    for (final key in ['climate', 'planting_counter', 'plantings']) {
+      json.remove(key);
+    }
     final props = ((json['layers'] as Map)[grow] as Map)['properties'] as Map;
-    expect((props['seed'] as Map)['plant_on'], '2027-04-15');
+    props['seed'] = <String, Object?>{
+      ...(props['seed'] as Map).cast<String, Object?>(),
+      'plant_on': '2027-04-15',
+    };
     final opened = documentFromJson(json);
-    expect(
-      (opened.layers[grow]!.properties as ZoneProperties).seed!.plantOn,
-      DateTime.utc(2027, 4, 15),
-    );
-    (props['seed'] as Map)['plant_on'] = '2027-02-31';
-    expect(() => documentFromJson(json), throwsA(isA<DocumentFormatError>()));
+    final sowing = opened.plantings.values.single;
+    expect(sowing.layerId, grow);
+    expect(sowing.sownOn, DateTime.utc(2027, 4, 15));
+    expect(sowing.startedIndoors, isFalse);
+    expect(opened.plantingCounter, 1);
   });
 
   test('seed diameter and empty gap round-trip explicitly', () {

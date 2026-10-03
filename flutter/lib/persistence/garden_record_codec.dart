@@ -200,6 +200,7 @@ Map<String, Object?> plantingToJson(Planting p) => {
   'count': p.count,
   'location': p.location,
   'notes': p.notes,
+  'layer': ?p.layerId,
 };
 
 /// Throws [FormatException] when a value cannot be read.
@@ -219,6 +220,7 @@ Planting plantingFromJson(Object? raw) {
     count: _optionalInt(j['count'], 'planting count'),
     location: _optionalString(j['location'], 'planting location') ?? '',
     notes: _optionalString(j['notes'], 'planting notes') ?? '',
+    layerId: _optionalString(j['layer'], 'planting layer'),
   );
 }
 

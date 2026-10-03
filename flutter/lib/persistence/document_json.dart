@@ -24,7 +24,9 @@ import 'garden_record_codec.dart'
 // 6: an empty Reference layer is kept (older readers would drop it).
 // 7: a planting's plant-on date (older readers would drop it).
 // 8: the farm's climate and plantings (older readers would drop them).
-const int schemaVersion = 8;
+// 9: plantings name their planting layer; a planting layer's Plant on
+//    date moves into a sown planting (older readers would drop the link).
+const int schemaVersion = 9;
 
 /// The oldest version still opened. Version 1 files open with their
 /// patterns and free-text ground notes dropped.
@@ -113,7 +115,6 @@ Map<String, Object?> _layerToJson(Layer layer) => {
           'variety_id': seed.varietyId,
           'name': seed.name,
           'size': seed.size,
-          if (seed.plantOn case final day?) 'plant_on': _dayToJson(day),
           'spacing': seed.spacing,
         },
     },
@@ -321,7 +322,6 @@ ZoneSeed _seedFromJson(Map<String, Object?> json, int version) {
     name: _string(json['name'], 'seed name'),
     size: size,
     spacing: spacing,
-    plantOn: json['plant_on'] == null ? null : _dayFromJson(json['plant_on']),
   );
   if (seed.problem != null) {
     throw const DocumentFormatError('Damaged file: seed spacing');
@@ -393,7 +393,11 @@ PropertyProperties _propertyFromJson(Map<String, Object?> props) =>
   Map<String, Object?> root,
   int version,
 ) {
-  if (version < 8) return (const Climate(), const {}, 0);
+  if (version < 7) return (const Climate(), const {}, 0);
+  if (version == 7) {
+    final (plantings, counter) = _plantOnDates(root);
+    return (const Climate(), plantings, counter);
+  }
   try {
     final climate = climateFromJson(_map(root['climate'], 'climate'));
     final counter = _count(root['planting_counter']);
@@ -415,6 +419,26 @@ PropertyProperties _propertyFromJson(Map<String, Object?> props) =>
   } on FormatException catch (e) {
     throw DocumentFormatError('Damaged file: ${e.message}');
   }
+}
+
+/// Version 7 kept one Plant on date on a planting layer's seed. Each
+/// becomes a planting sown in place that day, linked to its layer.
+(Map<String, Planting>, int) _plantOnDates(Map<String, Object?> root) {
+  final plantings = <String, Planting>{};
+  _map(root['layers'], 'layers').forEach((layerId, value) {
+    final props = _map(_map(value, 'layer')['properties'], 'properties');
+    final seed = props['seed'];
+    if (seed is! Map || seed['plant_on'] == null) return;
+    final id = 'planting-${plantings.length + 1}';
+    plantings[id] = Planting(
+      id: id,
+      varietyId: _string(seed['variety_id'], 'seed variety'),
+      sownOn: _dayFromJson(seed['plant_on']),
+      startedIndoors: false,
+      layerId: layerId,
+    );
+  });
+  return (plantings, plantings.length);
 }
 
 String _dayToJson(DateTime day) =>

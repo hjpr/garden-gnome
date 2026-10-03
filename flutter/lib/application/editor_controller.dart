@@ -936,6 +936,21 @@ class EditorController extends ChangeNotifier {
     );
   }
 
+  /// Sets the Sown date of planting [layerId] as one Undo step.
+  void setSownOn(String layerId, DateTime day) => _changeZone(
+    layerId,
+    'Set sown date',
+    (document) => document.withCounterFloor(_ledger).withSownOn(layerId, day),
+  );
+
+  /// Sets (or with null clears) the Transplanted date of planting
+  /// [layerId] as one Undo step.
+  void setTransplantedOn(String layerId, DateTime? day) => _changeZone(
+    layerId,
+    day == null ? 'Clear transplanted date' : 'Set transplanted date',
+    (document) => document.withTransplantedOn(layerId, day),
+  );
+
   /// Sets a zone's row width, spacing and direction as one Undo step.
   void setRows(String layerId, RowSpec rows) {
     _changeZone(

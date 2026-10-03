@@ -33,6 +33,7 @@ class Planting {
     this.count,
     this.location = '',
     this.notes = '',
+    this.layerId,
   });
 
   final String id;
@@ -54,6 +55,10 @@ class Planting {
   final String location;
   final String notes;
 
+  /// The planting layer it grows in on the farm map; null for a tray
+  /// not yet in the ground, or a sowing made without the map.
+  final String? layerId;
+
   PlantingStage get stage {
     if (finishedOn != null) return PlantingStage.finished;
     if (startedIndoors && plantedOutOn == null) return PlantingStage.greenhouse;
@@ -70,16 +75,20 @@ class Planting {
     int? Function()? count,
     String? location,
     String? notes,
+    String? varietyId,
+    bool? startedIndoors,
+    String? Function()? layerId,
   }) => Planting(
     id: id,
-    varietyId: varietyId,
+    varietyId: varietyId ?? this.varietyId,
     sownOn: sownOn ?? this.sownOn,
-    startedIndoors: startedIndoors,
+    startedIndoors: startedIndoors ?? this.startedIndoors,
     plantedOutOn: plantedOutOn == null ? this.plantedOutOn : plantedOutOn(),
     finishedOn: finishedOn == null ? this.finishedOn : finishedOn(),
     count: count == null ? this.count : count(),
     location: location ?? this.location,
     notes: notes ?? this.notes,
+    layerId: layerId == null ? this.layerId : layerId(),
   );
 
   /// A copy under another ID, e.g. when moved into a farm.
@@ -93,6 +102,7 @@ class Planting {
     count: count,
     location: location,
     notes: notes,
+    layerId: layerId,
   );
 
   @override
@@ -106,7 +116,8 @@ class Planting {
       other.finishedOn == finishedOn &&
       other.count == count &&
       other.location == location &&
-      other.notes == notes;
+      other.notes == notes &&
+      other.layerId == layerId;
 
   @override
   int get hashCode => Object.hash(
@@ -119,6 +130,7 @@ class Planting {
     count,
     location,
     notes,
+    layerId,
   );
 }
 

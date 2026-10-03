@@ -10,7 +10,7 @@ import '../widgets/icon_controls.dart';
 import '../widgets/property_controls.dart';
 import 'layer_fields.dart';
 import 'measure_field.dart';
-import 'plant_on_field.dart';
+import 'day_field.dart';
 
 class ZoneOptions extends StatelessWidget {
   const ZoneOptions({
@@ -66,6 +66,7 @@ class ZoneOptions extends StatelessWidget {
     final seed = p.seed;
     final seedEditable = editable && seed != null;
     final layout = editor.document.plantLayoutOf(layer.id);
+    final sowing = editor.document.currentPlantingOf(layer.id);
     void setSeed(ZoneSeed Function(ZoneSeed) change) {
       final current = editor.document.layers[layer.id]?.properties;
       if (current is ZoneProperties && current.seed != null) {
@@ -135,11 +136,23 @@ class ZoneOptions extends StatelessWidget {
           apply: (v) => setSeed((s) => s.copyWith(spacing: v)),
         ),
         PropertyRow(
-          label: 'Plant on',
-          child: PlantOnField(
-            day: seed?.plantOn,
+          label: 'Sown',
+          child: DayField(
+            label: 'Sown',
+            day: sowing?.sownOn,
             enabled: seedEditable,
-            onChanged: (day) => setSeed((s) => s.copyWith(plantOn: () => day)),
+            onChanged: (day) => editor.setSownOn(layer.id, day),
+          ),
+        ),
+        PropertyRow(
+          label: 'Transplanted',
+          child: DayField(
+            label: 'Transplanted',
+            day: sowing?.plantedOutOn,
+            first: sowing?.sownOn,
+            enabled: seedEditable && sowing != null,
+            onChanged: (day) => editor.setTransplantedOn(layer.id, day),
+            onCleared: () => editor.setTransplantedOn(layer.id, null),
           ),
         ),
       ],
