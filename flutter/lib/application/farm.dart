@@ -5,7 +5,7 @@ import 'document_session.dart';
 
 /// The open farm, as the growing tools see it: they read its climate and
 /// plantings and change them through [changeFarm], which goes through the
-/// same history and unsaved-changes tracking as an edit in Build.
+/// same history and unsaved-changes tracking as an edit in Plan.
 abstract interface class FarmAccess implements Listenable {
   GardenDocument get farm;
   String get farmName;
@@ -25,7 +25,7 @@ abstract interface class FarmAccess implements Listenable {
   );
 }
 
-/// The farm open in Build. Follows the session as farms are opened.
+/// The farm open in Plan. Follows the session as farms are opened.
 class SessionFarm extends ChangeNotifier implements FarmAccess {
   SessionFarm(this.session) {
     session.addListener(_follow);
@@ -70,7 +70,7 @@ class SessionFarm extends ChangeNotifier implements FarmAccess {
   }
 }
 
-/// A farm held only in memory, for a growing tool used without Build
+/// A farm held only in memory, for a growing tool used without Plan
 /// (tests and previews).
 class DetachedFarm extends ChangeNotifier implements FarmAccess {
   DetachedFarm([GardenDocument? farm])

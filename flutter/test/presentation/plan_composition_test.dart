@@ -3,8 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:garden_gnome/application/editor_controller.dart';
 import 'package:garden_gnome/application/tools.dart';
 import 'package:garden_gnome/domain/layer.dart';
-import 'package:garden_gnome/presentation/build_header.dart';
-import 'package:garden_gnome/presentation/build_status_bar.dart';
+import 'package:garden_gnome/presentation/plan_header.dart';
+import 'package:garden_gnome/presentation/plan_status_bar.dart';
 import 'package:garden_gnome/presentation/panels/layer_actions.dart';
 import 'package:garden_gnome/presentation/panels/layer_fields.dart';
 import 'package:garden_gnome/presentation/panels/properties_panel.dart';
@@ -16,7 +16,7 @@ import '../support/widget_harness.dart';
 
 void main() {
   testWidgets(
-    'BuildHeader places the mode switch on the right without history buttons',
+    'PlanHeader places the mode switch on the right without history buttons',
     (tester) async {
       await setTestViewport(tester, size: const Size(800, 600));
       final editor = EditorController();
@@ -25,7 +25,7 @@ void main() {
         testApp(
           child: ListenableBuilder(
             listenable: editor,
-            builder: (context, _) => BuildHeader(
+            builder: (context, _) => PlanHeader(
               title: editor.title,
               dirty: false,
               editor: editor,
@@ -60,7 +60,7 @@ void main() {
     },
   );
 
-  testWidgets('BuildHeader delegates file commands without owning a session', (
+  testWidgets('PlanHeader delegates file commands without owning a session', (
     tester,
   ) async {
     await setTestViewport(tester);
@@ -69,7 +69,7 @@ void main() {
     final commands = <String>[];
     await tester.pumpWidget(
       testApp(
-        child: BuildHeader(
+        child: PlanHeader(
           title: editor.title,
           dirty: false,
           editor: editor,
@@ -106,7 +106,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('BuildStatusBar follows view changes without a screen rebuild', (
+  testWidgets('PlanStatusBar follows view changes without a screen rebuild', (
     tester,
   ) async {
     await setTestViewport(tester);
@@ -118,7 +118,7 @@ void main() {
         child: Builder(
           builder: (context) {
             parentBuilds++;
-            return BuildStatusBar(editor: editor);
+            return PlanStatusBar(editor: editor);
           },
         ),
       ),

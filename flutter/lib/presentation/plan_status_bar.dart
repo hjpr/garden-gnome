@@ -6,8 +6,8 @@ import 'theme.dart';
 import 'widgets/icon_controls.dart';
 import 'widgets/selection_readout.dart';
 
-class BuildStatusBar extends StatelessWidget {
-  const BuildStatusBar({super.key, required this.editor});
+class PlanStatusBar extends StatelessWidget {
+  const PlanStatusBar({super.key, required this.editor});
 
   final EditorController editor;
 

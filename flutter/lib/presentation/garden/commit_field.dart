@@ -8,7 +8,7 @@ import '../theme.dart';
 /// or null when the value was taken. [hint] shows the default used while
 /// the box is empty.
 ///
-/// Local to the garden field, unlike Build drafts registered for drawing
+/// Local to the garden field, unlike Plan drafts registered for drawing
 /// save, undo and layer-switch settlement.
 class CommitField extends StatefulWidget {
   const CommitField({

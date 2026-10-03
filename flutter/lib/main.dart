@@ -25,7 +25,7 @@ void main() {
     lastFarm: LastFarmPreference(),
   );
   // One toast stack for every tool. The growing tools work on the farm
-  // open in Build.
+  // open in Plan.
   final garden = GardenController(
     store: BrowserGardenRecordStore(),
     toasts: session.toasts,

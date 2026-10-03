@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../application/app_tools.dart';
 import '../application/document_session.dart';
 import '../application/garden_controller.dart';
-import 'build_screen.dart';
+import 'plan_screen.dart';
 import 'garden/garden_page.dart';
 import 'garden/greenhouse_screen.dart';
 import 'garden/grow_screen.dart';
@@ -11,7 +11,7 @@ import 'garden/harvest_screen.dart';
 import 'garden/seed_vault_screen.dart';
 import 'home_screen.dart';
 
-/// Shows the open tool, or home. Build is kept alive while another tool
+/// Shows the open tool, or home. Plan is kept alive while another tool
 /// is open (Offstage), so switching back keeps its view, panels and any
 /// half-typed values.
 class AppShell extends StatelessWidget {
@@ -34,17 +34,17 @@ class AppShell extends StatelessWidget {
       return Stack(
         children: [
           Offstage(
-            offstage: tool != AppTool.build,
+            offstage: tool != AppTool.plan,
             child: TickerMode(
-              enabled: tool == AppTool.build,
-              child: BuildScreen(
+              enabled: tool == AppTool.plan,
+              child: PlanScreen(
                 session: session,
                 navigator: navigator,
                 garden: garden,
               ),
             ),
           ),
-          if (tool != AppTool.build) _gardenTool(tool),
+          if (tool != AppTool.plan) _gardenTool(tool),
         ],
       );
     },
@@ -60,7 +60,7 @@ class AppShell extends StatelessWidget {
         AppTool.greenhouse => GreenhouseBody(garden: garden),
         AppTool.grow => GrowBody(garden: garden),
         AppTool.harvest => HarvestBody(garden: garden),
-        AppTool.build => const SizedBox.shrink(),
+        AppTool.plan => const SizedBox.shrink(),
       },
     );
   }

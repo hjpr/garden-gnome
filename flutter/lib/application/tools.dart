@@ -88,7 +88,7 @@ enum ToolFunction {
   bool get drawsCircle => this == centerCircle || this == twoPointCircle;
 }
 
-/// Build's two modes, switched from the header.
+/// The Plan screen's two modes, switched from the header.
 ///
 /// Build lays out the land. Plant freezes all geometry while existing
 /// grow zones can be selected and planted with seeds from the Seed Vault.

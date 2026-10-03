@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:garden_gnome/application/editor_controller.dart';
 import 'package:garden_gnome/application/tools.dart';
 import 'package:garden_gnome/application/workspace_settings.dart';
-import 'package:garden_gnome/presentation/build_header.dart';
+import 'package:garden_gnome/presentation/plan_header.dart';
 import 'package:garden_gnome/presentation/panels/layer_actions.dart';
 import 'package:garden_gnome/presentation/panels/tools_panel.dart';
 import 'package:garden_gnome/presentation/widgets/dock.dart';
@@ -16,7 +16,7 @@ Widget workspaceFor(EditorController editor) => testApp(
     listenable: editor,
     builder: (context, _) => Column(
       children: [
-        BuildHeader(
+        PlanHeader(
           title: 'Plant workspace',
           dirty: false,
           editor: editor,

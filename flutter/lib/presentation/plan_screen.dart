@@ -13,8 +13,8 @@ import '../application/tools.dart';
 import '../application/workspace_settings.dart';
 import '../platform/leave_guard.dart';
 import '../platform/persistent_storage.dart';
-import 'build_header.dart';
-import 'build_status_bar.dart';
+import 'plan_header.dart';
+import 'plan_status_bar.dart';
 import 'canvas/drawing_canvas.dart';
 import 'dialogs.dart';
 import 'panels/layer_actions.dart';
@@ -35,10 +35,10 @@ import 'widgets/toaster.dart';
 /// Smallest window the editor supports, in logical pixels.
 const Size minimumEditorSize = Size(800, 600);
 
-/// The Build screen: a header with menus, the drawing canvas between two
+/// The Plan screen: a header with menus, the drawing canvas between two
 /// folding docks of panels, and a status bar.
-class BuildScreen extends StatefulWidget {
-  const BuildScreen({
+class PlanScreen extends StatefulWidget {
+  const PlanScreen({
     super.key,
     required this.session,
     this.navigator,
@@ -51,17 +51,17 @@ class BuildScreen extends StatefulWidget {
   /// empty.
   final GardenController? garden;
 
-  /// Switches to the other tools from the header; null shows Build alone.
+  /// Switches to the other tools from the header; null shows Plan alone.
   final AppNavigator? navigator;
 
   @override
-  State<BuildScreen> createState() => _BuildScreenState();
+  State<PlanScreen> createState() => _PlanScreenState();
 }
 
-class _BuildScreenState extends State<BuildScreen> {
+class _PlanScreenState extends State<PlanScreen> {
   final FocusNode _canvasFocus = FocusNode(debugLabel: 'canvas');
 
-  /// The screen's own focus, taken back whenever Build is opened again so
+  /// The screen's own focus, taken back whenever Plan is opened again so
   /// its shortcuts work at once.
   final FocusNode _screenFocus = FocusNode(debugLabel: 'build screen');
   late final AppLifecycleListener _lifecycle;
@@ -97,13 +97,13 @@ class _BuildScreenState extends State<BuildScreen> {
   EditorController? _listened;
 
   bool get _isOpen =>
-      widget.navigator == null || widget.navigator!.current == AppTool.build;
+      widget.navigator == null || widget.navigator!.current == AppTool.plan;
 
   void _onToolChanged() {
     if (_isOpen) {
       _screenFocus.requestFocus();
     } else {
-      // Leaving Build drops a half-made shape, as Esc does, and keeps the
+      // Leaving Plan drops a half-made shape, as Esc does, and keeps the
       // view in case the tab is closed from another tool.
       _editor.cancelOperation();
       unawaited(_session.rememberWorkspace());
@@ -391,7 +391,7 @@ class _BuildScreenState extends State<BuildScreen> {
               children: [
                 Column(
                   children: [
-                    BuildHeader(
+                    PlanHeader(
                       title: _editor.title,
                       dirty: _session.hasUnsavedWork,
                       editor: _editor,
@@ -407,7 +407,7 @@ class _BuildScreenState extends State<BuildScreen> {
                     Expanded(
                       child: tooSmall ? const _TooSmallNotice() : _workspace(),
                     ),
-                    BuildStatusBar(editor: _editor),
+                    PlanStatusBar(editor: _editor),
                   ],
                 ),
                 Positioned.fill(

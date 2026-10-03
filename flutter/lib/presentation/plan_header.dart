@@ -8,8 +8,8 @@ import 'theme.dart';
 import 'widgets/drawing_title.dart';
 import 'widgets/mode_switch.dart';
 
-class BuildHeader extends StatelessWidget {
-  const BuildHeader({
+class PlanHeader extends StatelessWidget {
+  const PlanHeader({
     super.key,
     required this.title,
     required this.dirty,

@@ -1,7 +1,9 @@
-# Build screen: quick guide
+# Plan screen: quick guide
 
-The Build screen is where you draw your land. Layers lists each kind of
-layer on its own, so what a layer is for is always visible:
+The Plan screen is where you plan your farm. Planning has two parts,
+switched in the header: Build, where you draw your land, and Plant,
+where you place seed in plantings. Layers lists each kind of layer on
+its own, so what a layer is for is always visible:
 
 - Property: land you hold. Properties may not overlap one another.
 - Bed: ground inside a property: Fallow, Flat, or Row.
@@ -443,5 +445,5 @@ numbers are shown.
 
 ## Window size
 
-The Build screen needs a window of at least 800 × 600 to edit. In a smaller
+The Plan screen needs a window of at least 800 × 600 to edit. In a smaller
 window the drawing is shown but cannot be edited. Saving still works.

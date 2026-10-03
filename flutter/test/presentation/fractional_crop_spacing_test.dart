@@ -120,7 +120,6 @@ void main() {
               builder: (context, child) => VarietyDetail(
                 garden: garden,
                 profile: garden.profileOf('variety-1')!,
-                onRemoved: () {},
               ),
             ),
           ),

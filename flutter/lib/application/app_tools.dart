@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 /// The app's tools, in the order the gardener meets them: lay out the
 /// land, record seed, start seed, plan sowing, pick.
 enum AppTool {
-  build('Build'),
+  plan('Plan'),
   seedVault('Seed Vault'),
   greenhouse('Greenhouse'),
   grow('Grow'),

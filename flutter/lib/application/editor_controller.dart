@@ -30,7 +30,7 @@ import 'workspace_settings.dart';
 /// which is not a layer.
 const referenceDraftOwner = 'reference-image';
 
-/// The Build screen's state and the only place drawing changes are made.
+/// The Plan screen's state and the only place drawing changes are made.
 ///
 /// Widgets read state from here and call its commands. Every change to the
 /// drawing goes through [commit], which validates it, records it for Undo,

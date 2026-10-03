@@ -9,7 +9,7 @@ Widget toolIcon(AppTool? tool, {double size = 18, Color? color}) {
   final c = color ?? Palette.accent;
   return switch (tool) {
     null => Icon(Icons.eco, size: size, color: c),
-    AppTool.build => Icon(Icons.architecture, size: size, color: c),
+    AppTool.plan => Icon(Icons.architecture, size: size, color: c),
     AppTool.seedVault => Icon(Icons.inventory_2_outlined, size: size, color: c),
     AppTool.greenhouse => AppIcon('greenhouse.svg', size: size, color: c),
     AppTool.grow => Icon(Icons.calendar_month_outlined, size: size, color: c),

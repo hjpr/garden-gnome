@@ -6,7 +6,7 @@ import 'variety.dart';
 /// the garden's climate. Immutable; each change makes a new record.
 ///
 /// This is the gardener's, not a drawing's, so it stays the same when a
-/// different drawing is opened in Build.
+/// different drawing is opened in Plan.
 class GardenRecord {
   GardenRecord({
     this.climate = const Climate(),

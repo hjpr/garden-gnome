@@ -4,7 +4,6 @@ import '../../application/garden_controller.dart';
 import '../../domain/grow/crop.dart';
 import '../../domain/grow/variety.dart';
 import '../theme.dart';
-import '../widgets/icon_controls.dart';
 import '../widgets/property_controls.dart';
 import 'commit_field.dart';
 import 'crop_notes.dart';
@@ -14,16 +13,10 @@ import 'garden_card.dart';
 /// The selected variety: its own details on the left, the crop's growing
 /// notes from the catalog on the right.
 class VarietyDetail extends StatelessWidget {
-  const VarietyDetail({
-    super.key,
-    required this.garden,
-    required this.profile,
-    required this.onRemoved,
-  });
+  const VarietyDetail({super.key, required this.garden, required this.profile});
 
   final GardenController garden;
   final VarietyProfile profile;
-  final VoidCallback onRemoved;
 
   Variety get _v => profile.variety;
   Crop get _crop => profile.crop;
@@ -85,14 +78,6 @@ class VarietyDetail extends StatelessWidget {
           width: 380,
           child: GardenCard(
             title: 'Variety',
-            trailing: IconAction(
-              iconData: Icons.delete_outline,
-              label: 'Remove variety',
-              onPressed: () {
-                garden.removeVariety(_v.id);
-                onRemoved();
-              },
-            ),
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,

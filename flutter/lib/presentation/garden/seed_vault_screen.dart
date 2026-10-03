@@ -142,6 +142,12 @@ class _SeedVaultBodyState extends State<SeedVaultBody> {
                                   selected: p.id == _selectedId,
                                   onTap: () =>
                                       setState(() => _selectedId = p.id),
+                                  onRemove: () {
+                                    _garden.removeVariety(p.id);
+                                    if (_selectedId == p.id) {
+                                      setState(() => _selectedId = null);
+                                    }
+                                  },
                                 ),
                             ],
                           ),
@@ -193,7 +199,6 @@ class _SeedVaultBodyState extends State<SeedVaultBody> {
                     key: ValueKey(selected.id),
                     garden: _garden,
                     profile: selected,
-                    onRemoved: () => setState(() => _selectedId = null),
                   ),
           ),
         ],
@@ -273,11 +278,13 @@ class _VarietyTile extends StatelessWidget {
     required this.profile,
     required this.selected,
     required this.onTap,
+    required this.onRemove,
   });
 
   final VarietyProfile profile;
   final bool selected;
   final VoidCallback onTap;
+  final VoidCallback onRemove;
 
   @override
   Widget build(BuildContext context) {
@@ -321,6 +328,13 @@ class _VarietyTile extends StatelessWidget {
                   ],
                 ),
               ),
+              IconAction(
+                iconData: Icons.delete_outline,
+                label: 'Remove ${v.name}',
+                size: 24,
+                onPressed: onRemove,
+              ),
+              const SizedBox(width: 4),
               Icon(
                 profile.crop.season == Season.cool
                     ? Icons.ac_unit
