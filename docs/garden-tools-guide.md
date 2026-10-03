@@ -1,6 +1,6 @@
 # Garden tools guide
 
-Garden Gnome opens on Home, which shows five tools: Build, Seed Vault,
+Garden Gnome opens on Home, which shows five tools: Plan, Seed Vault,
 Greenhouse, Grow and Harvest. Each card shows a live count. To move
 between tools, use the leaf menu at the top left of any tool. It also
 has Home.
@@ -17,12 +17,14 @@ has Home.
   clicking away keeps it; Esc puts it back.
 - The right side shows the crop's growing notes from Johnny's Selected
   Seeds. Values marked * are estimates.
+- The bin on each variety row, left of its season icon, removes that
+  variety from the vault.
 - To filter the list, type in Search varieties or use the chips
   (Vegetables, Herbs, Cool, Warm, Transplant, Direct sow).
-- Greenhouse, Grow and Harvest show only the farm open in Build (its
+- Greenhouse, Grow and Harvest show only the farm open in Plan (its
   name is on Home). Its climate and sowings are saved with that farm:
   sowing, planting out, finishing and climate changes are Undo steps in
-  Build and need a Save, like a drawing change. A new blank farm has
+  Plan and need a Save, like a drawing change. A new blank farm has
   empty calendars. The last farm saved or opened reopens at start-up.
 - Sowings and climate from before farms held them move into the farm
   open the first time this version runs; save that farm to keep them.
@@ -31,7 +33,7 @@ has Home.
   a copy or move it to another browser. Importing adds new varieties and
   skips ones already in the vault (same crop and name).
 
-## Build: Ground and Plant
+## Plan: Build and Plant
 - Ground tool functions (beds only): Fallow is unprepared ground that
   nothing is planted on; Flat and Row prepare a bed's soil. New beds
   start Flat.
@@ -90,12 +92,31 @@ has Home.
 - Set Hardiness to your USDA zone. Last frost and First frost show the
   zone's typical dates in grey; type your own to replace them (for
   example "Apr 20").
-- The calendar lists what you can sow within two months either side of
-  today: Direct sow in green, Start in greenhouse in amber. The solid
-  part of each bar is the best time. Chips show Early, Ideal, Late or
-  Upcoming. Turn on Closed to see windows that have just ended.
-- The sprout button (Sow today) or the tray button (Start in greenhouse
-  today) records a sowing.
+- Grow is for sowing in place; seed started in trays is in Greenhouse.
+  Plan first: you can only sow plantings already on the map (Plan >
+  Plant mode, a planting with a seed and nothing sown yet).
+- Growing now: what is sown (germination in grey, harvest in red), then
+  plantings waiting to be sown with their sowing window in green, then
+  in grey the Seed Vault varieties whose window is near but that are in
+  no planting yet ("not planned"). The solid part of a window is the
+  best time.
+- Start next: Add plant, then the direct-sow windows within two months.
+  Planned ones have a sprout button that opens the Sow dialog for that
+  planting; unplanned ones are greyed ("Add it to a planting in Plan
+  first"). Add plant offers every planting waiting to be sown.
+- The Sow dialog shows the planting, the Sown date (today unless you
+  change it) and how many plants it holds. That number comes from the
+  planting's Size, Spacing and Lines in Plan.
+
+## Planting lines
+- A planting over Row ground has Lines in its GROW properties: how many
+  lines of plants go along each row. All (the default) fills the row
+  with as many as fit; type a number, or use the arrows, to plant fewer.
+- The most you can enter is what fits across the row at the planting's
+  Size and Spacing ("At most 5 lines fit. Reduce Spacing for more").
+  For more lines, reduce Spacing or Size. Widening Spacing later lowers
+  Lines to the new most. Over Flat ground plants form a grid and Lines
+  is greyed.
 
 ## Greenhouse
 - Growing now: each tray, with its germination bar (grey) and the dates
@@ -124,13 +145,14 @@ separately listed varieties. See
 - Greenhouse's Start next lists seed to start within two months. Its
   start button opens the dialog with that seed already chosen. Add plant
   (top of Start next) starts anything else; pick the seed in the dialog.
-  Start in greenhouse in Grow opens the same dialog.
+  Greenhouse starts do not need a planting first: drag them onto one in
+  Plant mode when you know where they go.
 - The dialog asks for the Start date (today unless you change it, so
   you can enter what you will start in a few days), then Flats or Pots.
   Flats: how many flats and cells per flat; each cell is one plant.
   Pots: how many pots; one plant each. It shows how many plants you
   will have to plant out.
-- In Build's Plant mode, the Greenhouse panel under Seeds lists every
+- In Plan's Plant mode, the Greenhouse panel under Seeds lists every
   flat and pot still in the greenhouse, ready or not, with a Growing,
   Ready or Overdue tag, the plants each gives, and when it is ready.
 - Drag one onto a planting to plan where it goes: the planting takes

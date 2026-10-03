@@ -2,6 +2,7 @@ import 'document.dart';
 import 'grow/day.dart';
 import 'grow/planting.dart';
 import 'layer.dart';
+import 'plant_layout.dart';
 import 'row_layout.dart';
 
 /// A zone's ground, kept in its Properties so the Ground tool and the
@@ -71,6 +72,14 @@ extension ZoneGround on GardenDocument {
       throw StateError('Seeds are planted in plantings');
     }
     if (seed?.problem case final problem?) throw StateError(problem);
+    // Lines never exceed what fits at this size and spacing; a wider
+    // spacing brings them down with it.
+    if (seed?.lines case final lines?) {
+      final most = maxLinesOf(layerId, seed!);
+      if (most != null && lines > most) {
+        seed = seed.copyWith(lines: () => most < 1 ? null : most);
+      }
+    }
     if (properties.seed == seed) return this;
     var next = withLayer(
       layer.copyWith(properties: properties.copyWith(seed: () => seed)),

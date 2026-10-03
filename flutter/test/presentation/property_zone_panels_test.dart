@@ -132,6 +132,61 @@ void main() {
     expect(editor.document.currentPlantingOf(grow), isNull);
   });
 
+  testWidgets('Lines in GROW limits plant lines per row; All fills it', (
+    tester,
+  ) async {
+    final (editor, _, soil, grow) = garden(GroundType.row);
+    editor.setRows(soil, const RowSpec(width: 3, spacing: 0, direction: 0));
+    editor.setSeed(grow, seed(size: 0.5, spacing: 0.1));
+    await tester.pumpWidget(
+      editorPanel(
+        editor: editor,
+        builder: (_) => PropertiesBody(editor: editor),
+      ),
+    );
+    final box = find.descendant(
+      of: find.widgetWithText(PropertyRow, 'Lines'),
+      matching: find.byType(TextField),
+    );
+    expect(tester.widget<TextField>(box).controller!.text, 'All');
+    final all = editor.document.plantLayoutOf(grow)!.count;
+    await tester.ensureVisible(box);
+    await tester.enterText(box, '1');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    final seedNow =
+        (editor.document.layers[grow]!.properties as ZoneProperties).seed!;
+    expect(seedNow.lines, 1);
+    final one = editor.document.plantLayoutOf(grow)!.count;
+    expect(one, lessThan(all));
+    expect(
+      tester.widget<Text>(find.byKey(const ValueKey('readout-Plants'))).data,
+      '$one',
+    );
+    // More lines than the spacing fits are refused with the reason.
+    await tester.enterText(box, '6');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    expect(
+      find.text('At most 5 lines fit. Reduce Spacing for more'),
+      findsOneWidget,
+    );
+    expect(
+      (editor.document.layers[grow]!.properties as ZoneProperties).seed!.lines,
+      1,
+    );
+
+    await tester.enterText(box, 'all');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    expect(editor.document.plantLayoutOf(grow)!.count, all);
+
+    // Flat ground is a grid: Lines does not apply.
+    editor.setGround(soil, GroundType.flat);
+    await tester.pumpAndSettle();
+    expect(tester.widget<TextField>(box).enabled, isFalse);
+  });
+
   testWidgets('typing plant spacing changes row layout and supports Undo', (
     tester,
   ) async {

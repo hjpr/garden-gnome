@@ -28,7 +28,8 @@ import 'garden_record_codec.dart'
 //    date moves into a sown planting (older readers would drop the link).
 // 10: greenhouse flats and pots on plantings (older readers would drop
 //     them).
-const int schemaVersion = 10;
+// 11: a planting seed's lines per row (older readers would fill rows).
+const int schemaVersion = 11;
 
 /// The oldest version still opened. Version 1 files open with their
 /// patterns and free-text ground notes dropped.
@@ -118,6 +119,7 @@ Map<String, Object?> _layerToJson(Layer layer) => {
           'name': seed.name,
           'size': seed.size,
           'spacing': seed.spacing,
+          'lines': ?seed.lines,
         },
     },
   },
@@ -324,6 +326,7 @@ ZoneSeed _seedFromJson(Map<String, Object?> json, int version) {
     name: _string(json['name'], 'seed name'),
     size: size,
     spacing: spacing,
+    lines: json['lines'] == null ? null : _count(json['lines']),
   );
   if (seed.problem != null) {
     throw const DocumentFormatError('Damaged file: seed spacing');

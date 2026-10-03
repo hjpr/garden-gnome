@@ -12,6 +12,7 @@ import 'package:garden_gnome/domain/layer.dart';
 import 'package:garden_gnome/domain/plant_layout.dart';
 import 'package:garden_gnome/domain/region.dart';
 import 'package:garden_gnome/domain/vec.dart';
+import 'package:garden_gnome/persistence/document_codec.dart';
 
 import '../support/grow_fixtures.dart';
 import '../support/editor_input.dart';
@@ -190,6 +191,44 @@ void main() {
       expect(layout.count, 16);
       final xs = layout.positions.map((p) => p.x).toSet();
       expect(xs, {4.5, 5.5, 6.5, 7.5}, reason: 'on the row centres only');
+    });
+
+    test('Lines caps the plant lines on each row, centred, and survives a '
+        'save', () {
+      final (editor, _, soil, grow) = garden(GroundType.row);
+      // One 3 m row fits 5 lines of 0.5 m plants 0.1 m apart.
+      editor.setRows(soil, const RowSpec(width: 3, spacing: 0, direction: 0));
+      editor.setSeed(grow, seed(size: 0.5, spacing: 0.1));
+      final all = editor.document.plantLayoutOf(grow)!;
+      editor.setSeed(
+        grow,
+        seed(size: 0.5, spacing: 0.1).copyWith(lines: () => 2),
+      );
+      final two = editor.document.plantLayoutOf(grow)!;
+      expect(two.count, lessThan(all.count));
+      final linesPerRow = all.lines.length ~/ two.lines.length;
+      expect(linesPerRow, greaterThan(1));
+      // Lines stop at what the spacing fits: 5 lines on a 3 m row.
+      expect(
+        editor.document.maxLinesOf(grow, seed(size: 0.5, spacing: 0.1)),
+        5,
+      );
+      editor.setSeed(
+        grow,
+        seed(size: 0.5, spacing: 0.1).copyWith(lines: () => 99),
+      );
+      ZoneSeed stored() =>
+          (editor.document.layers[grow]!.properties as ZoneProperties).seed!;
+      expect(stored().lines, 5);
+      expect(editor.document.plantLayoutOf(grow)!.count, all.count);
+      // Widening the spacing brings Lines down with it.
+      editor.setSeed(grow, stored().copyWith(spacing: 0.5));
+      expect(stored().lines, 3);
+
+      final reopened = decodeGgnome(encodeGgnome(editor.document));
+      final props = reopened.layers[grow]!.properties as ZoneProperties;
+      expect(props.seed!.lines, 3);
+      expect(seed().copyWith(lines: () => 0).problem, isNotNull);
     });
 
     test('a wide row takes several lines at the seed spacing', () {

@@ -12,7 +12,7 @@ enum GroundType {
 
   /// A grow zone: not soil of its own, but an area drawn over Flat or Row
   /// ground to say what is planted there. Seeds are dropped on it in
-  /// Build's Plant mode, and plants follow the ground underneath.
+  /// Plan's Plant mode, and plants follow the ground underneath.
   grow('Grow');
 
   const GroundType(this.label);
@@ -123,6 +123,7 @@ class ZoneSeed {
     required this.name,
     required this.size,
     required this.spacing,
+    this.lines,
   });
 
   /// The Seed Vault variety's ID.
@@ -137,6 +138,10 @@ class ZoneSeed {
   /// Empty edge-to-edge gap between plants and plant lines, in metres.
   final double spacing;
 
+  /// Most lines of plants along each row bed; null fills the row with as
+  /// many lines as fit. Flat ground is a grid and ignores it.
+  final int? lines;
+
   /// Centre-to-centre distance along and across planting lines.
   double get pitch => size + spacing;
 
@@ -145,6 +150,7 @@ class ZoneSeed {
     if (!(size > 0) || !size.isFinite) {
       return 'Plant size must be above 0';
     }
+    if (lines case final n? when n < 1) return 'Lines must be 1 or more';
     if (!(spacing >= 0) || !spacing.isFinite) {
       return 'Plant spacing must be a finite distance of 0 or more';
     }
@@ -152,12 +158,14 @@ class ZoneSeed {
     return null;
   }
 
-  ZoneSeed copyWith({double? size, double? spacing}) => ZoneSeed(
-    varietyId: varietyId,
-    name: name,
-    size: size ?? this.size,
-    spacing: spacing ?? this.spacing,
-  );
+  ZoneSeed copyWith({double? size, double? spacing, int? Function()? lines}) =>
+      ZoneSeed(
+        varietyId: varietyId,
+        name: name,
+        size: size ?? this.size,
+        spacing: spacing ?? this.spacing,
+        lines: lines == null ? this.lines : lines(),
+      );
 
   @override
   bool operator ==(Object other) =>
@@ -165,8 +173,9 @@ class ZoneSeed {
       other.varietyId == varietyId &&
       other.name == name &&
       other.size == size &&
-      other.spacing == spacing;
+      other.spacing == spacing &&
+      other.lines == lines;
 
   @override
-  int get hashCode => Object.hash(varietyId, name, size, spacing);
+  int get hashCode => Object.hash(varietyId, name, size, spacing, lines);
 }

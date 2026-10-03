@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../application/app_tools.dart';
 import '../application/garden_controller.dart';
 import '../domain/grow/planting.dart';
-import '../domain/grow/planting_windows.dart';
 import 'tool_switcher.dart';
 import 'theme.dart';
 
@@ -17,7 +16,7 @@ class HomeBody extends StatelessWidget {
 
   String _summary(AppTool tool) {
     switch (tool) {
-      case AppTool.build:
+      case AppTool.plan:
         return 'Land, beds and plantings';
       case AppTool.seedVault:
         final n = garden.record.varieties.length;
@@ -26,13 +25,9 @@ class HomeBody extends StatelessWidget {
         final n = garden.inGreenhouse().length;
         return n == 0 ? 'Nothing growing' : '$n growing';
       case AppTool.grow:
-        final open = garden
-            .recommendations()
-            .where(
-              (r) => r.timing.isOpen && r.window.kind != WindowKind.plantOut,
-            )
-            .length;
-        return open == 0 ? 'Nothing to sow now' : '$open to sow now';
+        // Grow sows only what is planned on the map.
+        final n = garden.plannedSowings().length;
+        return n == 0 ? 'Nothing planned to sow' : '$n planned to sow';
       case AppTool.harvest:
         final today = garden.today;
         final n = garden
@@ -44,10 +39,10 @@ class HomeBody extends StatelessWidget {
   }
 
   static const _about = {
-    AppTool.build: 'Draw your farm: land, beds and plantings.',
+    AppTool.plan: 'Draw your farm: land, beds and plantings.',
     AppTool.seedVault: 'The seed you have and how to grow it.',
     AppTool.greenhouse: 'Trays growing and when they go out.',
-    AppTool.grow: 'What to sow in the next two months.',
+    AppTool.grow: 'Sow your planned plantings.',
     AppTool.harvest: 'When each crop comes ready.',
   };
 

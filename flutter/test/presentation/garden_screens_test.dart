@@ -492,7 +492,7 @@ void main() {
       );
       expect(garden.record.varieties[lettuce]!.daysToMaturity, isNull);
       expect(find.text('LETTUCE GROWING NOTES'), findsOneWidget);
-      await tester.tap(find.byTooltip('Remove variety'));
+      await tester.tap(find.byTooltip('Remove Little Gem'));
       await tester.pumpAndSettle();
       expect(garden.record.varieties.containsKey(lettuce), isFalse);
       expect(garden.record.varieties.containsKey(tomato), isTrue);
@@ -553,18 +553,18 @@ void main() {
     expect(garden.record.varieties[v.id]!.daysToMaturity!.min, 68);
   });
 
-  testWidgets('Grow lists what to start and records the sowing', (
+  testWidgets('Greenhouse lists what to start and records the sowing', (
     tester,
   ) async {
     final (navigator, garden) = await _pumpApp(tester);
     garden.addVariety('tomatoes', 'Big Beef');
-    navigator.open(AppTool.grow);
+    navigator.open(AppTool.greenhouse);
     await tester.pumpAndSettle();
 
     final range = tester.widget<Timeline>(find.byType(Timeline)).range;
     expect(range, calendarRange(garden.today));
     // Apr 1 in zone 6a: tomato trays are ideal to start now.
-    expect(find.textContaining('Start in greenhouse · Spring'), findsOneWidget);
+    expect(find.textContaining('Spring · ideal until'), findsOneWidget);
     await tester.tap(find.byTooltip('Start in greenhouse'));
     await tester.pumpAndSettle();
     // Two flats of 50 cells.

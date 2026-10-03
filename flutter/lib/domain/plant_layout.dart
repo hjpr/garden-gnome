@@ -90,6 +90,30 @@ extension ZonePlanting on GardenDocument {
     ];
   }
 
+  /// Most lines of [seed] that fit along the row beds under planting
+  /// [layerId] at its size and spacing: the widest bed's count, capped at
+  /// [PlantLayout.maxLinesPerRow]. Null when no row bed lies under it.
+  int? maxLinesOf(String layerId, ZoneSeed seed) {
+    final grow = layers.containsKey(layerId)
+        ? geometryOf(layerId).region
+        : null;
+    if (grow == null || seed.problem != null) return null;
+    int? most;
+    for (final soilId in soilZonesFor(layerId)) {
+      final layout = rowLayoutOf(soilId);
+      final region = geometryOf(soilId).region;
+      if (layout == null || region == null || !region.overlaps(grow)) {
+        continue;
+      }
+      final fit = math.min(
+        PlantLayout.maxLinesPerRow,
+        _fittingPlants(layout.spec.width, seed),
+      );
+      if (most == null || fit > most) most = fit;
+    }
+    return most;
+  }
+
   PlantLayout? _layout(String layerId) {
     final properties = layers[layerId]?.properties;
     if (properties is! ZoneProperties || !properties.isGrow) return null;
@@ -143,8 +167,9 @@ extension ZonePlanting on GardenDocument {
     if (layout == null) return const [];
     final (ax, ay) = layout.spec.along;
     final across = Vec(-ay, ax);
+    // The seed's Lines setting caps it, but never past what fits.
     final perRow = math.min(
-      PlantLayout.maxLinesPerRow,
+      math.min(PlantLayout.maxLinesPerRow, seed.lines ?? 1 << 30),
       _fittingPlants(layout.spec.width, seed),
     );
     final lines = <RowRun>[];

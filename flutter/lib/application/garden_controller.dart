@@ -9,9 +9,29 @@ import '../domain/grow/garden_record.dart';
 import '../domain/grow/planting.dart';
 import '../domain/grow/planting_windows.dart';
 import '../domain/grow/variety.dart';
+import '../domain/layer.dart';
+import '../domain/plant_layout.dart';
+import '../domain/zone_ground.dart';
 import 'farm.dart';
 import 'garden_record_store.dart';
 import 'toasts.dart';
+
+/// A planting layer on the map with a seed in it and nothing sown yet.
+class PlannedSowing {
+  const PlannedSowing({
+    required this.layerId,
+    required this.layerName,
+    required this.profile,
+    required this.plants,
+  });
+
+  final String layerId;
+  final String layerName;
+  final VarietyProfile profile;
+
+  /// How many plants its layout fits, or null with no land to plant.
+  final int? plants;
+}
 
 /// Runs the Seed Vault, Grow, Greenhouse and Harvest tools.
 ///
@@ -370,6 +390,53 @@ class GardenController extends ChangeNotifier {
         if (profileOf(p.varietyId) case final profile?)
           PlantingSchedule(p, profile),
   ]..sort((a, b) => a.planting.sownOn.compareTo(b.planting.sownOn));
+
+  /// Sowings made in place and not finished, oldest first.
+  List<PlantingSchedule> directSowings() => [
+    for (final p in plantings.values)
+      if (!p.startedIndoors && p.finishedOn == null)
+        if (profileOf(p.varietyId) case final profile?)
+          PlantingSchedule(p, profile),
+  ]..sort((a, b) => a.planting.sownOn.compareTo(b.planting.sownOn));
+
+  /// Planting layers ready to sow: a seed from the vault and nothing
+  /// growing there yet. Only these can be sown from Grow, so planning on
+  /// the map comes first.
+  List<PlannedSowing> plannedSowings() {
+    final document = farm.farm;
+    return [
+      for (final layer in document.layers.values)
+        if (layer.properties case ZoneProperties(:final seed?, isGrow: true))
+          if (document.currentPlantingOf(layer.id) == null)
+            if (profileOf(seed.varietyId) case final profile?)
+              PlannedSowing(
+                layerId: layer.id,
+                layerName: layer.name,
+                profile: profile,
+                plants: document.plantLayoutOf(layer.id)?.count,
+              ),
+    ]..sort((a, b) => a.layerName.compareTo(b.layerName));
+  }
+
+  /// How many plants planting layer [layerId]'s layout fits, or null.
+  int? plannedPlantsOf(String layerId) =>
+      farm.farm.plantLayoutOf(layerId)?.count;
+
+  /// Sows planting layer [layerId] on [on] (today by default), as one
+  /// Undo step. The layer's seed sets the variety.
+  void sowPlanting(String layerId, {DateTime? on}) {
+    final name = farm.farm.layers[layerId]?.name ?? 'Planting';
+    try {
+      farm.changeFarm(
+        'Sow $name',
+        (f) => f.withSownOn(layerId, dayOf(on ?? today)),
+      );
+    } on StateError catch (e) {
+      toasts.show(e.message, kind: ToastKind.error);
+      return;
+    }
+    toasts.show('$name sown', kind: ToastKind.success);
+  }
 
   /// The name of the planting layer [p] grows in, or null.
   String? layerNameOf(Planting p) => farm.farm.layers[p.layerId]?.name;

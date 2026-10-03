@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import '../../application/garden_controller.dart';
 import '../../domain/grow/climate.dart';
 import '../../domain/grow/day.dart';
-import '../theme.dart';
 import '../widgets/property_controls.dart';
-import 'calendar_presentation.dart';
 import 'commit_field.dart';
 import 'garden_card.dart';
 
@@ -77,12 +75,6 @@ class ClimateBar extends StatelessWidget {
             climate.zone.firstFallFrost,
             (d) => garden.setFrostDates(firstFall: () => d),
           ),
-          CalendarLegend([
-            ('Direct sow', Palette.directSow),
-            ('Start in greenhouse', Palette.greenhouse),
-            ('Plant out', Palette.plantOut),
-            ('Harvest', Palette.harvest),
-          ]),
         ],
       ),
     );
