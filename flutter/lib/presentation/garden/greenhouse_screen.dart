@@ -24,13 +24,17 @@ class GreenhouseBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final today = garden.today;
-    final growing = garden.inGreenhouse();
+    // Soonest out first.
+    final growing = garden.inGreenhouse()
+      ..sort((a, b) => a.plantOut.start.compareTo(b.plantOut.start));
     final queue = [
       for (final r in garden.recommendations(
         kinds: const {WindowKind.greenhouseSow},
       ))
         if (r.timing != Timing.passed) r,
-    ];
+    ]..sort(bySoonestWindow);
+    // One row per variety, soonest first; its later windows are more bars.
+    final varieties = byVariety(queue);
     return Padding(
       padding: const EdgeInsets.all(10),
       child: Row(
@@ -38,8 +42,10 @@ class GreenhouseBody extends StatelessWidget {
         children: [
           Expanded(
             child: GardenCard(
-              title: 'Growing now',
+              title: 'Calendar',
               trailing: CalendarLegend([
+                // In the order a tray goes through them.
+                ('Start window', Palette.greenhouse),
                 ('Germinating', Palette.muted),
                 ('Plant out', Palette.plantOut),
               ]),
@@ -48,8 +54,22 @@ class GreenhouseBody extends StatelessWidget {
                 range: calendarRange(today),
                 today: today,
                 labelWidth: 400,
-                emptyText: 'Nothing in the greenhouse.',
-                rows: [for (final s in growing) _row(s, today)],
+                sections: [
+                  TimelineSection(
+                    title: 'Growing',
+                    emptyText: 'Nothing in the greenhouse.',
+                    rows: [for (final s in growing) _row(s, today)],
+                  ),
+                  TimelineSection(
+                    title: 'Upcoming',
+                    emptyText: 'Nothing to start within a year.',
+                    inactive: true,
+                    rows: [
+                      for (final windows in varieties)
+                        _upcomingRow(context, windows),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
@@ -76,14 +96,17 @@ class GreenhouseBody extends StatelessWidget {
                   ),
                   const Divider(),
                   Expanded(
-                    child: queue.isEmpty
+                    child: varieties.isEmpty
                         ? const EmptyPanelText(
-                            'Nothing to start within two months.',
+                            'Nothing to start within a year.',
                           )
                         : ListView(
                             children: [
-                              for (final r in queue)
-                                _QueueTile(garden: garden, recommendation: r),
+                              for (final windows in varieties)
+                                _QueueTile(
+                                  garden: garden,
+                                  recommendation: windows.first,
+                                ),
                             ],
                           ),
                   ),
@@ -93,6 +116,39 @@ class GreenhouseBody extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  /// A variety's greenhouse sowing windows, not started yet. The chip
+  /// and text describe the soonest; every window is a bar.
+  TimelineRow _upcomingRow(BuildContext context, List<Recommendation> windows) {
+    final r = windows.first;
+    return TimelineRow(
+      title: r.profile.displayName,
+      subtitle: '${r.window.season.label} · ${timingDetail(r)}',
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          StatusChip(r.timing.label, color: timingColor(r.timing)),
+          const SizedBox(width: 4),
+          IconAction(
+            iconData: Icons.move_to_inbox_outlined,
+            label: 'Start ${r.profile.variety.name} in greenhouse',
+            size: 26,
+            onPressed: () =>
+                showStartTrayDialog(context, garden, varietyId: r.profile.id),
+          ),
+        ],
+      ),
+      bars: [
+        for (final w in windows)
+          TimelineBar(
+            span: w.window.span,
+            ideal: w.window.ideal,
+            color: Palette.greenhouse,
+            label: 'Start: ${w.window.span}\nIdeal: ${w.window.ideal}',
+          ),
+      ],
     );
   }
 

@@ -241,21 +241,18 @@ class Recommendation {
   VarietyProfile get profile => window.profile;
 }
 
-/// Recommendations for [profiles] whose windows fall within [reachDays]
-/// either side of [today], in order of urgency: open windows first
-/// (ideal, then late, then early), then upcoming ones soonest first, then
-/// those that just closed.
+/// Recommendations for [profiles]: every window open now or opening
+/// within [aheadDays] of [today] (a year by default, so every variety
+/// shows its next chance), in order of urgency: open windows first
+/// (ideal, then late, then early), then upcoming ones soonest first.
 List<Recommendation> recommend(
   Iterable<VarietyProfile> profiles,
   PlantingPlanner planner,
   DateTime today, {
   Set<WindowKind> kinds = const {...WindowKind.values},
-  int reachDays = 61,
+  int aheadDays = 365,
 }) {
-  final reach = DayWindow(
-    addDays(today, -reachDays),
-    addDays(today, reachDays),
-  );
+  final reach = DayWindow(today, addDays(today, aheadDays));
   final found = <Recommendation>[];
   for (final profile in profiles) {
     for (var year = today.year - 1; year <= today.year + 1; year++) {

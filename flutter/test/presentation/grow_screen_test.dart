@@ -6,6 +6,7 @@ import 'package:garden_gnome/application/toasts.dart';
 import 'package:garden_gnome/domain/layer.dart';
 import 'package:garden_gnome/domain/zone_ground.dart';
 import 'package:garden_gnome/presentation/garden/grow_screen.dart';
+import 'package:garden_gnome/presentation/garden/timeline.dart';
 
 import '../support/grow_fixtures.dart';
 import '../support/ground_fixtures.dart' as map;
@@ -77,6 +78,41 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+
+    // Growing (nothing sown yet) sits above Upcoming, and Upcoming runs
+    // soonest sowing first, planned and unplanned together.
+    expect(find.text('GROWING  0'), findsOneWidget);
+    expect(find.text('Nothing sown.'), findsOneWidget);
+    final upcomingTop = tester.getTopLeft(find.textContaining('UPCOMING')).dy;
+    expect(
+      tester.getTopLeft(find.text('GROWING  0')).dy,
+      lessThan(upcomingTop),
+    );
+    final order = [
+      for (final r in garden.recommendations())
+        if (r.window.kind.name == 'directSow') r,
+    ]..sort((a, b) => a.window.ideal.start.compareTo(b.window.ideal.start));
+    // One row per variety, placed at its soonest window.
+    final titles = {for (final r in order) r.profile.displayName}.toList();
+    expect(
+      find.descendant(
+        of: find.byType(Timeline),
+        matching: find.text('Little Gem · Lettuce'),
+      ),
+      findsOneWidget,
+      reason: 'spring and fall windows share one row',
+    );
+    double top(String title) => tester
+        .getTopLeft(
+          find.descendant(
+            of: find.byType(Timeline),
+            matching: find.text(title),
+          ),
+        )
+        .dy;
+    for (var i = 1; i < titles.length; i++) {
+      expect(top(titles[i - 1]), lessThan(top(titles[i])));
+    }
 
     // Lettuce has a window but no planting: greyed, with the reason.
     expect(find.textContaining('not planned'), findsWidgets);

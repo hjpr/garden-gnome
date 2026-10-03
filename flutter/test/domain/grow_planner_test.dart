@@ -86,7 +86,7 @@ void main() {
     expect(out.span.end, addDays(_d(10, 1), -50));
   });
 
-  test('recommendations look two months either side, open ones first', () {
+  test('recommendations look a year ahead, open ones first', () {
     final profiles = [
       _profile(testTomato),
       _profile(testLettuce),
@@ -103,6 +103,22 @@ void main() {
     // Beans go in a week after frost: upcoming on Apr 1, within reach.
     final beans = found.where((r) => r.profile.crop == testBean).single;
     expect(beans.timing, Timing.upcoming);
+
+    // Every variety shows, even when its window is months away: in
+    // October, next spring's tomato window.
+    final october = recommend(profiles, planner, _d(10, 3));
+    expect(october.map((r) => r.profile.crop).toSet(), {
+      testTomato,
+      testLettuce,
+      testBean,
+    });
+    expect(
+      october.every(
+        (r) => !r.window.span.start.isAfter(addDays(_d(10, 3), 365)),
+      ),
+      isTrue,
+    );
+    expect(october.where((r) => r.timing == Timing.passed), isEmpty);
 
     // In late September nothing warm-season is left to sow.
     final fall = recommend(profiles, planner, _d(9, 29));

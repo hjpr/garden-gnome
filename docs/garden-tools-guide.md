@@ -95,12 +95,15 @@ has Home.
 - Grow is for sowing in place; seed started in trays is in Greenhouse.
   Plan first: you can only sow plantings already on the map (Plan >
   Plant mode, a planting with a seed and nothing sown yet).
-- Growing now: what is sown (germination in grey, harvest in red), then
-  plantings waiting to be sown with their sowing window in green, then
-  in grey the Seed Vault varieties whose window is near but that are in
-  no planting yet ("not planned"). The solid part of a window is the
-  best time.
-- Start next: Add plant, then the direct-sow windows within two months.
+- The calendar has two sections. Growing, on top, is what is sown
+  (germination in grey, harvest in red). Upcoming, below and faded, is
+  what is not in the ground yet: plantings waiting to be sown and Seed
+  Vault varieties in no planting yet ("not planned"), each with its
+  sowing window. The solid part of a window is the best time.
+- Both sections run soonest first: Growing by when picking starts,
+  Upcoming by when the best sowing time starts. Higher in the list means
+  sooner, even when the dates are scrolled off screen.
+- Start next: Add plant, then the direct-sow windows open now or opening within a year.
   Planned ones have a sprout button that opens the Sow dialog for that
   planting; unplanned ones are greyed ("Add it to a planting in Plan
   first"). Add plant offers every planting waiting to be sown.
@@ -119,10 +122,15 @@ has Home.
   is greyed.
 
 ## Greenhouse
-- Growing now: each tray, with its germination bar (grey) and the dates
-  it can be planted out (blue). Chips show Growing, Ready or Overdue.
+- The calendar has two sections. Growing, on top, is each flat or pot
+  in the greenhouse, with its germination bar (grey) and the dates it
+  can be planted out (blue); chips show Growing, Ready or Overdue.
+  Upcoming, below and faded, is seed to start within a year, with
+  its start window (amber).
+- Both sections run soonest first: Growing by when it is ready to plant
+  out, Upcoming by when the best start time begins.
 - The arrow button (Planted out today) moves the tray into the ground.
-- Start next: trays to start within two months.
+- Start next: trays to start within a year.
 
 ## Harvest
 - Shows when each planting comes ready and how long it keeps picking.
@@ -142,7 +150,7 @@ separately listed varieties. See
 `tools/johnnys-catalog/README.md`.
 
 ## Greenhouse flats and pots
-- Greenhouse's Start next lists seed to start within two months. Its
+- Greenhouse's Start next lists seed to start within a year. Its
   start button opens the dialog with that seed already chosen. Add plant
   (top of Start next) starts anything else; pick the seed in the dialog.
   Greenhouse starts do not need a planting first: drag them onto one in

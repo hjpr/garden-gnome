@@ -13,6 +13,28 @@ DayWindow calendarRange(DateTime today) => DayWindow(
   addDays(today, calendarReachDays),
 );
 
+/// Calendar sections list soonest first, so the order alone says what
+/// comes next even when the dates are off screen. Recommendations go by
+/// when their best time starts.
+int bySoonestWindow(Recommendation a, Recommendation b) {
+  final ideal = a.window.ideal.start.compareTo(b.window.ideal.start);
+  return ideal != 0
+      ? ideal
+      : a.window.span.start.compareTo(b.window.span.start);
+}
+
+/// [sorted] windows grouped one list per variety, so a variety with
+/// several windows in reach (spring and fall, this year and next) is one
+/// row. Groups keep the order of each variety's first window, so sorting
+/// with [bySoonestWindow] first gives soonest variety first.
+List<List<Recommendation>> byVariety(List<Recommendation> sorted) {
+  final groups = <String, List<Recommendation>>{};
+  for (final r in sorted) {
+    (groups[r.profile.id] ??= []).add(r);
+  }
+  return groups.values.toList();
+}
+
 Color windowColor(WindowKind kind) => switch (kind) {
   WindowKind.directSow => Palette.directSow,
   WindowKind.greenhouseSow => Palette.greenhouse,

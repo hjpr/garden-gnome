@@ -564,7 +564,10 @@ void main() {
     final range = tester.widget<Timeline>(find.byType(Timeline)).range;
     expect(range, calendarRange(garden.today));
     // Apr 1 in zone 6a: tomato trays are ideal to start now.
-    expect(find.textContaining('Spring · ideal until'), findsOneWidget);
+    // In the calendar's Upcoming section and in Start next.
+    expect(find.textContaining('Spring · ideal until'), findsNWidgets(2));
+    expect(find.text('GROWING  0'), findsOneWidget);
+    expect(find.text('UPCOMING  1'), findsOneWidget);
     await tester.tap(find.byTooltip('Start in greenhouse'));
     await tester.pumpAndSettle();
     // Two flats of 50 cells.

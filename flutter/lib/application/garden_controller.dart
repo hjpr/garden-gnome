@@ -441,7 +441,7 @@ class GardenController extends ChangeNotifier {
   /// The name of the planting layer [p] grows in, or null.
   String? layerNameOf(Planting p) => farm.farm.layers[p.layerId]?.name;
 
-  /// What to sow or plant within two months either side of today.
+  /// What to sow or plant: windows open now or opening within a year.
   List<Recommendation> recommendations({
     Set<WindowKind> kinds = const {...WindowKind.values},
   }) => recommend(profiles, planner, today, kinds: kinds);

@@ -41,6 +41,47 @@ class TimelineRow {
   final bool selected;
 }
 
+/// A titled group of rows in a [Timeline]. An [inactive] section's titles
+/// and bars are drawn fainter, so what is growing stands out above what
+/// is only planned.
+class TimelineSection {
+  const TimelineSection({
+    required this.title,
+    required this.rows,
+    required this.emptyText,
+    this.inactive = false,
+  });
+
+  final String title;
+  final List<TimelineRow> rows;
+
+  /// Shown in place of rows when there are none.
+  final String emptyText;
+  final bool inactive;
+}
+
+/// What one line of the row list holds.
+sealed class _Line {
+  const _Line();
+}
+
+class _HeaderLine extends _Line {
+  const _HeaderLine(this.title, this.count);
+  final String title;
+  final int count;
+}
+
+class _EmptyLine extends _Line {
+  const _EmptyLine(this.text);
+  final String text;
+}
+
+class _RowLine extends _Line {
+  const _RowLine(this.row, this.inactive);
+  final TimelineRow row;
+  final bool inactive;
+}
+
 /// A calendar strip: today's date, month headings, one row per item with
 /// its windows as bars over week (major) and day (minor) lines, and a
 /// line at today. Over the chart the mouse wheel zooms around the
@@ -51,7 +92,8 @@ class Timeline extends StatefulWidget {
     super.key,
     required this.range,
     required this.today,
-    required this.rows,
+    this.rows = const [],
+    this.sections,
     this.labelWidth = 220,
     this.emptyText = 'Nothing to show.',
   });
@@ -60,6 +102,10 @@ class Timeline extends StatefulWidget {
   final DayWindow range;
   final DateTime today;
   final List<TimelineRow> rows;
+
+  /// When given, rows are shown in these titled groups instead of [rows],
+  /// each group always present (with its empty text when it has none).
+  final List<TimelineSection>? sections;
   final double labelWidth;
   final String emptyText;
 
@@ -197,14 +243,31 @@ class _TimelineState extends State<Timeline> {
                 ),
                 const Divider(),
                 Expanded(
-                  child: rows.isEmpty
+                  child: lines.isEmpty
                       ? Center(child: _EmptyText(widget.emptyText))
                       : Stack(
                           children: [
                             ListView.builder(
-                              itemCount: rows.length,
-                              itemExtent: rowHeight,
-                              itemBuilder: (context, i) => _row(rows[i], scale),
+                              itemCount: lines.length,
+                              itemBuilder: (context, i) => switch (lines[i]) {
+                                _HeaderLine(:final title, :final count) =>
+                                  _sectionHeader(title, count),
+                                _EmptyLine(:final text) => SizedBox(
+                                  height: rowHeight,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(left: 12),
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: _EmptyText(text),
+                                    ),
+                                  ),
+                                ),
+                                _RowLine(:final row, :final inactive) => _row(
+                                  row,
+                                  scale,
+                                  inactive: inactive,
+                                ),
+                              },
                             ),
                             if (showsToday)
                               Positioned(
@@ -229,7 +292,35 @@ class _TimelineState extends State<Timeline> {
     );
   }
 
-  Widget _row(TimelineRow row, _Scale scale) {
+  /// The rows as list lines: plain rows, or each section's header then its
+  /// rows (or its empty text).
+  List<_Line> get lines {
+    final sections = widget.sections;
+    if (sections == null) return [for (final r in rows) _RowLine(r, false)];
+    return [
+      for (final s in sections) ...[
+        _HeaderLine(s.title, s.rows.length),
+        if (s.rows.isEmpty)
+          _EmptyLine(s.emptyText)
+        else
+          for (final r in s.rows) _RowLine(r, s.inactive),
+      ],
+    ];
+  }
+
+  /// A section title band across the list, on the chrome grey.
+  Widget _sectionHeader(String title, int count) => Container(
+    height: 26,
+    padding: const EdgeInsets.symmetric(horizontal: 12),
+    alignment: Alignment.centerLeft,
+    decoration: const BoxDecoration(
+      color: Palette.chrome,
+      border: Border(bottom: BorderSide(color: Palette.rule)),
+    ),
+    child: Text('${title.toUpperCase()}  $count', style: sectionTitleStyle),
+  );
+
+  Widget _row(TimelineRow row, _Scale scale, {bool inactive = false}) {
     return Material(
       color: row.selected ? Palette.wash : Palette.paper,
       child: InkWell(
@@ -256,9 +347,10 @@ class _TimelineState extends State<Timeline> {
                               row.title,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w500,
+                                color: inactive ? Palette.muted : Palette.ink,
                               ),
                             ),
                             if (row.subtitle != null)
@@ -289,7 +381,17 @@ class _TimelineState extends State<Timeline> {
                         Positioned.fill(
                           child: CustomPaint(painter: _DayLinesPainter(scale)),
                         ),
-                        for (final bar in row.bars) ..._bar(bar, scale),
+                        // Not planted yet: windows show, but faded.
+                        Positioned.fill(
+                          child: Opacity(
+                            opacity: inactive ? 0.45 : 1,
+                            child: Stack(
+                              children: [
+                                for (final bar in row.bars) ..._bar(bar, scale),
+                              ],
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),

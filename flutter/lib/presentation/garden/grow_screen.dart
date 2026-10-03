@@ -38,7 +38,7 @@ class GrowBody extends StatelessWidget {
         kinds: const {WindowKind.directSow},
       ))
         if (r.timing != Timing.passed) r,
-    ];
+    ]..sort(bySoonestWindow);
     final planned = garden.plannedSowings();
     final plannedVarieties = {for (final p in planned) p.profile.id};
     List<Recommendation> windowsOf(VarietyProfile profile) => [
@@ -49,6 +49,23 @@ class GrowBody extends StatelessWidget {
       for (final r in windows)
         if (!plannedVarieties.contains(r.profile.id)) r,
     ];
+    // Both sections run soonest first. Sown crops go by when picking
+    // starts; upcoming ones by when their best sowing time starts, planned
+    // and unplanned together so the order is the order of the season. A
+    // planned planting with no window in reach sorts as due now.
+    final sown = garden.directSowings()
+      ..sort((a, b) => a.harvest.start.compareTo(b.harvest.start));
+    final upcoming = <(DateTime, TimelineRow)>[
+      for (final p in planned)
+        if (windowsOf(p.profile) case final w)
+          (
+            w.isEmpty ? today : w.first.window.ideal.start,
+            _plannedRow(context, p, w),
+          ),
+      // One row per variety; its later windows are more bars.
+      for (final w in byVariety(unplanned))
+        (w.first.window.ideal.start, _unplannedRow(w)),
+    ]..sort((a, b) => a.$1.compareTo(b.$1));
     return Padding(
       padding: const EdgeInsets.all(10),
       child: Column(
@@ -62,7 +79,7 @@ class GrowBody extends StatelessWidget {
               children: [
                 Expanded(
                   child: GardenCard(
-                    title: 'Growing now',
+                    title: 'Calendar',
                     trailing: CalendarLegend([
                       // In the order a crop goes through them.
                       ('Not planned', Palette.faint),
@@ -75,17 +92,21 @@ class GrowBody extends StatelessWidget {
                       range: calendarRange(today),
                       today: today,
                       labelWidth: 400,
-                      emptyText: garden.record.varieties.isEmpty
-                          ? 'Add varieties in the Seed Vault to see what '
-                                'to plant.'
-                          : 'Nothing sown or planned.',
-                      rows: [
-                        for (final s in garden.directSowings()) _sownRow(s),
-                        for (final p in planned)
-                          _plannedRow(context, p, windowsOf(p.profile)),
-                        // Below the real plantings, so the calendar
-                        // reads plan first.
-                        for (final r in unplanned) _unplannedRow(r),
+                      sections: [
+                        TimelineSection(
+                          title: 'Growing',
+                          emptyText: 'Nothing sown.',
+                          rows: [for (final s in sown) _sownRow(s)],
+                        ),
+                        TimelineSection(
+                          title: 'Upcoming',
+                          emptyText: garden.record.varieties.isEmpty
+                              ? 'Add varieties in the Seed Vault to see '
+                                    'what to plant.'
+                              : 'Nothing to sow within a year.',
+                          inactive: true,
+                          rows: [for (final (_, row) in upcoming) row],
+                        ),
                       ],
                     ),
                   ),
@@ -189,9 +210,11 @@ class GrowBody extends StatelessWidget {
     );
   }
 
-  TimelineRow _unplannedRow(Recommendation r) => TimelineRow(
-    title: r.profile.displayName,
-    subtitle: '${r.window.season.label} · ${timingDetail(r)} · not planned',
+  TimelineRow _unplannedRow(List<Recommendation> windows) => TimelineRow(
+    title: windows.first.profile.displayName,
+    subtitle:
+        '${windows.first.window.season.label} · '
+        '${timingDetail(windows.first)} · not planned',
     trailing: const IconAction(
       iconData: Icons.grass,
       label: 'Sow',
@@ -199,7 +222,7 @@ class GrowBody extends StatelessWidget {
       size: 26,
       onPressed: null,
     ),
-    bars: [_windowBar(r, Palette.faint)],
+    bars: [for (final r in windows) _windowBar(r, Palette.faint)],
   );
 
   static TimelineBar _windowBar(Recommendation r, Color color) => TimelineBar(
@@ -249,16 +272,17 @@ class _StartNext extends StatelessWidget {
           const Divider(),
           Expanded(
             child: windows.isEmpty
-                ? const EmptyPanelText('Nothing to sow within two months.')
+                ? const EmptyPanelText('Nothing to sow within a year.')
                 : ListView(
                     children: [
-                      for (final r in windows)
+                      // One tile per variety, at its soonest window.
+                      for (final w in byVariety(windows))
                         _QueueTile(
                           garden: garden,
-                          recommendation: r,
+                          recommendation: w.first,
                           planned: [
                             for (final p in planned)
-                              if (p.profile.id == r.profile.id) p,
+                              if (p.profile.id == w.first.profile.id) p,
                           ],
                         ),
                     ],
