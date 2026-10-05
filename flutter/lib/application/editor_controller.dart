@@ -18,6 +18,7 @@ import 'camera.dart';
 import 'construction_state.dart';
 import 'document_content.dart';
 import 'drafts.dart';
+import 'farm_files.dart';
 import 'identifiers.dart';
 import 'guides.dart';
 import 'history.dart';
@@ -42,6 +43,7 @@ class EditorController extends ChangeNotifier {
     Camera camera = const Camera(),
     this.title = 'Untitled',
     this.libraryId,
+    this.fileRef,
     ToastCenter? toasts,
     bool fitOnFirstView = false,
   }) : toasts = toasts ?? ToastCenter(),
@@ -76,6 +78,10 @@ class EditorController extends ChangeNotifier {
   /// Where the drawing is saved in the browser library, if it has been.
   String? libraryId;
 
+  /// The .ggnome file on disk it was opened from or saved to, when Save
+  /// can write back to it.
+  FarmFileRef? fileRef;
+
   late GardenDocument _savedDocument;
   late String _savedTitle;
 
@@ -105,9 +111,15 @@ class EditorController extends ChangeNotifier {
   /// Records [saved], under [title], as what storage now holds. The
   /// drawing itself is not touched: work done since the save started,
   /// including a rename, still counts as unsaved.
-  void markSaved(GardenDocument saved, {String? libraryId, String? title}) {
+  void markSaved(
+    GardenDocument saved, {
+    String? libraryId,
+    FarmFileRef? fileRef,
+    String? title,
+  }) {
     _savedDocument = saved;
     if (libraryId != null) this.libraryId = libraryId;
+    if (fileRef != null) this.fileRef = fileRef;
     _savedTitle = title ?? this.title;
     notifyListeners();
   }

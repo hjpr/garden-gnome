@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 
-import 'package:idb_shim/idb_browser.dart';
+import 'package:idb_shim/idb.dart';
+
+import '../platform/browser_storage.dart';
 
 import '../application/document_storage.dart';
 import '../application/storage_error.dart';
@@ -16,7 +18,7 @@ export '../application/storage_error.dart';
 /// data removes it. Use Export to keep a portable copy.
 class BrowserDrawingLibrary implements DrawingLibrary {
   BrowserDrawingLibrary({IdbFactory? factory})
-    : _factory = factory ?? idbFactoryBrowser;
+    : _factory = factory ?? defaultLibraryFactory();
 
   static const _databaseName = 'garden_gnome';
   static const _store = 'drawings';
