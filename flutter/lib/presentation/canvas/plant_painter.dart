@@ -72,6 +72,9 @@ extension _PlantPainter on ScenePainter {
   /// row does not look stamped, over a soft shadow toward the lower right.
   /// Returns false, drawing nothing, when the crop has no picture, it has
   /// not loaded yet, or plants are too small or too many to draw singly.
+  ///
+  /// All shadows go in one atlas draw and all pictures in another: one
+  /// draw call per plant cost about 40 ms a frame zoomed out on a laptop.
   bool _paintPlantPictures(
     Canvas canvas,
     Size size,
@@ -91,43 +94,86 @@ extension _PlantPainter on ScenePainter {
 
     // The square picture is a little larger than the canopy it holds.
     final side = canopy / (1 - 2 * PlantArt.spriteMargin);
-    final source = Rect.fromLTWH(
-      0,
-      0,
-      image.width.toDouble(),
-      image.height.toDouble(),
-    );
-    final target = Rect.fromCenter(
-      center: Offset.zero,
-      width: side,
-      height: side,
-    );
-    final picture = Paint()..filterQuality = FilterQuality.medium;
-    final shadow = Paint()
-      ..color = _PlantColours.shadow
-      ..maskFilter = MaskFilter.blur(BlurStyle.normal, canopy * 0.07);
+    final half = image.width / 2;
+    final pictureScale = side / image.width;
+    // Shadows are lost under a few pixels' worth of leaves.
+    final shadows = canopy >= _minShadowPixels;
+    final disc = shadows ? _shadowDisc() : null;
+    final discScale = canopy / _ShadowDisc.canopy;
     // The leaves reach about half the canopy from the centre, so the
     // shadow must be nearly as wide and pushed out to show past them.
     final drop = Offset(canopy * 0.11, canopy * 0.14);
     final visible = (Offset.zero & size).inflate(side);
+
+    final at = <Offset>[];
+    final turns = <double>[];
+    final grows = <double>[];
     for (final p in layout.positions) {
-      final at = _camera.toScreen(p);
-      if (!visible.contains(at)) continue;
-      final turn = _hashAt(p);
+      final screen = _camera.toScreen(p);
+      if (!visible.contains(screen)) continue;
+      at.add(screen);
+      turns.add(_hashAt(p) * 2 * math.pi);
       // Each plant a little bigger or smaller (±8%), so a bed of one
       // picture does not look stamped. Display only.
-      final grow = 0.92 + 0.16 * _hashAt(p + const Vec(7.1, 3.3));
-      canvas.drawCircle(at + drop * grow, canopy * 0.47 * grow, shadow);
-      canvas
-        ..save()
-        ..translate(at.dx, at.dy)
-        ..rotate(turn * 2 * math.pi)
-        ..scale(grow);
-      canvas.drawImageRect(image, source, target, picture);
-      canvas.restore();
+      grows.add(0.92 + 0.16 * _hashAt(p + const Vec(7.1, 3.3)));
     }
+    if (at.isEmpty) return true;
+
+    if (disc != null) {
+      const c = _ShadowDisc.side / 2;
+      final transforms = Float32List(at.length * 4);
+      final rects = Float32List(at.length * 4);
+      for (var i = 0; i < at.length; i++) {
+        final scale = discScale * grows[i];
+        final centre = at[i] + drop * grows[i];
+        transforms
+          ..[i * 4] = scale
+          ..[i * 4 + 1] = 0
+          ..[i * 4 + 2] = centre.dx - scale * c
+          ..[i * 4 + 3] = centre.dy - scale * c;
+        rects
+          ..[i * 4 + 2] = _ShadowDisc.side
+          ..[i * 4 + 3] = _ShadowDisc.side;
+      }
+      canvas.drawRawAtlas(
+        disc,
+        transforms,
+        rects,
+        null,
+        null,
+        null,
+        Paint()..filterQuality = FilterQuality.low,
+      );
+    }
+
+    final transforms = Float32List(at.length * 4);
+    final rects = Float32List(at.length * 4);
+    for (var i = 0; i < at.length; i++) {
+      final scale = pictureScale * grows[i];
+      final cos = scale * math.cos(turns[i]), sin = scale * math.sin(turns[i]);
+      transforms
+        ..[i * 4] = cos
+        ..[i * 4 + 1] = sin
+        ..[i * 4 + 2] = at[i].dx - cos * half + sin * half
+        ..[i * 4 + 3] = at[i].dy - sin * half - cos * half;
+      rects
+        ..[i * 4 + 2] = image.width.toDouble()
+        ..[i * 4 + 3] = image.height.toDouble();
+    }
+    canvas.drawRawAtlas(
+      image,
+      transforms,
+      rects,
+      null,
+      null,
+      null,
+      Paint()..filterQuality = FilterQuality.medium,
+    );
     return true;
   }
+
+  /// Plants narrower than this many pixels are drawn without a shadow.
+  static const _minShadowPixels = 10.0;
 
   /// A fixed number in 0..1 for world position [p], so each plant keeps
   /// its turn and size as the view pans and zooms.
@@ -157,6 +203,40 @@ extension _PlantPainter on ScenePainter {
     }
   }
 }
+
+/// One soft plant shadow, blurred once and stamped under every plant
+/// instead of blurring a circle per plant each frame.
+abstract final class _ShadowDisc {
+  /// The canopy width, in pixels, the disc is drawn for.
+  static const double canopy = 96;
+
+  /// Room for the circle (0.47 canopy) and its blur (3 × 0.07 canopy).
+  static const double side = 136;
+}
+
+ui.Image? _shadowDiscImage;
+
+ui.Image _shadowDisc() => _shadowDiscImage ??= () {
+  final recorder = ui.PictureRecorder();
+  const c = _ShadowDisc.side / 2;
+  Canvas(recorder).drawCircle(
+    const Offset(c, c),
+    _ShadowDisc.canopy * 0.47,
+    Paint()
+      ..color = _PlantColours.shadow
+      ..maskFilter = const MaskFilter.blur(
+        BlurStyle.normal,
+        _ShadowDisc.canopy * 0.07,
+      ),
+  );
+  final picture = recorder.endRecording();
+  final image = picture.toImageSync(
+    _ShadowDisc.side.toInt(),
+    _ShadowDisc.side.toInt(),
+  );
+  picture.dispose();
+  return image;
+}();
 
 abstract final class _PlantColours {
   static const leaf = Color(0xFF4F9A3A);

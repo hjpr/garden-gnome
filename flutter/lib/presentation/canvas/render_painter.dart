@@ -255,9 +255,13 @@ extension _RenderPainter on ScenePainter {
   /// Gives [paint] a repeating [texture] fixed to the world, one repeat
   /// per [RenderTexture.metres] of ground. Leaves the plain colour when
   /// the picture has not loaded.
+  ///
+  /// While the view is moving the picture is plainly tiled: the
+  /// non-repeating ground shader costs about 40 ms a frame zoomed in on a
+  /// laptop GPU, since it runs for every ground pixel on screen.
   void _applyTexture(Paint paint, RenderTexture texture) {
     final assets = scene.renderAssets;
-    final ground = assets?.groundShader(texture);
+    final ground = scene.viewMoving ? null : assets?.groundShader(texture);
     if (ground != null) {
       paint.shader = _groundShader(ground, texture);
       return;
