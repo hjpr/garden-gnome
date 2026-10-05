@@ -87,9 +87,14 @@ class Climate {
     this.zone = HardinessZone.fallback,
     this.lastSpringFrost,
     this.firstFallFrost,
+    this.latitude,
   });
 
   final HardinessZone zone;
+
+  /// Degrees north. Dates winter windows, which follow day length; null
+  /// leaves them undated.
+  final double? latitude;
 
   /// The gardener's own frost dates; null uses the zone's.
   final MonthDay? lastSpringFrost;
@@ -102,8 +107,10 @@ class Climate {
     HardinessZone? zone,
     MonthDay? Function()? lastSpringFrost,
     MonthDay? Function()? firstFallFrost,
+    double? Function()? latitude,
   }) => Climate(
     zone: zone ?? this.zone,
+    latitude: latitude == null ? this.latitude : latitude(),
     lastSpringFrost: lastSpringFrost == null
         ? this.lastSpringFrost
         : lastSpringFrost(),
@@ -117,8 +124,10 @@ class Climate {
       other is Climate &&
       other.zone == zone &&
       other.lastSpringFrost == lastSpringFrost &&
-      other.firstFallFrost == firstFallFrost;
+      other.firstFallFrost == firstFallFrost &&
+      other.latitude == latitude;
 
   @override
-  int get hashCode => Object.hash(zone, lastSpringFrost, firstFallFrost);
+  int get hashCode =>
+      Object.hash(zone, lastSpringFrost, firstFallFrost, latitude);
 }

@@ -1,0 +1,644 @@
+{
+ "runs": [
+  {
+   "spent_usd": 0.0,
+   "records": [
+    {
+     "plant": "lettuce",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint a head of green leaf lettuce, a loose round rosette of ruffled bright green leaves. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 85% of the frame wide, not touching the edges. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067283,
+     "file": "lettuce-c02.png"
+    },
+    {
+     "plant": "kale",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint a kale plant, a rosette of large dark blue-green curly ruffled kale leaves with pale midribs. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 85% of the frame wide, not touching the edges. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672855,
+     "file": "kale-c02.png"
+    },
+    {
+     "plant": "tomato",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint a bushy tomato plant, a mass of serrated compound leaves with a few round red tomatoes on top among the leaves. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 85% of the frame wide, not touching the edges. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672865,
+     "file": "tomato-c02.png"
+    },
+    {
+     "plant": "chives",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint a clump of chives, a dense tuft of thin grass-like hollow green leaves with a few round lavender pompom flowers. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 85% of the frame wide, not touching the edges. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067288,
+     "file": "chives-c02.png"
+    },
+    {
+     "plant": "lettuce",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint a head of green leaf lettuce, a loose round rosette of ruffled bright green leaves. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 85% of the frame wide, not touching the edges. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.06786,
+     "file": "lettuce-c01.png"
+    },
+    {
+     "plant": "kale",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint a kale plant, a rosette of large dark blue-green curly ruffled kale leaves with pale midribs. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 85% of the frame wide, not touching the edges. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678625,
+     "file": "kale-c01.png"
+    },
+    {
+     "plant": "tomato",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint a bushy tomato plant, a mass of serrated compound leaves with a few round red tomatoes on top among the leaves. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 85% of the frame wide, not touching the edges. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678635,
+     "file": "tomato-c01.png"
+    },
+    {
+     "plant": "chives",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint a clump of chives, a dense tuft of thin grass-like hollow green leaves with a few round lavender pompom flowers. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 85% of the frame wide, not touching the edges. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067865,
+     "file": "chives-c01.png"
+    },
+    {
+     "plant": "corn",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint a corn plant seen from directly above, long arching green blade leaves radiating out in a star from the stalk top with a pale tassel in the middle. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 85% of the frame wide, not touching the edges. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.06729,
+     "file": "corn-c02.png"
+    },
+    {
+     "plant": "cucumber",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint a cucumber vine, large lobed rough green leaves, curling tendrils, small yellow flowers and one striped cucumber lying among the leaves. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 85% of the frame wide, not touching the edges. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067288,
+     "file": "cucumber-c02.png"
+    },
+    {
+     "plant": "corn",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint a corn plant seen from directly above, long arching green blade leaves radiating out in a star from the stalk top with a pale tassel in the middle. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 85% of the frame wide, not touching the edges. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067867,
+     "file": "corn-c01.png"
+    },
+    {
+     "plant": "cucumber",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint a cucumber vine, large lobed rough green leaves, curling tendrils, small yellow flowers and one striped cucumber lying among the leaves. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 85% of the frame wide, not touching the edges. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067865,
+     "file": "cucumber-c01.png"
+    }
+   ]
+  },
+  {
+   "spent_usd": 2.703,
+   "records": [
+    {
+     "plant": "cabbage",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint a green cabbage plant, a round pale blue-green head in the middle wrapped by broad outer leaves. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672875,
+     "file": "cabbage-c02.png"
+    },
+    {
+     "plant": "chard",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint a Swiss chard plant, a rosette of glossy crinkled dark green leaves with bright yellow and orange stems. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672885,
+     "file": "chard-c02.png"
+    },
+    {
+     "plant": "cauliflower",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint a cauliflower plant, a creamy white curd in the centre ringed by large green leaves. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067286,
+     "file": "cauliflower-c02.png"
+    },
+    {
+     "plant": "broccoli",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint a broccoli plant, a domed green floret head in the centre ringed by large blue-green leaves. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672885,
+     "file": "broccoli-c02.png"
+    },
+    {
+     "plant": "cabbage",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint a green cabbage plant, a round pale blue-green head in the middle wrapped by broad outer leaves. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678645,
+     "file": "cabbage-c01.png"
+    },
+    {
+     "plant": "chard",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint a Swiss chard plant, a rosette of glossy crinkled dark green leaves with bright yellow and orange stems. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678655,
+     "file": "chard-c01.png"
+    },
+    {
+     "plant": "broccoli",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint a broccoli plant, a domed green floret head in the centre ringed by large blue-green leaves. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678655,
+     "file": "broccoli-c01.png"
+    },
+    {
+     "plant": "cauliflower",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint a cauliflower plant, a creamy white curd in the centre ringed by large green leaves. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067863,
+     "file": "cauliflower-c01.png"
+    },
+    {
+     "plant": "spinach",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint a spinach plant, a low rosette of smooth glossy dark green rounded leaves. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672845,
+     "file": "spinach-c02.png"
+    },
+    {
+     "plant": "spinach",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint a spinach plant, a low rosette of smooth glossy dark green rounded leaves. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678615,
+     "file": "spinach-c01.png"
+    },
+    {
+     "plant": "carrot",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint a carrot plant, a soft star of finely divided feathery bright green fronds. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672855,
+     "file": "carrot-c02.png"
+    },
+    {
+     "plant": "beet",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint a beet plant, a rosette of green leaves with deep red veins and stems. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067285,
+     "file": "beet-c02.png"
+    },
+    {
+     "plant": "beet",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint a beet plant, a rosette of green leaves with deep red veins and stems. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067862,
+     "file": "beet-c01.png"
+    },
+    {
+     "plant": "turnip",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint a turnip plant, a rosette of rough lobed green leaves with the white and purple top of the root just showing in the middle. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067291,
+     "file": "turnip-c02.png"
+    },
+    {
+     "plant": "carrot",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint a carrot plant, a soft star of finely divided feathery bright green fronds. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678625,
+     "file": "carrot-c01.png"
+    },
+    {
+     "plant": "turnip",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint a turnip plant, a rosette of rough lobed green leaves with the white and purple top of the root just showing in the middle. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067868,
+     "file": "turnip-c01.png"
+    },
+    {
+     "plant": "onion",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint an onion plant, a loose star of hollow round blue-green leaves fanning out from the middle. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672875,
+     "file": "onion-c02.png"
+    },
+    {
+     "plant": "onion",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint an onion plant, a loose star of hollow round blue-green leaves fanning out from the middle. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678645,
+     "file": "onion-c01.png"
+    },
+    {
+     "plant": "leek",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint a leek plant, flat blue-green strap leaves fanning out in two opposite directions. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672865,
+     "file": "leek-c02.png"
+    },
+    {
+     "plant": "garlic",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint a garlic plant, flat narrow green leaves arching out from the centre in a loose star. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672865,
+     "file": "garlic-c02.png"
+    },
+    {
+     "plant": "leek",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint a leek plant, flat blue-green strap leaves fanning out in two opposite directions. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678635,
+     "file": "leek-c01.png"
+    },
+    {
+     "plant": "pepper",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint a bell pepper plant, a bushy mound of glossy pointed oval leaves with the tops of a few green and red peppers peeking through. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672905,
+     "file": "pepper-c02.png"
+    },
+    {
+     "plant": "garlic",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint a garlic plant, flat narrow green leaves arching out from the centre in a loose star. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678635,
+     "file": "garlic-c01.png"
+    },
+    {
+     "plant": "pepper",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint a bell pepper plant, a bushy mound of glossy pointed oval leaves with the tops of a few green and red peppers peeking through. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678675,
+     "file": "pepper-c01.png"
+    },
+    {
+     "plant": "eggplant",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint an eggplant plant, a mound of large soft grey-green leaves with a few small violet flowers. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067287,
+     "file": "eggplant-c02.png"
+    },
+    {
+     "plant": "bean",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint a bush bean plant, a mound of heart-shaped green trifoliate leaves. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672855,
+     "file": "bean-c02.png"
+    },
+    {
+     "plant": "eggplant",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint an eggplant plant, a mound of large soft grey-green leaves with a few small violet flowers. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067864,
+     "file": "eggplant-c01.png"
+    },
+    {
+     "plant": "pea",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint a pea plant, a tangle of rounded pale green leaflets, curling tendrils and a few white flowers. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672875,
+     "file": "pea-c02.png"
+    },
+    {
+     "plant": "bean",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint a bush bean plant, a mound of heart-shaped green trifoliate leaves. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678625,
+     "file": "bean-c01.png"
+    },
+    {
+     "plant": "pea",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint a pea plant, a tangle of rounded pale green leaflets, curling tendrils and a few white flowers. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678645,
+     "file": "pea-c01.png"
+    },
+    {
+     "plant": "summer_squash",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint a zucchini plant, a big open rosette of huge lobed leaves with silvery markings and a large yellow flower in the centre. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678665,
+     "file": "summer_squash-c01.png"
+    },
+    {
+     "plant": "summer_squash",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint a zucchini plant, a big open rosette of huge lobed leaves with silvery markings and a large yellow flower in the centre. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672895,
+     "file": "summer_squash-c02.png"
+    },
+    {
+     "plant": "winter_squash",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint a pumpkin vine, large round lobed green leaves and one round orange pumpkin lying among them. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672865,
+     "file": "winter_squash-c02.png"
+    },
+    {
+     "plant": "winter_squash",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint a pumpkin vine, large round lobed green leaves and one round orange pumpkin lying among them. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678635,
+     "file": "winter_squash-c01.png"
+    },
+    {
+     "plant": "melon",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint a melon vine, rounded lobed green leaves, tendrils and one netted tan melon lying among them. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678645,
+     "file": "melon-c01.png"
+    },
+    {
+     "plant": "melon",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint a melon vine, rounded lobed green leaves, tendrils and one netted tan melon lying among them. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672875,
+     "file": "melon-c02.png"
+    },
+    {
+     "plant": "potato",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint a potato plant, a bushy mound of dark green compound leaves with a few small white flowers. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678635,
+     "file": "potato-c01.png"
+    },
+    {
+     "plant": "basil",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint a basil plant, a bushy mound of glossy bright green cupped oval leaves in pairs. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067286,
+     "file": "basil-c02.png"
+    },
+    {
+     "plant": "potato",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint a potato plant, a bushy mound of dark green compound leaves with a few small white flowers. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672865,
+     "file": "potato-c02.png"
+    },
+    {
+     "plant": "basil",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint a basil plant, a bushy mound of glossy bright green cupped oval leaves in pairs. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067863,
+     "file": "basil-c01.png"
+    },
+    {
+     "plant": "parsley",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint a flat-leaf parsley plant, a dense mound of bright green divided serrated leaves. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067286,
+     "file": "parsley-c02.png"
+    },
+    {
+     "plant": "parsley",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint a flat-leaf parsley plant, a dense mound of bright green divided serrated leaves. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067863,
+     "file": "parsley-c01.png"
+    },
+    {
+     "plant": "dill",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint a dill plant, airy thread-like feathery blue-green foliage with a flat yellow flower umbel. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067288,
+     "file": "dill-c02.png"
+    },
+    {
+     "plant": "dill",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint a dill plant, airy thread-like feathery blue-green foliage with a flat yellow flower umbel. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067865,
+     "file": "dill-c01.png"
+    },
+    {
+     "plant": "thyme",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint a thyme plant, a low dense cushion of tiny grey-green leaves with a few small pink flowers. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672875,
+     "file": "thyme-c02.png"
+    },
+    {
+     "plant": "rosemary",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint a rosemary plant, a bushy mound of needle-like dark grey-green leaves. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672855,
+     "file": "rosemary-c02.png"
+    },
+    {
+     "plant": "thyme",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint a thyme plant, a low dense cushion of tiny grey-green leaves with a few small pink flowers. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678645,
+     "file": "thyme-c01.png"
+    },
+    {
+     "plant": "rosemary",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint a rosemary plant, a bushy mound of needle-like dark grey-green leaves. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678625,
+     "file": "rosemary-c01.png"
+    },
+    {
+     "plant": "sage",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint a sage plant, a mound of soft oval pebbly grey-green leaves. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067285,
+     "file": "sage-c02.png"
+    },
+    {
+     "plant": "sage",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint a sage plant, a mound of soft oval pebbly grey-green leaves. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067862,
+     "file": "sage-c01.png"
+    },
+    {
+     "plant": "mint",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint a mint plant, a dense patch of bright green toothed oval leaves in pairs. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678625,
+     "file": "mint-c01.png"
+    },
+    {
+     "plant": "mint",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint a mint plant, a dense patch of bright green toothed oval leaves in pairs. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672855,
+     "file": "mint-c02.png"
+    },
+    {
+     "plant": "pac_choi",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint a pac choi plant, a rosette of spoon-shaped glossy dark green leaves with thick white stems. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672875,
+     "file": "pac_choi-c02.png"
+    },
+    {
+     "plant": "pac_choi",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint a pac choi plant, a rosette of spoon-shaped glossy dark green leaves with thick white stems. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678645,
+     "file": "pac_choi-c01.png"
+    },
+    {
+     "plant": "celery",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint a celery plant, a clump of pale green stalks topped with bright green divided leaves fanning out. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067864,
+     "file": "celery-c01.png"
+    },
+    {
+     "plant": "celery",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint a celery plant, a clump of pale green stalks topped with bright green divided leaves fanning out. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067287,
+     "file": "celery-c02.png"
+    },
+    {
+     "plant": "okra",
+     "index": 2,
+     "reference": false,
+     "prompt": "Paint an okra plant, large lobed maple-like green leaves with one pale yellow hibiscus-like flower. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672875,
+     "file": "okra-c02.png"
+    },
+    {
+     "plant": "okra",
+     "index": 1,
+     "reference": true,
+     "prompt": "Paint an okra plant, large lobed maple-like green leaves with one pale yellow hibiscus-like flower. Seen from DIRECTLY ABOVE, a strict orthographic top-down overhead view like a garden plan: we look straight down onto the top of the plant, its centre in the middle of the picture, leaves spreading out in every direction, nothing hanging, no side view, no stems seen from the side. One single plant, centred, about 75% of the frame wide, with a clear empty magenta margin all round it. Matte hand-painted gouache illustration with soft pencil detail, clear readable leaf shapes, gentle two-tone shading, diffuse even light, no cast shadow, no soil, no pot, no outline, no border, no text. Background: perfectly flat solid pure magenta #FF00FF everywhere around the plant, nothing else.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678645,
+     "file": "okra-c01.png"
+    }
+   ]
+  }
+ ]
+}

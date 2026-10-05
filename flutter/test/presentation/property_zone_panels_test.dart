@@ -13,7 +13,11 @@ import 'package:garden_gnome/presentation/panels/layers_panel.dart';
 import 'package:garden_gnome/presentation/panels/layer_fields.dart';
 import 'package:garden_gnome/presentation/panels/properties_panel.dart';
 import 'package:garden_gnome/presentation/widgets/property_controls.dart';
+import 'package:garden_gnome/application/garden_controller.dart';
+import 'package:garden_gnome/application/toasts.dart';
 import '../support/ground_fixtures.dart';
+import '../support/grow_fixtures.dart';
+import '../support/memory_garden_record_store.dart';
 import '../support/widget_harness.dart';
 
 Widget panels(EditorController editor) => editorPanel(
@@ -42,6 +46,53 @@ void drawSquare(EditorController editor, String layerId) {
 }
 
 void main() {
+  testWidgets('a Cover bed shows COVER with crop, seed needed and dates', (
+    tester,
+  ) async {
+    final (editor, _, bed, _) = garden(GroundType.cover);
+    final garden_ = GardenController(
+      store: MemoryGardenRecordStore(),
+      toasts: ToastCenter(),
+      catalog: testCatalog,
+    );
+    await garden_.load();
+    final rye = garden_.addVariety('winter-rye', 'Winter Rye (Common)');
+    editor.selectLayer(bed);
+    await tester.pumpWidget(
+      editorPanel(
+        editor: editor,
+        builder: (_) => PropertiesBody(editor: editor, garden: garden_),
+      ),
+    );
+    expect(find.text('Cover bed'), findsOneWidget);
+    expect(find.text('COVER'), findsOneWidget);
+    expect(find.text('GROUND'), findsNothing);
+    final sown = find.byKey(const ValueKey('day-Sown'));
+    expect(tester.widget<InkWell>(sown).onTap, isNull, reason: 'no crop');
+    expect(
+      tester
+          .widget<Text>(find.byKey(const ValueKey('readout-Seed needed')))
+          .data,
+      '—',
+    );
+
+    editor.setCover(
+      bed,
+      CoverSowing(varietyId: rye, name: 'Winter Rye (Common) · Winter Rye'),
+    );
+    await tester.pumpAndSettle();
+    // A 10 × 10 m bed is about 1,076 sq ft at 2–3 lb per 1,000.
+    expect(
+      tester
+          .widget<Text>(find.byKey(const ValueKey('readout-Seed needed')))
+          .data,
+      '≈ 2.2–3.2 lb',
+    );
+    expect(tester.widget<InkWell>(sown).onTap, isNotNull);
+    final terminated = find.byKey(const ValueKey('day-Terminated'));
+    expect(tester.widget<InkWell>(terminated).onTap, isNull, reason: 'unsown');
+  });
+
   testWidgets('Flat ground owns the planting direction; grow zones show none', (
     tester,
   ) async {
@@ -91,8 +142,9 @@ void main() {
     double top(String label) =>
         tester.getTopLeft(find.widgetWithText(PropertyRow, label)).dy;
     expect(top('Seed'), lessThan(top('Plants')));
-    expect(top('Plants'), lessThan(top('Size (ft)')));
-    expect(top('Spacing (ft)'), lessThan(top('Sown')));
+    expect(top('Plants'), lessThan(top('In-row (in)')));
+    expect(top('In-row (in)'), lessThan(top('Between rows (in)')));
+    expect(top('Between rows (in)'), lessThan(top('Sown')));
     expect(top('Sown'), lessThan(top('Transplanted')));
     expect(
       tester.widget<InkWell>(transplanted).onTap,
@@ -137,7 +189,7 @@ void main() {
   ) async {
     final (editor, _, soil, grow) = garden(GroundType.row);
     editor.setRows(soil, const RowSpec(width: 3, spacing: 0, direction: 0));
-    editor.setSeed(grow, seed(size: 0.5, spacing: 0.1));
+    editor.setSeed(grow, seed(inRow: 0.6, betweenRows: 0.6));
     await tester.pumpWidget(
       editorPanel(
         editor: editor,
@@ -168,7 +220,7 @@ void main() {
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle();
     expect(
-      find.text('At most 5 lines fit. Reduce Spacing for more'),
+      find.text('At most 5 lines fit. Reduce Between rows for more'),
       findsOneWidget,
     );
     expect(
@@ -187,7 +239,7 @@ void main() {
     expect(tester.widget<TextField>(box).enabled, isFalse);
   });
 
-  testWidgets('typing plant spacing changes row layout and supports Undo', (
+  testWidgets('typing in-row spacing changes the layout and supports Undo', (
     tester,
   ) async {
     final (editor, _, soil, grow) = garden(GroundType.row);
@@ -197,8 +249,8 @@ void main() {
       const ZoneSeed(
         varietyId: 'test',
         name: 'Test seed',
-        size: 0.5,
-        spacing: 0,
+        inRow: 0.5,
+        betweenRows: 0.5,
       ),
     );
     await tester.pumpWidget(
@@ -207,21 +259,21 @@ void main() {
         builder: (_) => PropertiesBody(editor: editor),
       ),
     );
-    final spacing = find.descendant(
-      of: find.widgetWithText(PropertyRow, 'Spacing (ft)'),
+    final inRow = find.descendant(
+      of: find.widgetWithText(PropertyRow, 'In-row (in)'),
       matching: find.byType(TextField),
     );
     final before = editor.document.plantLayoutOf(grow)!;
-    await tester.enterText(spacing, '1');
+    await tester.enterText(inRow, '30');
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle();
     final after = editor.document.plantLayoutOf(grow)!;
-    expect(after.seed.size, 0.5);
-    expect(after.seed.spacing, closeTo(0.3048, 1e-9));
+    expect(after.seed.inRow, closeTo(0.762, 1e-9));
+    expect(after.seed.betweenRows, 0.5);
     expect(after.count, lessThan(before.count));
     expect(
       (after.positions[1].y - after.positions[0].y).abs(),
-      closeTo(0.8048, 1e-9),
+      closeTo(0.762, 1e-9),
     );
     expect(
       tester.widget<Text>(find.byKey(const ValueKey('readout-Plants'))).data,
@@ -230,21 +282,17 @@ void main() {
     editor.undo();
     await tester.pumpAndSettle();
     expect(editor.document.plantLayoutOf(grow)!.count, before.count);
-    expect(tester.widget<TextField>(spacing).controller!.text, '0');
     editor.redo();
     await tester.pumpAndSettle();
     expect(editor.document.plantLayoutOf(grow)!.count, after.count);
-    await tester.enterText(spacing, '-1');
+    // Zero would ask for endless plants.
+    await tester.enterText(inRow, '0');
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle();
     expect(
-      editor.document.plantLayoutOf(grow)!.seed.spacing,
-      closeTo(0.3048, 1e-9),
+      editor.document.plantLayoutOf(grow)!.seed.inRow,
+      closeTo(0.762, 1e-9),
     );
-    await tester.enterText(spacing, '0');
-    await tester.testTextInput.receiveAction(TextInputAction.done);
-    await tester.pumpAndSettle();
-    expect(editor.document.plantLayoutOf(grow)!.count, before.count);
   });
 
   testWidgets(
@@ -299,7 +347,7 @@ void main() {
   });
 
   testWidgets(
-    'row dimensions use inches in feet drawings and metres otherwise',
+    'row dimensions use inches in feet drawings and centimetres in metres',
     (tester) async {
       final (editor, _, _, zone) = farm();
       editor.setGround(zone, GroundType.row);
@@ -337,18 +385,18 @@ void main() {
       editor.updateSettings(editor.settings.copyWith(units: Units.metres));
       await tester.pumpAndSettle();
       for (final (label, value) in [
-        ('Row width', '0.635'),
-        ('Spacing', '0.254'),
-        ('Border', '1.27'),
+        ('Row width', '63.5'),
+        ('Spacing', '25.4'),
+        ('Border', '127'),
       ]) {
         expect(
-          tester.widget<TextField>(field('$label (m)')).controller!.text,
+          tester.widget<TextField>(field('$label (cm)')).controller!.text,
           value,
         );
       }
       expect(editor.document, same(document));
-      await tester.ensureVisible(field('Border (m)'));
-      await tester.enterText(field('Border (m)'), '1.524');
+      await tester.ensureVisible(field('Border (cm)'));
+      await tester.enterText(field('Border (cm)'), '152.4');
       await tester.testTextInput.receiveAction(TextInputAction.done);
       await tester.pumpAndSettle();
       expect(editor.document.rowsOf(zone)!.border, closeTo(1.524, 1e-9));
@@ -437,10 +485,10 @@ void main() {
     expect(find.text('OPTIONS'), findsNothing);
     expect(find.text('GROUND'), findsNothing);
     expect(find.text('GROW'), findsOneWidget);
-    expect(find.text('Spacing (ft)'), findsOneWidget);
+    expect(find.text('Between rows (in)'), findsOneWidget);
     final spacing = find.descendant(
       of: find
-          .ancestor(of: find.text('Size (ft)'), matching: find.byType(Row))
+          .ancestor(of: find.text('In-row (in)'), matching: find.byType(Row))
           .first,
       matching: find.byType(TextField),
     );
@@ -449,8 +497,8 @@ void main() {
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle();
     expect(
-      (editor.document.layers[grow]!.properties as ZoneProperties).seed!.size,
-      closeTo(editor.settings.units.toMetres(2), 1e-9),
+      (editor.document.layers[grow]!.properties as ZoneProperties).seed!.inRow,
+      closeTo(editor.settings.units.fineToMetres(2), 1e-9),
     );
     editor.setMode(EditMode.build);
     await tester.pumpAndSettle();
@@ -560,7 +608,7 @@ void main() {
         find.text('Direction (°)'),
         ground == null ? findsNothing : findsOneWidget,
       );
-      for (final label in ['Crop', 'GROW', 'Size (ft)']) {
+      for (final label in ['Crop', 'GROW', 'Size (in)']) {
         expect(find.text(label), findsNothing, reason: label);
       }
       expect(

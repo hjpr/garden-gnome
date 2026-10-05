@@ -30,7 +30,7 @@ enum GrowContainer {
 
 /// One sowing of one variety, followed from seed to harvest.
 ///
-/// Sown in the greenhouse it appears in Greenhouse until it is planted
+/// Sown in the greenhouse it appears in Grow > Transplant until it is planted
 /// out; sown directly it goes straight to the ground. Once in the ground
 /// it appears in Harvest.
 class Planting {

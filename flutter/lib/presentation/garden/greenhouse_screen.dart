@@ -13,7 +13,7 @@ import 'start_tray_dialog.dart';
 import 'status_chip.dart';
 import 'timeline.dart';
 
-/// Greenhouse: every tray growing now and when it comes due to plant
+/// Grow > Transplant: every tray growing now and when it comes due to plant
 /// out, beside the queue of what to start next (from Grow's greenhouse
 /// windows).
 class GreenhouseBody extends StatelessWidget {
@@ -48,12 +48,13 @@ class GreenhouseBody extends StatelessWidget {
                 ('Start window', Palette.greenhouse),
                 ('Germinating', Palette.muted),
                 ('Plant out', Palette.plantOut),
-              ]),
+              ], alternates: true),
               padding: EdgeInsets.zero,
               child: Timeline(
                 range: calendarRange(today),
                 today: today,
                 labelWidth: 400,
+                seasons: frostFreeSeasons(garden.climate, today),
                 sections: [
                   TimelineSection(
                     title: 'Growing',
@@ -125,7 +126,7 @@ class GreenhouseBody extends StatelessWidget {
     final r = windows.first;
     return TimelineRow(
       title: r.profile.displayName,
-      subtitle: '${r.window.season.label} · ${timingDetail(r)}',
+      subtitle: windowSummary(r),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -140,15 +141,7 @@ class GreenhouseBody extends StatelessWidget {
           ),
         ],
       ),
-      bars: [
-        for (final w in windows)
-          TimelineBar(
-            span: w.window.span,
-            ideal: w.window.ideal,
-            color: Palette.greenhouse,
-            label: 'Start: ${w.window.span}\nIdeal: ${w.window.ideal}',
-          ),
-      ],
+      bars: [for (final w in windows) windowBar(w, Palette.greenhouse)],
     );
   }
 
@@ -252,7 +245,7 @@ class _QueueTile extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '${r.window.season.label} · ${timingDetail(r)}',
+                    windowSummary(r),
                     style: const TextStyle(
                       fontSize: 11.5,
                       color: Palette.muted,

@@ -21,12 +21,12 @@ import 'editor_input.dart';
   return (editor, input, property, zone);
 }
 
-/// A seed with round sizes and gaps, so plant counts are easy to check.
-ZoneSeed seed({double size = 0.5, double spacing = 0.25}) => ZoneSeed(
+/// A seed with round spacings, so plant counts are easy to check.
+ZoneSeed seed({double inRow = 0.75, double betweenRows = 0.75}) => ZoneSeed(
   varietyId: 'variety-1',
   name: 'Test · Crop',
-  size: size,
-  spacing: spacing,
+  inRow: inRow,
+  betweenRows: betweenRows,
 );
 
 /// A 0–20 m property with a soil zone and a grow zone over part of it.

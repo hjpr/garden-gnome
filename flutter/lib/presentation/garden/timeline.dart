@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -13,6 +14,7 @@ class TimelineBar {
     required this.color,
     this.ideal,
     this.label,
+    this.outlined = false,
   });
 
   final DayWindow span;
@@ -21,6 +23,10 @@ class TimelineBar {
 
   /// Tooltip text.
   final String? label;
+
+  /// Drawn as an outline over a light hatch: an alternate window that
+  /// needs protection, rather than the usual open-field one.
+  final bool outlined;
 }
 
 class TimelineRow {
@@ -85,8 +91,9 @@ class _RowLine extends _Line {
 /// A calendar strip: today's date, month headings, one row per item with
 /// its windows as bars over week (major) and day (minor) lines, and a
 /// line at today. Over the chart the mouse wheel zooms around the
-/// pointer and a drag moves through time; Today brings the view back.
-/// Shared by Grow, Greenhouse and Harvest so all three read the same way.
+/// pointer; a drag moves through time sideways and through the rows up
+/// and down, like a map. Today brings the view back.
+/// Shared by Grow's Sow and Transplant views so both read the same way.
 class Timeline extends StatefulWidget {
   const Timeline({
     super.key,
@@ -94,6 +101,7 @@ class Timeline extends StatefulWidget {
     required this.today,
     this.rows = const [],
     this.sections,
+    this.seasons = const [],
     this.labelWidth = 220,
     this.emptyText = 'Nothing to show.',
   });
@@ -106,6 +114,9 @@ class Timeline extends StatefulWidget {
   /// When given, rows are shown in these titled groups instead of [rows],
   /// each group always present (with its empty text when it has none).
   final List<TimelineSection>? sections;
+
+  /// Stretches shaded behind every row, e.g. last frost to first frost.
+  final List<DayWindow> seasons;
   final double labelWidth;
   final String emptyText;
 
@@ -119,6 +130,15 @@ class _TimelineState extends State<Timeline> {
   /// The zoomed or moved view; null shows [Timeline.range].
   TimelineView? _moved;
   bool _dragging = false;
+
+  /// The row list's scroller, so a drag can move it up and down.
+  final _scroll = ScrollController();
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
 
   /// Width of the chart at the last layout, for turning drags into days.
   double _chartWidth = 1;
@@ -153,10 +173,14 @@ class _TimelineState extends State<Timeline> {
   }
 
   void _onDrag(DragUpdateDetails details) {
-    final dx = details.primaryDelta ?? 0;
-    if (dx == 0) return;
-    // Dragging right pulls earlier days into view, like a map.
-    setState(() => _moved = _view.panned(-dx / _chartWidth));
+    final Offset(:dx, :dy) = details.delta;
+    // Dragging right pulls earlier days into view and dragging down
+    // earlier rows, like a map.
+    if (dy != 0 && _scroll.hasClients) {
+      final p = _scroll.position;
+      p.jumpTo((p.pixels - dy).clamp(p.minScrollExtent, p.maxScrollExtent));
+    }
+    if (dx != 0) setState(() => _moved = _view.panned(-dx / _chartWidth));
   }
 
   Widget _header() {
@@ -192,7 +216,7 @@ class _TimelineState extends State<Timeline> {
   }
 
   /// The chart part of a row or the heading: shows a grab hand, since a
-  /// drag there moves through time.
+  /// drag there moves through time and the rows.
   Widget _chartCell(Widget child) => MouseRegion(
     cursor: _dragging ? SystemMouseCursors.grabbing : SystemMouseCursors.grab,
     child: child,
@@ -214,10 +238,13 @@ class _TimelineState extends State<Timeline> {
           child: GestureDetector(
             // Empty stretches of the chart drag too.
             behavior: HitTestBehavior.opaque,
-            onHorizontalDragStart: (_) => setState(() => _dragging = true),
-            onHorizontalDragUpdate: _onDrag,
-            onHorizontalDragEnd: (_) => setState(() => _dragging = false),
-            onHorizontalDragCancel: () => setState(() => _dragging = false),
+            // A pan, not a horizontal drag, so the hand moves the rows
+            // up and down too. Touch still scrolls the list on its own:
+            // its vertical drag wins before the pan's larger slop.
+            onPanStart: (_) => setState(() => _dragging = true),
+            onPanUpdate: _onDrag,
+            onPanEnd: (_) => setState(() => _dragging = false),
+            onPanCancel: () => setState(() => _dragging = false),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -233,7 +260,12 @@ class _TimelineState extends State<Timeline> {
                           height: 32,
                           child: ClipRect(
                             child: CustomPaint(
-                              painter: _MonthsPainter(scale, today, showsToday),
+                              painter: _MonthsPainter(
+                                scale,
+                                today,
+                                showsToday,
+                                widget.seasons,
+                              ),
                             ),
                           ),
                         ),
@@ -248,27 +280,50 @@ class _TimelineState extends State<Timeline> {
                       : Stack(
                           children: [
                             ListView.builder(
+                              controller: _scroll,
                               itemCount: lines.length,
-                              itemBuilder: (context, i) => switch (lines[i]) {
-                                _HeaderLine(:final title, :final count) =>
-                                  _sectionHeader(title, count),
-                                _EmptyLine(:final text) => SizedBox(
-                                  height: rowHeight,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(left: 12),
-                                    child: Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: _EmptyText(text),
+                              // Each line listens too: it sits inside the
+                              // list's scroller, so it claims the wheel
+                              // over the chart before the list can scroll.
+                              // Over the names it lets the list have it.
+                              itemBuilder: (context, i) => Listener(
+                                onPointerSignal: _onSignal,
+                                child: switch (lines[i]) {
+                                  _HeaderLine(:final title, :final count) =>
+                                    _sectionHeader(title, count),
+                                  _EmptyLine(:final text) => SizedBox(
+                                    height: rowHeight,
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(left: 12),
+                                      child: Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: _EmptyText(text),
+                                      ),
+                                    ),
+                                  ),
+                                  _RowLine(:final row, :final inactive) => _row(
+                                    row,
+                                    scale,
+                                    inactive: inactive,
+                                  ),
+                                },
+                              ),
+                            ),
+                            // Where each frost-free season starts and
+                            // ends, under the today line.
+                            for (final at in _seasonEdges(widget.seasons))
+                              if (scale.shows(at))
+                                Positioned(
+                                  left: labelWidth + scale.x(at) - 1,
+                                  top: 0,
+                                  bottom: 0,
+                                  child: IgnorePointer(
+                                    child: Container(
+                                      width: 2,
+                                      color: Palette.seasonMark,
                                     ),
                                   ),
                                 ),
-                                _RowLine(:final row, :final inactive) => _row(
-                                  row,
-                                  scale,
-                                  inactive: inactive,
-                                ),
-                              },
-                            ),
                             if (showsToday)
                               Positioned(
                                 left: labelWidth + scale.x(today) - 1,
@@ -379,7 +434,9 @@ class _TimelineState extends State<Timeline> {
                     child: Stack(
                       children: [
                         Positioned.fill(
-                          child: CustomPaint(painter: _DayLinesPainter(scale)),
+                          child: CustomPaint(
+                            painter: _DayLinesPainter(scale, widget.seasons),
+                          ),
                         ),
                         // Not planted yet: windows show, but faded.
                         Positioned.fill(
@@ -423,19 +480,22 @@ class _TimelineState extends State<Timeline> {
         height: height,
         child: Tooltip(
           message: bar.label ?? w.toString(),
-          child: Container(
-            decoration: BoxDecoration(
-              color: bar.color.withValues(alpha: alpha),
-              borderRadius: BorderRadius.circular(4),
-            ),
-          ),
+          child: bar.outlined
+              ? CustomPaint(painter: _HatchPainter(bar.color))
+              : Container(
+                  decoration: BoxDecoration(
+                    color: bar.color.withValues(alpha: alpha),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
         ),
       );
     }
 
     return [
       piece(bar.span, 0.28, 14),
-      if (bar.ideal case final ideal?) piece(ideal, 0.95, 14),
+      if (bar.ideal case final ideal? when !bar.outlined)
+        piece(ideal, 0.95, 14),
     ];
   }
 }
@@ -490,14 +550,24 @@ class _EmptyText extends StatelessWidget {
   );
 }
 
+/// Where frost-free seasons start and end: the lines and badges sit on
+/// the edges of the band, so the end is the day after its last day.
+List<DateTime> _seasonEdges(List<DayWindow> seasons) => [
+  for (final s in seasons) ...[s.start, _dayAfter(s.end)],
+];
+
+DateTime _dayAfter(DateTime day) => addDays(day, 1);
+
 /// Month names and ticks across the top of the timeline, day numbers
-/// when zoomed in far enough, and the TODAY badge.
+/// when zoomed in far enough, LAST FROST and FIRST FROST badges at each
+/// frost-free season's edges, and the TODAY badge.
 class _MonthsPainter extends CustomPainter {
-  _MonthsPainter(this.scale, this.today, this.showsToday);
+  _MonthsPainter(this.scale, this.today, this.showsToday, this.seasons);
 
   final _Scale scale;
   final DateTime today;
   final bool showsToday;
+  final List<DayWindow> seasons;
 
   /// Day numbers need at least this many pixels per day.
   static const _dayNumberPixels = 20.0;
@@ -541,6 +611,7 @@ class _MonthsPainter extends CustomPainter {
     if (scale.dayPixels >= _dayNumberPixels) {
       for (var d = range.start; !d.isAfter(range.end); d = addDays(d, 1)) {
         if (showsToday && d == today) continue;
+        if (_seasonEdges(seasons).contains(d)) continue;
         final number = _text(
           '${d.day}',
           const TextStyle(fontSize: 10, color: Palette.faint),
@@ -553,33 +624,93 @@ class _MonthsPainter extends CustomPainter {
         number.dispose();
       }
     }
-    if (!showsToday) return;
-    final t = scale.x(today);
-    final todayLabel = _text(
-      'TODAY',
-      const TextStyle(
-        fontSize: 9.5,
-        fontWeight: FontWeight.w700,
-        color: Colors.white,
-        letterSpacing: 0.5,
-      ),
-    );
-    final box = Rect.fromCenter(
-      center: Offset(t, size.height - 8),
-      width: todayLabel.width + 8,
+    // TODAY is placed first and never moves; the frost badges slide
+    // aside rather than cover it or each other. Their lines stay on the
+    // true dates.
+    final placed = <Rect>[];
+    final todayBadge = showsToday
+        ? _place(size, 'TODAY', scale.x(today), placed)
+        : null;
+    // The season runs from the last spring frost to the first fall one.
+    for (final s in seasons) {
+      for (final (text, at) in [
+        ('LAST FROST', s.start),
+        ('FIRST FROST', _dayAfter(s.end)),
+      ]) {
+        if (scale.shows(at)) {
+          final badge = _place(size, text, scale.x(at), placed);
+          _draw(canvas, badge, Palette.seasonMark);
+        }
+      }
+    }
+    if (todayBadge != null) _draw(canvas, todayBadge, Palette.ink);
+  }
+
+  static const _badgeStyle = TextStyle(
+    fontSize: 9.5,
+    fontWeight: FontWeight.w700,
+    color: Colors.white,
+    letterSpacing: 0.5,
+  );
+
+  /// Where a badge reading [text] goes: centred on [x] in the bottom half,
+  /// kept inside the chart, and slid clear of the badges in [placed],
+  /// away from the one it meets. Adds itself to [placed].
+  (TextPainter, Rect) _place(
+    Size size,
+    String text,
+    double x,
+    List<Rect> placed,
+  ) {
+    final label = _text(text, _badgeStyle);
+    var box = Rect.fromCenter(
+      center: Offset(x, size.height - 8),
+      width: label.width + 8,
       height: 14,
     );
+    Rect inside(Rect r) => r.shift(
+      Offset(
+        r.left < 0
+            ? -r.left
+            : r.right > size.width
+            ? size.width - r.right
+            : 0,
+        0,
+      ),
+    );
+    box = inside(box);
+    for (final other in placed) {
+      if (!box.overlaps(other.inflate(2))) continue;
+      final right = box.center.dx >= other.center.dx;
+      box = inside(
+        box.shift(
+          Offset(
+            right ? other.right + 3 - box.left : other.left - 3 - box.right,
+            0,
+          ),
+        ),
+      );
+    }
+    placed.add(box);
+    return (label, box);
+  }
+
+  void _draw(Canvas canvas, (TextPainter, Rect) badge, Color color) {
+    final (label, box) = badge;
     canvas.drawRRect(
       RRect.fromRectAndRadius(box, const Radius.circular(3)),
-      Paint()..color = Palette.ink,
+      Paint()..color = color,
     );
-    todayLabel.paint(canvas, Offset(box.left + 4, box.top + 1));
-    todayLabel.dispose();
+    label.paint(canvas, Offset(box.left + 4, box.top + 1));
+    label.dispose();
   }
 
   @override
   bool shouldRepaint(_MonthsPainter old) =>
-      old.scale != scale || old.today != today || old.showsToday != showsToday;
+      old.scale != scale ||
+      old.today != today ||
+      old.showsToday != showsToday ||
+      !listEquals(old.seasons, seasons);
 }
 
 /// A faint line at every day and a stronger one at the start of every
@@ -587,9 +718,12 @@ class _MonthsPainter extends CustomPainter {
 /// Zoomed out, day lines are left out, then week lines give way to one
 /// line at the start of each month.
 class _DayLinesPainter extends CustomPainter {
-  _DayLinesPainter(this.scale);
+  _DayLinesPainter(this.scale, this.seasons);
 
   final _Scale scale;
+
+  /// Shaded first, under the lines: the frost-free growing seasons.
+  final List<DayWindow> seasons;
 
   /// Day lines need at least this many pixels per day, week lines this
   /// many per week.
@@ -598,6 +732,14 @@ class _DayLinesPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    final band = Paint()..color = Palette.season;
+    for (final s in seasons) {
+      final left = scale.clampedX(s.start);
+      final right = scale.clampedX(addDays(s.end, 1));
+      if (right > left) {
+        canvas.drawRect(Rect.fromLTRB(left, 0, right, size.height), band);
+      }
+    }
     final major = Paint()
       ..color = Palette.muted.withValues(alpha: 0.55)
       ..strokeWidth = 1.5;
@@ -620,5 +762,46 @@ class _DayLinesPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_DayLinesPainter old) => old.scale != scale;
+  bool shouldRepaint(_DayLinesPainter old) =>
+      old.scale != scale || !listEquals(old.seasons, seasons);
+}
+
+/// An alternate window: a thin outline in [color] over light diagonal
+/// hatching, so it reads as possible but not the usual way.
+class _HatchPainter extends CustomPainter {
+  _HatchPainter(this.color);
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final box = RRect.fromRectAndRadius(
+      Offset.zero & size,
+      const Radius.circular(4),
+    );
+    canvas.save();
+    canvas.clipRRect(box);
+    canvas.drawRRect(box, Paint()..color = color.withValues(alpha: 0.10));
+    final hatch = Paint()
+      ..color = color.withValues(alpha: 0.45)
+      ..strokeWidth = 1.2;
+    for (var x = -size.height; x < size.width; x += 6) {
+      canvas.drawLine(
+        Offset(x, size.height),
+        Offset(x + size.height, 0),
+        hatch,
+      );
+    }
+    canvas.restore();
+    canvas.drawRRect(
+      box.deflate(0.75),
+      Paint()
+        ..color = color.withValues(alpha: 0.9)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_HatchPainter old) => old.color != color;
 }

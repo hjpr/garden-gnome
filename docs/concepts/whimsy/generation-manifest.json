@@ -1,0 +1,113 @@
+{
+  "round": 1,
+  "model": "google/gemini-3.1-flash-image",
+  "provider": "openrouter",
+  "total_cost_usd": 0.540329,
+  "generations": [
+    {
+      "id": "pocket-home",
+      "file": "proofs/pocket-home.png",
+      "source": "openrouter_google_gemini-3_1-flash-image_20261003_230618_e4a5d680.png",
+      "cost_usd": 0.0674225,
+      "requested_aspect_ratio": "16:9",
+      "pixels": [
+        1376,
+        768
+      ],
+      "verdict": "keep",
+      "reason": "Warm storybook illustration; direct readable navigation. On smaller screens the illustration must shrink before the controls do."
+    },
+    {
+      "id": "field-home",
+      "file": "proofs/field-home.png",
+      "source": "openrouter_google_gemini-3_1-flash-image_20261003_230615_b9b73b28.png",
+      "cost_usd": 0.0674275,
+      "requested_aspect_ratio": "16:9",
+      "pixels": [
+        1376,
+        768
+      ],
+      "verdict": "keep",
+      "reason": "Clear separation of map and software. Serif card headings drift from the current UI; retain the app typography if implemented."
+    },
+    {
+      "id": "village-home-original",
+      "file": "proofs/village-home-original.png",
+      "source": "openrouter_google_gemini-3_1-flash-image_20261003_230616_5c9c336a.png",
+      "cost_usd": 0.067406,
+      "requested_aspect_ratio": "16:9",
+      "pixels": [
+        1376,
+        768
+      ],
+      "verdict": "discard",
+      "reason": "Duplicated navigation cards, invented cabinet lettering, and unwanted palette strip. Superseded by the corrected proof."
+    },
+    {
+      "id": "pocket-plants",
+      "file": "proofs/pocket-plants.png",
+      "source": "openrouter_google_gemini-3_1-flash-image_20261003_230616_b3aead7b.png",
+      "cost_usd": 0.0674125,
+      "requested_aspect_ratio": "1:1",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "rework",
+      "reason": "Warm illustrated forms. Generator returned 16 cells rather than 12, repeated crops and invented a purple plant. Roots and some side-on stems need redrawing."
+    },
+    {
+      "id": "field-plants",
+      "file": "proofs/field-plants.png",
+      "source": "openrouter_google_gemini-3_1-flash-image_20261003_230626_447c3ed6.png",
+      "cost_usd": 0.0674015,
+      "requested_aspect_ratio": "1:1",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "rework",
+      "reason": "Distinct silhouettes, but 16 cells rather than 12 and inconsistent overhead angles. Generated pixels need a true shared pixel grid before production."
+    },
+    {
+      "id": "village-plants",
+      "file": "proofs/village-plants.png",
+      "source": "openrouter_google_gemini-3_1-flash-image_20261003_230625_ba05412b.png",
+      "cost_usd": 0.0673905,
+      "requested_aspect_ratio": "1:1",
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "rework",
+      "reason": "Cleanest twelve-cell sheet. Some roots are exposed and beans remain side-on; corn is too much like a generic star. Needs botanical correction."
+    },
+    {
+      "id": "cover-crops",
+      "file": "proofs/cover-crops.png",
+      "source": "openrouter_google_gemini-3_1-flash-image_20261003_230627_a4d9bda8.png",
+      "cost_usd": 0.067403,
+      "requested_aspect_ratio": "16:9",
+      "pixels": [
+        1376,
+        768
+      ],
+      "verdict": "rework",
+      "reason": "Six distinct foliage textures. Square backplates and edge leaves are visible: these are not seamless production tiles. Reduce flower density for a vegetative default."
+    },
+    {
+      "id": "village-home",
+      "file": "proofs/village-home.png",
+      "source": "openrouter_google_gemini-3_1-flash-image_20261003_230737_e3e3870f.png",
+      "cost_usd": 0.0684655,
+      "requested_aspect_ratio": "16:9",
+      "pixels": [
+        1376,
+        768
+      ],
+      "verdict": "keep",
+      "reason": "Corrected to one navigation row. Strong sculpted miniature character; large marketing-style heading should become a quieter farm greeting in implementation."
+    }
+  ],
+  "disclosure": "Concept proofs only. Farm name and counts are illustrative. Model-rendered lettering and logos are not production artwork. No application code changed."
+}

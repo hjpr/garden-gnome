@@ -1,6 +1,7 @@
 import 'climate.dart';
 import 'crop.dart';
 import 'day.dart';
+import 'daylight.dart';
 import 'variety.dart';
 
 /// What a planting window is for.
@@ -19,10 +20,13 @@ enum WindowKind {
   final String label;
 }
 
-/// Spring or fall.
+/// Spring or fall, or one of the winter options.
 enum PlantingSeason {
   spring('Spring'),
   fall('Fall'),
+
+  /// Sown late summer or fall to harvest through winter.
+  winterHarvest('Winter harvest'),
 
   /// Planted in fall to grow on through winter, e.g. garlic.
   overwinter('Overwinter');
@@ -66,11 +70,30 @@ class PlantingWindow {
     required this.season,
     required this.span,
     required this.ideal,
+    this.structure,
+    this.winter,
   });
 
   final VarietyProfile profile;
   final WindowKind kind;
   final PlantingSeason season;
+
+  /// The protection this window needs, e.g. a high tunnel; null for the
+  /// usual open-field windows.
+  final Structure? structure;
+
+  /// The Johnny's winter chart row this window came from, if any.
+  final WinterWindow? winter;
+
+  /// An alternate to the usual open-field sowing: it needs protection.
+  bool get isAlternate => structure != null;
+
+  /// "Spring", or "Winter harvest · needs high tunnel · baby leaf".
+  String get label => [
+    season.label,
+    if (structure case final s?) 'needs ${s.label}',
+    ?winter?.detail,
+  ].join(' · ');
 
   /// From the earliest to the latest sensible day.
   final DayWindow span;
@@ -97,6 +120,8 @@ class PlantingWindow {
     season: season,
     span: span.shift(days, days),
     ideal: ideal.shift(days, days),
+    structure: structure,
+    winter: winter,
   );
 }
 
@@ -119,6 +144,10 @@ class PlantingWindow {
 ///   part.
 /// - Greenhouse sowing windows are the plant-out windows moved back by
 ///   the weeks transplants spend in trays.
+/// - Alternates from Johnny's winter charts (winter harvest in a high
+///   tunnel, overwintering under low tunnels) are timed in weeks before
+///   the last day with 10 hours of daylight, so they need the farm's
+///   latitude; sowings to transplant are greenhouse windows.
 class PlantingPlanner {
   const PlantingPlanner(this.climate);
 
@@ -168,7 +197,42 @@ class PlantingPlanner {
         for (final w in out) w.shifted(WindowKind.greenhouseSow, back),
       ]);
     }
+    windows.addAll(_winterWindows(profile, year));
     return windows;
+  }
+
+  /// [profile]'s winter chart windows for the short days starting in the
+  /// fall of [year]. None without a latitude, or where days never drop
+  /// under 10 hours.
+  List<PlantingWindow> _winterWindows(VarietyProfile profile, int year) {
+    final latitude = climate.latitude;
+    final rows = profile.crop.winterWindows;
+    if (latitude == null || rows.isEmpty) return const [];
+    final dark = shortDays(latitude, year);
+    if (dark == null) return const [];
+    final last10 = addDays(dark.start, -1);
+    return [
+      for (final w in rows)
+        // Week N on the chart is the 7 days from N weeks before.
+        if (DayWindow(
+              addDays(last10, -w.weeksBefore.max * 7),
+              addDays(last10, -w.weeksBefore.min * 7 + 6),
+            )
+            case final span)
+          PlantingWindow(
+            profile: profile,
+            kind: w.transplant
+                ? WindowKind.greenhouseSow
+                : WindowKind.directSow,
+            season: w.use == WinterUse.winterHarvest
+                ? PlantingSeason.winterHarvest
+                : PlantingSeason.overwinter,
+            span: span,
+            ideal: span,
+            structure: w.structure,
+            winter: w,
+          ),
+    ];
   }
 
   /// Windows for putting [profile] in the ground (as seed or transplant)

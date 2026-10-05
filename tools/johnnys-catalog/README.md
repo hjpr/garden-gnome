@@ -45,6 +45,39 @@ create and clean isolated subdirectories there and mock all HTTP responses.
    spacing, sowing depth, soil temperature, succession interval, harvest window.
 4. Merges `overrides.json`, the hand-curated values.
 
+## Winter windows
+
+`winter_charts.py` parses Johnny's two Winter Growing Guide charts
+(winter-harvest planting and overwintering planting) and adds a
+`winterWindows` list to each crop they cover: use (`winterHarvest` or
+`overwinter`), structure the chart assumes (`highTunnel` or
+`lowTunnel`), method (`transplant` or `direct`), weeks before the last
+10-hour day, Johnny's reliability tier, and an optional detail such as
+"baby leaf". Chart rows are mapped to catalog crops in its `ROWS` table;
+an unknown row fails the run. `scrape.py` runs it as part of a full
+rebuild; to add the windows to the current crops.json alone:
+
+    python3 tools/johnnys-catalog/winter_charts.py [--refresh]
+
+## Cover crops
+
+`cover_crops.py` builds `flutter/assets/catalog/cover_crops.json` (crops and
+their varieties) from Johnny's Cover Crop Comparison Chart PDF (one crop per
+chart row: sowing season, minimum germination temperature, hardiness zone,
+growth rate, seeding rates, depth, benefits), the cover-crop Key Growing
+Information pages (growing notes, shared where one page covers several
+rows) and the `/cover-crops/` product listings (varieties with product
+URLs). Nothing is estimated; cover crops stay out of the planting calendars.
+
+    python3 tools/johnnys-catalog/cover_crops.py [--refresh]
+
+Needs `pdftotext` (poppler-utils) for the chart. Chart rows map to crop ids
+in `ROWS` and products to crop ids in `PRODUCTS`; an unknown row or product
+fails the run. Products with no chart row (Berseem and Dutch White Clover,
+Japanese Millet) are left out. Cache: `~/.hermes/cache/scratch/johnnys-cover-crops`.
+
+Snapshot 2026-10-03: 26 cover crops and 34 varieties.
+
 ## Estimated values
 
 Johnny's pages don't give everything the app needs (season, frost tolerance, planting window

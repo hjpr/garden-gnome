@@ -34,6 +34,8 @@ class SceneState {
     this.showCurveHandles = false,
     this.viewMode = ViewMode.wireframe,
     this.renderAssets,
+    this.coverCropIds = const {},
+    this.plantCropIds = const {},
     this.selectedFeatureId,
     this.viewMoving = false,
     this.hiddenLayers = const {},
@@ -88,6 +90,13 @@ class SceneState {
   /// Textures and feature pictures; null in tests that do not need them,
   /// which then see plain colours.
   final RenderAssets? renderAssets;
+
+  /// Resolved cover crop IDs by layer; never variety IDs or display names.
+  final Map<String, String> coverCropIds;
+
+  /// Each planting layer's seed as a catalog crop ID, which picks its
+  /// plant picture in Render.
+  final Map<String, String> plantCropIds;
 
   /// The feature showing its selection ring, if any.
   final String? selectedFeatureId;

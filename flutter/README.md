@@ -1,6 +1,6 @@
 # Garden Gnome (Flutter)
 
-The current web app: Home, Plan, Seed Vault, Greenhouse, Grow and Harvest.
+The current web app: Home, Seed Vault, Plan and Grow (Sow | Transplant).
 Plan draws **properties and zones**, including curved boundaries, holes,
 ground/rows, features and reference images. Plant mode places varieties on
 grow zones; the other tools track varieties, sowing and harvest calendars.

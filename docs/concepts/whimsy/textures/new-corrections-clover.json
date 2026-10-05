@@ -1,0 +1,362 @@
+{
+  "materials": [
+    "loam",
+    "crimson_clover"
+  ],
+  "model": "google/gemini-3.1-flash-image",
+  "status": "blocked_provider_key_total_limit",
+  "generations": [
+    {
+      "material": "crimson_clover",
+      "variant": 1,
+      "file": "raw/crimson_clover-01.png",
+      "cost_usd": 0.067856,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "An original square 1024 full-frame overhead crimson clover canopy illustration, independent composition 01. Use supplied own botanical artwork only for matte gouache shapes and delicate pencil leaf edges. Dense little TRIFOLIATE rounded leaves in #2F6B3F #4F9A3A #7FB255 #24541E, medium green foliage dominates, tiny sparse crimson buds #C0583A about 15 across entire image, NOT big flowers. Hundreds of small overlapping three-leaf groups, each leaflet only 10-20 pixels, uniform feature scale and tone, irregular all-direction arrangement. Foliage fills all edges, no black backing or visible soil rectangles. Strict overhead, flat diffuse light. No margins, framed swatches, panels, grid, text, horizon, vignette, gradient, focal flower, insects, objects, photo, clay3D, pixels.",
+      "verdict": "rework",
+      "reason": "Conspicuous white border and isolated square patch.",
+      "excluded": true,
+      "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested.",
+      "sha256": "d462de8d49aa52322dda27787a5e1d38d406b732a59b6c5841aa251138df0f39"
+    },
+    {
+      "material": "crimson_clover",
+      "variant": 2,
+      "file": "raw/crimson_clover-02.png",
+      "cost_usd": 0.068039,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "An original square 1024 full-frame overhead crimson clover canopy illustration, independent composition 02. Use supplied own botanical artwork only for matte gouache shapes and delicate pencil leaf edges. Dense little TRIFOLIATE rounded leaves in #2F6B3F #4F9A3A #7FB255 #24541E, medium green foliage dominates, tiny sparse crimson buds #C0583A about 15 across entire image, NOT big flowers. Hundreds of small overlapping three-leaf groups, each leaflet only 10-20 pixels, uniform feature scale and tone, irregular all-direction arrangement. Foliage fills all edges, no black backing or visible soil rectangles. Strict overhead, flat diffuse light. No margins, framed swatches, panels, grid, text, horizon, vignette, gradient, focal flower, insects, objects, photo, clay3D, pixels.",
+      "verdict": "keep",
+      "reason": "Full-bleed leaf canopy; buds sparse but leaf scale larger than requested. Green backing visible in interstices, not rectangular.",
+      "excluded": false,
+      "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested.",
+      "sha256": "39e99bcb74a5f7e05de3fc83da4ed232e222173f460aedb3b7e5c100b3124d64"
+    },
+    {
+      "material": "crimson_clover",
+      "variant": 3,
+      "file": "raw/crimson_clover-03.png",
+      "cost_usd": 0.067856,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "An original square 1024 full-frame overhead crimson clover canopy illustration, independent composition 03. Use supplied own botanical artwork only for matte gouache shapes and delicate pencil leaf edges. Dense little TRIFOLIATE rounded leaves in #2F6B3F #4F9A3A #7FB255 #24541E, medium green foliage dominates, tiny sparse crimson buds #C0583A about 15 across entire image, NOT big flowers. Hundreds of small overlapping three-leaf groups, each leaflet only 10-20 pixels, uniform feature scale and tone, irregular all-direction arrangement. Foliage fills all edges, no black backing or visible soil rectangles. Strict overhead, flat diffuse light. No margins, framed swatches, panels, grid, text, horizon, vignette, gradient, focal flower, insects, objects, photo, clay3D, pixels.",
+      "verdict": "rework",
+      "reason": "White borders and mixed-species swatch instead of full-bleed clover.",
+      "excluded": true,
+      "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested.",
+      "sha256": "e3dd35e9c26785bcab73bd0901ba1d91fc03776a2b4598e46fa23ef28a7bfb16"
+    },
+    {
+      "material": "crimson_clover",
+      "variant": 4,
+      "file": "raw/crimson_clover-04.png",
+      "cost_usd": 0.067856,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "An original square 1024 full-frame overhead crimson clover canopy illustration, independent composition 04. Use supplied own botanical artwork only for matte gouache shapes and delicate pencil leaf edges. Dense little TRIFOLIATE rounded leaves in #2F6B3F #4F9A3A #7FB255 #24541E, medium green foliage dominates, tiny sparse crimson buds #C0583A about 15 across entire image, NOT big flowers. Hundreds of small overlapping three-leaf groups, each leaflet only 10-20 pixels, uniform feature scale and tone, irregular all-direction arrangement. Foliage fills all edges, no black backing or visible soil rectangles. Strict overhead, flat diffuse light. No margins, framed swatches, panels, grid, text, horizon, vignette, gradient, focal flower, insects, objects, photo, clay3D, pixels.",
+      "verdict": "rework",
+      "reason": "Oversaturated bright green vs matched medium-green palette.",
+      "excluded": true,
+      "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested.",
+      "sha256": "11c478b5686da2a6d88c2d310a9161def3ad105aeac299a2dfd21af4e46c6e30"
+    },
+    {
+      "material": "crimson_clover",
+      "variant": 5,
+      "file": "raw/crimson_clover-05.png",
+      "cost_usd": 0.067856,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "An original square 1024 full-frame overhead crimson clover canopy illustration, independent composition 05. Use supplied own botanical artwork only for matte gouache shapes and delicate pencil leaf edges. Dense little TRIFOLIATE rounded leaves in #2F6B3F #4F9A3A #7FB255 #24541E, medium green foliage dominates, tiny sparse crimson buds #C0583A about 15 across entire image, NOT big flowers. Hundreds of small overlapping three-leaf groups, each leaflet only 10-20 pixels, uniform feature scale and tone, irregular all-direction arrangement. Foliage fills all edges, no black backing or visible soil rectangles. Strict overhead, flat diffuse light. No margins, framed swatches, panels, grid, text, horizon, vignette, gradient, focal flower, insects, objects, photo, clay3D, pixels.",
+      "verdict": "rework",
+      "reason": "White borders and mixed-species swatch instead of full-bleed clover.",
+      "excluded": true,
+      "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested.",
+      "sha256": "0124844864be325ed2ebac27ef7cbc13bced9ccf8ad681d7d88fdf29001c19d4"
+    },
+    {
+      "material": "crimson_clover",
+      "variant": 6,
+      "file": "raw/crimson_clover-06.png",
+      "cost_usd": 0.067925,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "An original square 1024 full-frame overhead crimson clover canopy illustration, independent composition 06. Use supplied own botanical artwork only for matte gouache shapes and delicate pencil leaf edges. Dense little TRIFOLIATE rounded leaves in #2F6B3F #4F9A3A #7FB255 #24541E, medium green foliage dominates, tiny sparse crimson buds #C0583A about 15 across entire image, NOT big flowers. Hundreds of small overlapping three-leaf groups, each leaflet only 10-20 pixels, uniform feature scale and tone, irregular all-direction arrangement. Foliage fills all edges, no black backing or visible soil rectangles. Strict overhead, flat diffuse light. No margins, framed swatches, panels, grid, text, horizon, vignette, gradient, focal flower, insects, objects, photo, clay3D, pixels.",
+      "verdict": "keep",
+      "reason": "Full-bleed dense illustrated clover with sparse small buds, acceptable leaf scale; dark green interstices.",
+      "excluded": false,
+      "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested.",
+      "sha256": "af58ef02c604f5daa376ab1c61a7b8dddd1176afae92d545180f8928d16d3325"
+    },
+    {
+      "material": "loam",
+      "variant": 1,
+      "file": "raw/loam-01.png",
+      "cost_usd": 0.067828,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "Original illustrated fertile dark brown loam, full-bleed 1024 square, variant 01. Match small fine crumb density and matte pencil-gouache rendering of attached cropped detail, but create a much wider field with entirely new randomized placement. Brown #432B1D and #A0613D, never black. Tiny soft irregular aggregates, fine grain, no strong highlights, exactly overhead, flat diffuse lighting, uniform color. No furrows, rows, paths, border, panels, text, gradient, vignette, plants, objects, photo or 3D. Feature sizes 2-12 pixels across; illustration fills entire canvas.",
+      "verdict": "rework",
+      "reason": "Cropped guide enlarged into oversized clods; 01/04/06 similar source arrangements; regenerate fine soil.",
+      "excluded": true,
+      "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested.",
+      "sha256": "6c583f889616b84a1bce40a00a6643363667a3c1626f4d6248042891829927f1"
+    },
+    {
+      "material": "loam",
+      "variant": 2,
+      "file": "raw/loam-02.png",
+      "cost_usd": 0.0678445,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "Paint one original 1024 square full-bleed LOAM ground illustration, independently arranged variant 02. Our supplied artwork is only reference for matte handmade gouache and fine pencil detail; no plant content. Dark fertile warm brown #432B1D enriched by restrained #A0613D tiny crumbs; visibly brown NOT near-black. Evenly spread little soft soil aggregates and fine speckled crumbs with delicate contour marks, no large stones. Entire image is continuous loose loamy soil. Exactly overhead with uniform flat diffuse nondirectional light, no highlights or shadows, no directional furrows. Consistent small feature scale and density. No borders, margins, panels, text, grid, vignette, gradient, paths, ruts, rows, objects, plants, insects, photo, 3D clay or pixel art.",
+      "verdict": "keep",
+      "reason": "Warm dark brown full-frame fine painted aggregates, no furrows.",
+      "excluded": false,
+      "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested.",
+      "sha256": "b7864548c373893086a08b78074fc7a779c845fb02d148b99e7e70fbb515b1c5"
+    },
+    {
+      "material": "loam",
+      "variant": 3,
+      "file": "raw/loam-03.png",
+      "cost_usd": 0.067828,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "Original illustrated fertile dark brown loam, full-bleed 1024 square, variant 03. Match small fine crumb density and matte pencil-gouache rendering of attached cropped detail, but create a much wider field with entirely new randomized placement. Brown #432B1D and #A0613D, never black. Tiny soft irregular aggregates, fine grain, no strong highlights, exactly overhead, flat diffuse lighting, uniform color. No furrows, rows, paths, border, panels, text, gradient, vignette, plants, objects, photo or 3D. Feature sizes 2-12 pixels across; illustration fills entire canvas.",
+      "verdict": "rework",
+      "reason": "Cropped guide enlarged into oversized clods; 01/04/06 similar source arrangements; regenerate fine soil.",
+      "excluded": true,
+      "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested.",
+      "sha256": "375c53de13673db1cab9119133f917011fa113936648456ca9965663ce46d240"
+    },
+    {
+      "material": "loam",
+      "variant": 4,
+      "file": "raw/loam-04.png",
+      "cost_usd": 0.067828,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "Original illustrated fertile dark brown loam, full-bleed 1024 square, variant 04. Match small fine crumb density and matte pencil-gouache rendering of attached cropped detail, but create a much wider field with entirely new randomized placement. Brown #432B1D and #A0613D, never black. Tiny soft irregular aggregates, fine grain, no strong highlights, exactly overhead, flat diffuse lighting, uniform color. No furrows, rows, paths, border, panels, text, gradient, vignette, plants, objects, photo or 3D. Feature sizes 2-12 pixels across; illustration fills entire canvas.",
+      "verdict": "rework",
+      "reason": "Cropped guide enlarged into oversized clods; 01/04/06 similar source arrangements; regenerate fine soil.",
+      "excluded": true,
+      "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested.",
+      "sha256": "1d6145d1b093dee93cf64e6a4f33c07458a42be91368dd479e62656fafec304d"
+    },
+    {
+      "material": "loam",
+      "variant": 5,
+      "file": "raw/loam-05.png",
+      "cost_usd": 0.0678445,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "Paint one original 1024 square full-bleed LOAM ground illustration, independently arranged variant 05. Our supplied artwork is only reference for matte handmade gouache and fine pencil detail; no plant content. Dark fertile warm brown #432B1D enriched by restrained #A0613D tiny crumbs; visibly brown NOT near-black. Evenly spread little soft soil aggregates and fine speckled crumbs with delicate contour marks, no large stones. Entire image is continuous loose loamy soil. Exactly overhead with uniform flat diffuse nondirectional light, no highlights or shadows, no directional furrows. Consistent small feature scale and density. No borders, margins, panels, text, grid, vignette, gradient, paths, ruts, rows, objects, plants, insects, photo, 3D clay or pixel art.",
+      "verdict": "rework",
+      "reason": "Aggregate scale too large compared with fine-crumb target.",
+      "excluded": true,
+      "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested.",
+      "sha256": "54c16d6bf25c008a2f27278770f9975024a8ec921b3612c4cc9522cc576d8ea4"
+    },
+    {
+      "material": "loam",
+      "variant": 6,
+      "file": "raw/loam-06.png",
+      "cost_usd": 0.067828,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "Original illustrated fertile dark brown loam, full-bleed 1024 square, variant 06. Match small fine crumb density and matte pencil-gouache rendering of attached cropped detail, but create a much wider field with entirely new randomized placement. Brown #432B1D and #A0613D, never black. Tiny soft irregular aggregates, fine grain, no strong highlights, exactly overhead, flat diffuse lighting, uniform color. No furrows, rows, paths, border, panels, text, gradient, vignette, plants, objects, photo or 3D. Feature sizes 2-12 pixels across; illustration fills entire canvas.",
+      "verdict": "rework",
+      "reason": "Cropped guide enlarged into oversized clods; 01/04/06 similar source arrangements; regenerate fine soil.",
+      "excluded": true,
+      "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested.",
+      "sha256": "1f4b44507ad63772fe5e08ca8e000c839bb8537e00edb8463053d6339a9db849"
+    }
+  ],
+  "rejected": [],
+  "additional_cost_usd": 0,
+  "new_attempts": [],
+  "failed_attempts": [
+    {
+      "material": "loam",
+      "variant": 1,
+      "prompt": "Full-frame seamless-looking 1024x1024 top-down loam ground texture for a hand-painted botanical garden map. Dark warm brown earth #432B1D dotted evenly with thousands of TINY crumb aggregates 2-10 pixels across in restrained #8C6239. Fine soft compact soil, NOT gravel or large rocks. Crisp matte gouache illustration with delicate colored-pencil grain, simple painted forms. Consistent small detail and uniform density across entire image, flat diffuse shadowless lighting. Earth fills every edge. Fresh irregular natural arrangement. No black voids, big clods, stones, cracks, plants, perspective, border, frame, swatch, gradient, text or objects.",
+      "aspect_ratio": "square",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "success": false,
+      "image": null,
+      "error_type": "auth_error",
+      "error": "OpenRouter rejected the API key (403): Key limit exceeded (total limit).",
+      "cost_usd": null
+    },
+    {
+      "material": "crimson_clover",
+      "variant": 1,
+      "prompt": "A full-frame 1024x1024 overhead crimson clover canopy texture, crisp matte hand-painted botanical gouache illustration with delicate pencil outlines. Hundreds of TINY trifoliate clover clusters only 25-40 pixels across, each three rounded oval leaflets with subtle pale V chevrons. Dense overlapping foliage uniformly fills EVERY edge; muted medium greens #2F6B3F #4F9A3A #7FB255, deep green interstices. About twelve tiny crimson buds #A64B42 throughout. Flat shadowless diffuse lighting, same density and small leaf scale everywhere, fresh irregular all-direction arrangement. Clover ONLY. No big leaves, fluorescent greens, grass, fern, vetch, other species, white margins, paper background, frame, swatch, grid, text, horizon or vignette.",
+      "aspect_ratio": "square",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "success": false,
+      "image": null,
+      "error_type": "auth_error",
+      "error": "OpenRouter rejected the API key (403): Key limit exceeded (total limit).",
+      "cost_usd": null
+    }
+  ],
+  "source_changes": false,
+  "review_notes": [
+    "Visually inspected approved cover-crops.png plus both six-tile raw contact sheets.",
+    "Loam 01,03,04,05,06 still require fresh small-aggregate source generations; 01/04/06 visibly retain similar arrangements. Loam 02 retained.",
+    "Crimson clover 01,03,04,05 remain rejected for borders, mixed species, or saturation. Clover 02 retained verbatim in metadata but visibly larger than 06 and should be replaced for bank scale consistency. Clover 06 retained.",
+    "The first two independent calls were submitted concurrently; both returned explicit key total-limit errors. No retries, provider changes, or config changes.",
+    "No originals superseded, so rejected backup entries remain empty. Current records copied without flag changes. Source banks are NOT corrected or newly approved."
+  ],
+  "verification": {
+    "current_record_count": 12,
+    "per_material": {
+      "crimson_clover": 6,
+      "loam": 6
+    },
+    "unique_file_hashes": 12,
+    "all_1024_square": true,
+    "all_original_hashes_match": true,
+    "successful_new_call_count": 0,
+    "source_checks": [
+      {
+        "file": "raw/crimson_clover-01.png",
+        "pixels": [
+          1024,
+          1024
+        ],
+        "sha256": "d462de8d49aa52322dda27787a5e1d38d406b732a59b6c5841aa251138df0f39",
+        "manifest_hash_matches": true
+      },
+      {
+        "file": "raw/crimson_clover-02.png",
+        "pixels": [
+          1024,
+          1024
+        ],
+        "sha256": "39e99bcb74a5f7e05de3fc83da4ed232e222173f460aedb3b7e5c100b3124d64",
+        "manifest_hash_matches": true
+      },
+      {
+        "file": "raw/crimson_clover-03.png",
+        "pixels": [
+          1024,
+          1024
+        ],
+        "sha256": "e3dd35e9c26785bcab73bd0901ba1d91fc03776a2b4598e46fa23ef28a7bfb16",
+        "manifest_hash_matches": true
+      },
+      {
+        "file": "raw/crimson_clover-04.png",
+        "pixels": [
+          1024,
+          1024
+        ],
+        "sha256": "11c478b5686da2a6d88c2d310a9161def3ad105aeac299a2dfd21af4e46c6e30",
+        "manifest_hash_matches": true
+      },
+      {
+        "file": "raw/crimson_clover-05.png",
+        "pixels": [
+          1024,
+          1024
+        ],
+        "sha256": "0124844864be325ed2ebac27ef7cbc13bced9ccf8ad681d7d88fdf29001c19d4",
+        "manifest_hash_matches": true
+      },
+      {
+        "file": "raw/crimson_clover-06.png",
+        "pixels": [
+          1024,
+          1024
+        ],
+        "sha256": "af58ef02c604f5daa376ab1c61a7b8dddd1176afae92d545180f8928d16d3325",
+        "manifest_hash_matches": true
+      },
+      {
+        "file": "raw/loam-01.png",
+        "pixels": [
+          1024,
+          1024
+        ],
+        "sha256": "6c583f889616b84a1bce40a00a6643363667a3c1626f4d6248042891829927f1",
+        "manifest_hash_matches": true
+      },
+      {
+        "file": "raw/loam-02.png",
+        "pixels": [
+          1024,
+          1024
+        ],
+        "sha256": "b7864548c373893086a08b78074fc7a779c845fb02d148b99e7e70fbb515b1c5",
+        "manifest_hash_matches": true
+      },
+      {
+        "file": "raw/loam-03.png",
+        "pixels": [
+          1024,
+          1024
+        ],
+        "sha256": "375c53de13673db1cab9119133f917011fa113936648456ca9965663ce46d240",
+        "manifest_hash_matches": true
+      },
+      {
+        "file": "raw/loam-04.png",
+        "pixels": [
+          1024,
+          1024
+        ],
+        "sha256": "1d6145d1b093dee93cf64e6a4f33c07458a42be91368dd479e62656fafec304d",
+        "manifest_hash_matches": true
+      },
+      {
+        "file": "raw/loam-05.png",
+        "pixels": [
+          1024,
+          1024
+        ],
+        "sha256": "54c16d6bf25c008a2f27278770f9975024a8ec921b3612c4cc9522cc576d8ea4",
+        "manifest_hash_matches": true
+      },
+      {
+        "file": "raw/loam-06.png",
+        "pixels": [
+          1024,
+          1024
+        ],
+        "sha256": "1f4b44507ad63772fe5e08ca8e000c839bb8537e00edb8463053d6339a9db849",
+        "manifest_hash_matches": true
+      }
+    ]
+  }
+}

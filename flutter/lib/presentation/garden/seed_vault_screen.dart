@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import '../../platform/save_copy.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 
@@ -39,20 +40,58 @@ class _SeedVaultBodyState extends State<SeedVaultBody> {
 
   GardenController get _garden => widget.garden;
 
-  List<VarietyProfile> get _filtered {
+  /// Every vault variety: crops first-class, cover crops alongside them.
+  List<_Entry> get _entries =>
+      [
+        for (final p in _garden.profiles) _Entry(p.variety, profile: p),
+        for (final (v, cover) in _garden.coverVarieties)
+          _Entry(v, cover: cover),
+      ]..sort(
+        (a, b) => a.variety.name.toLowerCase().compareTo(
+          b.variety.name.toLowerCase(),
+        ),
+      );
+
+  List<_Entry> get _filtered {
     final q = _query.trim().toLowerCase();
     return [
-      for (final p in _garden.profiles)
+      for (final e in _entries)
         if ((q.isEmpty ||
-                p.variety.name.toLowerCase().contains(q) ||
-                p.crop.name.toLowerCase().contains(q) ||
-                (p.variety.source ?? '').toLowerCase().contains(q)) &&
-            (_category == null || p.crop.category == _category) &&
+                e.variety.name.toLowerCase().contains(q) ||
+                e.cropName.toLowerCase().contains(q) ||
+                (e.variety.source ?? '').toLowerCase().contains(q)) &&
+            (_category == null || e.category == _category) &&
+            // Cover crops have no season or sowing method to filter on.
             (_season == _SeasonFilter.all ||
-                p.crop.season.name == _season.name) &&
-            (_sowing == null || p.sowing == _sowing))
-          p,
+                e.profile?.crop.season.name == _season.name) &&
+            (_sowing == null || e.profile?.sowing == _sowing))
+          e,
     ];
+  }
+
+  Widget _detail(String id) {
+    final v = _garden.record.varieties[id];
+    final profile = _garden.profileOf(id);
+    final cover = v == null ? null : _garden.catalog.coverCrop(v.cropId);
+    if (profile != null) {
+      return VarietyDetail(
+        key: ValueKey(id),
+        garden: _garden,
+        profile: profile,
+      );
+    }
+    if (v != null && cover != null) {
+      return VarietyDetail.cover(
+        key: ValueKey(id),
+        garden: _garden,
+        variety: v,
+        cover: cover,
+      );
+    }
+    return const GardenCard(
+      title: 'Variety',
+      child: Center(child: EmptyPanelText('Nothing selected.')),
+    );
   }
 
   Future<void> _add() async {
@@ -68,12 +107,13 @@ class _SeedVaultBodyState extends State<SeedVaultBody> {
   Future<void> _export() async {
     const name = 'Seed Vault.seedvault';
     try {
-      await XFile.fromData(
+      final saved = await saveCopy(
+        name,
         utf8.encode(encodeSeedVault(_garden.record.varieties.values)),
-        name: name,
         mimeType: 'application/json',
-      ).saveTo(name);
-      _garden.toasts.show('Exported $name');
+        type: const XTypeGroup(label: 'Seed Vault', extensions: ['seedvault']),
+      );
+      if (saved) _garden.toasts.show('Exported $name');
     } catch (_) {
       _garden.toasts.show('Export failed', kind: ToastKind.error);
     }
@@ -102,9 +142,6 @@ class _SeedVaultBodyState extends State<SeedVaultBody> {
   @override
   Widget build(BuildContext context) {
     final list = _filtered;
-    final selected = _selectedId == null
-        ? null
-        : _garden.profileOf(_selectedId!);
     return Padding(
       padding: const EdgeInsets.all(10),
       child: Row(
@@ -136,15 +173,16 @@ class _SeedVaultBodyState extends State<SeedVaultBody> {
                           )
                         : ListView(
                             children: [
-                              for (final p in list)
+                              for (final e in list)
                                 _VarietyTile(
-                                  profile: p,
-                                  selected: p.id == _selectedId,
-                                  onTap: () =>
-                                      setState(() => _selectedId = p.id),
+                                  entry: e,
+                                  selected: e.variety.id == _selectedId,
+                                  onTap: () => setState(
+                                    () => _selectedId = e.variety.id,
+                                  ),
                                   onRemove: () {
-                                    _garden.removeVariety(p.id);
-                                    if (_selectedId == p.id) {
+                                    _garden.removeVariety(e.variety.id);
+                                    if (_selectedId == e.variety.id) {
                                       setState(() => _selectedId = null);
                                     }
                                   },
@@ -189,18 +227,7 @@ class _SeedVaultBodyState extends State<SeedVaultBody> {
             ),
           ),
           const SizedBox(width: 10),
-          Expanded(
-            child: selected == null
-                ? const GardenCard(
-                    title: 'Variety',
-                    child: Center(child: EmptyPanelText('Nothing selected.')),
-                  )
-                : VarietyDetail(
-                    key: ValueKey(selected.id),
-                    garden: _garden,
-                    profile: selected,
-                  ),
-          ),
+          Expanded(child: _detail(_selectedId ?? '')),
         ],
       ),
     );
@@ -273,22 +300,37 @@ class _SeedVaultBodyState extends State<SeedVaultBody> {
   }
 }
 
+/// A vault variety with either its planning profile or, for a cover
+/// crop, the cover crop it belongs to.
+class _Entry {
+  _Entry(this.variety, {this.profile, this.cover})
+    : assert((profile == null) != (cover == null));
+
+  final Variety variety;
+  final VarietyProfile? profile;
+  final CoverCrop? cover;
+
+  String get cropName => profile?.crop.name ?? cover!.name;
+  String get category => profile?.crop.category ?? CoverCrop.category;
+}
+
 class _VarietyTile extends StatelessWidget {
   const _VarietyTile({
-    required this.profile,
+    required this.entry,
     required this.selected,
     required this.onTap,
     required this.onRemove,
   });
 
-  final VarietyProfile profile;
+  final _Entry entry;
   final bool selected;
   final VoidCallback onTap;
   final VoidCallback onRemove;
 
   @override
   Widget build(BuildContext context) {
-    final v = profile.variety;
+    final v = entry.variety;
+    final profile = entry.profile;
     return Material(
       color: selected ? Palette.wash : Palette.paper,
       child: InkWell(
@@ -314,8 +356,8 @@ class _VarietyTile extends StatelessWidget {
                     ),
                     Text(
                       [
-                        profile.crop.name,
-                        '${profile.daysToMaturity} days',
+                        entry.cropName,
+                        if (profile != null) '${profile.daysToMaturity} days',
                         if ((v.seedsOnHand ?? '').isNotEmpty) v.seedsOnHand!,
                       ].join(' · '),
                       maxLines: 1,
@@ -336,9 +378,11 @@ class _VarietyTile extends StatelessWidget {
               ),
               const SizedBox(width: 4),
               Icon(
-                profile.crop.season == Season.cool
-                    ? Icons.ac_unit
-                    : Icons.wb_sunny_outlined,
+                switch (profile?.crop.season) {
+                  Season.cool => Icons.ac_unit,
+                  Season.warm => Icons.wb_sunny_outlined,
+                  null => Icons.grass,
+                },
                 size: 14,
                 color: Palette.faint,
               ),

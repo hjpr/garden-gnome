@@ -33,7 +33,20 @@ class PlannedSowing {
   final int? plants;
 }
 
-/// Runs the Seed Vault, Grow, Greenhouse and Harvest tools.
+/// A Cover bed on the map with its cover crop in the ground.
+class CoverBed {
+  const CoverBed({
+    required this.layerId,
+    required this.layerName,
+    required this.cover,
+  });
+
+  final String layerId;
+  final String layerName;
+  final CoverSowing cover;
+}
+
+/// Runs the Seed Vault and Grow (Sow and Transplant).
 ///
 /// The Seed Vault is the gardener's, kept in this browser's record and
 /// changed through [_change] (which saves it). Climate and plantings
@@ -53,9 +66,11 @@ class GardenController extends ChangeNotifier {
     GardenRecord? record,
     DateTime Function()? clock,
     FarmAccess? farm,
+    Future<bool> Function(String url)? openLink,
   }) : _catalog = catalog ?? CropCatalog.empty,
        _record = record ?? GardenRecord(),
        _clock = clock ?? DateTime.now,
+       _openLink = openLink,
        farm = farm ?? DetachedFarm() {
     this.farm.addListener(_onFarmChanged);
   }
@@ -66,6 +81,10 @@ class GardenController extends ChangeNotifier {
   final FarmAccess farm;
   final ToastCenter toasts;
   final DateTime Function() _clock;
+
+  /// Opens a web page outside the app (platform/open_link.dart, injected
+  /// at startup). Null in tests, where nothing is opened.
+  final Future<bool> Function(String url)? _openLink;
 
   CropCatalog _catalog;
   CropCatalog get catalog => _catalog;
@@ -211,6 +230,10 @@ class GardenController extends ChangeNotifier {
   void setZone(HardinessZone zone) =>
       _changeClimate(climate.copyWith(zone: zone));
 
+  /// Sets the farm's latitude in degrees north; null clears it.
+  void setLatitude(double? latitude) =>
+      _changeClimate(climate.copyWith(latitude: () => latitude));
+
   /// Sets the farm's own frost dates; null goes back to the zone's.
   void setFrostDates({
     MonthDay? Function()? lastSpring,
@@ -233,11 +256,33 @@ class GardenController extends ChangeNotifier {
     return crop == null ? null : v!.resolve(crop);
   }
 
+  /// Cover crop varieties in the vault, by name. They are kept out of
+  /// [profiles], so the calendars and Plant never offer them.
+  List<(Variety, CoverCrop)> get coverVarieties => [
+    for (final v in _record.varieties.values)
+      if (_catalog.coverCrop(v.cropId) case final cover?) (v, cover),
+  ]..sort((a, b) => a.$1.name.compareTo(b.$1.name));
+
+  /// Where to reorder [v]: its own link if it has one, else its product
+  /// page in the catalog, or null when the catalog does not list it.
+  String? reorderUrlOf(Variety v) =>
+      v.url ?? _catalog.productUrlOf(v.cropId, v.name);
+
+  /// Opens [v]'s product page to reorder it.
+  Future<void> reorder(Variety v) async {
+    final url = reorderUrlOf(v);
+    if (url == null) return;
+    final opened = await _openLink?.call(url) ?? false;
+    if (!opened) {
+      toasts.show('Could not open $url', kind: ToastKind.error);
+    }
+  }
+
   /// Adds a variety of [cropId] and returns its ID.
   String addVariety(String cropId, String name) {
     final (next, id) = _record.nextId('variety');
     final clean = name.trim().isEmpty
-        ? (_catalog[cropId]?.name ?? 'New variety')
+        ? (_catalog.nameOf(cropId) ?? 'New variety')
         : name.trim();
     _change(next.withVariety(Variety(id: id, cropId: cropId, name: clean)));
     return id;
@@ -252,7 +297,7 @@ class GardenController extends ChangeNotifier {
     var next = _record;
     var added = 0;
     for (final v in incoming) {
-      if (_catalog[v.cropId] == null || !known.add(key(v))) continue;
+      if (!_catalog.knows(v.cropId) || !known.add(key(v))) continue;
       final (withId, id) = next.nextId('variety');
       next = withId.withVariety(v.copyWith(id: id));
       added++;
@@ -391,10 +436,11 @@ class GardenController extends ChangeNotifier {
           PlantingSchedule(p, profile),
   ]..sort((a, b) => a.planting.sownOn.compareTo(b.planting.sownOn));
 
-  /// Sowings made in place and not finished, oldest first.
-  List<PlantingSchedule> directSowings() => [
+  /// Everything in the ground and not finished, oldest sowing first:
+  /// sown in place, or planted out of the greenhouse.
+  List<PlantingSchedule> inGround() => [
     for (final p in plantings.values)
-      if (!p.startedIndoors && p.finishedOn == null)
+      if (p.finishedOn == null && !p.isInGreenhouseOn(today))
         if (profileOf(p.varietyId) case final profile?)
           PlantingSchedule(p, profile),
   ]..sort((a, b) => a.planting.sownOn.compareTo(b.planting.sownOn));
@@ -416,6 +462,42 @@ class GardenController extends ChangeNotifier {
                 plants: document.plantLayoutOf(layer.id)?.count,
               ),
     ]..sort((a, b) => a.layerName.compareTo(b.layerName));
+  }
+
+  /// Cover beds with a cover crop sown (or dated ahead) and not yet
+  /// terminated, soonest sowing first. Cover crops have no planting
+  /// windows, so they are only listed once the gardener dates them.
+  List<CoverBed> coverBeds() {
+    final document = farm.farm;
+    return [
+      for (final layer in document.layers.values)
+        if (layer.properties case ZoneProperties(
+          isCover: true,
+          cover: final cover?,
+        ) when cover.isGrowingOn(today))
+          CoverBed(layerId: layer.id, layerName: layer.name, cover: cover),
+    ]..sort((a, b) => a.cover.sownOn!.compareTo(b.cover.sownOn!));
+  }
+
+  /// Marks Cover bed [layerId]'s cover crop as terminated on [on] (today
+  /// by default), as one Undo step.
+  void terminateCover(String layerId, {DateTime? on}) {
+    final layer = farm.farm.layers[layerId];
+    final props = layer?.properties;
+    if (props is! ZoneProperties || props.cover == null) return;
+    final day = dayOf(on ?? today);
+    final sown = props.cover!.sownOn;
+    final next = props.cover!.copyWith(
+      terminatedOn: () => sown != null && day.isBefore(sown) ? sown : day,
+    );
+    try {
+      farm.changeFarm(
+        'Terminate ${props.cover!.name}',
+        (f) => f.withCover(layerId, next),
+      );
+    } on StateError catch (e) {
+      toasts.show(e.message, kind: ToastKind.error);
+    }
   }
 
   /// How many plants planting layer [layerId]'s layout fits, or null.

@@ -13,7 +13,7 @@ import '../widgets/panel.dart';
 /// Plant mode's greenhouse list: every flat and pot growing on this farm,
 /// ready or not, with how many plants each gives and when it is due out.
 /// Each one drags onto a planting to plan where it goes. Flats and pots
-/// are started in the Greenhouse tool.
+/// are started in Grow > Transplant.
 class GreenhouseBody extends StatelessWidget {
   const GreenhouseBody({super.key, required this.garden});
 

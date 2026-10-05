@@ -16,11 +16,11 @@ import 'package:garden_gnome/persistence/drawing_library.dart';
 import 'package:garden_gnome/persistence/workspace_store.dart';
 import 'package:garden_gnome/presentation/app_shell.dart';
 import 'package:garden_gnome/presentation/garden/calendar_presentation.dart';
-import 'package:garden_gnome/presentation/garden/climate_bar.dart';
 import 'package:garden_gnome/presentation/garden/commit_field.dart';
 import 'package:garden_gnome/presentation/garden/crop_notes.dart';
 import 'package:garden_gnome/presentation/garden/crop_range_field.dart';
 import 'package:garden_gnome/presentation/garden/timeline.dart';
+import 'package:garden_gnome/presentation/garden/variety_detail.dart';
 import 'package:garden_gnome/presentation/theme.dart';
 import 'package:garden_gnome/presentation/tool_switcher.dart';
 import 'package:idb_shim/idb_client_memory.dart';
@@ -130,25 +130,6 @@ void main() {
         expect(recommendation.timing, timing);
         expect(timingDetail(recommendation), detail);
         expect(timingColor(timing), color);
-      }
-    },
-  );
-
-  test(
-    'frost input accepts named and numeric dates and rejects unreadable text',
-    () {
-      for (final text in [
-        'Apr 20',
-        ' april 20 ',
-        'Apr. 20',
-        '4/20',
-        '04-20',
-        '4.20',
-      ]) {
-        expect(parseMonthDay(text), const MonthDay(4, 20), reason: text);
-      }
-      for (final text in ['', 'spring', 'Foo 20', '13/20', '4/32', '4/0']) {
-        expect(parseMonthDay(text), isNull, reason: text);
       }
     },
   );
@@ -311,43 +292,72 @@ void main() {
     expect(tester.widget<TextField>(field).decoration!.hintText, '70–80 days');
   });
 
-  testWidgets('climate bar keeps frost overrides separate from zone defaults', (
-    tester,
-  ) async {
+  testWidgets('climate bar edits frost dates with month and day dropdowns '
+      'and latitude with degrees and N or S', (tester) async {
     final (navigator, garden) = await _pumpApp(tester);
     navigator.open(AppTool.grow);
     await tester.pumpAndSettle();
-    final spring = _gardenField('Last frost');
-    final fall = _gardenField('First frost');
-    final defaultSpring = garden.climate.zone.lastSpringFrost.toString();
-    expect(
-      tester.widget<TextField>(spring).decoration!.hintText,
-      defaultSpring,
-    );
-    await tester.enterText(spring, '4/20');
-    await tester.testTextInput.receiveAction(TextInputAction.done);
-    await tester.pumpAndSettle();
-    expect(garden.climate.lastSpringFrost, const MonthDay(4, 20));
+    String shown(String label) =>
+        tester.widget<Text>(find.byKey(ValueKey('value-$label'))).data!;
 
-    await tester.enterText(fall, 'Oct 10');
-    await tester.tap(spring);
-    await tester.pumpAndSettle();
-    expect(garden.climate.firstFallFrost, const MonthDay(10, 10));
-    await tester.enterText(spring, 'not a date');
-    await tester.testTextInput.receiveAction(TextInputAction.done);
-    await tester.pumpAndSettle();
-    expect(garden.climate.lastSpringFrost, const MonthDay(4, 20));
-    expect(find.text('e.g. Apr 20'), findsOneWidget);
+    // No input boxes: the zone's dates show, greyed, with a pencil.
+    expect(shown('Last frost'), garden.climate.zone.lastSpringFrost.toString());
+    expect(shown('Latitude'), 'Not set');
+    expect(find.byTooltip("Use the zone's last frost"), findsNothing);
 
-    await tester.enterText(spring, '');
-    await tester.testTextInput.receiveAction(TextInputAction.done);
+    Future<void> pick(String menu, String item) async {
+      await tester.tap(
+        find.descendant(
+          of: find.byWidgetPredicate(
+            (w) => w is Semantics && w.properties.label == menu,
+          ),
+          matching: find.byWidgetPredicate((w) => w is DropdownButtonFormField),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(item).last);
+      await tester.pumpAndSettle();
+    }
+
+    await tester.tap(find.byTooltip('Edit Last frost'));
+    await tester.pumpAndSettle();
+    await pick('Last frost month', 'May');
+    await pick('Last frost day', '20');
+    await tester.tap(find.byTooltip('Apply Last frost'));
+    await tester.pumpAndSettle();
+    expect(garden.climate.lastSpringFrost, const MonthDay(5, 20));
+    expect(shown('Last frost'), 'May 20');
+
+    // Cancel keeps the stored date.
+    await tester.tap(find.byTooltip('Edit First frost'));
+    await tester.pumpAndSettle();
+    await pick('First frost month', 'November');
+    await tester.tap(find.byTooltip('Cancel First frost'));
+    await tester.pumpAndSettle();
+    expect(garden.climate.firstFallFrost, isNull);
+
+    // Reset goes back to the zone's date.
+    await tester.tap(find.byTooltip("Use the zone's last frost"));
     await tester.pumpAndSettle();
     expect(garden.climate.lastSpringFrost, isNull);
-    expect(
-      tester.widget<TextField>(spring).decoration!.hintText,
-      defaultSpring,
+
+    await tester.tap(find.byTooltip('Edit Latitude'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('latitude-degrees')),
+      '95',
     );
-    expect(garden.climate.firstFallFrost, const MonthDay(10, 10));
+    await tester.pump();
+    expect(find.text('0–90'), findsOneWidget);
+    await tester.enterText(
+      find.byKey(const ValueKey('latitude-degrees')),
+      '33.9',
+    );
+    await pick('North or south', 'S');
+    await tester.tap(find.byTooltip('Apply Latitude'));
+    await tester.pumpAndSettle();
+    expect(garden.climate.latitude, -33.9);
+    expect(shown('Latitude'), '33.9°S');
   });
 
   testWidgets(
@@ -553,12 +563,58 @@ void main() {
     expect(garden.record.varieties[v.id]!.daysToMaturity!.min, 68);
   });
 
+  testWidgets('reorder sits between SEED and GROWING; cover crops show too', (
+    tester,
+  ) async {
+    final (navigator, garden) = await _pumpApp(tester);
+    final beef = garden.addVariety('tomatoes', 'Big Beef');
+    garden.addVariety('lettuce', 'Grandma Lettuce');
+    garden.addVariety('winter-rye', 'Winter Rye (Common)');
+    navigator.open(AppTool.seedVault);
+    await tester.pumpAndSettle();
+    expect(find.text('3 of 3'), findsOneWidget);
+
+    await tester.tap(find.text('Big Beef'));
+    await tester.pumpAndSettle();
+    final reorder = find.widgetWithText(OutlinedButton, ReorderButton.label);
+    expect(tester.widget<OutlinedButton>(reorder).onPressed, isNotNull);
+    final y = tester.getCenter(reorder).dy;
+    expect(tester.getCenter(find.text('SEED')).dy, lessThan(y));
+    expect(tester.getCenter(find.text('GROWING')).dy, greaterThan(y));
+    expect(garden.reorderUrlOf(garden.record.varieties[beef]!), bigBeefUrl);
+
+    // Not in the catalog: greyed.
+    await tester.tap(find.text('Grandma Lettuce'));
+    await tester.pumpAndSettle();
+    expect(tester.widget<OutlinedButton>(reorder).onPressed, isNull);
+
+    // A cover crop: chart facts, reorder, no GROWING overrides.
+    await tester.tap(find.text('Cover crops'));
+    await tester.pumpAndSettle();
+    expect(find.text('1 of 3'), findsOneWidget);
+    await tester.tap(find.text('Winter Rye (Common)'));
+    await tester.pumpAndSettle();
+    expect(find.text('WINTER RYE GROWING NOTES'), findsOneWidget);
+    expect(find.text('34 °F'), findsOneWidget);
+    expect(find.text('Erosion control'), findsOneWidget);
+    expect(find.text('GROWING'), findsNothing);
+    expect(tester.widget<OutlinedButton>(reorder).onPressed, isNotNull);
+
+    // Cover crops never reach the calendars.
+    expect(garden.profiles.map((p) => p.variety.name), [
+      'Big Beef',
+      'Grandma Lettuce',
+    ]);
+  });
+
   testWidgets('Greenhouse lists what to start and records the sowing', (
     tester,
   ) async {
     final (navigator, garden) = await _pumpApp(tester);
     garden.addVariety('tomatoes', 'Big Beef');
-    navigator.open(AppTool.greenhouse);
+    navigator
+      ..growMode = GrowMode.transplant
+      ..open(AppTool.grow);
     await tester.pumpAndSettle();
 
     final range = tester.widget<Timeline>(find.byType(Timeline)).range;
@@ -584,7 +640,9 @@ void main() {
     expect(tray.container, GrowContainer.flat);
     expect(tray.plants, 100);
 
-    navigator.open(AppTool.greenhouse);
+    navigator
+      ..growMode = GrowMode.transplant
+      ..open(AppTool.grow);
     await tester.pumpAndSettle();
     expect(tester.widget<Timeline>(find.byType(Timeline)).range, range);
     expect(find.textContaining('Sown Apr 1'), findsOneWidget);
@@ -636,14 +694,15 @@ void main() {
     await tester.tap(find.widgetWithText(TextButton, 'Today'));
     await tester.pumpAndSettle();
 
-    navigator.open(AppTool.harvest);
+    // Planted out, it grows on in Sow until its harvest is finished.
+    navigator.growMode = GrowMode.sow;
     await tester.pumpAndSettle();
     expect(find.textContaining('Planted out Apr 1'), findsOneWidget);
     expect(tester.widget<Timeline>(find.byType(Timeline)).range, range);
     await tester.tap(find.byTooltip('Harvest finished'));
     await tester.pumpAndSettle();
-    expect(find.text('Nothing planted yet.'), findsOneWidget);
-    expect(garden.schedules(PlantingStage.inGround), isEmpty);
+    expect(find.text('Nothing sown.'), findsOneWidget);
+    expect(garden.inGround(), isEmpty);
     // Let the "started in the greenhouse" toast time out.
     await tester.pump(const Duration(seconds: 10));
   });
@@ -688,18 +747,43 @@ void main() {
     tester,
   ) async {
     final (navigator, _) = await _pumpApp(tester);
-    navigator.open(AppTool.harvest);
+    navigator
+      ..growMode = GrowMode.transplant
+      ..open(AppTool.grow);
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Switch tool'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Grow').last);
+    await tester.tap(find.text('Plan').last);
     await tester.pumpAndSettle();
-    expect(navigator.current, AppTool.grow);
+    expect(navigator.current, AppTool.plan);
 
     await tester.tap(find.byTooltip('Switch tool').hitTestable());
     await tester.pumpAndSettle();
     await tester.tap(find.text('Home'));
     await tester.pumpAndSettle();
     expect(navigator.current, isNull);
+  });
+
+  testWidgets('tools run Seed Vault, Plan, Grow; Grow switches between Sow '
+      'and Transplant and remembers it', (tester) async {
+    expect(AppTool.values, [AppTool.seedVault, AppTool.plan, AppTool.grow]);
+    final (navigator, _) = await _pumpApp(tester);
+    navigator.open(AppTool.grow);
+    await tester.pumpAndSettle();
+    expect(find.text('Sow'), findsOneWidget);
+    expect(find.text('Transplant'), findsOneWidget);
+    expect(find.text('Sow window'), findsOneWidget);
+    expect(find.text('Plant out'), findsNothing);
+
+    await tester.tap(find.bySemanticsLabel('Transplant mode'));
+    await tester.pumpAndSettle();
+    expect(navigator.growMode, GrowMode.transplant);
+    expect(find.text('Plant out'), findsOneWidget);
+
+    navigator.open(AppTool.seedVault);
+    await tester.pumpAndSettle();
+    navigator.open(AppTool.grow);
+    await tester.pumpAndSettle();
+    expect(navigator.growMode, GrowMode.transplant);
   });
 }

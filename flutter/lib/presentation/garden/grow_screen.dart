@@ -16,8 +16,8 @@ import 'status_chip.dart';
 import 'timeline.dart';
 
 /// Grow: what is sown in place, beside the queue of what to sow next.
-/// The same layout as Greenhouse, for direct sowing; greenhouse starts
-/// are recommended in Greenhouse.
+/// Grow > Sow: the same layout as Transplant, for direct sowing; seed
+/// started in trays is in Transplant.
 ///
 /// Only planting layers on the map can be sown: planning comes first.
 /// Varieties with a sowing window coming up but no planting yet are
@@ -53,8 +53,13 @@ class GrowBody extends StatelessWidget {
     // starts; upcoming ones by when their best sowing time starts, planned
     // and unplanned together so the order is the order of the season. A
     // planned planting with no window in reach sorts as due now.
-    final sown = garden.directSowings()
-      ..sort((a, b) => a.harvest.start.compareTo(b.harvest.start));
+    // Cover crops sit with them, by when they are next due: terminated,
+    // or sown when no end is set.
+    final growing = <(DateTime, TimelineRow)>[
+      for (final s in garden.inGround()) (s.harvest.start, _sownRow(s)),
+      for (final c in garden.coverBeds())
+        (c.cover.terminatedOn ?? c.cover.sownOn!, _coverRow(c)),
+    ]..sort((a, b) => a.$1.compareTo(b.$1));
     final upcoming = <(DateTime, TimelineRow)>[
       for (final p in planned)
         if (windowsOf(p.profile) case final w)
@@ -86,17 +91,19 @@ class GrowBody extends StatelessWidget {
                       ('Sow window', Palette.directSow),
                       ('Germinating', Palette.muted),
                       ('Harvest', Palette.harvest),
-                    ]),
+                      ('Cover crop', Palette.groundCover),
+                    ], alternates: true),
                     padding: EdgeInsets.zero,
                     child: Timeline(
                       range: calendarRange(today),
                       today: today,
                       labelWidth: 400,
+                      seasons: frostFreeSeasons(garden.climate, today),
                       sections: [
                         TimelineSection(
                           title: 'Growing',
                           emptyText: 'Nothing sown.',
-                          rows: [for (final s in sown) _sownRow(s)],
+                          rows: [for (final (_, row) in growing) row],
                         ),
                         TimelineSection(
                           title: 'Upcoming',
@@ -137,7 +144,10 @@ class GrowBody extends StatelessWidget {
     return TimelineRow(
       title: s.profile.displayName,
       subtitle: [
-        'Sown ${formatDay(p.sownOn)}',
+        if (p.startedIndoors && p.plantedOutOn != null)
+          'Planted out ${formatDay(p.plantedOutOn!)}'
+        else
+          'Sown ${formatDay(p.sownOn)}',
         ?garden.layerNameOf(p),
         if (plants != null) '$plants plants',
         'harvest ${formatDay(harvest.start)}',
@@ -151,6 +161,12 @@ class GrowBody extends StatelessWidget {
             color: Palette.directSow,
           ),
           const SizedBox(width: 4),
+          IconAction(
+            iconData: Icons.done_all,
+            label: 'Harvest finished',
+            size: 26,
+            onPressed: () => garden.finish(p.id),
+          ),
           IconAction(
             iconData: Icons.delete_outline,
             label: 'Remove sowing',
@@ -177,6 +193,47 @@ class GrowBody extends StatelessWidget {
     );
   }
 
+  /// A Cover bed's cover crop, from Sown to Terminated (to today while
+  /// no end is set: Johnny's gives no length to invent one from).
+  TimelineRow _coverRow(CoverBed c) {
+    final sown = c.cover.sownOn!;
+    final end = c.cover.terminatedOn;
+    final today = garden.today;
+    return TimelineRow(
+      title: c.cover.name,
+      subtitle: [
+        'Sown ${formatDay(sown)}',
+        c.layerName,
+        if (end != null) 'terminate ${formatDay(end)}',
+      ].join(' · '),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          StatusChip(
+            today.isBefore(sown) ? 'Planned' : 'Cover',
+            color: Palette.groundCover,
+          ),
+          const SizedBox(width: 4),
+          IconAction(
+            iconData: Icons.content_cut,
+            label: 'Terminated today',
+            size: 26,
+            onPressed: () => garden.terminateCover(c.layerId),
+          ),
+        ],
+      ),
+      bars: [
+        TimelineBar(
+          span: DayWindow(sown, end ?? (today.isAfter(sown) ? today : sown)),
+          color: Palette.groundCover,
+          label: end == null
+              ? 'Cover crop sown ${formatDay(sown)}'
+              : 'Cover crop ${formatDay(sown)} – ${formatDay(end)}',
+        ),
+      ],
+    );
+  }
+
   TimelineRow _plannedRow(
     BuildContext context,
     PlannedSowing p,
@@ -187,7 +244,7 @@ class GrowBody extends StatelessWidget {
       subtitle: [
         p.layerName,
         if (p.plants case final n?) '$n plants',
-        if (windows.isNotEmpty) timingDetail(windows.first),
+        if (windows.isNotEmpty) windowSummary(windows.first),
       ].join(' · '),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -206,15 +263,13 @@ class GrowBody extends StatelessWidget {
           ),
         ],
       ),
-      bars: [for (final r in windows) _windowBar(r, Palette.directSow)],
+      bars: [for (final r in windows) windowBar(r, Palette.directSow)],
     );
   }
 
   TimelineRow _unplannedRow(List<Recommendation> windows) => TimelineRow(
     title: windows.first.profile.displayName,
-    subtitle:
-        '${windows.first.window.season.label} · '
-        '${timingDetail(windows.first)} · not planned',
+    subtitle: '${windowSummary(windows.first)} · not planned',
     trailing: const IconAction(
       iconData: Icons.grass,
       label: 'Sow',
@@ -222,16 +277,7 @@ class GrowBody extends StatelessWidget {
       size: 26,
       onPressed: null,
     ),
-    bars: [for (final r in windows) _windowBar(r, Palette.faint)],
-  );
-
-  static TimelineBar _windowBar(Recommendation r, Color color) => TimelineBar(
-    span: r.window.span,
-    ideal: r.window.ideal,
-    color: color,
-    label:
-        '${r.window.kind.label}: ${r.window.span}'
-        '\nIdeal: ${r.window.ideal}',
+    bars: [for (final r in windows) windowBar(r, Palette.faint)],
   );
 }
 
@@ -335,8 +381,7 @@ class _QueueTile extends StatelessWidget {
                   ),
                   Text(
                     [
-                      r.window.season.label,
-                      timingDetail(r),
+                      windowSummary(r),
                       if (isPlanned)
                         planned.map((p) => p.layerName).join(', ')
                       else

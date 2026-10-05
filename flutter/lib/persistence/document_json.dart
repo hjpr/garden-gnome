@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'dart:typed_data';
 
 import '../application/storage_error.dart';
@@ -29,7 +28,11 @@ import 'garden_record_codec.dart'
 // 10: greenhouse flats and pots on plantings (older readers would drop
 //     them).
 // 11: a planting seed's lines per row (older readers would fill rows).
-const int schemaVersion = 11;
+// 12: Cover beds (ground "cover") and their cover crop sowing (older
+//     readers would refuse the ground name).
+// 13: a planting seed's in-row and between-row centre distances replace
+//     size and gap (older readers require them).
+const int schemaVersion = 13;
 
 /// The oldest version still opened. Version 1 files open with their
 /// patterns and free-text ground notes dropped.
@@ -117,9 +120,16 @@ Map<String, Object?> _layerToJson(Layer layer) => {
         'seed': {
           'variety_id': seed.varietyId,
           'name': seed.name,
-          'size': seed.size,
-          'spacing': seed.spacing,
+          'in_row': seed.inRow,
+          'between_rows': seed.betweenRows,
           'lines': ?seed.lines,
+        },
+      if (p.cover case final cover?)
+        'cover': {
+          'variety_id': cover.varietyId,
+          'name': cover.name,
+          if (cover.sownOn case final d?) 'sown_on': _dayToJson(d),
+          if (cover.terminatedOn case final d?) 'terminated_on': _dayToJson(d),
         },
     },
   },
@@ -303,29 +313,49 @@ Layer _layerFromJson(String id, Map<String, Object?> json, int version) {
       seed: props['seed'] == null
           ? null
           : _seedFromJson(_map(props['seed'], 'seed'), version),
+      cover: props['cover'] == null
+          ? null
+          : _coverFromJson(_map(props['cover'], 'cover')),
     ),
   });
 }
 
+CoverSowing _coverFromJson(Map<String, Object?> json) {
+  DateTime? day(String key) =>
+      json[key] == null ? null : _dayFromJson(json[key]);
+  final sown = day('sown_on'), terminated = day('terminated_on');
+  if (sown != null && terminated != null && terminated.isBefore(sown)) {
+    throw const DocumentFormatError('Damaged file: cover crop dates');
+  }
+  return CoverSowing(
+    varietyId: _string(json['variety_id'], 'cover crop variety'),
+    name: _string(json['name'], 'cover crop name'),
+    sownOn: sown,
+    terminatedOn: terminated,
+  );
+}
+
 ZoneSeed _seedFromJson(Map<String, Object?> json, int version) {
-  final size = _number(json[version < 4 ? 'in_row' : 'size']);
-  final double spacing;
-  if (version < 4) {
-    final between = _number(json['between_rows']);
-    if (between <= 0) {
+  final double inRow, betweenRows;
+  if (version >= 4 && version < 13) {
+    // Size plus gap was one centre distance used both ways; keep it so
+    // the planting lays out as it did.
+    final size = _number(json['size']), gap = _number(json['spacing']);
+    if (!(size > 0) || !(gap >= 0)) {
       throw const DocumentFormatError('Damaged file: seed spacing');
     }
-    // Legacy values were centre distances, not empty gaps. Use the old
-    // in-row recommendation as diameter, just like a fresh catalog seed.
-    spacing = math.max(0, between - size);
+    final pitch = size + gap;
+    inRow = pitch;
+    betweenRows = pitch;
   } else {
-    spacing = _number(json['spacing']);
+    inRow = _number(json['in_row']);
+    betweenRows = _number(json['between_rows']);
   }
   final seed = ZoneSeed(
     varietyId: _string(json['variety_id'], 'seed variety'),
     name: _string(json['name'], 'seed name'),
-    size: size,
-    spacing: spacing,
+    inRow: inRow,
+    betweenRows: betweenRows,
     lines: json['lines'] == null ? null : _count(json['lines']),
   );
   if (seed.problem != null) {

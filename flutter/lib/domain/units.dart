@@ -11,6 +11,19 @@ enum Units {
   double fromMetres(double metres) => metres / metresPerUnit;
   double toMetres(double value) => value * metresPerUnit;
 
+  /// The smaller unit for close measurements such as row and plant
+  /// spacing: inches with feet, centimetres with metres.
+  String get fineSymbol => switch (this) {
+    feet => 'in',
+    metres => 'cm',
+  };
+  double get metresPerFineUnit => switch (this) {
+    feet => 0.0254,
+    metres => 0.01,
+  };
+  double fineFromMetres(double metres) => metres / metresPerFineUnit;
+  double fineToMetres(double value) => value * metresPerFineUnit;
+
   /// A short, readable length such as "3.28 ft" or "0.125 m".
   String format(double metres) {
     final value = fromMetres(metres);

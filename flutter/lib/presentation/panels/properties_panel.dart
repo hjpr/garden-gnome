@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../application/editor_controller.dart';
+import '../../application/garden_controller.dart';
 import '../../domain/land_rules.dart';
 import '../../domain/layer.dart';
 import '../theme.dart';
@@ -14,9 +15,13 @@ import 'zone_options.dart';
 
 /// Settings for the selected layer: its name, status, and options.
 class PropertiesBody extends StatelessWidget {
-  const PropertiesBody({super.key, required this.editor});
+  const PropertiesBody({super.key, required this.editor, this.garden});
 
   final EditorController editor;
+
+  /// The Seed Vault and catalog, for a Cover bed's cover crop. Null in
+  /// tests that need none: the crop list is then empty.
+  final GardenController? garden;
 
   @override
   Widget build(BuildContext context) {
@@ -83,6 +88,7 @@ class PropertiesBody extends StatelessWidget {
           ),
           ZoneProperties p => ZoneOptions(
             editor: editor,
+            garden: garden,
             layer: layer,
             properties: p,
             editable: editable,
@@ -102,6 +108,7 @@ class _GroundTypeBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = switch (ground) {
       null => Palette.groundZone,
+      GroundType.cover => Palette.groundCover,
       GroundType.flat => Palette.groundFlat,
       GroundType.row => Palette.groundRow,
       GroundType.grow => Palette.groundGrow,

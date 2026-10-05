@@ -113,6 +113,7 @@ class ZoneProperties extends LayerProperties {
     this.rows = const RowSpec(),
     this.crop,
     this.seed,
+    this.cover,
   });
 
   final OutlineColor color;
@@ -133,8 +134,15 @@ class ZoneProperties extends LayerProperties {
   /// when the ground changes, so switching back to Grow restores it.
   final ZoneSeed? seed;
 
+  /// The cover crop sown here. Used while [ground] is [GroundType.cover],
+  /// and kept when it is not, so switching back restores it.
+  final CoverSowing? cover;
+
   /// Whether this zone is a grow zone, which Plant mode works on.
   bool get isGrow => ground == GroundType.grow;
+
+  /// Whether this is a Cover bed, which Plant mode sows cover crops on.
+  bool get isCover => ground == GroundType.cover;
 
   ZoneProperties copyWith({
     OutlineColor? color,
@@ -142,12 +150,14 @@ class ZoneProperties extends LayerProperties {
     RowSpec? rows,
     String? Function()? crop,
     ZoneSeed? Function()? seed,
+    CoverSowing? Function()? cover,
   }) => ZoneProperties(
     color: color ?? this.color,
     ground: ground == null ? this.ground : ground(),
     rows: rows ?? this.rows,
     crop: crop == null ? this.crop : crop(),
     seed: seed == null ? this.seed : seed(),
+    cover: cover == null ? this.cover : cover(),
   );
 }
 

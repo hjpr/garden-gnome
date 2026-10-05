@@ -14,6 +14,35 @@ class ModeSwitch extends StatelessWidget {
   final EditorController editor;
 
   @override
+  Widget build(BuildContext context) => SegmentSwitch<EditMode>(
+    values: EditMode.values,
+    selected: editor.mode,
+    label: (mode) => mode.label,
+    icon: (mode) => mode == EditMode.build
+        ? Icons.architecture_outlined
+        : Icons.spa_outlined,
+    onSelect: editor.setMode,
+  );
+}
+
+/// A header switch between a tool's modes, one segment per value.
+class SegmentSwitch<T> extends StatelessWidget {
+  const SegmentSwitch({
+    super.key,
+    required this.values,
+    required this.selected,
+    required this.label,
+    required this.icon,
+    required this.onSelect,
+  });
+
+  final List<T> values;
+  final T selected;
+  final String Function(T) label;
+  final IconData Function(T) icon;
+  final ValueChanged<T> onSelect;
+
+  @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(2),
     decoration: BoxDecoration(
@@ -23,15 +52,13 @@ class ModeSwitch extends StatelessWidget {
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        for (final mode in EditMode.values)
+        for (final value in values)
           _Segment(
-            key: ValueKey(mode),
-            label: mode.label,
-            icon: mode == EditMode.build
-                ? Icons.architecture_outlined
-                : Icons.spa_outlined,
-            selected: editor.mode == mode,
-            onTap: () => editor.setMode(mode),
+            key: ValueKey(value),
+            label: label(value),
+            icon: icon(value),
+            selected: value == selected,
+            onTap: () => onSelect(value),
           ),
       ],
     ),

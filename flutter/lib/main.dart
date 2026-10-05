@@ -15,6 +15,7 @@ import 'persistence/garden_record_store.dart';
 import 'persistence/texture_store.dart';
 import 'persistence/workspace_store.dart';
 import 'platform/farm_files.dart';
+import 'platform/open_link.dart';
 import 'presentation/app_shell.dart';
 import 'presentation/canvas/texture_preparer.dart';
 import 'presentation/theme.dart';
@@ -44,6 +45,7 @@ void main() {
     store: BrowserGardenRecordStore(),
     toasts: session.toasts,
     farm: SessionFarm(session),
+    openLink: openLink,
   );
   // The last farm opens before the garden loads, so plantings from the
   // old shared record move into it rather than a blank farm.

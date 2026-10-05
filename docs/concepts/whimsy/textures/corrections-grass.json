@@ -1,0 +1,2521 @@
+{
+  "materials": [
+    "wild_grass",
+    "lawn"
+  ],
+  "model": "google/gemini-3.1-flash-image",
+  "generations": [
+    {
+      "material": "lawn",
+      "variant": 1,
+      "file": "raw/lawn-01.png",
+      "prompt": "Full-frame 1024 square painting of lawn stubble viewed vertically from above. Minuscule cut blade tips and very short narrow grass strokes cover the whole image uniformly; mixed orientations. Matte botanical gouache, fine colored-pencil detail. Medium green #4F793D with #658E4B #385C32. No long blades, large tufts, flowers, clover, shadows, border, paper or text. Another unique arrangement.",
+      "cost_usd": 0.0672495,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "keep",
+      "excluded": false,
+      "reason": "Dense full-bleed fine narrow clipped blades with interwoven mixed directions, muted matte pencil-gouache detail. Some strokes longer than requested, but no large tufts or bare backing; promising botanical source, pending bank coherence.",
+      "sha256": "ddc05f10987f83a9af646542391fa42ae4fb5e360569082ba4da71b5b6fa1c3f",
+      "pixel_sha256": "cb76c5d1330593ccb9fefdcb3b708eea61139cb8aca4bab100319eb9293c5b3a",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_095733_df38c5fd.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "lawn",
+      "variant": 2,
+      "file": "raw/lawn-02.png",
+      "prompt": "An overhead painting of dense fine short grass stubble covering every pixel. Uniform medium leafy green, tiny cut blade tips, short strokes randomly pointing every way. Delicate matte gouache and pencil detail. No long blades or tufts, no white borders. 1024 square. #4F793D #658E4B #385C32. Flat light. Independent arrangement A.",
+      "cost_usd": 0.067243,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "rework",
+      "excluded": true,
+      "reason": "Matte full-frame fine grass but predominantly upward direction and much paler than dense pilot01; bank mismatch.",
+      "sha256": "d2d30bd0aedd61cf2c331367a10a4bbdc4e8cee5801742ee4d396778cd1d8f46",
+      "pixel_sha256": "905c3ec468d0f04055a8aea50f0bb1874dff073aa3bb1f17b375439e28f8cc34",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_095941_9ea5e87b.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "lawn",
+      "variant": 3,
+      "file": "raw/lawn-03.png",
+      "prompt": "An overhead painting of dense fine short grass stubble covering every pixel. Uniform medium leafy green, tiny cut blade tips, short strokes randomly pointing every way. Delicate matte gouache and pencil detail. No long blades or tufts, no white borders. 1024 square. #4F793D #658E4B #385C32. Flat light. Independent arrangement B.",
+      "cost_usd": 0.067243,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "rework",
+      "excluded": true,
+      "reason": "All-direction strokes improved but blade scale too long for clipped turf and pale tone differs from pilot01.",
+      "sha256": "e6b591aa50961ab611c55c418d1eebc4663d2387e753ea7426c7879eb6149cdb",
+      "pixel_sha256": "edf4100b34bc1fabab5107bd06b5d8d87229ac75f87dd0af2b0483424f84a998",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_095942_dc546f57.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "lawn",
+      "variant": 4,
+      "file": "raw/lawn-04.png",
+      "prompt": "Full-frame 1024 square painting of lawn stubble viewed vertically from above. Minuscule cut blade tips and very short narrow grass strokes cover the whole image uniformly; mixed orientations. Matte botanical gouache, fine colored-pencil detail. Medium green #4F793D with #658E4B #385C32. No long blades, large tufts, flowers, clover, shadows, border, paper or text. Another unique arrangement. Dense interwoven miniature strokes.",
+      "cost_usd": 0.067252,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "rework",
+      "excluded": true,
+      "reason": "Full-frame all-direction grass but long interwoven blades read as clippings rather than short clipped turf. Coarser scale than best pilot01.",
+      "sha256": "641bcc3273b8fc43e12d153f83f48a8dcd6bab26028626fcffb4d45aa418386e",
+      "pixel_sha256": "bb5cef539b5897596f9453feb13f7cd564a1c16769b47dbc68719c354dc9121d",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_100208_fd1638dd.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "lawn",
+      "variant": 5,
+      "file": "raw/lawn-05.png",
+      "cost_usd": 0.0679565,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "Repaint as uniformly mown SHORT LAWN, variant 05. Remove ALL clover and other broad leaves. Grass ONLY. Completely new independent layout of many tiny 5-12px grass strokes, mixed directions, no upright tall blades. Match original medium green palette, but every part has same fine scale and density. True directly overhead flat turf. Keep matte gouache and pencil hand-illustration. Fill entire 1024 square edge to edge with turf. Uniform flat diffuse illumination. No border, sheets, panels, text, rows, stripes, swirls, gradient, vignette, focal area, flowers, objects, insects, photography or 3D.",
+      "verdict": "keep",
+      "reason": "Full-bleed fine grass; broad clover removed, but moderate directional blade flow remains.",
+      "excluded": false,
+      "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested.",
+      "sha256": "482976eb8ce5828693f6e3a1753baa3a567579bd7f5c4fec1adaa0c8dece2071"
+    },
+    {
+      "material": "lawn",
+      "variant": 6,
+      "file": "raw/lawn-06.png",
+      "cost_usd": 0.067858,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "Single full-bleed 1024x1024 square LAWN texture, independent composition 06. Reference for handmade botanical gouache and pencil STYLE ONLY, not six-swatch layout. Exactly overhead tidy short fine grass blades, smaller and more uniform than wild grass, fresh medium green. Hundreds of tiny strokes oriented in all directions, small crisp painted shapes, subtle pencil detail. Restrained #4F9A3A #7FB255 #2F6B3F #24541E, uniform density, scale, tone and flat diffuse lighting throughout. Ground reaches all edges. No mowing stripes, rows, furrows, flowers, clover, large tufts, focal features, gradients, vignette, border, margins, grid, swatches, text, horizon, islands, black backing, objects, insects, characters, photographic texture, clay3D or pixels. One continuous rotation-safe hand-illustrated ground surface.",
+      "verdict": "rework",
+      "reason": "Unwanted clover / too-long directional blades; regenerate at short uniform turf scale.",
+      "excluded": true,
+      "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested.",
+      "sha256": "67e681d6a5fb65240f34380bc7e9c3f7199c368cb680efbded3787a23856a96d"
+    },
+    {
+      "material": "wild_grass",
+      "variant": 1,
+      "file": "raw/wild_grass-01.png",
+      "prompt": "Full-frame 1024 square painting of low grass stubble and scattered tiny clover viewed vertically from above. Minuscule blade tips and very short narrow grass strokes cover the whole image uniformly; mixed orientations. Tiny little clover flecks occupy five percent. Matte botanical gouache, fine colored-pencil detail. Medium green #4F793D with #658E4B #385C32. No long blades, large tufts, flowers, shadows, border, paper or text.",
+      "cost_usd": 0.067253,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "keep",
+      "excluded": false,
+      "reason": "Dense full-bleed fine interwoven mixed-direction grass with small scattered clover, consistent muted medium-green tone. Some strokes exceed literal pixel target, but no large hero tufts or strong lighting; bank coherence pending.",
+      "sha256": "0e765af73aa0506d61f8d6137129663be2c1a716b47e8994b0c6c9e153aabdba",
+      "pixel_sha256": "b09b05a9baaa6bb73e1e1ee9625d734e5d4f81e0e71c16166dd1edcebeeb69a0",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_095733_21830c69.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "wild_grass",
+      "variant": 2,
+      "file": "raw/wild_grass-02.png",
+      "prompt": "Hand-painted overhead lawn with a few tiny clover leaves scattered through it, covering entire frame, green to the edges. The low turf has the fine even appearance of green velvet: thousands of minute specks and minuscule tapered dashes, NOT long individual grass blades. Soft matte gouache, subtle pencil grain, natural medium green #4F793D #658E4B #385C32. Uniform fine texture, flat diffuse light. No flowers, no border, no text.",
+      "cost_usd": 0.0672515,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "keep",
+      "excluded": false,
+      "reason": "Full-bleed fine miniature turf stipples with sparse clover, matte soft gouache. Clover is larger than requested but scattered without hero tufts; subtle local grain direction. Coherent fine-scale pilot; bank comparison pending.",
+      "sha256": "cb46973e97a5b528826f74f8be3aec9411073ac74b8282aa38daf44fbc50a935",
+      "pixel_sha256": "a1fe9901d80724a8751aa835b18ff49875246b7557b107f2e507c0801dfcfac3",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_095209_ef937f4a.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "wild_grass",
+      "variant": 3,
+      "file": "raw/wild_grass-03.png",
+      "prompt": "Hand-painted overhead lawn with a few tiny clover leaves scattered through it, covering entire frame, green to the edges. The low turf has the fine even appearance of green velvet: thousands of minute specks and minuscule tapered dashes, NOT long individual grass blades. Soft matte gouache, subtle pencil grain, natural medium green #4F793D #658E4B #385C32. Uniform fine texture, flat diffuse light. No flowers, no border, no text. New arrangement 03.",
+      "cost_usd": 0.0672545,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "keep",
+      "excluded": false,
+      "reason": "Fine full-bleed matte turf with scattered small clover; darker than pilot02 but same velvety fine grass scale. No strong border or shadow, no long hero tufts.",
+      "sha256": "42b1978b1ecb6b097ba618b74f4439c28658a3cf260b66cdd3999931a3990606",
+      "pixel_sha256": "58e934f892da3a0cf29de4ff3ebc4640cc3f969402cdef395795b43c06c32a59",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_095319_68bb365a.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "wild_grass",
+      "variant": 4,
+      "file": "raw/wild_grass-04.png",
+      "prompt": "Full-frame 1024 square painting of low grass stubble and scattered tiny clover viewed vertically from above. Minuscule blade tips and very short narrow grass strokes cover the whole image uniformly; mixed orientations. Tiny little clover flecks occupy five percent. Matte botanical gouache, fine colored-pencil detail. Medium green #4F793D with #658E4B #385C32. No long blades, large tufts, flowers, shadows, border, paper or text. Unique random arrangement two.",
+      "cost_usd": 0.0672555,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Sparse illustrated clippings with broad plain backing, too different from dense botanical pilot01.",
+      "sha256": "ff11d33a2b4f340b30f46d88afce62d6bee128d10586d755dc146a98e12b78f3",
+      "pixel_sha256": "15e6d932394311d83cc17ddf6b466bc3d8294279cdac5bfa42df6460f3a376de",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_095838_1a751158.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "wild_grass",
+      "variant": 5,
+      "file": "raw/wild_grass-05.png",
+      "prompt": "Full-frame 1024 square painting of low grass stubble and scattered tiny clover viewed vertically from above. Minuscule blade tips and very short narrow grass strokes cover the whole image uniformly; mixed orientations. Tiny little clover flecks occupy five percent. Matte botanical gouache, fine colored-pencil detail. Medium green #4F793D with #658E4B #385C32. No long blades, large tufts, flowers, shadows, border, paper or text. Unique random arrangement three.",
+      "cost_usd": 0.0672555,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "rework",
+      "excluded": true,
+      "reason": "Broader longer upward-flowing blades than dense fine pilot01; inconsistent scale and direction.",
+      "sha256": "8a0a17704edb762e6738c922e9ef279856d77c99804694bf7412cd207fe9dba1",
+      "pixel_sha256": "ff7d2859f580ea7c4723979f4fda3390a61dfb0a324908f65284ef585a59af39",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_095839_70a47f8e.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "wild_grass",
+      "variant": 6,
+      "file": "raw/wild_grass-06.png",
+      "prompt": "An overhead painting of dense fine short grass stubble with tiny scattered clover flecks covering every pixel. Uniform medium leafy green, tiny blade tips, short strokes randomly pointing every way. Delicate matte gouache and pencil detail. No long blades or tufts, no white borders. 1024 square. #4F793D #658E4B #385C32. Flat light. Independent arrangement C.",
+      "cost_usd": 0.0672455,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "rework",
+      "excluded": true,
+      "reason": "Dense fine botanical rendering and small clover, but stronger upward flow and longer blades than desired; differs from velvety02/03.",
+      "sha256": "ec622bf09b7e3173e2fa638dd8bfe9ead3a6b7109d852079adb415e79956e6f8",
+      "pixel_sha256": "e826386d31cde228612d9647caa68d05a1d915ae96254989bee87bd6ceb0199a",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_095942_62380982.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    }
+  ],
+  "rejected": [
+    {
+      "material": "wild_grass",
+      "variant": 1,
+      "file": "raw/rejected/wild_grass-01-superseded-4c1312b0494e.png",
+      "cost_usd": 0.067848,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "REWORK this full-frame grass into true overhead fine low ground cover, variant 01. Completely redraw layout, NOT a filtered copy. Make every blade very short 8-18px with all radial directions equally mixed; remove tall vertical stems. Clover and weeds should be tiny 6-12px leaflets, about 20 percent coverage among fine little grass strokes. Hundreds of little motifs across 1024 square. Uniform medium greens #2F6B3F #4F9A3A #7FB255, matte gouache and pencil. Strict directly above view; low carpet with no upright elevation. Full-bleed edge-to-edge constant density, flat diffuse light. No swirls, rows, stripes, border, panels, text, gradient, vignette, giant leaves, focal patches, photo or 3D.",
+      "verdict": "discard",
+      "reason": "Superseded during bank-coherence rework; see historical_review for prior source assessment.",
+      "excluded": true,
+      "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested.",
+      "sha256": "4c1312b0494ec4a63784e388a9c497a841590da2b04787f39ccf14f06e93cc81",
+      "superseded_file": "raw/wild_grass-01.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "keep",
+        "excluded": false,
+        "reason": "Full-bleed fine botanical linework; moderate upward blade flow remains.",
+        "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested."
+      }
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "file": "raw/rejected/lawn-01-superseded-654bebd23c10.png",
+      "cost_usd": 0.068053,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "Single full-bleed 1024x1024 square LAWN texture, independent composition 01. Reference for handmade botanical gouache and pencil STYLE ONLY, not six-swatch layout. Exactly overhead tidy short fine grass blades, smaller and more uniform than wild grass, fresh medium green. Hundreds of tiny strokes oriented in all directions, small crisp painted shapes, subtle pencil detail. Restrained #4F9A3A #7FB255 #2F6B3F #24541E, uniform density, scale, tone and flat diffuse lighting throughout. Ground reaches all edges. No mowing stripes, rows, furrows, flowers, clover, large tufts, focal features, gradients, vignette, border, margins, grid, swatches, text, horizon, islands, black backing, objects, insects, characters, photographic texture, clay3D or pixels. One continuous rotation-safe hand-illustrated ground surface.",
+      "verdict": "discard",
+      "reason": "Superseded during bank-coherence rework; see historical_review for prior source assessment.",
+      "excluded": true,
+      "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested.",
+      "sha256": "654bebd23c1053ab35484369cfe38a5308a2f644e586d0ee25dc625f4ea82e63",
+      "superseded_file": "raw/lawn-01.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "keep",
+        "excluded": false,
+        "reason": "Full-bleed short green turf; tiny blade orientation somewhat upward, no stripes or borders.",
+        "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested."
+      }
+    },
+    {
+      "material": "wild_grass",
+      "variant": 1,
+      "file": "raw/rejected/wild_grass-01-superseded-0b9f4298fb5b.png",
+      "prompt": "1024 square, full-bleed flat overhead illustration of a seven-metre wild grass carpet. Thousands of tiny short grass dashes pointing randomly in every direction, blades 5-15 pixels, with sparse tiny clover leaflets 4-8 pixels, 10% coverage. Crisp handmade matte gouache, delicate pencil edges. Uniform medium leafy greens #4F793D #658E4B #385C32. Even density and flat light. No upright tufts, long blades, flowers, shadows, vignette, borders, labels, photo or 3D.",
+      "cost_usd": 0.067262,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Too coarse painted dashes with local upward orientation and oversized clover; finer botanical treatment needed.",
+      "sha256": "0b9f4298fb5b15616553c783193352d1776682f7370014d18b3f5928208bea48",
+      "pixel_sha256": "e298634af534ff1e813231c7b57ba46ff3a543c987c4e216f4475500e15f9a78",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_093409_68524b38.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending.",
+      "superseded_file": "raw/wild_grass-01.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "discard",
+        "excluded": true,
+        "reason": "Too coarse painted dashes with local upward orientation and oversized clover; finer botanical treatment needed.",
+        "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+      }
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "file": "raw/rejected/lawn-01-superseded-6e27462dc32a.png",
+      "prompt": "1024 square full-bleed illustration, straight overhead six-metre carpet of finely clipped lawn. Thousands of tiny tapered grass dashes 4-10 pixels long pointing randomly in all directions. Flat crisp handmade matte gouache with delicate pencil edges. Uniform medium leafy greens #4F793D #658E4B #385C32. Even fine density and flat light across the whole image. Grass only: no broad leaves, flowers, long blades, upright tufts, stripes, shadows, vignette, borders, labels, photo or 3D.",
+      "cost_usd": 0.06726,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Sparse coarse confetti-like strokes on plain backing; lacks dense fine botanical lawn detail.",
+      "sha256": "6e27462dc32acc3414b9a6caac7ca6b3b2d107c986fd10bcd48675ea05cbc302",
+      "pixel_sha256": "8ef228e746fd51bc962575c55017295e36d228522002967bde2fbd7786ce8771",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_093408_fde78d80.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending.",
+      "superseded_file": "raw/lawn-01.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "discard",
+        "excluded": true,
+        "reason": "Sparse coarse confetti-like strokes on plain backing; lacks dense fine botanical lawn detail.",
+        "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+      }
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "file": "raw/rejected/lawn-01-superseded-53e4b546d6a7.png",
+      "prompt": "Full-frame 1024 square hand-painted botanical ground texture: strictly overhead six metres of close-clipped fine lawn, miniature fine detail. Dense 15,000 interwoven hair-fine tapered grass leaves only 4-9 pixels long, oriented evenly in ALL compass directions. Tiny blades nearly touch; no plain empty backing. Flat matte gouache with delicate botanical pencil contours, muted greens #4F793D #658E4B #385C32. Constant density, scale and colour edge to edge. Fresh irregular independent arrangement. Grass only, no clover, broad leaves, tufts, upright hay, flowers, long blades, confetti dashes, shadows, borders, vignette, text, photo or 3D.",
+      "cost_usd": 0.0672785,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "All-direction blades improved but long coarse spiky linework reads as straw rather than finely clipped lawn.",
+      "sha256": "53e4b546d6a768d54c02ff354d7332aaaefb98f7e54acfb626984b7434028b28",
+      "pixel_sha256": "a774f1bf3edb298bcafda7899b72f8382008b7b07115465685e6115f8b1fa2b5",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_093501_067bfa0a.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending.",
+      "superseded_file": "raw/lawn-01.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "discard",
+        "excluded": true,
+        "reason": "All-direction blades improved but long coarse spiky linework reads as straw rather than finely clipped lawn.",
+        "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+      }
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "file": "raw/rejected/lawn-01-superseded-c17586b9f8e4.png",
+      "prompt": "1024 square painting. A flat carpet of thousands of tiny short grass blades seen directly overhead, muted medium greens #4F793D #658E4B #385C32. Delicate gouache. Random directions, even fine detail everywhere. Grass fills entire frame. No border or text.",
+      "cost_usd": 0.067234,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Long crisscrossing fine lines rather than close-clipped lawn; finer stippled scale needed.",
+      "sha256": "c17586b9f8e45f84a3ac1ddd7453d611e25b4198b251cd94563a826c2aa9ddc9",
+      "pixel_sha256": "a1128180007ef7a32e1b77883f2af4b19a319d8c681b22aa636ffef451e859f2",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_093649_e0f44129.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending.",
+      "superseded_file": "raw/lawn-01.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "discard",
+        "excluded": true,
+        "reason": "Long crisscrossing fine lines rather than close-clipped lawn; finer stippled scale needed.",
+        "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+      }
+    },
+    {
+      "material": "wild_grass",
+      "variant": 1,
+      "file": "raw/rejected/wild_grass-01-superseded-c51c881b4a28.png",
+      "prompt": "Full-frame 1024 square hand-painted botanical ground texture: strictly overhead seven metres of low wild turf, miniature fine detail. Dense 10,000 interwoven hair-fine tapered grass leaves only 6-14 pixels long, oriented evenly in ALL compass directions, plus 150 scattered tiny clover groups with 3-6px leaflets. Flat matte gouache with delicate botanical pencil contours, muted greens #4F793D #658E4B #385C32. Constant density, scale and colour edge to edge. Fresh irregular independent arrangement. No large tufts, upright hay, flowers, long blades, broad hero leaves, confetti dashes, shadows, borders, vignette, text, photo or 3D.",
+      "cost_usd": 0.06728,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Oversized grass/clover and conspicuous identical repeated quadrants, not fine independently composed full-frame turf.",
+      "sha256": "c51c881b4a28cc3baed830da677d5b39c579a1a79f187e8105fa42f9efa04ae2",
+      "pixel_sha256": "7314d5180df164131d8cb2fe8bb993fc8650022f2ee39a57a294b2d9743fefb1",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_093503_9423a589.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending.",
+      "superseded_file": "raw/wild_grass-01.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "discard",
+        "excluded": true,
+        "reason": "Oversized grass/clover and conspicuous identical repeated quadrants, not fine independently composed full-frame turf.",
+        "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+      }
+    },
+    {
+      "material": "wild_grass",
+      "variant": 1,
+      "file": "raw/rejected/wild_grass-01-superseded-c4bedbfe0e56.png",
+      "prompt": "Zoom out three times to show nine times more tiny grass strokes and little clover. Fill the entire 1024 square edge to edge with uniformly dense very fine miniature wild turf marks. Make a new random all-direction arrangement. Matte botanical gouache and fine pencil. Keep these medium greens. No border, no large marks, no shadows, no text.",
+      "cost_usd": 0.0677965,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Near-exact clone of initial coarse candidate; requested zoom-out did not alter composition or scale.",
+      "sha256": "c4bedbfe0e56c17cfc1ffe2ad3b36a8405680467be56b0571edb6ba9e0078f47",
+      "pixel_sha256": "681c6a60f4edf0f0c9cdbf1ae7a4552c9d9b828c4739c3a8459b61dea8daef66",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [
+        "raw/rejected/wild_grass-01-superseded-0b9f4298fb5b.png"
+      ],
+      "generation_mode": "image-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_093926_68f44351.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending.",
+      "superseded_file": "raw/wild_grass-01.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "discard",
+        "excluded": true,
+        "reason": "Near-exact clone of initial coarse candidate; requested zoom-out did not alter composition or scale.",
+        "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+      }
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "file": "raw/rejected/lawn-01-superseded-c8a2dff7564c.png",
+      "prompt": "Fine green lawn turf texture. Directly overhead. Thousands of tiny short grass blades, evenly mixed directions. Matte gouache painting. Medium leafy greens. Full frame square. Uniform density, miniature details.",
+      "cost_usd": 0.0672195,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Conspicuous white margin and long blades; does not satisfy full-bleed short turf.",
+      "sha256": "c8a2dff7564c4c71eb635bab37eade40dbc26d6513a14153ace608437d408d1b",
+      "pixel_sha256": "505365358840c4ac053c60b7f0a56fd0ea4367897498544590522530f8e44527",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_093839_528c9610.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending.",
+      "superseded_file": "raw/lawn-01.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "discard",
+        "excluded": true,
+        "reason": "Conspicuous white margin and long blades; does not satisfy full-bleed short turf.",
+        "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+      }
+    },
+    {
+      "material": "wild_grass",
+      "variant": 1,
+      "file": "raw/rejected/wild_grass-01-superseded-51788f4c1b49.png",
+      "prompt": "Fine stippled wild grass and tiny clover, uniformly dense and low. Miniature matte green gouache and pencil strokes, randomly oriented. Bird's-eye view. Edge-to-edge, no border. Medium leafy green.",
+      "cost_usd": 0.0672235,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Dense cream paper flecking creates washed-out etched surface rather than full green matte botanical grass.",
+      "sha256": "51788f4c1b49cf0a282575ff3d92193f5d2b393ff26679db4d7d2ee8a2c1959b",
+      "pixel_sha256": "5b556d9e75e2bb1e2f3fb128999eeb585a2da71c0ddf3387381f804105eefa63",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_094036_424cb353.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending.",
+      "superseded_file": "raw/wild_grass-01.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "discard",
+        "excluded": true,
+        "reason": "Dense cream paper flecking creates washed-out etched surface rather than full green matte botanical grass.",
+        "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+      }
+    },
+    {
+      "material": "wild_grass",
+      "variant": 2,
+      "file": "raw/rejected/wild_grass-02-superseded-a62f6eb5bfb2.png",
+      "cost_usd": 0.067848,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "REWORK this full-frame grass into true overhead fine low ground cover, variant 02. Completely redraw layout, NOT a filtered copy. Make every blade very short 8-18px with all radial directions equally mixed; remove tall vertical stems. Clover and weeds should be tiny 6-12px leaflets, about 20 percent coverage among fine little grass strokes. Hundreds of little motifs across 1024 square. Uniform medium greens #2F6B3F #4F9A3A #7FB255, matte gouache and pencil. Strict directly above view; low carpet with no upright elevation. Full-bleed edge-to-edge constant density, flat diffuse light. No swirls, rows, stripes, border, panels, text, gradient, vignette, giant leaves, focal patches, photo or 3D.",
+      "verdict": "discard",
+      "reason": "Long vertically flowing blades and larger clover than fine-coverage target; rework did not fix scale.",
+      "excluded": true,
+      "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested.",
+      "sha256": "a62f6eb5bfb2362531fffafbffc5c8ca3e29887b3e5f310f8d23bd8c31cde0c3",
+      "superseded_file": "raw/wild_grass-02.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "rework",
+        "excluded": true,
+        "reason": "Long vertically flowing blades and larger clover than fine-coverage target; rework did not fix scale.",
+        "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested."
+      }
+    },
+    {
+      "material": "wild_grass",
+      "variant": 2,
+      "file": "raw/rejected/wild_grass-02-superseded-9e50a135aed0.png",
+      "prompt": "1024 square, full-bleed flat overhead illustration of a seven-metre wild grass carpet. Thousands of tiny short grass dashes pointing randomly in every direction, blades 5-15 pixels, with sparse tiny clover leaflets 4-8 pixels, 10% coverage. Crisp handmade matte gouache, delicate pencil edges. Uniform medium leafy greens #4F793D #658E4B #385C32. Even density and flat light. No upright tufts, long blades, flowers, shadows, vignette, borders, labels, photo or 3D. Very dense delicate narrow strokes. Fresh random composition B.",
+      "cost_usd": 0.0672675,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Sparse plain green backing and larger lighter dashes than denser candidate 01. Does not match desired botanical density.",
+      "sha256": "9e50a135aed0111e58b3a930b702e794e78f6af26265cf25b6cd6c6c1eb31761",
+      "pixel_sha256": "b7374f9d4f68b23f22f8d02272e0abd4719f2255a4330a29374d3a36f1954cb7",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_094359_07d03154.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending.",
+      "superseded_file": "raw/wild_grass-02.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "discard",
+        "excluded": true,
+        "reason": "Sparse plain green backing and larger lighter dashes than denser candidate 01. Does not match desired botanical density.",
+        "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+      }
+    },
+    {
+      "material": "lawn",
+      "variant": 3,
+      "file": "raw/rejected/lawn-03-superseded-4c0651e47fbf.png",
+      "cost_usd": 0.067834,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "Paint an original 1024x1024 square all-over short lawn illustration, version 03. Our own attached botanical artwork is a brushwork reference only. Tiny tidy fine grass blades cover every pixel in fresh medium greens #4F9A3A #7FB255 #2F6B3F #24541E. Directly overhead, randomized short blade orientations, uniform small feature scale and dense matte coverage, flat diffuse light. Gouache with delicate colored-pencil strokes. Continuous ground to all edges, no surrounding paper. No border, panels, text, flowers, stripes, furrows, gradient, vignette, objects, insects, characters, photography or 3D.",
+      "verdict": "discard",
+      "reason": "Superseded during bank-coherence rework; see historical_review for prior source assessment.",
+      "excluded": true,
+      "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested.",
+      "sha256": "4c0651e47fbf198dab7097eab3f64c08942c4d07b75a671eb541f7fc46e5fcdd",
+      "superseded_file": "raw/lawn-03.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "keep",
+        "excluded": false,
+        "reason": "Full-bleed short green turf; tiny blade orientation somewhat upward, no stripes or borders.",
+        "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested."
+      }
+    },
+    {
+      "material": "lawn",
+      "variant": 4,
+      "file": "raw/rejected/lawn-04-superseded-d3eeb43c92c2.png",
+      "cost_usd": 0.0678275,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "Repaint as uniformly mown SHORT LAWN, variant 04. Remove ALL clover and other broad leaves. Grass ONLY. Completely new independent layout of many tiny 5-12px grass strokes, mixed directions, no upright tall blades. Match original medium green palette, but every part has same fine scale and density. True directly overhead flat turf. Keep matte gouache and pencil hand-illustration. Fill entire 1024 square edge to edge with turf. Uniform flat diffuse illumination. No border, sheets, panels, text, rows, stripes, swirls, gradient, vignette, focal area, flowers, objects, insects, photography or 3D.",
+      "verdict": "discard",
+      "reason": "Broad leaves removed but large vertically flowing blade patches remain, unlike short turf target.",
+      "excluded": true,
+      "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested.",
+      "sha256": "d3eeb43c92c20b121222968f157519a85b13943b30f931e23b61fa42f545ee0d",
+      "superseded_file": "raw/lawn-04.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "rework",
+        "excluded": true,
+        "reason": "Broad leaves removed but large vertically flowing blade patches remain, unlike short turf target.",
+        "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested."
+      }
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "file": "raw/rejected/lawn-01-superseded-8be6d3334f49.png",
+      "prompt": "Paint a 1024x1024 square all-over short lawn illustration. Tiny tidy fine grass blades cover every pixel in muted medium greens #4F793D #658E4B #385C32. Directly overhead, randomized short blade orientations, uniform small feature scale and dense matte coverage, flat diffuse light. Gouache with delicate colored-pencil strokes. Continuous ground to all edges, no surrounding paper. No border, panels, text, flowers, stripes, furrows, gradient, vignette, objects, insects, photography or 3D.",
+      "cost_usd": 0.067261,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Long thick upward-curving blades and repeated motif regions, not finely clipped random-direction turf.",
+      "sha256": "8be6d3334f4904c4678adcb44a43e206910668eeb9d43154be6e4548b30779ad",
+      "pixel_sha256": "249c77b9ca4ccf9d6c4aaa3d3077a086865cdeba39a84d6d6e36d9b86f574574",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_094137_5b1367c9.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending.",
+      "superseded_file": "raw/lawn-01.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "discard",
+        "excluded": true,
+        "reason": "Long thick upward-curving blades and repeated motif regions, not finely clipped random-direction turf.",
+        "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+      }
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "file": "raw/rejected/lawn-01-superseded-961307e94f6a.png",
+      "prompt": "Paint a new square of short lawn. Use this green pencil-gouache brushwork and fine scale, but a different random grass arrangement, evenly pointed in all directions. Full bleed, flat light, grass only.",
+      "cost_usd": 0.0677815,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Near-clone of historical lawn03: measured 128px luminance correlation 0.97725. Not independently composed.",
+      "sha256": "961307e94f6a7cf5f7e589bd29dff3f9819a5b036a2067c2c0c2331c05d86a31",
+      "pixel_sha256": "e10667ad57fe0f49c77849073aecf29331de27dd840c313ee2e812fa91d658fb",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [
+        "raw/rejected/lawn-03-superseded-4c0651e47fbf.png"
+      ],
+      "generation_mode": "image-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_094710_c3314ea6.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending.",
+      "superseded_file": "raw/lawn-01.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "discard",
+        "excluded": true,
+        "reason": "Near-clone of historical lawn03: measured 128px luminance correlation 0.97725. Not independently composed.",
+        "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+      }
+    },
+    {
+      "material": "wild_grass",
+      "variant": 2,
+      "file": "raw/rejected/wild_grass-02-superseded-ffd9d7de1294.png",
+      "prompt": "1024x1024 hand-painted ground texture, low fine wild grass from directly overhead. Tiny 1-5 pixel tapered strokes, dense like soft moss, scattered in all directions; small scattered clover specks. Matte gouache and subtle pencil grain, muted #4F793D #658E4B #385C32. Flat illumination. Whole image a continuous green surface with minute details. No long grass, no flowers, no border or text.",
+      "cost_usd": 0.067252,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Repeated large tuft-shaped regions with long blades; not low random short grass.",
+      "sha256": "ffd9d7de129411406099f9452f4a3629e64fb9aa23f4d8ab73be9e7b51fa9df7",
+      "pixel_sha256": "d91ac85100a3bb5893237b372e8bfa374e74e80db1596c1162f322c774d5bdab",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_094456_4afd8540.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending.",
+      "superseded_file": "raw/wild_grass-02.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "discard",
+        "excluded": true,
+        "reason": "Repeated large tuft-shaped regions with long blades; not low random short grass.",
+        "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+      }
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "file": "raw/rejected/lawn-01-superseded-f0a8b7d4832b.png",
+      "prompt": "Paint delicate tiny short tapered green marks all over the image. Dense fine-grained clipped lawn, looked at from straight above. Thin little strokes, randomly pointing in all directions. Matte gouache and pencil, #4F793D #658E4B #385C32. Edge-to-edge green, evenly lit, no borders or lettering.",
+      "cost_usd": 0.067239,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Long pencil blades and broad directional changes rather than close-clipped miniature turf.",
+      "sha256": "f0a8b7d4832bf17f206c5451a46177fe2c981854dcbffa6a8145e4403165466a",
+      "pixel_sha256": "55ff5e43c27b8a9bc968b567ca2aabe77de24bf1d53cdffa532d0531d295cd01",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_094803_333120de.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending.",
+      "superseded_file": "raw/lawn-01.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "discard",
+        "excluded": true,
+        "reason": "Long pencil blades and broad directional changes rather than close-clipped miniature turf.",
+        "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+      }
+    },
+    {
+      "material": "wild_grass",
+      "variant": 2,
+      "file": "raw/rejected/wild_grass-02-superseded-c209d6937387.png",
+      "prompt": "Paint delicate tiny short tapered green marks all over the image. Dense fine-grained wild grass with small scattered clover leaflets, looked at from straight above. Thin little strokes, randomly pointing in all directions. Matte gouache and pencil, #4F793D #658E4B #385C32. Edge-to-edge green, evenly lit, no borders or lettering.",
+      "cost_usd": 0.0672415,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Long fine blades and oversized scattered clover, inconsistent with required low fine scale.",
+      "sha256": "c209d69373878ea171a588a8ae15f39f10df5a631428b2fa6f640186be3af90c",
+      "pixel_sha256": "87c32417adbe5d355a05bb828b16c1dd5fc1b57154249c60cf2844f8bece3aae",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_094805_458091d3.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending.",
+      "superseded_file": "raw/wild_grass-02.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "discard",
+        "excluded": true,
+        "reason": "Long fine blades and oversized scattered clover, inconsistent with required low fine scale.",
+        "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+      }
+    },
+    {
+      "material": "wild_grass",
+      "variant": 2,
+      "file": "raw/rejected/wild_grass-02-superseded-7de9a956f711.png",
+      "prompt": "Full-bleed hand-painted overhead wild turf, green grass fills ALL pixels of 1024 square, no paper showing. The low grass has the fine even appearance of green velvet: thousands of minute specks and minuscule tapered dashes, NOT long individual grass blades. Scattered tiny clover leaflets, small and sparse. Soft matte gouache, subtle pencil grain, natural medium green #4F793D #658E4B #385C32. Uniform texture to every edge, flat diffuse light. No flowers, no border, no text.",
+      "cost_usd": 0.0672585,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "White border, very inconsistent detail scale with large long blades around edges and central focal density.",
+      "sha256": "7de9a956f711c7a4df1cf655a9e30052363a66d0cbd010b368349d789eb7de77",
+      "pixel_sha256": "768d67e788169366a156a00fd4e9b67f92697b5bc37e29adb6030f05dee0a093",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_094940_761df1e9.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending.",
+      "superseded_file": "raw/wild_grass-02.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "discard",
+        "excluded": true,
+        "reason": "White border, very inconsistent detail scale with large long blades around edges and central focal density.",
+        "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+      }
+    },
+    {
+      "material": "wild_grass",
+      "variant": 2,
+      "file": "raw/rejected/wild_grass-02-superseded-6cb7c227b91b.png",
+      "prompt": "Single full-bleed 1024x1024 square WILD GRASS texture. Reference for handmade botanical gouache and pencil STYLE ONLY, not six-swatch layout. Exactly overhead tiny fine short grass blades with scattered miniature clover and weeds, fresh medium green #4F793D #658E4B #385C32. Thousands of tiny strokes oriented in all directions, small crisp painted shapes, subtle pencil detail. Uniform dense coverage, scale, tone and flat diffuse lighting. Ground reaches all edges. No large tufts, flowers, stripes, gradients, vignette, border, margins, grid, swatches, text, horizon, objects, photography or 3D. One continuous hand-illustrated ground surface.",
+      "cost_usd": 0.067837,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Reference composition cloned as mixed-species patchwork, not wild grass texture.",
+      "sha256": "6cb7c227b91bca639e88982f7acf200b937c6432ae52ae97ffd598e1ab66912c",
+      "pixel_sha256": "c1cae1616de851f2c2828ae890789d3a2946d6d6c15b9dd653048b8cb95dd76e",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [
+        "../proofs/cover-crops.png"
+      ],
+      "generation_mode": "image-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_095113_5dd0d13b.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending.",
+      "superseded_file": "raw/wild_grass-02.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "discard",
+        "excluded": true,
+        "reason": "Reference composition cloned as mixed-species patchwork, not wild grass texture.",
+        "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+      }
+    },
+    {
+      "material": "wild_grass",
+      "variant": 3,
+      "file": "raw/rejected/wild_grass-03-superseded-44e453f523fd.png",
+      "cost_usd": 0.0678695,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "ONE full-bleed square 1024x1024 WILD GRASS ground illustration, variant 03, an independent small-detail composition. The supplied sheet guides ONLY matte botanical hand-illustration style, do not copy its layout. Medium green turf composed of many little mixed blades, small trifoliate clover and scattered tiny weeds, optional very sparse pale flower flecks. Small crisp gouache shapes, colored-pencil edges, gentle matte grain. Restrained greens #2F6B3F #4F9A3A #7FB255 #24541E, tiny #E6F0E8. Moderately dense foliage uniform to every edge, all directions mixed in an organic irregular distribution. True vertical overhead, flat diffuse nondirectional illumination, rotation safe. No margins, swatches, panels, grid, labels, horizon, isolated islands, giant leaves, decorative focal objects, insects or characters, vignette, gradient, stripes, black backing, photorealism, 3D clay, pixel art. Material covers all pixels.",
+      "verdict": "discard",
+      "reason": "Superseded during bank-coherence rework; see historical_review for prior source assessment.",
+      "excluded": true,
+      "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested.",
+      "sha256": "44e453f523fd9665ff3559e8fde3972792f844fbaa784e90070a00f17cc34070",
+      "superseded_file": "raw/wild_grass-03.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "keep",
+        "excluded": false,
+        "reason": "Full-bleed fine small mixed grass/clover with slightly upward blade tendency.",
+        "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested."
+      }
+    },
+    {
+      "material": "lawn",
+      "variant": 2,
+      "file": "raw/rejected/lawn-02-superseded-1d6ef74239c3.png",
+      "cost_usd": 0.0678275,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "Repaint as uniformly mown SHORT LAWN, variant 02. Remove ALL clover and other broad leaves. Grass ONLY. Completely new independent layout of many tiny 5-12px grass strokes, mixed directions, no upright tall blades. Match original medium green palette, but every part has same fine scale and density. True directly overhead flat turf. Keep matte gouache and pencil hand-illustration. Fill entire 1024 square edge to edge with turf. Uniform flat diffuse illumination. No border, sheets, panels, text, rows, stripes, swirls, gradient, vignette, focal area, flowers, objects, insects, photography or 3D.",
+      "verdict": "discard",
+      "reason": "Superseded during bank-coherence rework; see historical_review for prior source assessment.",
+      "excluded": true,
+      "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested.",
+      "sha256": "1d6ef74239c3535481ad0c7d5c0cb2de1c9eac1845a7995785d1611183f6361f",
+      "superseded_file": "raw/lawn-02.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "keep",
+        "excluded": false,
+        "reason": "Full-bleed fine grass; broad clover removed, but moderate directional blade flow remains.",
+        "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested."
+      }
+    },
+    {
+      "material": "lawn",
+      "variant": 4,
+      "file": "raw/rejected/lawn-04-superseded-a14f3b09d5df.png",
+      "prompt": "1024 square full-bleed illustration, straight overhead six-metre carpet of finely clipped lawn. Thousands of tiny tapered grass dashes 4-10 pixels long pointing randomly in all directions. Flat crisp handmade matte gouache with delicate pencil edges. Uniform medium leafy greens #4F793D #658E4B #385C32. Even fine density and flat light across the whole image. Grass only: no broad leaves, flowers, long blades, upright tufts, stripes, shadows, vignette, borders, labels, photo or 3D. New random arrangement 04.",
+      "cost_usd": 0.0672635,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Short mixed-direction grass, but conspicuously repeated half-frame motif layout and simplified coarse dashes; finer botanical treatment needed.",
+      "sha256": "a14f3b09d5dfa931f0758aa927d162b40a548d529600080ca6ffe23a7305358d",
+      "pixel_sha256": "1d002c8b00af3be64c826bbf7f343e3ded1240ce947a732453388270b0322b1a",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_094540_b2cfb26d.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending.",
+      "superseded_file": "raw/lawn-04.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "rework",
+        "excluded": true,
+        "reason": "Short mixed-direction grass, but conspicuously repeated half-frame motif layout and simplified coarse dashes; finer botanical treatment needed.",
+        "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+      }
+    },
+    {
+      "material": "wild_grass",
+      "variant": 5,
+      "file": "raw/rejected/wild_grass-05-superseded-e0cb393db5aa.png",
+      "cost_usd": 0.067848,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "REWORK this full-frame grass into true overhead fine low ground cover, variant 05. Completely redraw layout, NOT a filtered copy. Make every blade very short 8-18px with all radial directions equally mixed; remove tall vertical stems. Clover and weeds should be tiny 6-12px leaflets, about 20 percent coverage among fine little grass strokes. Hundreds of little motifs across 1024 square. Uniform medium greens #2F6B3F #4F9A3A #7FB255, matte gouache and pencil. Strict directly above view; low carpet with no upright elevation. Full-bleed edge-to-edge constant density, flat diffuse light. No swirls, rows, stripes, border, panels, text, gradient, vignette, giant leaves, focal patches, photo or 3D.",
+      "verdict": "discard",
+      "reason": "Rework retained too many long vertical blades and large clover patches.",
+      "excluded": true,
+      "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested.",
+      "sha256": "e0cb393db5aa830b022170a8116ee48fd73511c77e881b892b19522259fa817b",
+      "superseded_file": "raw/wild_grass-05.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "rework",
+        "excluded": true,
+        "reason": "Rework retained too many long vertical blades and large clover patches.",
+        "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested."
+      }
+    },
+    {
+      "material": "wild_grass",
+      "variant": 6,
+      "file": "raw/rejected/wild_grass-06-superseded-4ee182fba032.png",
+      "cost_usd": 0.067848,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "REWORK this full-frame grass into true overhead fine low ground cover, variant 06. Completely redraw layout, NOT a filtered copy. Make every blade very short 8-18px with all radial directions equally mixed; remove tall vertical stems. Clover and weeds should be tiny 6-12px leaflets, about 20 percent coverage among fine little grass strokes. Hundreds of little motifs across 1024 square. Uniform medium greens #2F6B3F #4F9A3A #7FB255, matte gouache and pencil. Strict directly above view; low carpet with no upright elevation. Full-bleed edge-to-edge constant density, flat diffuse light. No swirls, rows, stripes, border, panels, text, gradient, vignette, giant leaves, focal patches, photo or 3D.",
+      "verdict": "discard",
+      "reason": "Fine grass improved but larger clover clusters and upward directional flow remain.",
+      "excluded": true,
+      "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested.",
+      "sha256": "4ee182fba03279a2e55ba7a330ba51898237461c83982c827b1bd20d377a1785",
+      "superseded_file": "raw/wild_grass-06.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "rework",
+        "excluded": true,
+        "reason": "Fine grass improved but larger clover clusters and upward directional flow remain.",
+        "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested."
+      }
+    },
+    {
+      "material": "wild_grass",
+      "variant": 4,
+      "file": "raw/rejected/wild_grass-04-superseded-f9b29f220137.png",
+      "cost_usd": 0.067848,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "REWORK this full-frame grass into true overhead fine low ground cover, variant 04. Completely redraw layout, NOT a filtered copy. Make every blade very short 8-18px with all radial directions equally mixed; remove tall vertical stems. Clover and weeds should be tiny 6-12px leaflets, about 20 percent coverage among fine little grass strokes. Hundreds of little motifs across 1024 square. Uniform medium greens #2F6B3F #4F9A3A #7FB255, matte gouache and pencil. Strict directly above view; low carpet with no upright elevation. Full-bleed edge-to-edge constant density, flat diffuse light. No swirls, rows, stripes, border, panels, text, gradient, vignette, giant leaves, focal patches, photo or 3D.",
+      "verdict": "discard",
+      "reason": "Fine overhead full-bleed ground cover; a little bluer and denser than other variants.",
+      "excluded": true,
+      "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested.",
+      "sha256": "f9b29f2201379b242c77eb2e1d83102a2726783520f6bfff96949dedcad99166",
+      "superseded_file": "raw/wild_grass-04.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "keep",
+        "excluded": false,
+        "reason": "Fine overhead full-bleed ground cover; a little bluer and denser than other variants.",
+        "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested."
+      }
+    },
+    {
+      "material": "wild_grass",
+      "variant": 4,
+      "file": "raw/rejected/wild_grass-04-superseded-1696a9d8a28b.png",
+      "prompt": "Seamless wild grass ground illustration, 1024 square full frame. Fine even green velvet turf, thousands of minuscule tapered dashes in all directions, no long individual blades. Scatter numerous grass-sized tiny clover specks, leaflets 4px, 5% coverage. Soft matte gouache and delicate pencil grain. Medium leafy greens #4F793D #658E4B #385C32, even colour and density throughout. Flat overhead, no shadows. No large leaves, no white, no border or text.",
+      "cost_usd": 0.0672565,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Good full-bleed small clover and short mixed-direction marks, but obvious large-scale swirl and repeated quadrants remain. Further randomization needed.",
+      "sha256": "1696a9d8a28b7bebc0263eca3022f5572713f86e04c891e2a98ae53ea9ef983a",
+      "pixel_sha256": "eead4189d3a86f80a0ee2983bfb8f9f4ade9d3a49a4212a775783c1f97bec9b2",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_095519_c0526c20.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending.",
+      "superseded_file": "raw/wild_grass-04.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "rework",
+        "excluded": true,
+        "reason": "Good full-bleed small clover and short mixed-direction marks, but obvious large-scale swirl and repeated quadrants remain. Further randomization needed.",
+        "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+      }
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "file": "raw/rejected/lawn-01-superseded-f71e511bc92a.png",
+      "prompt": "Square hand-painted overhead lawn. The short turf has the fine even appearance of green velvet: thousands of minute specks and minuscule tapered dashes, NOT long individual grass blades. Soft matte gouache, subtle pencil grain, natural medium green #4F793D #658E4B #385C32. Uniform texture to every edge, flat diffuse light. No other plants, no border, no text.",
+      "cost_usd": 0.0672445,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Fine miniature clipped turf achieved, but white margin violates full-bleed requirement.",
+      "sha256": "f71e511bc92ae48f995f1b292da5db700b3ece4717029f981763589f54bb0dd9",
+      "pixel_sha256": "16df9aa0977ac0bba6f70a3f9c58b79dbd33d462e20747d29fbeb6248933fa9b",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_094853_9d76ec3a.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending.",
+      "superseded_file": "raw/lawn-01.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "rework",
+        "excluded": true,
+        "reason": "Fine miniature clipped turf achieved, but white margin violates full-bleed requirement.",
+        "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+      }
+    },
+    {
+      "material": "wild_grass",
+      "variant": 1,
+      "file": "raw/rejected/wild_grass-01-superseded-58af96feb2cd.png",
+      "prompt": "1024 square, full-bleed flat overhead illustration of a seven-metre wild grass carpet. Thousands of tiny short grass dashes pointing randomly in every direction, blades 5-15 pixels, with sparse tiny clover leaflets 4-8 pixels, 10% coverage. Crisp handmade matte gouache, delicate pencil edges. Uniform medium leafy greens #4F793D #658E4B #385C32. Even density and flat light. No upright tufts, long blades, flowers, shadows, vignette, borders, labels, photo or 3D. Very dense delicate narrow strokes.",
+      "cost_usd": 0.067265,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Earlier simple-dash pilot too coarse relative to final fine botanical direction; retain provenance but supersede.",
+      "sha256": "58af96feb2cd4805ea2f82c25168e7c52f1c50fa6b81126d2bc8a9164fa6f406",
+      "pixel_sha256": "a33be34889a99dfb039a2601478b482ee423afeaeaf7e016d40d91e18d991648",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_094308_a8833ce5.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending.",
+      "superseded_file": "raw/wild_grass-01.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "rework",
+        "excluded": true,
+        "reason": "Earlier simple-dash pilot too coarse relative to final fine botanical direction; retain provenance but supersede.",
+        "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+      }
+    },
+    {
+      "material": "wild_grass",
+      "variant": 4,
+      "file": "raw/rejected/wild_grass-04-superseded-5221176832f4.png",
+      "prompt": "Seamless wild grass ground illustration, 1024 square full frame. Fine even green velvet turf, thousands of minuscule tapered dashes in all directions, no long individual blades. Scatter numerous grass-sized tiny clover specks, leaflets 4px, 5% coverage. Soft matte gouache and delicate pencil grain. Medium leafy greens #4F793D #658E4B #385C32, even colour and density throughout. Flat overhead, no shadows. No large leaves, no white, no border or text. Random arrangement 2, no swirls.",
+      "cost_usd": 0.0672605,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Repeated quadrants and strong sweeping directional blade flow remain despite no-swirl instruction.",
+      "sha256": "5221176832f4adf11838cfb0295701189a7f724c3b99065425b4e52365c55194",
+      "pixel_sha256": "7f5f28088d010ba3f0dfbfc911c164f2592337be8183c6428c52250bbba09362",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_095619_00ce4efd.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending.",
+      "superseded_file": "raw/wild_grass-04.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "rework",
+        "excluded": true,
+        "reason": "Repeated quadrants and strong sweeping directional blade flow remain despite no-swirl instruction.",
+        "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+      }
+    },
+    {
+      "material": "wild_grass",
+      "variant": 5,
+      "file": "raw/rejected/wild_grass-05-superseded-d56cb7b3047d.png",
+      "prompt": "Hand-painted overhead lawn with a few tiny clover leaves scattered through it, covering entire frame, green to the edges. The low turf has the fine even appearance of green velvet: thousands of minute specks and minuscule tapered dashes, NOT long individual grass blades. Soft matte gouache, subtle pencil grain, natural medium green #4F793D #658E4B #385C32. Uniform fine texture, flat diffuse light. No flowers, no border, no text. New arrangement 05.",
+      "cost_usd": 0.0672545,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Fine full-frame turf, but conspicuous large dark clover and much paler colour than02/03.",
+      "sha256": "d56cb7b3047d4480e6a46bf6f81fab33fe1fb374c7f7040f241e4c6bca9e4e85",
+      "pixel_sha256": "319d07f2d44c6d9506aff4c5c888d8f7ccecfcdb9936481f1a431d11a985837c",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_095420_c56c2686.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending.",
+      "superseded_file": "raw/wild_grass-05.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "rework",
+        "excluded": true,
+        "reason": "Fine full-frame turf, but conspicuous large dark clover and much paler colour than02/03.",
+        "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+      }
+    },
+    {
+      "material": "lawn",
+      "variant": 2,
+      "file": "raw/rejected/lawn-02-superseded-394d0e55bdb0.png",
+      "prompt": "Hand-painted overhead lawn covering entire frame, green to the edges. The low turf has the fine even appearance of green velvet: thousands of minute specks and minuscule tapered dashes, NOT long individual grass blades. Soft matte gouache, subtle pencil grain, natural medium green #4F793D #658E4B #385C32. Uniform fine texture, flat diffuse light. Grass only, no clover, no flowers, no border, no text. New arrangement 02.",
+      "cost_usd": 0.0672525,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Pronounced pale upper region and dark lower-right patch; blades still overly upright. Does not meet uniform flat-light target.",
+      "sha256": "394d0e55bdb012569d4caf60d7c3e7c3b4d662e2a86e2c42789c92a3f4497889",
+      "pixel_sha256": "12fb2ea7b298249b9a67d3ed852da8af0e55b8ae7c303567daa5213af7cf6489",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_095319_1c2d61ce.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending.",
+      "superseded_file": "raw/lawn-02.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "discard",
+        "excluded": true,
+        "reason": "Pronounced pale upper region and dark lower-right patch; blades still overly upright. Does not meet uniform flat-light target.",
+        "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+      }
+    },
+    {
+      "material": "lawn",
+      "variant": 3,
+      "file": "raw/rejected/lawn-03-superseded-487761ef3dff.png",
+      "prompt": "1024 square full-bleed illustration, straight overhead six-metre carpet of finely clipped lawn. Thousands of tiny tapered grass dashes 4-10 pixels long pointing randomly in all directions. Flat crisp handmade matte gouache with delicate pencil edges. Uniform medium leafy greens #4F793D #658E4B #385C32. Even fine density and flat light across the whole image. Grass only: no broad leaves, flowers, long blades, upright tufts, stripes, shadows, vignette, borders, labels, photo or 3D. New random arrangement 03.",
+      "cost_usd": 0.0672635,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Small strokes still predominantly upward and sparse on broad plain backing.",
+      "sha256": "487761ef3dff2152a49f07c98be9c464e204f0f4e890cadd177164022102add2",
+      "pixel_sha256": "f081e4f295282c9bb8c7d707dd4af04e62e505aa5c13ad53bbc18b8bba3b07ea",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_094538_012565b8.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending.",
+      "superseded_file": "raw/lawn-03.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "discard",
+        "excluded": true,
+        "reason": "Small strokes still predominantly upward and sparse on broad plain backing.",
+        "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+      }
+    },
+    {
+      "material": "wild_grass",
+      "variant": 6,
+      "file": "raw/rejected/wild_grass-06-superseded-6572e1826a00.png",
+      "prompt": "Hand-painted overhead lawn with a few tiny clover leaves scattered through it, covering entire frame, green to the edges. The low turf has the fine even appearance of green velvet: thousands of minute specks and minuscule tapered dashes, NOT long individual grass blades. Soft matte gouache, subtle pencil grain, natural medium green #4F793D #658E4B #385C32. Uniform fine texture, flat diffuse light. No flowers, no border, no text. New arrangement 06.",
+      "cost_usd": 0.0672545,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Short fine turf but large clover clusters and brighter green than02/03; bank not coherent.",
+      "sha256": "6572e1826a002d1ad5d3f047f3f882e1b4f0f583894cb567f7c64b31f2f338e2",
+      "pixel_sha256": "2c4512e9c36cc7d6a301f1225a7043cba5d7fc847700af1a07c18530bd8e0f51",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_095419_dbf6574a.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending.",
+      "superseded_file": "raw/wild_grass-06.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "rework",
+        "excluded": true,
+        "reason": "Short fine turf but large clover clusters and brighter green than02/03; bank not coherent.",
+        "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+      }
+    },
+    {
+      "material": "lawn",
+      "variant": 4,
+      "file": "raw/rejected/lawn-04-superseded-5fd4715a1baf.png",
+      "prompt": "Hand-painted overhead lawn covering entire frame, green to the edges. The low turf has the fine even appearance of green velvet: thousands of minute specks and minuscule tapered dashes, NOT long individual grass blades. Soft matte gouache, subtle pencil grain, natural medium green #4F793D #658E4B #385C32. Uniform fine texture and uniform green tone, flat diffuse light. Grass only, no clover, no flowers, no border, no text. New arrangement 04.",
+      "cost_usd": 0.0672545,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Fine minuscule turf achieved but white border and pale desaturated ground; unsuitable full-bleed source.",
+      "sha256": "5fd4715a1bafbea2d383fe1341e3e6d1cd632c4c47356826ac94d027bd19d995",
+      "pixel_sha256": "eaaaec0a051e83c3299a1030a80812c99ba8dec437ce7572cd03432bf8495928",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_095418_ce781e28.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending.",
+      "superseded_file": "raw/lawn-04.png",
+      "supersession_reason": "Replaced for coherent smaller-scale random-direction source bank; original review retained.",
+      "historical_review": {
+        "verdict": "rework",
+        "excluded": true,
+        "reason": "Fine minuscule turf achieved but white border and pale desaturated ground; unsuitable full-bleed source.",
+        "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+      }
+    }
+  ],
+  "additional_cost_usd": 2.4227645,
+  "new_attempts": [
+    {
+      "material": "wild_grass",
+      "variant": 1,
+      "file": "raw/rejected/wild_grass-01-superseded-0b9f4298fb5b.png",
+      "prompt": "1024 square, full-bleed flat overhead illustration of a seven-metre wild grass carpet. Thousands of tiny short grass dashes pointing randomly in every direction, blades 5-15 pixels, with sparse tiny clover leaflets 4-8 pixels, 10% coverage. Crisp handmade matte gouache, delicate pencil edges. Uniform medium leafy greens #4F793D #658E4B #385C32. Even density and flat light. No upright tufts, long blades, flowers, shadows, vignette, borders, labels, photo or 3D.",
+      "cost_usd": 0.067262,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Too coarse painted dashes with local upward orientation and oversized clover; finer botanical treatment needed.",
+      "sha256": "0b9f4298fb5b15616553c783193352d1776682f7370014d18b3f5928208bea48",
+      "pixel_sha256": "e298634af534ff1e813231c7b57ba46ff3a543c987c4e216f4475500e15f9a78",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_093409_68524b38.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "file": "raw/rejected/lawn-01-superseded-6e27462dc32a.png",
+      "prompt": "1024 square full-bleed illustration, straight overhead six-metre carpet of finely clipped lawn. Thousands of tiny tapered grass dashes 4-10 pixels long pointing randomly in all directions. Flat crisp handmade matte gouache with delicate pencil edges. Uniform medium leafy greens #4F793D #658E4B #385C32. Even fine density and flat light across the whole image. Grass only: no broad leaves, flowers, long blades, upright tufts, stripes, shadows, vignette, borders, labels, photo or 3D.",
+      "cost_usd": 0.06726,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Sparse coarse confetti-like strokes on plain backing; lacks dense fine botanical lawn detail.",
+      "sha256": "6e27462dc32acc3414b9a6caac7ca6b3b2d107c986fd10bcd48675ea05cbc302",
+      "pixel_sha256": "8ef228e746fd51bc962575c55017295e36d228522002967bde2fbd7786ce8771",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_093408_fde78d80.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "wild_grass",
+      "variant": 1,
+      "file": "raw/rejected/wild_grass-01-superseded-c51c881b4a28.png",
+      "prompt": "Full-frame 1024 square hand-painted botanical ground texture: strictly overhead seven metres of low wild turf, miniature fine detail. Dense 10,000 interwoven hair-fine tapered grass leaves only 6-14 pixels long, oriented evenly in ALL compass directions, plus 150 scattered tiny clover groups with 3-6px leaflets. Flat matte gouache with delicate botanical pencil contours, muted greens #4F793D #658E4B #385C32. Constant density, scale and colour edge to edge. Fresh irregular independent arrangement. No large tufts, upright hay, flowers, long blades, broad hero leaves, confetti dashes, shadows, borders, vignette, text, photo or 3D.",
+      "cost_usd": 0.06728,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Oversized grass/clover and conspicuous identical repeated quadrants, not fine independently composed full-frame turf.",
+      "sha256": "c51c881b4a28cc3baed830da677d5b39c579a1a79f187e8105fa42f9efa04ae2",
+      "pixel_sha256": "7314d5180df164131d8cb2fe8bb993fc8650022f2ee39a57a294b2d9743fefb1",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_093503_9423a589.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "file": "raw/rejected/lawn-01-superseded-53e4b546d6a7.png",
+      "prompt": "Full-frame 1024 square hand-painted botanical ground texture: strictly overhead six metres of close-clipped fine lawn, miniature fine detail. Dense 15,000 interwoven hair-fine tapered grass leaves only 4-9 pixels long, oriented evenly in ALL compass directions. Tiny blades nearly touch; no plain empty backing. Flat matte gouache with delicate botanical pencil contours, muted greens #4F793D #658E4B #385C32. Constant density, scale and colour edge to edge. Fresh irregular independent arrangement. Grass only, no clover, broad leaves, tufts, upright hay, flowers, long blades, confetti dashes, shadows, borders, vignette, text, photo or 3D.",
+      "cost_usd": 0.0672785,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "All-direction blades improved but long coarse spiky linework reads as straw rather than finely clipped lawn.",
+      "sha256": "53e4b546d6a768d54c02ff354d7332aaaefb98f7e54acfb626984b7434028b28",
+      "pixel_sha256": "a774f1bf3edb298bcafda7899b72f8382008b7b07115465685e6115f8b1fa2b5",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_093501_067bfa0a.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "file": "raw/rejected/lawn-01-superseded-c17586b9f8e4.png",
+      "prompt": "1024 square painting. A flat carpet of thousands of tiny short grass blades seen directly overhead, muted medium greens #4F793D #658E4B #385C32. Delicate gouache. Random directions, even fine detail everywhere. Grass fills entire frame. No border or text.",
+      "cost_usd": 0.067234,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Long crisscrossing fine lines rather than close-clipped lawn; finer stippled scale needed.",
+      "sha256": "c17586b9f8e45f84a3ac1ddd7453d611e25b4198b251cd94563a826c2aa9ddc9",
+      "pixel_sha256": "a1128180007ef7a32e1b77883f2af4b19a319d8c681b22aa636ffef451e859f2",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_093649_e0f44129.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "file": "raw/rejected/lawn-01-superseded-c8a2dff7564c.png",
+      "prompt": "Fine green lawn turf texture. Directly overhead. Thousands of tiny short grass blades, evenly mixed directions. Matte gouache painting. Medium leafy greens. Full frame square. Uniform density, miniature details.",
+      "cost_usd": 0.0672195,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Conspicuous white margin and long blades; does not satisfy full-bleed short turf.",
+      "sha256": "c8a2dff7564c4c71eb635bab37eade40dbc26d6513a14153ace608437d408d1b",
+      "pixel_sha256": "505365358840c4ac053c60b7f0a56fd0ea4367897498544590522530f8e44527",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_093839_528c9610.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "wild_grass",
+      "variant": 1,
+      "file": "raw/rejected/wild_grass-01-superseded-c4bedbfe0e56.png",
+      "prompt": "Zoom out three times to show nine times more tiny grass strokes and little clover. Fill the entire 1024 square edge to edge with uniformly dense very fine miniature wild turf marks. Make a new random all-direction arrangement. Matte botanical gouache and fine pencil. Keep these medium greens. No border, no large marks, no shadows, no text.",
+      "cost_usd": 0.0677965,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Near-exact clone of initial coarse candidate; requested zoom-out did not alter composition or scale.",
+      "sha256": "c4bedbfe0e56c17cfc1ffe2ad3b36a8405680467be56b0571edb6ba9e0078f47",
+      "pixel_sha256": "681c6a60f4edf0f0c9cdbf1ae7a4552c9d9b828c4739c3a8459b61dea8daef66",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [
+        "raw/rejected/wild_grass-01-superseded-0b9f4298fb5b.png"
+      ],
+      "generation_mode": "image-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_093926_68f44351.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "wild_grass",
+      "variant": 1,
+      "file": "raw/rejected/wild_grass-01-superseded-51788f4c1b49.png",
+      "prompt": "Fine stippled wild grass and tiny clover, uniformly dense and low. Miniature matte green gouache and pencil strokes, randomly oriented. Bird's-eye view. Edge-to-edge, no border. Medium leafy green.",
+      "cost_usd": 0.0672235,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Dense cream paper flecking creates washed-out etched surface rather than full green matte botanical grass.",
+      "sha256": "51788f4c1b49cf0a282575ff3d92193f5d2b393ff26679db4d7d2ee8a2c1959b",
+      "pixel_sha256": "5b556d9e75e2bb1e2f3fb128999eeb585a2da71c0ddf3387381f804105eefa63",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_094036_424cb353.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "file": "raw/rejected/lawn-01-superseded-8be6d3334f49.png",
+      "prompt": "Paint a 1024x1024 square all-over short lawn illustration. Tiny tidy fine grass blades cover every pixel in muted medium greens #4F793D #658E4B #385C32. Directly overhead, randomized short blade orientations, uniform small feature scale and dense matte coverage, flat diffuse light. Gouache with delicate colored-pencil strokes. Continuous ground to all edges, no surrounding paper. No border, panels, text, flowers, stripes, furrows, gradient, vignette, objects, insects, photography or 3D.",
+      "cost_usd": 0.067261,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Long thick upward-curving blades and repeated motif regions, not finely clipped random-direction turf.",
+      "sha256": "8be6d3334f4904c4678adcb44a43e206910668eeb9d43154be6e4548b30779ad",
+      "pixel_sha256": "249c77b9ca4ccf9d6c4aaa3d3077a086865cdeba39a84d6d6e36d9b86f574574",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_094137_5b1367c9.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "wild_grass",
+      "variant": 1,
+      "file": "raw/rejected/wild_grass-01-superseded-58af96feb2cd.png",
+      "prompt": "1024 square, full-bleed flat overhead illustration of a seven-metre wild grass carpet. Thousands of tiny short grass dashes pointing randomly in every direction, blades 5-15 pixels, with sparse tiny clover leaflets 4-8 pixels, 10% coverage. Crisp handmade matte gouache, delicate pencil edges. Uniform medium leafy greens #4F793D #658E4B #385C32. Even density and flat light. No upright tufts, long blades, flowers, shadows, vignette, borders, labels, photo or 3D. Very dense delicate narrow strokes.",
+      "cost_usd": 0.067265,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Earlier simple-dash pilot too coarse relative to final fine botanical direction; retain provenance but supersede.",
+      "sha256": "58af96feb2cd4805ea2f82c25168e7c52f1c50fa6b81126d2bc8a9164fa6f406",
+      "pixel_sha256": "a33be34889a99dfb039a2601478b482ee423afeaeaf7e016d40d91e18d991648",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_094308_a8833ce5.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "wild_grass",
+      "variant": 2,
+      "file": "raw/rejected/wild_grass-02-superseded-9e50a135aed0.png",
+      "prompt": "1024 square, full-bleed flat overhead illustration of a seven-metre wild grass carpet. Thousands of tiny short grass dashes pointing randomly in every direction, blades 5-15 pixels, with sparse tiny clover leaflets 4-8 pixels, 10% coverage. Crisp handmade matte gouache, delicate pencil edges. Uniform medium leafy greens #4F793D #658E4B #385C32. Even density and flat light. No upright tufts, long blades, flowers, shadows, vignette, borders, labels, photo or 3D. Very dense delicate narrow strokes. Fresh random composition B.",
+      "cost_usd": 0.0672675,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Sparse plain green backing and larger lighter dashes than denser candidate 01. Does not match desired botanical density.",
+      "sha256": "9e50a135aed0111e58b3a930b702e794e78f6af26265cf25b6cd6c6c1eb31761",
+      "pixel_sha256": "b7374f9d4f68b23f22f8d02272e0abd4719f2255a4330a29374d3a36f1954cb7",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_094359_07d03154.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "wild_grass",
+      "variant": 2,
+      "file": "raw/rejected/wild_grass-02-superseded-ffd9d7de1294.png",
+      "prompt": "1024x1024 hand-painted ground texture, low fine wild grass from directly overhead. Tiny 1-5 pixel tapered strokes, dense like soft moss, scattered in all directions; small scattered clover specks. Matte gouache and subtle pencil grain, muted #4F793D #658E4B #385C32. Flat illumination. Whole image a continuous green surface with minute details. No long grass, no flowers, no border or text.",
+      "cost_usd": 0.067252,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Repeated large tuft-shaped regions with long blades; not low random short grass.",
+      "sha256": "ffd9d7de129411406099f9452f4a3629e64fb9aa23f4d8ab73be9e7b51fa9df7",
+      "pixel_sha256": "d91ac85100a3bb5893237b372e8bfa374e74e80db1596c1162f322c774d5bdab",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_094456_4afd8540.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "lawn",
+      "variant": 3,
+      "file": "raw/rejected/lawn-03-superseded-487761ef3dff.png",
+      "prompt": "1024 square full-bleed illustration, straight overhead six-metre carpet of finely clipped lawn. Thousands of tiny tapered grass dashes 4-10 pixels long pointing randomly in all directions. Flat crisp handmade matte gouache with delicate pencil edges. Uniform medium leafy greens #4F793D #658E4B #385C32. Even fine density and flat light across the whole image. Grass only: no broad leaves, flowers, long blades, upright tufts, stripes, shadows, vignette, borders, labels, photo or 3D. New random arrangement 03.",
+      "cost_usd": 0.0672635,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Small strokes still predominantly upward and sparse on broad plain backing.",
+      "sha256": "487761ef3dff2152a49f07c98be9c464e204f0f4e890cadd177164022102add2",
+      "pixel_sha256": "f081e4f295282c9bb8c7d707dd4af04e62e505aa5c13ad53bbc18b8bba3b07ea",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_094538_012565b8.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "lawn",
+      "variant": 4,
+      "file": "raw/rejected/lawn-04-superseded-a14f3b09d5df.png",
+      "prompt": "1024 square full-bleed illustration, straight overhead six-metre carpet of finely clipped lawn. Thousands of tiny tapered grass dashes 4-10 pixels long pointing randomly in all directions. Flat crisp handmade matte gouache with delicate pencil edges. Uniform medium leafy greens #4F793D #658E4B #385C32. Even fine density and flat light across the whole image. Grass only: no broad leaves, flowers, long blades, upright tufts, stripes, shadows, vignette, borders, labels, photo or 3D. New random arrangement 04.",
+      "cost_usd": 0.0672635,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Short mixed-direction grass, but conspicuously repeated half-frame motif layout and simplified coarse dashes; finer botanical treatment needed.",
+      "sha256": "a14f3b09d5dfa931f0758aa927d162b40a548d529600080ca6ffe23a7305358d",
+      "pixel_sha256": "1d002c8b00af3be64c826bbf7f343e3ded1240ce947a732453388270b0322b1a",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_094540_b2cfb26d.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "file": "raw/rejected/lawn-01-superseded-961307e94f6a.png",
+      "prompt": "Paint a new square of short lawn. Use this green pencil-gouache brushwork and fine scale, but a different random grass arrangement, evenly pointed in all directions. Full bleed, flat light, grass only.",
+      "cost_usd": 0.0677815,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Near-clone of historical lawn03: measured 128px luminance correlation 0.97725. Not independently composed.",
+      "sha256": "961307e94f6a7cf5f7e589bd29dff3f9819a5b036a2067c2c0c2331c05d86a31",
+      "pixel_sha256": "e10667ad57fe0f49c77849073aecf29331de27dd840c313ee2e812fa91d658fb",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [
+        "raw/rejected/lawn-03-superseded-4c0651e47fbf.png"
+      ],
+      "generation_mode": "image-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_094710_c3314ea6.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "file": "raw/rejected/lawn-01-superseded-f0a8b7d4832b.png",
+      "prompt": "Paint delicate tiny short tapered green marks all over the image. Dense fine-grained clipped lawn, looked at from straight above. Thin little strokes, randomly pointing in all directions. Matte gouache and pencil, #4F793D #658E4B #385C32. Edge-to-edge green, evenly lit, no borders or lettering.",
+      "cost_usd": 0.067239,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Long pencil blades and broad directional changes rather than close-clipped miniature turf.",
+      "sha256": "f0a8b7d4832bf17f206c5451a46177fe2c981854dcbffa6a8145e4403165466a",
+      "pixel_sha256": "55ff5e43c27b8a9bc968b567ca2aabe77de24bf1d53cdffa532d0531d295cd01",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_094803_333120de.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "wild_grass",
+      "variant": 2,
+      "file": "raw/rejected/wild_grass-02-superseded-c209d6937387.png",
+      "prompt": "Paint delicate tiny short tapered green marks all over the image. Dense fine-grained wild grass with small scattered clover leaflets, looked at from straight above. Thin little strokes, randomly pointing in all directions. Matte gouache and pencil, #4F793D #658E4B #385C32. Edge-to-edge green, evenly lit, no borders or lettering.",
+      "cost_usd": 0.0672415,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Long fine blades and oversized scattered clover, inconsistent with required low fine scale.",
+      "sha256": "c209d69373878ea171a588a8ae15f39f10df5a631428b2fa6f640186be3af90c",
+      "pixel_sha256": "87c32417adbe5d355a05bb828b16c1dd5fc1b57154249c60cf2844f8bece3aae",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_094805_458091d3.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "file": "raw/rejected/lawn-01-superseded-f71e511bc92a.png",
+      "prompt": "Square hand-painted overhead lawn. The short turf has the fine even appearance of green velvet: thousands of minute specks and minuscule tapered dashes, NOT long individual grass blades. Soft matte gouache, subtle pencil grain, natural medium green #4F793D #658E4B #385C32. Uniform texture to every edge, flat diffuse light. No other plants, no border, no text.",
+      "cost_usd": 0.0672445,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Fine miniature clipped turf achieved, but white margin violates full-bleed requirement.",
+      "sha256": "f71e511bc92ae48f995f1b292da5db700b3ece4717029f981763589f54bb0dd9",
+      "pixel_sha256": "16df9aa0977ac0bba6f70a3f9c58b79dbd33d462e20747d29fbeb6248933fa9b",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_094853_9d76ec3a.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "wild_grass",
+      "variant": 2,
+      "file": "raw/rejected/wild_grass-02-superseded-7de9a956f711.png",
+      "prompt": "Full-bleed hand-painted overhead wild turf, green grass fills ALL pixels of 1024 square, no paper showing. The low grass has the fine even appearance of green velvet: thousands of minute specks and minuscule tapered dashes, NOT long individual grass blades. Scattered tiny clover leaflets, small and sparse. Soft matte gouache, subtle pencil grain, natural medium green #4F793D #658E4B #385C32. Uniform texture to every edge, flat diffuse light. No flowers, no border, no text.",
+      "cost_usd": 0.0672585,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "White border, very inconsistent detail scale with large long blades around edges and central focal density.",
+      "sha256": "7de9a956f711c7a4df1cf655a9e30052363a66d0cbd010b368349d789eb7de77",
+      "pixel_sha256": "768d67e788169366a156a00fd4e9b67f92697b5bc37e29adb6030f05dee0a093",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_094940_761df1e9.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "wild_grass",
+      "variant": 2,
+      "file": "raw/rejected/wild_grass-02-superseded-6cb7c227b91b.png",
+      "prompt": "Single full-bleed 1024x1024 square WILD GRASS texture. Reference for handmade botanical gouache and pencil STYLE ONLY, not six-swatch layout. Exactly overhead tiny fine short grass blades with scattered miniature clover and weeds, fresh medium green #4F793D #658E4B #385C32. Thousands of tiny strokes oriented in all directions, small crisp painted shapes, subtle pencil detail. Uniform dense coverage, scale, tone and flat diffuse lighting. Ground reaches all edges. No large tufts, flowers, stripes, gradients, vignette, border, margins, grid, swatches, text, horizon, objects, photography or 3D. One continuous hand-illustrated ground surface.",
+      "cost_usd": 0.067837,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Reference composition cloned as mixed-species patchwork, not wild grass texture.",
+      "sha256": "6cb7c227b91bca639e88982f7acf200b937c6432ae52ae97ffd598e1ab66912c",
+      "pixel_sha256": "c1cae1616de851f2c2828ae890789d3a2946d6d6c15b9dd653048b8cb95dd76e",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [
+        "../proofs/cover-crops.png"
+      ],
+      "generation_mode": "image-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_095113_5dd0d13b.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "wild_grass",
+      "variant": 2,
+      "file": "raw/wild_grass-02.png",
+      "prompt": "Hand-painted overhead lawn with a few tiny clover leaves scattered through it, covering entire frame, green to the edges. The low turf has the fine even appearance of green velvet: thousands of minute specks and minuscule tapered dashes, NOT long individual grass blades. Soft matte gouache, subtle pencil grain, natural medium green #4F793D #658E4B #385C32. Uniform fine texture, flat diffuse light. No flowers, no border, no text.",
+      "cost_usd": 0.0672515,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "keep",
+      "excluded": false,
+      "reason": "Full-bleed fine miniature turf stipples with sparse clover, matte soft gouache. Clover is larger than requested but scattered without hero tufts; subtle local grain direction. Coherent fine-scale pilot; bank comparison pending.",
+      "sha256": "cb46973e97a5b528826f74f8be3aec9411073ac74b8282aa38daf44fbc50a935",
+      "pixel_sha256": "a1fe9901d80724a8751aa835b18ff49875246b7557b107f2e507c0801dfcfac3",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_095209_ef937f4a.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "wild_grass",
+      "variant": 3,
+      "file": "raw/wild_grass-03.png",
+      "prompt": "Hand-painted overhead lawn with a few tiny clover leaves scattered through it, covering entire frame, green to the edges. The low turf has the fine even appearance of green velvet: thousands of minute specks and minuscule tapered dashes, NOT long individual grass blades. Soft matte gouache, subtle pencil grain, natural medium green #4F793D #658E4B #385C32. Uniform fine texture, flat diffuse light. No flowers, no border, no text. New arrangement 03.",
+      "cost_usd": 0.0672545,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "keep",
+      "excluded": false,
+      "reason": "Fine full-bleed matte turf with scattered small clover; darker than pilot02 but same velvety fine grass scale. No strong border or shadow, no long hero tufts.",
+      "sha256": "42b1978b1ecb6b097ba618b74f4439c28658a3cf260b66cdd3999931a3990606",
+      "pixel_sha256": "58e934f892da3a0cf29de4ff3ebc4640cc3f969402cdef395795b43c06c32a59",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_095319_68bb365a.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "lawn",
+      "variant": 2,
+      "file": "raw/rejected/lawn-02-superseded-394d0e55bdb0.png",
+      "prompt": "Hand-painted overhead lawn covering entire frame, green to the edges. The low turf has the fine even appearance of green velvet: thousands of minute specks and minuscule tapered dashes, NOT long individual grass blades. Soft matte gouache, subtle pencil grain, natural medium green #4F793D #658E4B #385C32. Uniform fine texture, flat diffuse light. Grass only, no clover, no flowers, no border, no text. New arrangement 02.",
+      "cost_usd": 0.0672525,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Pronounced pale upper region and dark lower-right patch; blades still overly upright. Does not meet uniform flat-light target.",
+      "sha256": "394d0e55bdb012569d4caf60d7c3e7c3b4d662e2a86e2c42789c92a3f4497889",
+      "pixel_sha256": "12fb2ea7b298249b9a67d3ed852da8af0e55b8ae7c303567daa5213af7cf6489",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_095319_1c2d61ce.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "lawn",
+      "variant": 4,
+      "file": "raw/rejected/lawn-04-superseded-5fd4715a1baf.png",
+      "prompt": "Hand-painted overhead lawn covering entire frame, green to the edges. The low turf has the fine even appearance of green velvet: thousands of minute specks and minuscule tapered dashes, NOT long individual grass blades. Soft matte gouache, subtle pencil grain, natural medium green #4F793D #658E4B #385C32. Uniform fine texture and uniform green tone, flat diffuse light. Grass only, no clover, no flowers, no border, no text. New arrangement 04.",
+      "cost_usd": 0.0672545,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Fine minuscule turf achieved but white border and pale desaturated ground; unsuitable full-bleed source.",
+      "sha256": "5fd4715a1bafbea2d383fe1341e3e6d1cd632c4c47356826ac94d027bd19d995",
+      "pixel_sha256": "eaaaec0a051e83c3299a1030a80812c99ba8dec437ce7572cd03432bf8495928",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_095418_ce781e28.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "wild_grass",
+      "variant": 5,
+      "file": "raw/rejected/wild_grass-05-superseded-d56cb7b3047d.png",
+      "prompt": "Hand-painted overhead lawn with a few tiny clover leaves scattered through it, covering entire frame, green to the edges. The low turf has the fine even appearance of green velvet: thousands of minute specks and minuscule tapered dashes, NOT long individual grass blades. Soft matte gouache, subtle pencil grain, natural medium green #4F793D #658E4B #385C32. Uniform fine texture, flat diffuse light. No flowers, no border, no text. New arrangement 05.",
+      "cost_usd": 0.0672545,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Fine full-frame turf, but conspicuous large dark clover and much paler colour than02/03.",
+      "sha256": "d56cb7b3047d4480e6a46bf6f81fab33fe1fb374c7f7040f241e4c6bca9e4e85",
+      "pixel_sha256": "319d07f2d44c6d9506aff4c5c888d8f7ccecfcdb9936481f1a431d11a985837c",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_095420_c56c2686.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "wild_grass",
+      "variant": 6,
+      "file": "raw/rejected/wild_grass-06-superseded-6572e1826a00.png",
+      "prompt": "Hand-painted overhead lawn with a few tiny clover leaves scattered through it, covering entire frame, green to the edges. The low turf has the fine even appearance of green velvet: thousands of minute specks and minuscule tapered dashes, NOT long individual grass blades. Soft matte gouache, subtle pencil grain, natural medium green #4F793D #658E4B #385C32. Uniform fine texture, flat diffuse light. No flowers, no border, no text. New arrangement 06.",
+      "cost_usd": 0.0672545,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Short fine turf but large clover clusters and brighter green than02/03; bank not coherent.",
+      "sha256": "6572e1826a002d1ad5d3f047f3f882e1b4f0f583894cb567f7c64b31f2f338e2",
+      "pixel_sha256": "2c4512e9c36cc7d6a301f1225a7043cba5d7fc847700af1a07c18530bd8e0f51",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_095419_dbf6574a.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "wild_grass",
+      "variant": 4,
+      "file": "raw/rejected/wild_grass-04-superseded-1696a9d8a28b.png",
+      "prompt": "Seamless wild grass ground illustration, 1024 square full frame. Fine even green velvet turf, thousands of minuscule tapered dashes in all directions, no long individual blades. Scatter numerous grass-sized tiny clover specks, leaflets 4px, 5% coverage. Soft matte gouache and delicate pencil grain. Medium leafy greens #4F793D #658E4B #385C32, even colour and density throughout. Flat overhead, no shadows. No large leaves, no white, no border or text.",
+      "cost_usd": 0.0672565,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Good full-bleed small clover and short mixed-direction marks, but obvious large-scale swirl and repeated quadrants remain. Further randomization needed.",
+      "sha256": "1696a9d8a28b7bebc0263eca3022f5572713f86e04c891e2a98ae53ea9ef983a",
+      "pixel_sha256": "eead4189d3a86f80a0ee2983bfb8f9f4ade9d3a49a4212a775783c1f97bec9b2",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_095519_c0526c20.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "wild_grass",
+      "variant": 4,
+      "file": "raw/rejected/wild_grass-04-superseded-5221176832f4.png",
+      "prompt": "Seamless wild grass ground illustration, 1024 square full frame. Fine even green velvet turf, thousands of minuscule tapered dashes in all directions, no long individual blades. Scatter numerous grass-sized tiny clover specks, leaflets 4px, 5% coverage. Soft matte gouache and delicate pencil grain. Medium leafy greens #4F793D #658E4B #385C32, even colour and density throughout. Flat overhead, no shadows. No large leaves, no white, no border or text. Random arrangement 2, no swirls.",
+      "cost_usd": 0.0672605,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Repeated quadrants and strong sweeping directional blade flow remain despite no-swirl instruction.",
+      "sha256": "5221176832f4adf11838cfb0295701189a7f724c3b99065425b4e52365c55194",
+      "pixel_sha256": "7f5f28088d010ba3f0dfbfc911c164f2592337be8183c6428c52250bbba09362",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_095619_00ce4efd.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "file": "raw/lawn-01.png",
+      "prompt": "Full-frame 1024 square painting of lawn stubble viewed vertically from above. Minuscule cut blade tips and very short narrow grass strokes cover the whole image uniformly; mixed orientations. Matte botanical gouache, fine colored-pencil detail. Medium green #4F793D with #658E4B #385C32. No long blades, large tufts, flowers, clover, shadows, border, paper or text. Another unique arrangement.",
+      "cost_usd": 0.0672495,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "keep",
+      "excluded": false,
+      "reason": "Dense full-bleed fine narrow clipped blades with interwoven mixed directions, muted matte pencil-gouache detail. Some strokes longer than requested, but no large tufts or bare backing; promising botanical source, pending bank coherence.",
+      "sha256": "ddc05f10987f83a9af646542391fa42ae4fb5e360569082ba4da71b5b6fa1c3f",
+      "pixel_sha256": "cb76c5d1330593ccb9fefdcb3b708eea61139cb8aca4bab100319eb9293c5b3a",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_095733_df38c5fd.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "wild_grass",
+      "variant": 1,
+      "file": "raw/wild_grass-01.png",
+      "prompt": "Full-frame 1024 square painting of low grass stubble and scattered tiny clover viewed vertically from above. Minuscule blade tips and very short narrow grass strokes cover the whole image uniformly; mixed orientations. Tiny little clover flecks occupy five percent. Matte botanical gouache, fine colored-pencil detail. Medium green #4F793D with #658E4B #385C32. No long blades, large tufts, flowers, shadows, border, paper or text.",
+      "cost_usd": 0.067253,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "keep",
+      "excluded": false,
+      "reason": "Dense full-bleed fine interwoven mixed-direction grass with small scattered clover, consistent muted medium-green tone. Some strokes exceed literal pixel target, but no large hero tufts or strong lighting; bank coherence pending.",
+      "sha256": "0e765af73aa0506d61f8d6137129663be2c1a716b47e8994b0c6c9e153aabdba",
+      "pixel_sha256": "b09b05a9baaa6bb73e1e1ee9625d734e5d4f81e0e71c16166dd1edcebeeb69a0",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_095733_21830c69.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "wild_grass",
+      "variant": 4,
+      "file": "raw/wild_grass-04.png",
+      "prompt": "Full-frame 1024 square painting of low grass stubble and scattered tiny clover viewed vertically from above. Minuscule blade tips and very short narrow grass strokes cover the whole image uniformly; mixed orientations. Tiny little clover flecks occupy five percent. Matte botanical gouache, fine colored-pencil detail. Medium green #4F793D with #658E4B #385C32. No long blades, large tufts, flowers, shadows, border, paper or text. Unique random arrangement two.",
+      "cost_usd": 0.0672555,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Sparse illustrated clippings with broad plain backing, too different from dense botanical pilot01.",
+      "sha256": "ff11d33a2b4f340b30f46d88afce62d6bee128d10586d755dc146a98e12b78f3",
+      "pixel_sha256": "15e6d932394311d83cc17ddf6b466bc3d8294279cdac5bfa42df6460f3a376de",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_095838_1a751158.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "wild_grass",
+      "variant": 5,
+      "file": "raw/wild_grass-05.png",
+      "prompt": "Full-frame 1024 square painting of low grass stubble and scattered tiny clover viewed vertically from above. Minuscule blade tips and very short narrow grass strokes cover the whole image uniformly; mixed orientations. Tiny little clover flecks occupy five percent. Matte botanical gouache, fine colored-pencil detail. Medium green #4F793D with #658E4B #385C32. No long blades, large tufts, flowers, shadows, border, paper or text. Unique random arrangement three.",
+      "cost_usd": 0.0672555,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "rework",
+      "excluded": true,
+      "reason": "Broader longer upward-flowing blades than dense fine pilot01; inconsistent scale and direction.",
+      "sha256": "8a0a17704edb762e6738c922e9ef279856d77c99804694bf7412cd207fe9dba1",
+      "pixel_sha256": "ff7d2859f580ea7c4723979f4fda3390a61dfb0a324908f65284ef585a59af39",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_095839_70a47f8e.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "lawn",
+      "variant": 2,
+      "file": "raw/lawn-02.png",
+      "prompt": "An overhead painting of dense fine short grass stubble covering every pixel. Uniform medium leafy green, tiny cut blade tips, short strokes randomly pointing every way. Delicate matte gouache and pencil detail. No long blades or tufts, no white borders. 1024 square. #4F793D #658E4B #385C32. Flat light. Independent arrangement A.",
+      "cost_usd": 0.067243,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "rework",
+      "excluded": true,
+      "reason": "Matte full-frame fine grass but predominantly upward direction and much paler than dense pilot01; bank mismatch.",
+      "sha256": "d2d30bd0aedd61cf2c331367a10a4bbdc4e8cee5801742ee4d396778cd1d8f46",
+      "pixel_sha256": "905c3ec468d0f04055a8aea50f0bb1874dff073aa3bb1f17b375439e28f8cc34",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_095941_9ea5e87b.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "lawn",
+      "variant": 3,
+      "file": "raw/lawn-03.png",
+      "prompt": "An overhead painting of dense fine short grass stubble covering every pixel. Uniform medium leafy green, tiny cut blade tips, short strokes randomly pointing every way. Delicate matte gouache and pencil detail. No long blades or tufts, no white borders. 1024 square. #4F793D #658E4B #385C32. Flat light. Independent arrangement B.",
+      "cost_usd": 0.067243,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "rework",
+      "excluded": true,
+      "reason": "All-direction strokes improved but blade scale too long for clipped turf and pale tone differs from pilot01.",
+      "sha256": "e6b591aa50961ab611c55c418d1eebc4663d2387e753ea7426c7879eb6149cdb",
+      "pixel_sha256": "edf4100b34bc1fabab5107bd06b5d8d87229ac75f87dd0af2b0483424f84a998",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_095942_dc546f57.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "wild_grass",
+      "variant": 6,
+      "file": "raw/wild_grass-06.png",
+      "prompt": "An overhead painting of dense fine short grass stubble with tiny scattered clover flecks covering every pixel. Uniform medium leafy green, tiny blade tips, short strokes randomly pointing every way. Delicate matte gouache and pencil detail. No long blades or tufts, no white borders. 1024 square. #4F793D #658E4B #385C32. Flat light. Independent arrangement C.",
+      "cost_usd": 0.0672455,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "rework",
+      "excluded": true,
+      "reason": "Dense fine botanical rendering and small clover, but stronger upward flow and longer blades than desired; differs from velvety02/03.",
+      "sha256": "ec622bf09b7e3173e2fa638dd8bfe9ead3a6b7109d852079adb415e79956e6f8",
+      "pixel_sha256": "e826386d31cde228612d9647caa68d05a1d915ae96254989bee87bd6ceb0199a",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_095942_62380982.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    },
+    {
+      "material": "lawn",
+      "variant": 4,
+      "file": "raw/lawn-04.png",
+      "prompt": "Full-frame 1024 square painting of lawn stubble viewed vertically from above. Minuscule cut blade tips and very short narrow grass strokes cover the whole image uniformly; mixed orientations. Matte botanical gouache, fine colored-pencil detail. Medium green #4F793D with #658E4B #385C32. No long blades, large tufts, flowers, clover, shadows, border, paper or text. Another unique arrangement. Dense interwoven miniature strokes.",
+      "cost_usd": 0.067252,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "rework",
+      "excluded": true,
+      "reason": "Full-frame all-direction grass but long interwoven blades read as clippings rather than short clipped turf. Coarser scale than best pilot01.",
+      "sha256": "641bcc3273b8fc43e12d153f83f48a8dcd6bab26028626fcffb4d45aa418386e",
+      "pixel_sha256": "bb5cef539b5897596f9453feb13f7cd564a1c16769b47dbc68719c354dc9121d",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_images": [],
+      "generation_mode": "independent text-to-image",
+      "tool_image": "/home/hjpr/.hermes/cache/generated/images/openrouter_google_gemini-3_1-flash-image_20261004_100208_fd1638dd.png",
+      "inspection": "Source pixels visually inspected individually; raw source only, seam/shader gates pending."
+    }
+  ],
+  "failed_attempts": [
+    {
+      "material": "wild_grass",
+      "variant": 1,
+      "prompt": "1024 square, full-bleed flat overhead illustration of a seven-metre wild grass carpet. Thousands of tiny short grass dashes pointing randomly in every direction, blades 5-15 pixels, with sparse tiny clover leaflets 4-8 pixels, 10% coverage. Crisp handmade matte gouache, delicate pencil edges. Uniform medium leafy greens #4F793D #658E4B #385C32. Even density and flat light. No upright tufts, long blades, flowers, shadows, vignette, borders, labels, photo or 3D.",
+      "error": "OpenRouter 403: Key limit exceeded (total limit). No image generated.",
+      "cost_usd": null
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "prompt": "1024 square full-bleed illustration, straight overhead six-metre carpet of finely clipped lawn. Thousands of tiny tapered grass dashes 4-10 pixels long pointing randomly in all directions. Flat crisp handmade matte gouache with delicate pencil edges. Uniform medium leafy greens #4F793D #658E4B #385C32. Even fine density and flat light across the whole image. Grass only: no broad leaves, flowers, long blades, upright tufts, stripes, shadows, vignette, borders, labels, photo or 3D.",
+      "error": "OpenRouter 403: Key limit exceeded (total limit). No image generated.",
+      "cost_usd": null
+    },
+    {
+      "material": "wild_grass",
+      "variant": 1,
+      "prompt": "Paint a distant orthographic aerial view of a 7m square of low meadow ground cover, filling a 1024 square edge to edge. Fine-grained matte botanical gouache illustration, muted medium green #4F793D with #658E4B and #385C32 details. Extremely small grass marks 5-10px and scattered miniature clover dots; viewed from far above, NOT closeup. Dense even grass, irregular multidirectional tiny leaves. No individually prominent plant. One unique nonrepeating composition across the entire frame, flat even illumination. No tall grass, large leaves, flowers, highlights, shadows, panels, borders, text, vignette or photographic realism.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material; generic original botanical prompt.",
+      "cost_usd": null
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "prompt": "Paint a distant orthographic aerial view of a 6m square of closely mown lawn, filling a 1024 square edge to edge. Fine-grained matte botanical gouache illustration, muted medium green #4F793D with #658E4B and #385C32 details. Extremely small tapered grass marks 3-7px; viewed from far above, NOT closeup. Dense even soft fine turf, irregular multidirectional tiny blades. No individually prominent plant. One unique nonrepeating composition across the entire frame, flat even illumination. No broad leaves, clover, tall grass, flowers, highlights, shadows, panels, borders, text, vignette or photographic realism.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material; generic original botanical prompt.",
+      "cost_usd": null
+    },
+    {
+      "material": "wild_grass",
+      "variant": 1,
+      "prompt": "An original illustration of fine low green turf with scattered miniature clover, viewed straight down from several metres above. Whole square image is covered by very small grass strokes in every direction. Miniature detailed matte gouache and colored pencil, medium muted leafy greens (#4F793D, #658E4B, #385C32). Flat even lighting and uniform density. 1024x1024, edge-to-edge foliage. Invent fresh random placement with no duplicated regions. No large tufts or leaves, no long blades, no flowers, shadows, borders, text or vignette.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material; generic original botanical prompt.",
+      "cost_usd": null
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "prompt": "An original illustration of very finely clipped green lawn, viewed straight down from several metres above. Whole square image is covered densely by extremely small delicate grass strokes in every direction. Miniature detailed matte gouache and colored pencil, medium muted leafy greens (#4F793D, #658E4B, #385C32). Flat even lighting and uniform density. 1024x1024, edge-to-edge turf. Invent fresh random placement with no duplicated regions. Grass only, no broad leaves or clover, no large tufts, no long blades, no flowers, shadows, borders, text or vignette.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material; generic original botanical prompt.",
+      "cost_usd": null
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "prompt": "1024 square matte gouache painting of closely clipped LAWN seen from high overhead. Very finely stippled green surface, dense tiny tapered pencil flicks less than 8 pixels long, uniformly scattered in all directions. Medium #4F793D green with #658E4B and #385C32 flecks. Almost velvety fine texture at a distance. Entire image evenly covered. No long lines, large grass, tufts, broad leaves, flowers, shadows, border or text.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material; generic botanical prompt.",
+      "cost_usd": null
+    },
+    {
+      "material": "wild_grass",
+      "variant": 1,
+      "prompt": "1024 square matte gouache painting of low wild grass seen from high overhead. Very finely stippled green surface, dense tiny tapered pencil flicks less than 12 pixels long, uniformly scattered in all directions, with tiny scattered trifoliate clover specks. Medium #4F793D green with #658E4B and #385C32 flecks. Fine miniature botanical detail. Entire image evenly covered. No long lines, large grass, tufts, large leaves, flowers, shadows, border or text.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material; generic botanical prompt.",
+      "cost_usd": null
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "prompt": "Use our illustration for brushwork only. Paint one continuous 1024 square lawn surface without borders. Dense tiny short grass marks in all directions, viewed straight down over six metres of ground. Matte medium green #4F793D #658E4B #385C32, delicate fine pencil detail. No other plants. Fine even coverage, flat lighting. Not upright long grass. No panels, margins or text.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material; generic botanical prompt.",
+      "cost_usd": null
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "prompt": "Zoom out three times to show nine times more tiny grass strokes. Fill the entire 1024 square edge to edge with uniformly dense very fine miniature lawn marks. Make a new random all-direction arrangement. Matte botanical gouache and fine pencil. Keep these medium greens. No border, no large marks, no shadows, no text.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material.",
+      "cost_usd": null,
+      "reference_images": [
+        "raw/rejected/lawn-01-superseded-6e27462dc32a.png"
+      ]
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "prompt": "Full-bleed fine lawn texture painted in matte gouache and delicate pencil. 1024 by 1024 pixels represents six metres of ground seen straight down. Each 32x32 pixel area contains twenty tiny individual short blades; grass all over, equally mixed directions. Restrained medium green #4F793D with #658E4B and #385C32. Dense miniature strokes smaller than a grain of rice. Even flat light, edge-to-edge continuous turf, grass only. No large plants, no long lines, no border, no text.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material; generic botanical prompt.",
+      "cost_usd": null
+    },
+    {
+      "material": "wild_grass",
+      "variant": 1,
+      "prompt": "Full-bleed fine wild-grass texture painted in matte gouache and delicate pencil. 1024 by 1024 pixels represents seven metres of ground seen straight down. Each 32x32 pixel area contains twenty tiny individual short blades; sparse miniature clover 5% coverage, equally mixed directions. Restrained medium green #4F793D with #658E4B and #385C32. Dense miniature strokes smaller than a grain of rice. Even flat light, edge-to-edge continuous turf. No large plants, no long lines, no border, no text.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material; generic botanical prompt.",
+      "cost_usd": null
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "prompt": "Fine stippled lawn, uniformly dense and very short. Miniature matte green gouache and pencil strokes, randomly oriented. Bird's-eye view. Edge-to-edge, no border. Medium leafy green.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material; generic botanical prompt.",
+      "cost_usd": null
+    },
+    {
+      "material": "wild_grass",
+      "variant": 1,
+      "prompt": "Fine stippled wild grass and tiny clover, uniformly dense and low. Miniature matte gouache and pencil strokes, randomly oriented. Bird's-eye view. Edge-to-edge, no border. Muted medium leafy greens #4F793D #658E4B #385C32 only; fully painted green surface, no white flecks.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material; generic botanical prompt.",
+      "cost_usd": null
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "prompt": "Fine stippled short lawn grass only, uniformly dense and low. Miniature matte gouache and pencil strokes, randomly oriented. Bird's-eye view. Edge-to-edge, no border. Muted medium leafy greens #4F793D #658E4B #385C32 only; fully painted green surface, no white flecks.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material; generic botanical prompt.",
+      "cost_usd": null
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "prompt": "1024 square, full-bleed matte gouache ground pattern. Fine evenly scattered microstrokes of clipped lawn grass in every orientation. Twenty thousand tiny strokes, so small that the result looks like a finely textured green carpet, not a close-up of individual plants. Medium leafy green #4F793D, muted small #658E4B and #385C32 strokes. Flat overhead view and even light. Dense coverage. No long blades, tall tufts, shading, border or text.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material; generic botanical prompt.",
+      "cost_usd": null
+    },
+    {
+      "material": "wild_grass",
+      "variant": 1,
+      "prompt": "1024 square, full-bleed matte gouache ground pattern. Fine evenly scattered microstrokes of low wild grass in every orientation. Twenty thousand tiny strokes, so small that the result looks like a finely textured green carpet, not a close-up of individual plants. Tiny occasional three-leaf clover specks. Medium leafy green #4F793D, muted small #658E4B and #385C32 strokes. Flat overhead view and even light. Dense coverage. No long blades, tall tufts, shading, border or text.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material; generic botanical prompt.",
+      "cost_usd": null
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "prompt": "1024 square full-bleed illustration, straight overhead six-metre carpet of finely clipped lawn. Thousands of tiny tapered grass dashes 4-10 pixels long pointing randomly in all directions. Flat crisp handmade matte gouache with delicate pencil edges. Uniform medium leafy greens #4F793D #658E4B #385C32. Even fine density and flat light across the whole image. Grass only: no broad leaves, flowers, long blades, upright tufts, stripes, shadows, vignette, borders, labels, photo or 3D. Very dense delicate narrow strokes.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material; generic botanical prompt.",
+      "cost_usd": null
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "prompt": "1024 square, full-bleed flat overhead illustration of a six-metre short LAWN carpet. Thousands of tiny short grass dashes pointing randomly in every direction, blades 4-10 pixels. Crisp handmade matte gouache, delicate pencil edges. Uniform medium leafy greens #4F793D #658E4B #385C32. Even density and flat light. Grass only. No clover, weeds, upright tufts, long blades, flowers, shadows, vignette, borders, labels, photo or 3D. Very dense delicate narrow strokes.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material.",
+      "cost_usd": null
+    },
+    {
+      "material": "wild_grass",
+      "variant": 3,
+      "prompt": "1024 square, full-bleed flat overhead illustration of a seven-metre wild grass carpet. Thousands of tiny short grass dashes pointing randomly in every direction, blades 5-15 pixels, with sparse tiny clover leaflets 4-8 pixels, 10% coverage. Crisp handmade matte gouache, delicate pencil edges. Uniform medium leafy greens #4F793D #658E4B #385C32. Even density and flat light. No upright tufts, long blades, flowers, shadows, vignette, borders, labels, photo or 3D. Very dense delicate narrow strokes. Fresh random composition C.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material.",
+      "cost_usd": null
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "prompt": "1024x1024 hand-painted ground texture, finely clipped green lawn from directly overhead. Tiny 1-5 pixel tapered strokes, dense like soft moss, scattered in all directions. Matte gouache and subtle pencil grain, muted #4F793D #658E4B #385C32. Flat illumination. Whole image a continuous green surface with minute details. No long grass, no flowers, no border or text.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material.",
+      "cost_usd": null
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "prompt": "1024 square full-bleed illustration, straight overhead six-metre carpet of finely clipped lawn. Thousands of tiny tapered grass dashes 4-10 pixels long pointing randomly in all directions. Flat crisp handmade matte gouache with delicate pencil edges. Uniform medium leafy greens #4F793D #658E4B #385C32. Even fine density and flat light across the whole image. Grass only: no broad leaves, flowers, long blades, upright tufts, stripes, shadows, vignette, borders, labels, photo or 3D.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material.",
+      "cost_usd": null
+    },
+    {
+      "material": "lawn",
+      "variant": 5,
+      "prompt": "1024 square full-bleed illustration, straight overhead six-metre carpet of finely clipped lawn. Thousands of tiny tapered grass dashes 4-10 pixels long pointing randomly in all directions. Flat crisp handmade matte gouache with delicate pencil edges. Uniform medium leafy greens #4F793D #658E4B #385C32. Even fine density and flat light across the whole image. Grass only: no broad leaves, flowers, long blades, upright tufts, stripes, shadows, vignette, borders, labels, photo or 3D. New random arrangement 05, every region unique, no repeating quadrants.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material.",
+      "cost_usd": null
+    },
+    {
+      "material": "lawn",
+      "variant": 6,
+      "prompt": "1024 square full-bleed illustration, straight overhead six-metre carpet of finely clipped lawn. Thousands of tiny tapered grass dashes 4-10 pixels long pointing randomly in all directions. Flat crisp handmade matte gouache with delicate pencil edges. Uniform medium leafy greens #4F793D #658E4B #385C32. Even fine density and flat light across the whole image. Grass only: no broad leaves, flowers, long blades, upright tufts, stripes, shadows, vignette, borders, labels, photo or 3D. New random arrangement 06, every region unique, no repeating quadrants.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material.",
+      "cost_usd": null
+    },
+    {
+      "material": "wild_grass",
+      "variant": 3,
+      "prompt": "1024 square, full-bleed flat overhead illustration of a seven-metre wild grass carpet. Thousands of tiny short grass dashes pointing randomly in every direction, blades 5-15 pixels, with sparse tiny clover leaflets 4-8 pixels, 10% coverage. Crisp handmade matte gouache, delicate pencil edges. Uniform medium leafy greens #4F793D #658E4B #385C32. Even density and flat light. No upright tufts, long blades, flowers, shadows, vignette, borders, labels, photo or 3D. Very dense delicate narrow strokes. Fresh random arrangement D, every region unique, no repeating quadrants.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material.",
+      "cost_usd": null
+    },
+    {
+      "material": "wild_grass",
+      "variant": 4,
+      "prompt": "1024 square, full-bleed flat overhead illustration of a seven-metre wild grass carpet. Thousands of tiny short grass dashes pointing randomly in every direction, blades 5-15 pixels, with sparse tiny clover leaflets 4-8 pixels, 10% coverage. Crisp handmade matte gouache, delicate pencil edges. Uniform medium leafy greens #4F793D #658E4B #385C32. Even density and flat light. No upright tufts, long blades, flowers, shadows, vignette, borders, labels, photo or 3D. Very dense delicate narrow strokes. Fresh random arrangement E, every region unique, no repeating quadrants.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material.",
+      "cost_usd": null
+    },
+    {
+      "material": "wild_grass",
+      "variant": 2,
+      "prompt": "Square hand-painted overhead wild turf. The low grass has the fine even appearance of green velvet: thousands of minute specks and minuscule tapered dashes, NOT long individual grass blades. Scattered tiny clover leaflets, small and sparse. Soft matte gouache, subtle pencil grain, natural medium green #4F793D #658E4B #385C32. Uniform texture to every edge, flat diffuse light. No flowers, no border, no text.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material.",
+      "cost_usd": null
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "prompt": "Remove the white margin. Extend the grass texture across all white regions, so every pixel is green lawn. Keep the same miniature blade scale. The entire 1024 square must be grass, corner to corner. No white, no frame, no border.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material.",
+      "cost_usd": null
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "prompt": "Full-bleed hand-painted overhead lawn, green turf fills ALL pixels of 1024 square, no paper showing. The short turf has the fine even appearance of green velvet: thousands of minute specks and minuscule tapered dashes, NOT long individual grass blades. Soft matte gouache, subtle pencil grain, natural medium green #4F793D #658E4B #385C32. Uniform texture to every edge, flat diffuse light. No other plants, no border, no text. Composition 02.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material.",
+      "cost_usd": null
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "prompt": "Single full-bleed 1024x1024 square LAWN texture. Reference for handmade botanical gouache and pencil STYLE ONLY, not six-swatch layout. Exactly overhead tidy short fine grass blades, tiny and uniform, fresh medium green #4F793D #658E4B #385C32. Thousands of tiny strokes oriented in all directions, small crisp painted shapes, subtle pencil detail. Uniform dense coverage, scale, tone and flat diffuse lighting. Ground reaches all edges. Grass only, no clover, large tufts, stripes, gradients, vignette, border, margins, grid, swatches, text, horizon, objects, photography or 3D. One continuous hand-illustrated ground surface.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material.",
+      "cost_usd": null
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "prompt": "Hand-painted overhead lawn covering entire frame, green to the edges. The short turf has the fine even appearance of green velvet: thousands of minute specks and minuscule tapered dashes, NOT long individual grass blades. Soft matte gouache, subtle pencil grain, natural medium green #4F793D #658E4B #385C32. Uniform fine texture, flat diffuse light. No other plants, no border, no text. New arrangement two.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material.",
+      "cost_usd": null
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "prompt": "Hand-painted overhead lawn covering entire frame, green to the edges. The short turf has the fine even appearance of green velvet: thousands of minute specks and minuscule tapered dashes, NOT long individual grass blades. Soft matte gouache, subtle pencil grain, natural medium green #4F793D #658E4B #385C32. Uniform fine texture, flat diffuse light. No other plants, no border, no text. New arrangement three.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material.",
+      "cost_usd": null
+    },
+    {
+      "material": "wild_grass",
+      "variant": 4,
+      "prompt": "Hand-painted overhead lawn with a few tiny clover leaves scattered through it, covering entire frame, green to the edges. The low turf has the fine even appearance of green velvet: thousands of minute specks and minuscule tapered dashes, NOT long individual grass blades. Soft matte gouache, subtle pencil grain, natural medium green #4F793D #658E4B #385C32. Uniform fine texture, flat diffuse light. No flowers, no border, no text. New arrangement 04.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material.",
+      "cost_usd": null
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "prompt": "Hand-painted overhead lawn covering entire frame, green to the edges. The low turf has the fine even appearance of green velvet: thousands of minute specks and minuscule tapered dashes, NOT long individual grass blades. Soft matte gouache, subtle pencil grain, natural medium green #4F793D #658E4B #385C32. Uniform fine texture, flat diffuse light. Grass only, no clover, no flowers, no border, no text. New arrangement 01.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material.",
+      "cost_usd": null
+    },
+    {
+      "material": "lawn",
+      "variant": 3,
+      "prompt": "Hand-painted overhead lawn covering entire frame, green to the edges. The low turf has the fine even appearance of green velvet: thousands of minute specks and minuscule tapered dashes, NOT long individual grass blades. Soft matte gouache, subtle pencil grain, natural medium green #4F793D #658E4B #385C32. Uniform fine texture and uniform green tone, flat diffuse light. Grass only, no clover, no flowers, no border, no text. New arrangement 03.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material.",
+      "cost_usd": null
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "prompt": "Seamless lawn ground illustration, 1024 square full frame. Fine even green velvet turf, thousands of minuscule tapered dashes in all directions, no long individual blades. Soft matte gouache and delicate pencil grain. Medium leafy greens #4F793D #658E4B #385C32, even colour and density throughout. Flat overhead, no shadows. Grass only, no clover, no white, no border or text.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material.",
+      "cost_usd": null
+    },
+    {
+      "material": "wild_grass",
+      "variant": 3,
+      "prompt": "Seamless wild grass ground illustration, 1024 square full frame. Fine even green velvet turf, thousands of minuscule tapered dashes in all directions, no long individual blades. Scatter numerous grass-sized tiny clover specks, leaflets 4px, 5% coverage. Soft matte gouache and delicate pencil grain. Medium leafy greens #4F793D #658E4B #385C32, even colour and density throughout. Flat overhead, no shadows. No large leaves, no white, no border or text. Random arrangement 3, no swirls.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material.",
+      "cost_usd": null
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "prompt": "Seamless lawn ground illustration, 1024 square full frame. Fine even green velvet turf, thousands of minuscule tapered dashes in all directions, no long individual blades. Soft matte gouache and delicate pencil grain. Medium leafy greens #4F793D #658E4B #385C32, even colour and density throughout. Flat overhead, no shadows. Grass only, no clover, no white, no border or text. Random arrangement 1, no swirls.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material.",
+      "cost_usd": null
+    },
+    {
+      "material": "lawn",
+      "variant": 2,
+      "prompt": "Seamless lawn ground illustration, 1024 square full frame. Fine even green velvet turf, thousands of minuscule tapered dashes in all directions, no long individual blades. Soft matte gouache and delicate pencil grain. Medium leafy greens #4F793D #658E4B #385C32, even colour and density throughout. Flat overhead, no shadows. Grass only, no clover, no white, no border or text. Random arrangement 2, no swirls.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material.",
+      "cost_usd": null
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "prompt": "Digital matte gouache albedo map of very fine clipped grass. Top down, 1024x1024, six metres across. Dense tiny green flecks and short thin tapering blades randomly pointing every way. Fine illustrative grain and delicate detail. Medium leafy greens #4F793D #658E4B #385C32, uniform diffuse lighting and density. Image entirely grass. No frame, no clover, no text.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material.",
+      "cost_usd": null
+    },
+    {
+      "material": "wild_grass",
+      "variant": 1,
+      "prompt": "Digital matte gouache albedo map of very fine wild grass. Top down, 1024x1024, seven metres across. Dense tiny green flecks and short thin tapering blades randomly pointing every way, sparse minute clover. Fine illustrative grain and delicate detail. Medium leafy greens #4F793D #658E4B #385C32, uniform diffuse lighting and density. Image entirely grass. No frame, no tall tufts, no text.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material.",
+      "cost_usd": null
+    },
+    {
+      "material": "lawn",
+      "variant": 1,
+      "prompt": "Full-frame 1024 square painting of lawn stubble viewed vertically from above. Minuscule cut blade tips and very short narrow grass strokes cover the whole image uniformly; mixed orientations. Matte botanical gouache, fine colored-pencil detail. Medium green #4F793D with #658E4B #385C32. No long blades, large tufts, flowers, clover, shadows, border, paper or text.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material.",
+      "cost_usd": null
+    },
+    {
+      "material": "lawn",
+      "variant": 2,
+      "prompt": "Full-frame 1024 square painting of lawn stubble viewed vertically from above. Minuscule cut blade tips and very short narrow grass strokes cover the whole image uniformly; mixed orientations. Matte botanical gouache, fine colored-pencil detail. Medium green #4F793D with #658E4B #385C32. No long blades, large tufts, flowers, clover, shadows, border, paper or text. Unique random arrangement two.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material.",
+      "cost_usd": null
+    },
+    {
+      "material": "lawn",
+      "variant": 3,
+      "prompt": "Full-frame 1024 square painting of lawn stubble viewed vertically from above. Minuscule cut blade tips and very short narrow grass strokes cover the whole image uniformly; mixed orientations. Matte botanical gouache, fine colored-pencil detail. Medium green #4F793D with #658E4B #385C32. No long blades, large tufts, flowers, clover, shadows, border, paper or text. Unique random arrangement three.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material.",
+      "cost_usd": null
+    },
+    {
+      "material": "wild_grass",
+      "variant": 6,
+      "prompt": "An overhead painting of dense fine short grass stubble with tiny scattered clover flecks covering every pixel. Uniform medium leafy green, tiny blade tips, short strokes randomly pointing every way. Delicate matte gouache and pencil detail. No long blades or tufts, no white borders. 1024 square. #4F793D #658E4B #385C32. Flat light. Independent arrangement D.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material.",
+      "cost_usd": null
+    },
+    {
+      "material": "lawn",
+      "variant": 2,
+      "prompt": "Single full-bleed 1024x1024 square LAWN texture, independent composition 02. Reference for handmade botanical gouache and pencil STYLE ONLY, not six-swatch layout. Exactly overhead tidy short fine grass blades, smaller and more uniform than wild grass, fresh medium green. Hundreds of tiny strokes oriented in all directions, small crisp painted shapes, subtle pencil detail. Restrained #4F9A3A #7FB255 #2F6B3F #24541E, uniform density, scale, tone and flat diffuse lighting throughout. Ground reaches all edges. No mowing stripes, rows, furrows, flowers, clover, large tufts, focal features, gradients, vignette, border, margins, grid, swatches, text, horizon, islands, black backing, objects, insects, characters, photographic texture, clay3D or pixels. One continuous rotation-safe hand-illustrated ground surface.",
+      "error": "Provider 400: flagged for copyrighted or trademarked material. Original generic botanical prompt; no artist or brand requested.",
+      "cost_usd": null,
+      "historical_main_manifest": true
+    },
+    {
+      "material": "lawn",
+      "variant": 3,
+      "prompt": "Single full-bleed 1024x1024 square LAWN texture, independent composition 03. Reference for handmade botanical gouache and pencil STYLE ONLY, not six-swatch layout. Exactly overhead tidy short fine grass blades, smaller and more uniform than wild grass, fresh medium green. Hundreds of tiny strokes oriented in all directions, small crisp painted shapes, subtle pencil detail. Restrained #4F9A3A #7FB255 #2F6B3F #24541E, uniform density, scale, tone and flat diffuse lighting throughout. Ground reaches all edges. No mowing stripes, rows, furrows, flowers, clover, large tufts, focal features, gradients, vignette, border, margins, grid, swatches, text, horizon, islands, black backing, objects, insects, characters, photographic texture, clay3D or pixels. One continuous rotation-safe hand-illustrated ground surface.",
+      "error": "Provider 400: flagged for copyrighted or trademarked material. Original generic botanical prompt; no artist or brand requested.",
+      "cost_usd": null,
+      "historical_main_manifest": true
+    },
+    {
+      "material": "lawn",
+      "variant": 4,
+      "prompt": "Single full-bleed 1024x1024 square LAWN texture, independent composition 04. Reference for handmade botanical gouache and pencil STYLE ONLY, not six-swatch layout. Exactly overhead tidy short fine grass blades, smaller and more uniform than wild grass, fresh medium green. Hundreds of tiny strokes oriented in all directions, small crisp painted shapes, subtle pencil detail. Restrained #4F9A3A #7FB255 #2F6B3F #24541E, uniform density, scale, tone and flat diffuse lighting throughout. Ground reaches all edges. No mowing stripes, rows, furrows, flowers, clover, large tufts, focal features, gradients, vignette, border, margins, grid, swatches, text, horizon, islands, black backing, objects, insects, characters, photographic texture, clay3D or pixels. One continuous rotation-safe hand-illustrated ground surface.",
+      "error": "Provider 400: flagged for copyrighted or trademarked material. Original generic botanical prompt; no artist or brand requested.",
+      "cost_usd": null,
+      "historical_main_manifest": true
+    },
+    {
+      "material": "lawn",
+      "variant": 6,
+      "prompt": "Replace tall grass with extremely SHORT clipped fine lawn, thousands of tiny matte green pencil dashes in all directions, seen straight down. REDRAW entire composition, do not preserve existing blade shapes. Fresh medium green #4F9A3A with #7FB255 and #2F6B3F details. 1024 square continuous turf, uniformly fine detail from edge to edge. No broad leaves, clover, flowers, large grass blades, stripes, rows, furrows, swirls, border, panels, text, gradient, vignette or photographic realism. Original handmade gouache surface with fine pencil strokes.",
+      "error": "OpenRouter 403: key total spending limit exceeded. No image generated.",
+      "cost_usd": null,
+      "historical_main_manifest": true
+    },
+    {
+      "material": "lawn",
+      "variant": 5,
+      "prompt": "Full-frame 1024 square painting of lawn stubble viewed vertically from above. Minuscule cut blade tips and very short narrow grass strokes cover the whole image uniformly; mixed orientations. Matte botanical gouache, fine colored-pencil detail. Medium green #4F793D with #658E4B #385C32. No long blades, large tufts, flowers, clover, shadows, border, paper or text. Another unique arrangement, version 5. Dense interwoven miniature strokes.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material.",
+      "cost_usd": null
+    },
+    {
+      "material": "wild_grass",
+      "variant": 4,
+      "prompt": "Full-frame 1024 square painting of low grass stubble and scattered tiny clover viewed vertically from above. Minuscule blade tips and very short narrow grass strokes cover the whole image uniformly; mixed orientations. Tiny little clover flecks occupy five percent. Matte botanical gouache, fine colored-pencil detail. Medium green #4F793D with #658E4B #385C32. No long blades, large tufts, flowers, shadows, border, paper or text. Dense interwoven miniature strokes. New arrangement 4.",
+      "error": "OpenRouter 400: Gemini flagged copyrighted or trademarked material.",
+      "cost_usd": null
+    }
+  ],
+  "status": "source_rework_in_progress",
+  "source_bank_review": {
+    "wild_grass": "Not coherent: 01/06 fine interwoven linework differs from fine stippled02/03;04 too sparse;05 long upward blades. No six-variant approval. Final six-contact inspection at70px/m confirms large density/style differences:02/03 fine stippling,01 linework,04 sparse backing,05/06 directional grass. These are candidates, not a coherent bank.",
+    "lawn": "Not coherent:01 promising dense dark fine interwoven blades;02/03 paler and more directional;04 significantly longer clippings;05/06 historical coarse blades. No six-variant approval. Final six-contact inspection at70px/m confirms01/04 dense interwoven strokes,02/03 pale sparse marks,05/06 long directional grass. These are candidates, not a coherent bank."
+  },
+  "cost_note": "Additional cost is the sum of all new successful calls, including discarded images. Failed calls returned no cost. Historical main-manifest costs excluded from additional total.",
+  "seamlessness": "Not tested or claimed. No processing, atlas or renderer changes. Neither six-variant source bank approved.",
+  "verification": {
+    "current_count": 12,
+    "material_counts": {
+      "wild_grass": 6,
+      "lawn": 6
+    },
+    "unique_current_sha256": 12,
+    "successful_new_attempts": 36,
+    "failed_attempts_including_historical": 51,
+    "resumed_failed_attempts": 45,
+    "retained_rejected_records": 36,
+    "all_record_hashes_and_dimensions_verified": true,
+    "all_originals_preserved": true,
+    "unchanged_main_records_copied_exactly": 2,
+    "sources_replaced": 10,
+    "near_duplicate_current_candidates": [],
+    "max_pairwise_d4_luminance_correlation_128": {
+      "wild_grass": 0.059949,
+      "lawn": 0.062109
+    },
+    "contact_sheet_pixels_per_metre": 70,
+    "source_tile_metres": {
+      "wild_grass": 7,
+      "lawn": 6
+    },
+    "accepted_coherent_banks": 0,
+    "final_six_contacts_visually_inspected": true
+  },
+  "budget_allocation_usd": 3.0,
+  "remaining_allocation_usd": 0.5772355,
+  "budget_completion_gate": {
+    "best_matching_subset": {
+      "wild_grass": [
+        2,
+        3
+      ],
+      "lawn": [
+        1
+      ]
+    },
+    "needed_new_matching_variants": 9,
+    "lowest_observed_success_cost_usd": 0.0672195,
+    "optimistic_minimum_remaining_cost_usd": 0.6049755,
+    "remaining_allocation_usd": 0.5772355,
+    "can_fund_all_missing_even_if_every_next_call_is_perfect": false
+  },
+  "blocker": "No coherent six-variant bank after repeated visual reworks. Remaining strict allocation cannot fund nine still-needed matching variants even at the lowest observed successful-call price. Persistent generic-prompt copyright false positives also affected generation; no spending-limit error on resumed calls.",
+  "review_gate": {
+    "wild_grass": {
+      "source_bank_accepted": false,
+      "accepted_variants": []
+    },
+    "lawn": {
+      "source_bank_accepted": false,
+      "accepted_variants": []
+    },
+    "note": "Individual keep verdicts are source-pilot assessments only; historical unchanged records retain prior verdicts exactly. Neither bank may be promoted based on these flags."
+  }
+}

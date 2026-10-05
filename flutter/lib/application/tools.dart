@@ -44,6 +44,7 @@ enum ToolFunction {
   /// is unprepared dirt that nothing is planted on. Plantings are added
   /// in Layers.
   clearGround('Fallow', 'ground-zone.svg'),
+  coverGround('Cover', 'ground-cover.svg'),
   flatGround('Flat', 'ground-flat.svg'),
   rowGround('Row', 'ground-row.svg'),
 
@@ -62,11 +63,15 @@ enum ToolFunction {
 
   /// Whether this is one of the Ground tool's functions.
   bool get setsGround =>
-      this == clearGround || this == flatGround || this == rowGround;
+      this == clearGround ||
+      this == coverGround ||
+      this == flatGround ||
+      this == rowGround;
 
   /// The ground a Ground function gives a bed; null for Fallow and
   /// for other tools. Check [setsGround] first.
   GroundType? get groundType => switch (this) {
+    coverGround => GroundType.cover,
     flatGround => GroundType.flat,
     rowGround => GroundType.row,
     _ => null,
@@ -127,10 +132,11 @@ enum Tool {
     ToolFunction.rectangle,
   ]),
 
-  /// Prepares a bed's soil: fallow, flat, or in rows. Rows are sized in
+  /// Prepares a bed's soil: fallow, cover crop, flat, or in rows. Rows are sized in
   /// Properties.
   ground('Ground', 'ground.svg', [
     ToolFunction.clearGround,
+    ToolFunction.coverGround,
     ToolFunction.flatGround,
     ToolFunction.rowGround,
   ]),

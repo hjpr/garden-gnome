@@ -1,13 +1,16 @@
 import 'dart:async';
 
-import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../application/app_tools.dart';
 import '../application/document_session.dart';
+import '../application/farm_files.dart';
+import '../application/storage_error.dart';
+import '../platform/farm_files.dart';
 import '../application/editor_controller.dart';
 import '../application/garden_controller.dart';
+import '../application/texture_library.dart';
 import '../application/toasts.dart';
 import '../application/tools.dart';
 import '../application/workspace_settings.dart';
@@ -145,14 +148,23 @@ class _PlanScreenState extends State<PlanScreen> {
     }
   }
 
+  /// Saves where the farm lives: its file on disk, or its browser
+  /// library entry. A farm saved nowhere yet goes to Save as.
   Future<bool> _save() async {
     requestPersistentStorage();
-    if (_editor.libraryId == null) return _saveAs();
+    final onDisk = _session.savesToFiles && _editor.fileRef != null;
+    if (!onDisk && _editor.libraryId == null) return _saveAs();
     return _report(await _session.save());
   }
 
+  /// Saves to a new file where files can be written (Chrome, Edge and
+  /// desktop), or under a new name in this browser elsewhere.
   Future<bool> _saveAs() async {
     requestPersistentStorage();
+    if (_session.savesToFiles) {
+      final result = await _session.saveAsFile();
+      return result != null && _report(result);
+    }
     final name = await askForName(context, _editor.title);
     if (name == null) return false;
     return _report(await _session.saveAs(name));
@@ -184,6 +196,8 @@ class _PlanScreenState extends State<PlanScreen> {
   }
 
   Future<void> _open() async {
+    // Desktop keeps no browser library: Open is the file picker.
+    if (!(_session.files?.hasBrowserLibrary ?? true)) return _import();
     // Choose first, so cancelling leaves the current drawing untouched.
     final choice = await chooseDrawing(context, _session.library);
     if (choice == null || !mounted) return;
@@ -197,13 +211,20 @@ class _PlanScreenState extends State<PlanScreen> {
   }
 
   Future<void> _import() async {
-    const group = XTypeGroup(label: 'Garden Gnome', extensions: ['ggnome']);
-    final file = await openFile(acceptedTypeGroups: [group]);
-    if (file == null || !mounted) return;
-    final bytes = await file.readAsBytes();
-    if (!mounted || !await _readyToLeave()) return;
-    _report(await _session.import(bytes, file.name));
+    final OpenedFarmFile? file;
+    try {
+      file = await _files.pickToOpen();
+    } on StorageError catch (e) {
+      _toast(e.message, error: true);
+      return;
+    }
+    if (file == null || !mounted || !await _readyToLeave()) return;
+    _report(await _session.import(file.bytes, file.name, ref: file.ref));
   }
+
+  /// Files on disk; a session built without them (tests) reads a picked
+  /// file once, like a browser without file handles.
+  FarmFiles get _files => _session.files ?? createFarmFiles();
 
   /// Opens Preferences. Values typed there are held until Apply, and
   /// dropped when the dialog closes.
@@ -213,9 +234,12 @@ class _PlanScreenState extends State<PlanScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Preferences'),
         content: SizedBox(
-          width: 600,
-          height: 360,
-          child: PreferencesBody(editor: _editor),
+          width: 680,
+          height: 520,
+          child: PreferencesBody(
+            editor: _editor,
+            textures: AppTextures.instance,
+          ),
         ),
         actions: [
           TextButton(
@@ -232,11 +256,7 @@ class _PlanScreenState extends State<PlanScreen> {
   Future<void> _export() async {
     final name = '${_editor.title.replaceAll(RegExp(r'[^\w\- ]'), '_')}.ggnome';
     try {
-      await XFile.fromData(
-        _session.export(),
-        name: name,
-        mimeType: 'application/zip',
-      ).saveTo(name);
+      await _files.exportCopy(name, _session.export());
       _toast('Exported $name');
     } catch (_) {
       _toast('Export failed', error: true);
@@ -359,7 +379,7 @@ class _PlanScreenState extends State<PlanScreen> {
             : editor.selectedLayer?.role.label,
         expanded: expanded,
         onExpandedChanged: setExpanded,
-        child: PropertiesBody(editor: editor),
+        child: PropertiesBody(editor: editor, garden: widget.garden),
       ),
       PanelId.layers => DockPanel(
         index: index,
@@ -404,6 +424,13 @@ class _PlanScreenState extends State<PlanScreen> {
                       onPreferences: _preferences,
                       navigator: widget.navigator,
                     ),
+                    if (_session.reopenWaiting case final name?)
+                      _ReopenBar(
+                        name: name,
+                        onReopen: () async =>
+                            _report(await _session.reopenFile()),
+                        onSkip: _session.skipReopen,
+                      ),
                     Expanded(
                       child: tooSmall ? const _TooSmallNotice() : _workspace(),
                     ),
@@ -459,7 +486,9 @@ class _PlanScreenState extends State<PlanScreen> {
               // Its own layer: redrawing the canvas leaves the panels'
               // pixels alone, and panel hovers leave the canvas alone.
               child: ClipRect(
-                child: RepaintBoundary(child: DrawingCanvas(editor: _editor)),
+                child: RepaintBoundary(
+                  child: DrawingCanvas(editor: _editor, garden: widget.garden),
+                ),
               ),
             ),
           ),
@@ -483,6 +512,47 @@ class _TooSmallNotice extends StatelessWidget {
         textAlign: TextAlign.center,
         style: TextStyle(color: Palette.muted),
       ),
+    ),
+  );
+}
+
+/// Offers to reopen last session's farm file. Chrome lets a page read a
+/// remembered file again only after a click, so start-up cannot do it
+/// alone; desktop never needs this.
+class _ReopenBar extends StatelessWidget {
+  const _ReopenBar({
+    required this.name,
+    required this.onReopen,
+    required this.onSkip,
+  });
+
+  final String name;
+  final VoidCallback onReopen;
+  final VoidCallback onSkip;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    height: 36,
+    padding: const EdgeInsets.symmetric(horizontal: 12),
+    decoration: const BoxDecoration(
+      color: Palette.wash,
+      border: Border(bottom: BorderSide(color: Palette.panelBorder)),
+    ),
+    child: Row(
+      children: [
+        const Icon(Icons.history, size: 16, color: Palette.accent),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            'Reopen $name from last time?',
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 13, color: Palette.ink),
+          ),
+        ),
+        TextButton(onPressed: onSkip, child: const Text('Not now')),
+        const SizedBox(width: 4),
+        FilledButton(onPressed: onReopen, child: const Text('Reopen')),
+      ],
     ),
   );
 }

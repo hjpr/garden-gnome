@@ -53,7 +53,7 @@ void main() {
   group('Plant layout', () {
     test('zero gap tiles flat ground with touching footprints', () {
       final (editor, _, _, grow) = garden(GroundType.flat);
-      editor.setSeed(grow, seed(size: 0.5, spacing: 0));
+      editor.setSeed(grow, seed(inRow: 0.5, betweenRows: 0.5));
       final layout = editor.document.plantLayoutOf(grow)!;
       expect(layout.count, 96); // Eight lines of twelve touching plants.
       expect(
@@ -61,44 +61,44 @@ void main() {
         4.25,
       );
       final before = editor.document;
-      editor.setSeed(grow, seed(size: 0.5, spacing: -0.1));
+      editor.setSeed(grow, seed(inRow: -0.1));
       expect(editor.document, same(before));
       expect(editor.notice, contains('spacing'));
     });
 
-    test('one footprint fits without needing a trailing empty gap', () {
+    test('one plant fits in one footprint without a trailing pitch', () {
       final (editor, _, flat, grow) = garden(GroundType.flat);
-      editor.setSeed(grow, seed(size: 4, spacing: 100));
+      editor.setSeed(grow, seed(inRow: 4, betweenRows: 4));
       expect(editor.document.plantLayoutOf(grow)!.positions, [const Vec(6, 7)]);
-      editor.setSeed(grow, seed(size: 4.01, spacing: 100));
+      editor.setSeed(grow, seed(inRow: 4.01, betweenRows: 4.01));
       expect(editor.document.plantLayoutOf(grow)!.count, 0);
       editor.setRows(flat, const RowSpec(direction: 90));
-      editor.setSeed(grow, seed(size: 5, spacing: 100));
-      // Across span is 6 m, but the 4 m run cannot fit a 5 m diameter.
+      editor.setSeed(grow, seed(inRow: 5, betweenRows: 5));
+      // Across span is 6 m, but the 4 m run cannot fit a 5 m footprint.
       expect(editor.document.plantLayoutOf(grow)!.count, 0);
     });
 
     test('dense planting retains the existing storage and line limits', () {
       final (editor, _, soil, grow) = garden(GroundType.flat);
-      editor.setSeed(grow, seed(size: 0.01, spacing: 0));
+      editor.setSeed(grow, seed(inRow: 0.01, betweenRows: 0.01));
       final grid = editor.document.plantLayoutOf(grow)!;
       expect(grid.count, 240000); // 400 lines * 600 plants.
       expect(grid.positions.length, PlantLayout.maxPositions);
-      editor.setSeed(grow, seed(size: 0.0009, spacing: 0));
+      editor.setSeed(grow, seed(inRow: 0.0009, betweenRows: 0.0009));
       expect(editor.document.plantLayoutOf(grow)!.count, 0);
       editor.setGround(soil, GroundType.row);
       editor.setRows(soil, const RowSpec(width: 1, spacing: 0));
-      editor.setSeed(grow, seed(size: 0.01, spacing: 0));
+      editor.setSeed(grow, seed(inRow: 0.01, betweenRows: 0.01));
       expect(editor.document.plantLayoutOf(grow)!.lines.length, 48);
     });
 
-    test('empty spacing increases centre pitch even on a single-line bed', () {
+    test('in-row spacing sets the pitch along a single-line bed', () {
       final (editor, _, soil, grow) = garden(GroundType.row);
       editor.setRows(soil, const RowSpec(width: 0.5, spacing: 0.5));
-      editor.setSeed(grow, seed(size: 0.5, spacing: 1));
+      editor.setSeed(grow, seed(inRow: 1.5, betweenRows: 0.5));
       final layout = editor.document.plantLayoutOf(grow)!;
-      // Four beds cross the grow zone. A 6 m run fits four 0.5 m
-      // footprints with three 1 m empty gaps (5 m occupied in total).
+      // Four beds cross the grow zone. A 6 m run fits four plants 1.5 m
+      // apart, half a 0.5 m footprint clear of each end.
       expect(layout.count, 16);
       for (final line in layout.lines) {
         final ys =
@@ -109,7 +109,7 @@ void main() {
               ..sort();
         expect(ys, [4.75, 6.25, 7.75, 9.25]);
       }
-      editor.setSeed(grow, seed(size: 0.5, spacing: 0));
+      editor.setSeed(grow, seed(inRow: 0.5, betweenRows: 0.5));
       expect(editor.document.plantLayoutOf(grow)!.count, 48);
       editor.undo();
       expect(editor.document.plantLayoutOf(grow)!.count, 16);
@@ -117,14 +117,14 @@ void main() {
       expect(editor.document.plantLayoutOf(grow)!.count, 48);
     });
 
-    test('a bed fits whole diameters with gaps only between lines', () {
+    test('a wide bed takes lines between-row spacing apart', () {
       final (editor, _, soil, grow) = garden(GroundType.row);
       editor.setRows(soil, const RowSpec(width: 1.25, spacing: 0.75));
-      editor.setSeed(grow, seed(size: 0.5, spacing: 0.25));
+      editor.setSeed(grow, seed(inRow: 0.5, betweenRows: 0.75));
       final layout = editor.document.plantLayoutOf(grow)!;
-      // Two 0.5 m footprints plus one 0.25 m gap fit exactly per bed.
-      // Two beds cross the grow zone; 8 plants fit each 6 m line.
-      expect(layout.count, 32);
+      // Two lines 0.75 m apart, each half a 0.5 m footprint inside the
+      // bed. Two beds cross the grow zone; 12 plants fit each 6 m line.
+      expect(layout.count, 48);
       // Unbordered beds start at x=2 and repeat every 2 m. The two
       // relevant bed centres are 4.625 and 6.625, with lines ±0.375 m.
       expect(layout.positions.map((p) => p.x).toSet(), {4.25, 5, 6.25, 7});
@@ -133,26 +133,28 @@ void main() {
     test('a plant wider than its bed is not planted', () {
       final (editor, _, soil, grow) = garden(GroundType.row);
       editor.setRows(soil, const RowSpec(width: 0.25, spacing: 0.75));
-      editor.setSeed(grow, seed(size: 0.5, spacing: 0));
+      editor.setSeed(grow, seed(inRow: 0.5, betweenRows: 0.5));
       expect(editor.document.plantLayoutOf(grow)!.count, 0);
     });
 
-    test('flat footprints fit endpoints and use the same gap in both axes', () {
+    test('flat grids put lines between-row apart and plants in-row apart', () {
       final (editor, _, _, grow) = garden(GroundType.flat);
-      editor.setSeed(grow, seed(size: 0.5, spacing: 1));
+      editor.setSeed(grow, seed(inRow: 1.5, betweenRows: 1));
       final layout = editor.document.plantLayoutOf(grow)!;
-      expect(layout.positions.map((p) => p.x).toSet(), {4.5, 6, 7.5});
+      // Lines run north–south, so x is across them and y along them.
+      expect(layout.positions.map((p) => p.x).toSet(), {4.5, 5.5, 6.5, 7.5});
       expect(layout.positions.map((p) => p.y).toSet(), {
         4.75,
         6.25,
         7.75,
         9.25,
       });
+      // Half the 1 m footprint stays inside the grow zone.
       for (final p in layout.positions) {
-        expect(p.x - 0.25, greaterThanOrEqualTo(4));
-        expect(p.x + 0.25, lessThanOrEqualTo(8));
-        expect(p.y - 0.25, greaterThanOrEqualTo(4));
-        expect(p.y + 0.25, lessThanOrEqualTo(10));
+        expect(p.x - 0.5, greaterThanOrEqualTo(4));
+        expect(p.x + 0.5, lessThanOrEqualTo(8));
+        expect(p.y - 0.5, greaterThanOrEqualTo(4));
+        expect(p.y + 0.5, lessThanOrEqualTo(10));
       }
     });
 
@@ -161,7 +163,7 @@ void main() {
       () {
         final (editor, _, soil, grow) = garden(GroundType.row);
         editor.setRows(soil, const RowSpec(width: 1, spacing: 1));
-        editor.setSeed(grow, seed(size: 0.25, spacing: 0.25));
+        editor.setSeed(grow, seed(inRow: 0.5, betweenRows: 0.5));
         final before = editor.document.plantLayoutOf(grow)!;
         editor.setRows(soil, const RowSpec(width: 1, spacing: 1, border: 3));
         final layout = editor.document.plantLayoutOf(grow)!;
@@ -180,13 +182,13 @@ void main() {
 
     test('over Row ground, plants go only along the rows', () {
       final (editor, _, soil, grow) = garden(GroundType.row);
-      // Rows run north–south, 1 m wide with no path, so each is one line
-      // of 0.5 m plants separated by 1 m empty gaps.
+      // Rows run north–south, 1 m wide with no path, so each holds one
+      // line of plants 1.5 m apart.
       editor.setRows(soil, const RowSpec(width: 1, spacing: 0, direction: 0));
-      editor.setSeed(grow, seed(size: 0.5, spacing: 1));
+      editor.setSeed(grow, seed(inRow: 1.5, betweenRows: 1));
       final layout = editor.document.plantLayoutOf(grow)!;
       // The grow zone is x 4–8 (4 rows, centres 4.5..7.5) and y 4–10
-      // (6 m of row each): 4 plants per row (0.5 + 3 * 1.5 = 5 m).
+      // (6 m of row each): 4 plants per row (1 + 3 * 1.5 = 5.5 m).
       expect(layout.soils, {GroundType.row});
       expect(layout.count, 16);
       final xs = layout.positions.map((p) => p.x).toSet();
@@ -198,11 +200,11 @@ void main() {
       final (editor, _, soil, grow) = garden(GroundType.row);
       // One 3 m row fits 5 lines of 0.5 m plants 0.1 m apart.
       editor.setRows(soil, const RowSpec(width: 3, spacing: 0, direction: 0));
-      editor.setSeed(grow, seed(size: 0.5, spacing: 0.1));
+      editor.setSeed(grow, seed(inRow: 0.6, betweenRows: 0.6));
       final all = editor.document.plantLayoutOf(grow)!;
       editor.setSeed(
         grow,
-        seed(size: 0.5, spacing: 0.1).copyWith(lines: () => 2),
+        seed(inRow: 0.6, betweenRows: 0.6).copyWith(lines: () => 2),
       );
       final two = editor.document.plantLayoutOf(grow)!;
       expect(two.count, lessThan(all.count));
@@ -210,19 +212,19 @@ void main() {
       expect(linesPerRow, greaterThan(1));
       // Lines stop at what the spacing fits: 5 lines on a 3 m row.
       expect(
-        editor.document.maxLinesOf(grow, seed(size: 0.5, spacing: 0.1)),
+        editor.document.maxLinesOf(grow, seed(inRow: 0.6, betweenRows: 0.6)),
         5,
       );
       editor.setSeed(
         grow,
-        seed(size: 0.5, spacing: 0.1).copyWith(lines: () => 99),
+        seed(inRow: 0.6, betweenRows: 0.6).copyWith(lines: () => 99),
       );
       ZoneSeed stored() =>
           (editor.document.layers[grow]!.properties as ZoneProperties).seed!;
       expect(stored().lines, 5);
       expect(editor.document.plantLayoutOf(grow)!.count, all.count);
       // Widening the spacing brings Lines down with it.
-      editor.setSeed(grow, stored().copyWith(spacing: 0.5));
+      editor.setSeed(grow, stored().copyWith(betweenRows: 1.0));
       expect(stored().lines, 3);
 
       final reopened = decodeGgnome(encodeGgnome(editor.document));
@@ -234,7 +236,7 @@ void main() {
     test('a wide row takes several lines at the seed spacing', () {
       final (editor, _, soil, grow) = garden(GroundType.row);
       editor.setRows(soil, const RowSpec(width: 1, spacing: 0, direction: 0));
-      editor.setSeed(grow, seed(size: 0.25, spacing: 0.25));
+      editor.setSeed(grow, seed(inRow: 0.5, betweenRows: 0.5));
       final layout = editor.document.plantLayoutOf(grow)!;
       // Two 0.25 m footprints and a 0.25 m gap per 1 m bed;
       // twelve plants occupy 0.25 + 11 * 0.5 = 5.75 m per line.
@@ -243,9 +245,10 @@ void main() {
 
     test('over Flat ground, plants go on a grid inside the grow zone', () {
       final (editor, _, _, grow) = garden(GroundType.flat);
-      editor.setSeed(grow, seed(size: 0.5, spacing: 1));
+      editor.setSeed(grow, seed(inRow: 1.5, betweenRows: 1.25));
       final layout = editor.document.plantLayoutOf(grow)!;
-      // Three lines occupy 3.5 m across; four plants occupy 5 m along.
+      // Three lines 1.25 m apart across 4 m; four plants 1.5 m apart
+      // along 6 m.
       expect(layout.soils, {GroundType.flat});
       expect(layout.count, 12);
       for (final p in layout.positions) {
@@ -269,10 +272,10 @@ void main() {
         6,
         role: LayerRole.planting,
       );
-      editor.setSeed(half, seed(size: 0.5, spacing: 1));
+      editor.setSeed(half, seed(inRow: 1.5, betweenRows: 1));
       final layout = editor.document.plantLayoutOf(half)!;
-      // Lines at 10.5, 12 and 13.5; only 10.5 is inside soil.
-      // Two 0.5 m footprints plus one 1 m gap fit the 2 m run exactly.
+      // Lines at 10.5, 11.5, 12.5 and 13.5; two are inside soil, and
+      // each 2 m run holds one plant.
       expect(layout.count, 2);
       expect(layout.positions.every((p) => p.x < 12), isTrue);
     });
@@ -478,9 +481,12 @@ void main() {
 
   group('Dropping seeds', () {
     test(
-      'catalog defaults clamp overlapping and broadcast recommendations',
+      'catalog defaults keep both centre distances; broadcast ones clamp',
       () {
-        for (final (inRow, between, size) in [(8, 4, 8.0), (0, 0, 0.5)]) {
+        for (final (inRow, between, inRowOut, betweenOut) in [
+          (8, 4, 8.0, 4.0),
+          (0, 0, 0.5, 0.5),
+        ]) {
           final planted = seedFromProfile(
             VarietyProfile(
               Variety(
@@ -493,8 +499,8 @@ void main() {
               testLettuce,
             ),
           );
-          expect(planted.size, closeTo(size * inch, 1e-9));
-          expect(planted.spacing, 0);
+          expect(planted.inRow, closeTo(inRowOut * inch, 1e-9));
+          expect(planted.betweenRows, closeTo(betweenOut * inch, 1e-9));
           expect(planted.problem, isNull);
         }
       },
@@ -515,9 +521,9 @@ void main() {
             (editor.document.layers[grow]!.properties as ZoneProperties).seed!;
         expect(planted.varietyId, 'variety-7');
         expect(planted.name, 'Buttercrunch · Lettuce');
-        expect(planted.size, closeTo(8 * inch, 1e-9));
-        expect(planted.spacing, closeTo(4 * inch, 1e-9));
-        expect(planted.pitch, closeTo(12 * inch, 1e-9));
+        // Centre to centre, as the catalog gives them.
+        expect(planted.inRow, closeTo(8 * inch, 1e-9));
+        expect(planted.betweenRows, closeTo(12 * inch, 1e-9));
         expect(editor.selectedLayerId, grow);
         expect(editor.undoLabel, 'Plant Buttercrunch · Lettuce');
       },
@@ -535,7 +541,7 @@ void main() {
       dropSeed(editor, profile, const Vec(6, 6));
       final wider = (editor.document.layers[grow]!.properties as ZoneProperties)
           .seed!
-          .copyWith(size: 0.5);
+          .copyWith(inRow: 0.5);
       editor.setSeed(grow, wider);
       dropSeed(editor, profile, const Vec(6, 6));
       expect(

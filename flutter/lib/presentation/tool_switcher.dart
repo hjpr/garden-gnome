@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../application/app_tools.dart';
 import 'theme.dart';
-import 'widgets/icon_controls.dart';
 
 /// The picture for each tool, used on the home view and in the switcher.
 Widget toolIcon(AppTool? tool, {double size = 18, Color? color}) {
@@ -11,9 +10,7 @@ Widget toolIcon(AppTool? tool, {double size = 18, Color? color}) {
     null => Icon(Icons.eco, size: size, color: c),
     AppTool.plan => Icon(Icons.architecture, size: size, color: c),
     AppTool.seedVault => Icon(Icons.inventory_2_outlined, size: size, color: c),
-    AppTool.greenhouse => AppIcon('greenhouse.svg', size: size, color: c),
     AppTool.grow => Icon(Icons.calendar_month_outlined, size: size, color: c),
-    AppTool.harvest => Icon(Icons.agriculture_outlined, size: size, color: c),
   };
 }
 

@@ -42,7 +42,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test(
-    'plant diameter is Size and stays visible with zero empty gap',
+    'plant circles are the closer spacing across, so neighbours touch',
     () async {
       final (editor, input, _, _) = garden(GroundType.flat);
       editor.selectLayer(editor.document.propertyIds.single);
@@ -57,22 +57,25 @@ void main() {
         role: LayerRole.planting,
       );
       final blank = await raster(editor.document);
-      editor.setSeed(grow, seed(size: 2, spacing: 0));
+      editor.setSeed(grow, seed(inRow: 2.0, betweenRows: 2.0));
       expect(editor.document.plantLayoutOf(grow)!.count, 1);
       final touching = await raster(editor.document);
       // Diameter 2 m at 30 px/m: radius 30 px, centred at (150, 150).
       expect(pixel(touching, 177, 150), isNot(pixel(blank, 177, 150)));
       expect(pixel(touching, 183, 150), pixel(blank, 183, 150));
 
-      editor.setSeed(grow, seed(size: 2, spacing: 3));
+      // A wider in-row spacing alone does not grow the circle.
+      editor.setSeed(grow, seed(inRow: 5, betweenRows: 2));
       expect(editor.document.plantLayoutOf(grow)!.count, 1);
       final separated = await raster(editor.document);
       expect(separated, orderedEquals(touching));
 
-      editor.setSeed(grow, seed(size: 1, spacing: 3));
+      // 1 m apart both ways: four 1 m circles centred at 4.5/5.5 m.
+      editor.setSeed(grow, seed(inRow: 1, betweenRows: 1));
+      expect(editor.document.plantLayoutOf(grow)!.count, 4);
       final smaller = await raster(editor.document);
       expect(pixel(smaller, 177, 150), pixel(blank, 177, 150));
-      expect(pixel(smaller, 160, 150), isNot(pixel(blank, 160, 150)));
+      expect(pixel(smaller, 165, 135), isNot(pixel(blank, 165, 135)));
     },
   );
 }

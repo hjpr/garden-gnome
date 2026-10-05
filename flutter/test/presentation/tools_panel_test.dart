@@ -129,6 +129,7 @@ void main() {
     ]);
     expect(Tool.ground.functions.map((f) => f.label), [
       'Fallow',
+      'Cover',
       'Flat',
       'Row',
     ]);

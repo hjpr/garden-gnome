@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../application/editor_controller.dart';
+import '../../application/garden_controller.dart';
+import '../../domain/grow/day.dart';
 import '../../domain/layer.dart';
 import '../../domain/plant_layout.dart';
-import '../../domain/units.dart';
+import '../../domain/land_rules.dart';
 import '../../domain/zone_ground.dart';
 import '../theme.dart';
 import '../widgets/draft_text_field.dart';
@@ -20,9 +22,14 @@ class ZoneOptions extends StatelessWidget {
     required this.layer,
     required this.properties,
     required this.editable,
+    this.garden,
   });
 
   final EditorController editor;
+
+  /// Offers the vault's cover crops and their seeding rates; null leaves
+  /// the Cover crop list empty.
+  final GardenController? garden;
   final Layer layer;
   final ZoneProperties properties;
   final bool editable;
@@ -59,8 +66,103 @@ class ZoneOptions extends StatelessWidget {
           title: 'GROUND',
           children: [_directionField(layer, p, editable)],
         ),
+      if (p.isCover) _coverGroup(layer, p, editable),
     ],
   ];
+
+  /// A Cover bed's cover crop, its dates and the seed it needs. The crop
+  /// is picked here or dragged on in Plant mode.
+  Widget _coverGroup(Layer layer, ZoneProperties p, bool editable) {
+    final cover = p.cover;
+    final choices = garden?.coverVarieties ?? const [];
+    final crop = cover == null
+        ? null
+        : garden?.catalog.coverCrop(
+            garden!.record.varieties[cover.varietyId]?.cropId ?? '',
+          );
+    final rate = crop?.seedRate;
+    final area = editor.document.netAreaOf(layer.id);
+    void setDates({
+      DateTime? Function()? sown,
+      DateTime? Function()? terminated,
+    }) {
+      final current = editor.document.layers[layer.id]?.properties;
+      if (current is ZoneProperties && current.cover != null) {
+        editor.setCover(
+          layer.id,
+          current.cover!.copyWith(sownOn: sown, terminatedOn: terminated),
+        );
+      }
+    }
+
+    return PropertyGroup(
+      title: 'COVER',
+      children: [
+        PropertyRow(
+          label: 'Cover crop',
+          child: CompactDropdown<String?>(
+            label: 'Cover crop',
+            value: cover?.varietyId,
+            items: {
+              null: '—',
+              // A crop no longer in the vault still shows by its name.
+              if (cover != null &&
+                  !choices.any((c) => c.$1.id == cover.varietyId))
+                cover.varietyId: cover.name,
+              for (final (v, c) in choices) v.id: '${v.name} · ${c.name}',
+            },
+            onChanged: editable
+                ? (id) {
+                    if (id == null) return editor.setCover(layer.id, null);
+                    final (v, c) = choices.firstWhere((e) => e.$1.id == id);
+                    editor.setCover(
+                      layer.id,
+                      CoverSowing(
+                        varietyId: v.id,
+                        name: '${v.name} · ${c.name}',
+                        sownOn: cover?.sownOn,
+                        terminatedOn: cover?.terminatedOn,
+                      ),
+                    );
+                  }
+                : null,
+          ),
+        ),
+        _readout(
+          'Seed needed',
+          rate == null || area == null ? '—' : rate.amountFor(area),
+          rate != null && area != null,
+        ),
+        PropertyRow(
+          label: 'Sown',
+          child: DayField(
+            label: 'Sown',
+            day: cover?.sownOn,
+            enabled: editable && cover != null,
+            onChanged: (day) => setDates(
+              sown: () => day,
+              // Terminated never stays before Sown.
+              terminated: cover?.terminatedOn?.isBefore(day) ?? false
+                  ? () => null
+                  : null,
+            ),
+            onCleared: () => setDates(sown: () => null, terminated: () => null),
+          ),
+        ),
+        PropertyRow(
+          label: 'Terminated',
+          child: DayField(
+            label: 'Terminated',
+            day: cover?.terminatedOn,
+            first: cover?.sownOn,
+            enabled: editable && cover?.sownOn != null,
+            onChanged: (day) => setDates(terminated: () => dayOf(day)),
+            onCleared: () => setDates(terminated: () => null),
+          ),
+        ),
+      ],
+    );
+  }
 
   Widget _plantingGroup(Layer layer, ZoneProperties p, bool editable) {
     final units = editor.settings.units;
@@ -113,28 +215,28 @@ class ZoneOptions extends StatelessWidget {
         MeasureField(
           editor: editor,
           ownerId: layer.id,
-          field: 'seed-size',
-          label: 'Size',
-          unit: units.symbol,
-          metres: seed?.size ?? 0,
-          toDisplay: units.fromMetres,
-          fromDisplay: units.toMetres,
+          field: 'seed-in-row',
+          label: 'In-row',
+          unit: units.fineSymbol,
+          metres: seed?.inRow ?? 0,
+          toDisplay: units.fineFromMetres,
+          fromDisplay: units.fineToMetres,
           enabled: seedEditable,
           minimum: Minimum.aboveZero,
-          apply: (v) => setSeed((s) => s.copyWith(size: v)),
+          apply: (v) => setSeed((s) => s.copyWith(inRow: v)),
         ),
         MeasureField(
           editor: editor,
           ownerId: layer.id,
-          field: 'seed-spacing',
-          label: 'Spacing',
-          unit: units.symbol,
-          metres: seed?.spacing ?? 0,
-          toDisplay: units.fromMetres,
-          fromDisplay: units.toMetres,
+          field: 'seed-between-rows',
+          label: 'Between rows',
+          unit: units.fineSymbol,
+          metres: seed?.betweenRows ?? 0,
+          toDisplay: units.fineFromMetres,
+          fromDisplay: units.fineToMetres,
           enabled: seedEditable,
-          minimum: Minimum.zero,
-          apply: (v) => setSeed((s) => s.copyWith(spacing: v)),
+          minimum: Minimum.aboveZero,
+          apply: (v) => setSeed((s) => s.copyWith(betweenRows: v)),
         ),
         // Only row beds take lines; flat ground is a grid.
         _linesField(
@@ -170,10 +272,9 @@ class ZoneOptions extends StatelessWidget {
   Widget _rowGroup(Layer layer, ZoneProperties p, bool editable) {
     final document = editor.document;
     final units = editor.settings.units;
-    final rowUnit = units == Units.feet ? 'in' : units.symbol;
-    final metresPerRowUnit = units == Units.feet ? 0.0254 : units.metresPerUnit;
-    double rowToDisplay(double metres) => metres / metresPerRowUnit;
-    double rowFromDisplay(double value) => value * metresPerRowUnit;
+    final rowUnit = units.fineSymbol;
+    final rowToDisplay = units.fineFromMetres;
+    final rowFromDisplay = units.fineToMetres;
     final layout = document.rowLayoutOf(layer.id);
     void setRows(RowSpec Function(RowSpec) change) {
       final current = editor.document.layers[layer.id]?.properties;
@@ -277,15 +378,14 @@ class ZoneOptions extends StatelessWidget {
       if (lines != seed?.lines) apply(lines);
     }
 
-    // The most lines the spacing lets the row beds hold: more needs a
-    // smaller Size or Spacing.
+    // The most lines the between-row spacing lets the row beds hold.
     final most = seed == null
         ? null
         : editor.document.maxLinesOf(layer.id, seed);
     final tooMany = most == null
         ? null
         : 'At most $most ${most == 1 ? 'line fits' : 'lines fit'}. '
-              'Reduce Spacing for more';
+              'Reduce Between rows for more';
 
     return PropertyRow(
       label: 'Lines',

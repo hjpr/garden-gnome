@@ -39,10 +39,10 @@ void main() {
       expect(crop.plantOutWeeks.min, isA<int>());
       final profile = Variety(id: 'v', cropId: id, name: 'Test').resolve(crop);
       final seed = seedFromProfile(profile);
-      expect(seed.size, closeTo(low * metresPerInch, 1e-12));
+      expect(seed.inRow, closeTo(low * metresPerInch, 1e-12));
       expect(
-        seed.spacing,
-        closeTo((crop.betweenRowSpacingIn.min - low) * metresPerInch, 1e-12),
+        seed.betweenRows,
+        closeTo(crop.betweenRowSpacingIn.min * metresPerInch, 1e-12),
       );
     });
   }
@@ -76,8 +76,8 @@ void main() {
     expect(back.weeksToTransplant!.min, isA<int>());
     final profile = back.resolve(catalog()['arugula']!);
     final seed = seedFromProfile(profile);
-    expect(seed.size, closeTo(0.75 * metresPerInch, 1e-12));
-    expect(seed.spacing, closeTo(1.5 * metresPerInch, 1e-12));
+    expect(seed.inRow, closeTo(0.75 * metresPerInch, 1e-12));
+    expect(seed.betweenRows, closeTo(2.25 * metresPerInch, 1e-12));
     final defaults = back
         .copyWith(inRowSpacingIn: () => null, betweenRowSpacingIn: () => null)
         .resolve(profile.crop);
@@ -165,7 +165,7 @@ void main() {
         '0.5–1 in',
       );
       expect(
-        seedFromProfile(profile).size,
+        seedFromProfile(profile).inRow,
         closeTo(0.5 * metresPerInch, 1e-12),
       );
     },

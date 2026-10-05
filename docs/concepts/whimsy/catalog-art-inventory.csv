@@ -1,0 +1,173 @@
+catalog,crop_id,name,category,concept_sample,production_status
+cover_crops.json,barley,Barley,Cover crops,,not produced
+cover_crops.json,buckwheat,Buckwheat,Cover crops,cover texture study,not produced
+cover_crops.json,common-oats,Common Oats,Cover crops,,not produced
+cover_crops.json,crimson-clover,Crimson Clover,Cover crops,cover texture study,not produced
+cover_crops.json,fall-green-manure-mix,Fall Green Manure Mix,Cover crops,,not produced
+cover_crops.json,field-peas,Field Peas,Cover crops,,not produced
+cover_crops.json,hairy-vetch,Hairy Vetch,Cover crops,cover texture study,not produced
+cover_crops.json,hulless-oats,Hulless Oats,Cover crops,,not produced
+cover_crops.json,mammoth-red-clover,Mammoth Red Clover,Cover crops,,not produced
+cover_crops.json,medium-red-clover,Medium Red Clover,Cover crops,,not produced
+cover_crops.json,mustard-cover-crop,Mustard,Cover crops,cover texture study,not produced
+cover_crops.json,new-zealand-white-clover,New Zealand White Clover,Cover crops,,not produced
+cover_crops.json,oilseed-radish,Oilseed Radish,Cover crops,,not produced
+cover_crops.json,pearl-millet,Pearl Millet,Cover crops,,not produced
+cover_crops.json,peas-and-oats-mix,Peas and Oats Mix,Cover crops,cover texture study,not produced
+cover_crops.json,purple-top-turnips,Purple Top Turnips,Cover crops,,not produced
+cover_crops.json,ryegrass,Ryegrass,Cover crops,,not produced
+cover_crops.json,spring-green-manure-mix,Spring Green Manure Mix,Cover crops,,not produced
+cover_crops.json,spring-wheat,Spring Wheat,Cover crops,,not produced
+cover_crops.json,sudangrass,Sudangrass,Cover crops,,not produced
+cover_crops.json,summer-alfalfa,Summer Alfalfa,Cover crops,,not produced
+cover_crops.json,sunflower-cover-crop,Sunflower,Cover crops,,not produced
+cover_crops.json,sunn-hemp,Sunn Hemp,Cover crops,,not produced
+cover_crops.json,sweet-clover,Sweet Clover,Cover crops,,not produced
+cover_crops.json,teff,Teff,Cover crops,,not produced
+cover_crops.json,winter-rye,Winter Rye,Cover crops,cover texture study,not produced
+crops.json,anise,Anise,Herbs,,not produced
+crops.json,anise-hyssop,Anise Hyssop,Herbs,,not produced
+crops.json,basil,Basil,Herbs,,not produced
+crops.json,borage,Borage,Herbs,,not produced
+crops.json,caraway,Caraway,Herbs,,not produced
+crops.json,chamomile,Chamomile,Herbs,,not produced
+crops.json,chervil,Chervil,Herbs,,not produced
+crops.json,chinese-leeks-garlic-chives,Chinese Leeks (Garlic Chives),Herbs,,not produced
+crops.json,chives,Chives,Herbs,,not produced
+crops.json,cilantro-coriander,Cilantro (Coriander),Herbs,,not produced
+crops.json,sage,Common Sage (Salvia officinalis) from Seed,Herbs,,not produced
+crops.json,cumin,Cumin,Herbs,,not produced
+crops.json,cutting-celery,Cutting Celery,Herbs,,not produced
+crops.json,dandelion,Dandelion,Herbs,,not produced
+crops.json,dill,Dill,Herbs,,not produced
+crops.json,lemon-grass,East Indian Lemon Grass,Herbs,,not produced
+crops.json,hyssop,Hyssop,Herbs,,not produced
+crops.json,lavender,Lavender,Herbs,,not produced
+crops.json,leaf-fennel,Leaf Fennel,Herbs,,not produced
+crops.json,lemon-balm,Lemon Balm,Herbs,,not produced
+crops.json,lovage,Lovage,Herbs,,not produced
+crops.json,mexican-mint-marigold,Mexican Mint Marigold,Herbs,,not produced
+crops.json,mint,Mint,Herbs,,not produced
+crops.json,oregano-greek,Oregano (Greek),Herbs,,not produced
+crops.json,parsley,Parsley,Herbs,,not produced
+crops.json,chamomile-roman,Roman Chamomile,Herbs,,not produced
+crops.json,root-parsley,Root Parsley,Herbs,,not produced
+crops.json,rosemary,Rosemary from Seed,Herbs,,not produced
+crops.json,salad-burnet,Salad Burnet,Herbs,,not produced
+crops.json,saltwort,Saltwort,Herbs,,not produced
+crops.json,shiso,Shiso,Herbs,,not produced
+crops.json,stevia,Stevia,Herbs,,not produced
+crops.json,summer-savory,Summer Savory,Herbs,,not produced
+crops.json,marjoram,Sweet Marjoram,Herbs,,not produced
+crops.json,thyme,Thyme,Herbs,,not produced
+crops.json,wild-marjoram,Wild Marjoram,Herbs,,not produced
+crops.json,winter-savory,Winter Savory (Satureja montana),Herbs,,not produced
+crops.json,acorn-winter-squash,Acorn Winter Squash,Vegetables,,not produced
+crops.json,artichoke,Artichokes,Vegetables,,not produced
+crops.json,arugula,Arugula,Vegetables,,not produced
+crops.json,asian-greens,Asian Greens,Vegetables,,not produced
+crops.json,asparagus,Asparagus,Vegetables,,not produced
+crops.json,baby-leaf-beets,Baby Leaf Beet Greens,Vegetables,,not produced
+crops.json,chicory-baby-leaf,Baby Leaf Chicory,Vegetables,,not produced
+crops.json,baby-leaf-swiss-chard,Baby Leaf Swiss Chard,Vegetables,,not produced
+crops.json,baby-leaf-brassicas,Baby-Leaf Brassica Greens,Vegetables,,not produced
+crops.json,beets,Beets,Vegetables,three style cutouts,not produced
+crops.json,chicory-belgian-endive,Belgian Endive (Witloof),Vegetables,,not produced
+crops.json,broccoli,Broccoli,Vegetables,three style cutouts,not produced
+crops.json,broccoli-raab,Broccoli Rabe (Raab),Vegetables,,not produced
+crops.json,broom-corn,Broom Corn,Vegetables,,not produced
+crops.json,brussels-sprouts,Brussels Sprouts,Vegetables,,not produced
+crops.json,bunching-onions,Bunching Onions,Vegetables,,not produced
+crops.json,burdock,Burdock,Vegetables,,not produced
+crops.json,bush-bean,Bush Bean,Vegetables,three style cutouts,not produced
+crops.json,buttercup-winter-squash,Buttercup Winter Squash,Vegetables,,not produced
+crops.json,butternut-winter-squash,Butternut Winter Squash,Vegetables,,not produced
+crops.json,cabbage,Cabbage,Vegetables,three style cutouts,not produced
+crops.json,cardoon,Cardoon,Vegetables,,not produced
+crops.json,carrots,Carrots,Vegetables,three style cutouts,not produced
+crops.json,cauliflower,Cauliflower,Vegetables,,not produced
+crops.json,celery-and-celeriac,Celery & Celeriac,Vegetables,,not produced
+crops.json,celtuce,Celtuce,Vegetables,,not produced
+crops.json,chicory-endive-escarole,Chicory: Endive & Escarole,Vegetables,,not produced
+crops.json,chinese-cabbage,Chinese Cabbage,Vegetables,,not produced
+crops.json,cipollini-mini-specialty-onions,"Cipollini, Mini & Specialty Onions",Vegetables,,not produced
+crops.json,claytonia,Claytonia,Vegetables,,not produced
+crops.json,collards,Collards,Vegetables,,not produced
+crops.json,cress,Cress,Vegetables,,not produced
+crops.json,daikon-radishes,Daikon/Korean & Specialty Radishes,Vegetables,,not produced
+crops.json,delicata-sweet-dumpling-winter-squash,Delicata & Sweet Dumpling Winter Squash,Vegetables,,not produced
+crops.json,eggplant,Eggplant,Vegetables,,not produced
+crops.json,fava-bean,Fava Bean,Vegetables,,not produced
+crops.json,fennel,Fennel,Vegetables,,not produced
+crops.json,cucumber,Field Cucumbers,Vegetables,three style cutouts,not produced
+crops.json,flower-sprouts,Flower Sprouts,Vegetables,,not produced
+crops.json,french-filet-beans,French Filet Beans,Vegetables,,not produced
+crops.json,fresh-shell-bean,Fresh Shell Beans,Vegetables,,not produced
+crops.json,garlic,Garlic,Vegetables,,not produced
+crops.json,greenhouse-cucumbers,Greenhouse Cucumbers,Vegetables,,not produced
+crops.json,greenhouse-eggplants,Greenhouse Eggplant,Vegetables,,not produced
+crops.json,greenhouse-peppers,Greenhouse Peppers,Vegetables,,not produced
+crops.json,greenhouse-tomatoes,Greenhouse Tomatoes,Vegetables,,not produced
+crops.json,horseradish,Horseradish,Vegetables,,not produced
+crops.json,hubbard-winter-squash,Hubbard Winter Squash,Vegetables,,not produced
+crops.json,husk-cherry,Husk Cherry (Physalis pruinosa),Vegetables,,not produced
+crops.json,italian-dandelion-chicory,Italian Dandelion Chicory,Vegetables,,not produced
+crops.json,kabocha-winter-squash,Kabocha Winter Squash,Vegetables,,not produced
+crops.json,kale,Kale,Vegetables,three style cutouts,not produced
+crops.json,kalettes,Kalettes,Vegetables,,not produced
+crops.json,kohlrabi,Kohlrabi,Vegetables,,not produced
+crops.json,leaf-broccoli,Leaf Broccoli,Vegetables,,not produced
+crops.json,leeks,Leeks,Vegetables,,not produced
+crops.json,lettuce,Lettuce,Vegetables,three style cutouts,not produced
+crops.json,lima-bean,Lima Bean,Vegetables,,not produced
+crops.json,magenta-spreen,Magenta Spreen,Vegetables,,not produced
+crops.json,malabar-spinach,Malabar Spinach,Vegetables,,not produced
+crops.json,melons,Melon,Vegetables,,not produced
+crops.json,mini-broccoli,Mini & Sprouting Broccoli,Vegetables,,not produced
+crops.json,mustard,Mustard Greens,Vegetables,,not produced
+crops.json,mache,Mâche / Corn Salad,Vegetables,,not produced
+crops.json,okra,Okra,Vegetables,,not produced
+crops.json,corn-old-fashioned-sweet,Old Fashioned Sweet Corn,Vegetables,,not produced
+crops.json,onion-sets,Onion Sets,Vegetables,,not produced
+crops.json,onions,Onions,Vegetables,three style cutouts,not produced
+crops.json,orach,Orach (Mountain Spinach),Vegetables,,not produced
+crops.json,corn-ornamental-dry-field,Ornamental & Dry Field Corn,Vegetables,,not produced
+crops.json,ornamental-gourds,Ornamental Gourds,Vegetables,,not produced
+crops.json,pac-choi,Pac Choi (Bok Choy),Vegetables,,not produced
+crops.json,parsnip,Parsnip,Vegetables,,not produced
+crops.json,peas,Peas,Vegetables,,not produced
+crops.json,pelleted-beets,Pelleted Beets,Vegetables,,not produced
+crops.json,pelleted-carrots,Pelleted Carrots,Vegetables,,not produced
+crops.json,pelleted-fennel,Pelleted Fennel,Vegetables,,not produced
+crops.json,pelleted-lettuce,Pelleted Lettuce,Vegetables,,not produced
+crops.json,pelleted-onions,Pelleted Onions,Vegetables,,not produced
+crops.json,pelleted-parsnips,Pelleted Parsnips,Vegetables,,not produced
+crops.json,peppers,Peppers,Vegetables,three style cutouts,not produced
+crops.json,pole-bean,Pole Bean,Vegetables,,not produced
+crops.json,potatoes,Potatoes,Vegetables,,not produced
+crops.json,pumpkins,Pumpkins,Vegetables,,not produced
+crops.json,purslane,Purslane,Vegetables,,not produced
+crops.json,radicchio,Radicchio,Vegetables,,not produced
+crops.json,radishes,Radishes,Vegetables,,not produced
+crops.json,rutabaga,Rutabaga,Vegetables,,not produced
+crops.json,salad-mixes,Salad Mixes,Vegetables,,not produced
+crops.json,scorzonera-salsify,Scorzonera & Salsify,Vegetables,,not produced
+crops.json,shallots,Shallots,Vegetables,,not produced
+crops.json,sorrel,Sorrel,Vegetables,,not produced
+crops.json,soybean,Soybean,Vegetables,,not produced
+crops.json,spaghetti-winter-squash,Spaghetti Winter Squash,Vegetables,,not produced
+crops.json,specialty-summer-squash,Specialty Summer Squash,Vegetables,,not produced
+crops.json,spinach,Spinach,Vegetables,,not produced
+crops.json,summer-squash,Summer Squash,Vegetables,,not produced
+crops.json,corn-super-sweet,Super Sweet Corn,Vegetables,,not produced
+crops.json,corn-sweet,Sweet Corn,Vegetables,three style cutouts,not produced
+crops.json,sweet-potatoes,Sweet Potatoes,Vegetables,,not produced
+crops.json,swiss-chard,Swiss Chard,Vegetables,,not produced
+crops.json,tomatillo,Tomatillo (Physalis philadelphica),Vegetables,,not produced
+crops.json,tomatoes,Tomatoes,Vegetables,three style cutouts,not produced
+crops.json,turnips,Turnips,Vegetables,,not produced
+crops.json,vegetable-amaranth,Vegetable Amaranth Greens,Vegetables,,not produced
+crops.json,watermelons,Watermelons,Vegetables,,not produced
+crops.json,winter-squash,Winter Squash,Vegetables,,not produced
+crops.json,yellow-summer-squash,Yellow Summer Squash,Vegetables,,not produced
+crops.json,zucchini,Zucchini,Vegetables,,not produced

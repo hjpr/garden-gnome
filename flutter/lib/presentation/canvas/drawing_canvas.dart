@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import '../../application/canvas_input.dart';
 import '../../application/curve_handles.dart';
 import '../../application/editor_controller.dart';
+import '../../application/garden_controller.dart';
 import '../../application/hit_testing.dart';
 import '../../application/planting.dart';
 import '../../application/previews.dart';
@@ -19,6 +20,7 @@ import '../../platform/canvas_cursor.dart';
 import '../widgets/text_focus.dart';
 import 'reference_image_cache.dart';
 import 'render_assets.dart';
+import 'render_cover.dart';
 import 'scene_painter.dart';
 import 'scene_state.dart';
 
@@ -27,9 +29,10 @@ import 'scene_state.dart';
 /// Middle-drag, or Space with a left-drag, pans. The mouse wheel zooms
 /// around the pointer. Other left-button input goes to the active tool.
 class DrawingCanvas extends StatefulWidget {
-  const DrawingCanvas({super.key, required this.editor});
+  const DrawingCanvas({super.key, required this.editor, this.garden});
 
   final EditorController editor;
+  final GardenController? garden;
 
   @override
   State<DrawingCanvas> createState() => _DrawingCanvasState();
@@ -42,9 +45,10 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
   final ReferenceImageCache _pictures = ReferenceImageCache();
 
   /// Everything that changes what the canvas shows.
-  late final Listenable _repaint = Listenable.merge([
+  Listenable get _repaint => Listenable.merge([
     widget.editor,
     widget.editor.viewChanges,
+    widget.garden,
     _pictures,
     RenderAssets.instance,
     _viewSettled,
@@ -263,10 +267,18 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
           // panel land on plantings (Plant mode).
           onWillAcceptWithDetails: (details) =>
               widget.editor.mode == EditMode.plant &&
-              (details.data is VarietyProfile || details.data is TrayDrag),
+              (details.data is VarietyProfile ||
+                  details.data is TrayDrag ||
+                  details.data is CoverDrag),
+          // Only a target that would take the drop lights up: a Cover
+          // bed for cover crops, a planting not over one for the rest.
           onMove: (details) => widget.editor.setPreview(
             SeedDropPreview(
-              growZoneAt(widget.editor, _worldAt(details.offset)),
+              dropTargetAt(
+                widget.editor,
+                details.data,
+                _worldAt(details.offset),
+              ),
             ),
           ),
           onLeave: (_) => widget.editor.setPreview(null),
@@ -278,6 +290,8 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
                 dropSeed(widget.editor, profile, world);
               case TrayDrag tray:
                 dropTray(widget.editor, tray, world);
+              case CoverDrag cover:
+                dropCover(widget.editor, cover, world);
             }
           },
           builder: (context, _, _) => _pointerArea(size),
@@ -355,6 +369,14 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
                       showCurveHandles: visibleCurveHandles(editor).isNotEmpty,
                       viewMode: editor.settings.viewMode,
                       renderAssets: RenderAssets.instance,
+                      coverCropIds: renderCoverCropIds(
+                        editor.document,
+                        widget.garden,
+                      ),
+                      plantCropIds: renderPlantCropIds(
+                        editor.document,
+                        widget.garden,
+                      ),
                       selectedFeatureId: editor.selectedFeature?.id,
                       viewMoving: _viewMoving,
                       hiddenLayers: editor.hiddenLayerIds,

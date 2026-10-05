@@ -668,7 +668,7 @@ class EditorController extends ChangeNotifier {
           ? '$name is locked. Unlock it in Layers to change it'
           : '$name is inside ${by.name}, which is locked';
     }
-    if (_mode == EditMode.plant && !isGrowZone(layerId)) {
+    if (_mode == EditMode.plant && !isPlantable(layerId)) {
       return plantModeNotice;
     }
     return null;
@@ -707,7 +707,7 @@ class EditorController extends ChangeNotifier {
         _function = _functionMemory[Tool.select] ?? Tool.select.functions.first;
       }
       _clearOverlaySelection();
-      if (_selectedLayerId != null && !isGrowZone(_selectedLayerId!)) {
+      if (_selectedLayerId != null && !isPlantable(_selectedLayerId!)) {
         _selection.clear();
       }
     }
@@ -771,6 +771,28 @@ class EditorController extends ChangeNotifier {
         _ => false,
       };
 
+  /// Whether [layerId] is a Cover bed.
+  bool isCoverBed(String layerId) =>
+      switch (_document.layers[layerId]?.properties) {
+        ZoneProperties p => p.isCover,
+        _ => false,
+      };
+
+  /// What Plant mode works on: plantings, and Cover beds (sown with a
+  /// cover crop across the whole bed).
+  bool isPlantable(String layerId) =>
+      isGrowZone(layerId) || isCoverBed(layerId);
+
+  /// Sows [cover] across Cover bed [layerId] as one Undo step; null takes
+  /// it out. Used by dropping a cover crop on the canvas and Properties.
+  void setCover(String layerId, CoverSowing? cover) {
+    _changeZone(
+      layerId,
+      cover == null ? 'Remove cover crop' : 'Sow ${cover.name}',
+      (document) => document.withCover(layerId, cover),
+    );
+  }
+
   /// Plants [seed] in grow zone [layerId] as one Undo step; null takes it
   /// out. Used by dropping a seed on the canvas and by Properties.
   void setSeed(String layerId, ZoneSeed? seed) {
@@ -790,7 +812,7 @@ class EditorController extends ChangeNotifier {
   void setLayerLocked(String layerId, bool locked) {
     final layer = _document.layers[layerId];
     if (layer == null || layer.locked == locked) return;
-    if (_mode == EditMode.plant && !isGrowZone(layerId)) {
+    if (_mode == EditMode.plant && !isPlantable(layerId)) {
       return showNotice(plantModeNotice);
     }
     if (locked) {

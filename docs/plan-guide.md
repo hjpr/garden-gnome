@@ -6,7 +6,7 @@ where you place seed in plantings. Layers lists each kind of layer on
 its own, so what a layer is for is always visible:
 
 - Property: land you hold. Properties may not overlap one another.
-- Bed: ground inside a property: Fallow, Flat, or Row.
+- Bed: ground inside a property: Fallow, Cover, Flat, or Row.
 - Planting: what grows where. Draw it over beds and plant it from the
   Seed Vault; plants follow the bed underneath.
 - Reference: pictures to trace over (see Reference below).
@@ -224,7 +224,7 @@ Operations > Align (under Boolean)
   along, as a drag does. Items that share points cannot be aligned.
 
 Ground (beds only)
-- Fallow, Flat or Row, then click inside the selected bed. The whole bed
+- Fallow, Cover, Flat or Row, then click inside the selected bed. The whole bed
   gets that ground; the tool stays chosen. Each change is one Undo step.
   Plantings are added in Layers, not with this tool.
 - Row ground uses Row width, Spacing (the path between rows) and
@@ -326,9 +326,11 @@ your chosen units. The grid always uses round sizes: 0.5, 1, 5, 10 or
 - Click a layer in Layers to work on it. Its details show in Properties.
 - In Properties you can rename the layer (pencil button). Properties have
   a colour option.
-- A bed's bar above its name shows its ground: grey for Fallow bed, burnt
-  orange for Flat bed, mint green for Row bed. A fallow bed shows only
-  colour; Flat adds Direction, the heading of the plant grid that
+- A bed's bar above its name shows its ground: grey for Fallow bed, olive
+  green for Cover bed, burnt orange for Flat bed, mint green for Row bed.
+  A fallow bed shows only colour; Cover adds COVER (Cover crop, Seed
+  needed from the bed's area and Johnny's per-1,000 sq ft rate, Sown,
+  Terminated); Flat adds Direction, the heading of the plant grid that
   plantings lay on it; Row adds row controls. A planting shows only the
   GROW options.
 - Net area excludes holes and includes curved edges; it is displayed in
@@ -362,12 +364,29 @@ Apply or clear the text first.
 
 ## Saving and opening
 
-Drawings are saved in your browser.
+In Chrome and Edge, and in the desktop app, farms are .ggnome files on
+your disk:
+
+- File > Save (Ctrl+S): writes back to the farm's file. The first time,
+  you pick where to save it and its name.
+- File > Save as (Ctrl+Shift+S): saves to a new file you pick.
+- File > Open (Ctrl+O), then Import .ggnome file: opens a file; Save then
+  writes back to it. (The desktop app goes straight to the file picker.)
+- The last farm opens again next time. Chrome asks first: a "Reopen
+  <file> from last time?" bar appears under the header, and Reopen may
+  bring up Chrome's permission prompt ("Allow on every visit" skips it
+  from then on). Not now forgets the file. If the file has been moved or
+  deleted, you start with an empty farm.
+
+In Firefox and other browsers, drawings are saved inside the browser:
 
 - File > Save (Ctrl+S): saves the drawing. The first time, you give it a
   name.
 - File > Save as (Ctrl+Shift+S): saves a copy under a new name.
 - File > Open (Ctrl+O): pick a saved drawing from the list.
+
+Either way:
+
 - File > New (Ctrl+N): starts a blank drawing.
 - File > Close drawing: closes it and leaves a blank drawing in its place.
 
@@ -386,7 +405,8 @@ The browser will also warn you before you close the tab.
 
 To keep a copy outside the browser, or move a drawing to another computer:
 
-- File > Export .ggnome file downloads the drawing as a file.
+- File > Export .ggnome file saves a copy as a file (a download in the
+  browser, a save dialog in the desktop app).
 - File > Open, then Import .ggnome file, loads one back in.
 
 Files that are damaged are refused, with a message explaining why, and
@@ -426,11 +446,19 @@ there first and use that point as the guide.
 When moving a whole shape or circle, whichever of its corners (or a
 circle's outermost points) is closest lines up. With Snapping also on, a
 guide wins on its axis and the grid places the other.
-- Edit > Preferences, in three categories down the left:
+- Edit > Preferences, in four categories down the left:
   - Canvas: the lowest and highest camera height, in your chosen units
     (lower for a small plot, higher for a large property), how many
     undo steps to keep, and menu size.
   - Style: line width, and grid thickness, colour and opacity.
+  - Textures: the pictures Render paints each ground with (Wild grass,
+    Lawn, Dirt, Prepared soil, Loam rows, Crimson clover). Pick the
+    Ground, then click textures to use them: a ground blends 1 to 3, and
+    the number on each is its place in the blend (the others are matched
+    to 1's colour). The reset arrow goes back to the built-in ones.
+    Add picture adds your own square picture to that ground; Install pack
+    adds a texture pack. Textures and packs are kept on this computer for
+    every farm, not in farm files. See Texture packs below.
   - Notifications: whether messages pop up at the top or bottom.
   Typed values are kept while you switch categories; press Apply to use
   them. The toast position takes effect straight away.
@@ -441,6 +469,31 @@ to spread them out and keep them on screen; the × dismisses one.
 
 Lengths are always stored in metres. Changing units only changes how
 numbers are shown.
+
+
+## Texture packs
+
+A texture pack is a zip file (named `.ggtextures` or `.zip`) laid out as:
+
+    pack.json                         optional
+    textures/wild_grass/<pictures>
+    textures/lawn/<pictures>
+    textures/dirt/<pictures>
+    textures/prepped_soil/<pictures>
+    textures/loam/<pictures>
+    textures/crimson_clover/<pictures>
+
+- Pictures are PNG, JPEG or WebP, square (1:1), at least 256 px. Any
+  size works; each is resized to 1024 px and made to repeat without a
+  seam when installed. Other files and folders are skipped.
+- `pack.json` gives the pack's name, author, and how much ground one
+  picture covers: `{"name": "Autumn", "author": "Jo", "feet_per_repeat": 5}`.
+  Without it the file name is the pack's name and a picture covers 5 ft
+  (at full zoom, the 10 × 10 grid of half-foot squares).
+- Installing a pack with the same name replaces it. Installing does not
+  change what is in use; click its textures to use them. Removing a pack
+  (bin beside its name) puts any ground that used it back on what is left
+  of its choice, or its built-in textures.
 
 
 ## Window size

@@ -12,6 +12,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import scrape
+import winter_charts
 
 
 class RefreshSafetyTests(unittest.TestCase):
@@ -62,7 +63,9 @@ class RefreshSafetyTests(unittest.TestCase):
                 str(self.root / 'cache'), '--out', str(self.out), '--raw', str(self.raw),
                 *extra_args]), patch.object(scrape, 'OVERRIDES', self.overrides), \
                 patch.object(scrape.urllib.request, 'urlopen', side_effect=response), \
-                patch.object(scrape.time, 'sleep'), contextlib.redirect_stdout(self.log), \
+                patch.object(scrape.time, 'sleep'), \
+                patch.object(winter_charts, 'fetch_charts', return_value=[]), \
+                contextlib.redirect_stdout(self.log), \
                 contextlib.redirect_stderr(self.log):
             try:
                 scrape.main()

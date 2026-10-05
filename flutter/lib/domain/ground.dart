@@ -4,6 +4,10 @@ import 'dart:math' as math;
 /// unprepared dirt that nothing is planted on. [grow] marks a planting
 /// rather than soil.
 enum GroundType {
+  /// Sown with a cover crop across the whole bed. Plantings over it are
+  /// not planted: the bed is taken until it goes back to Flat or Row.
+  cover('Cover'),
+
   /// One level, prepared bed across the whole zone.
   flat('Flat'),
 
@@ -19,8 +23,9 @@ enum GroundType {
 
   final String label;
 
-  /// Whether this is soil of its own (Flat, Row) that grow zones plant on.
-  bool get isSoil => this != grow;
+  /// Whether this is soil that plantings plant on (Flat, Row). Cover beds,
+  /// like fallow ones, are not planted.
+  bool get isSoil => this == flat || this == row;
 
   /// The type saved under [name], or null for none.
   static GroundType? fromName(String? name) =>
@@ -111,18 +116,66 @@ class RowSpec {
   int get hashCode => Object.hash(width, spacing, direction, border);
 }
 
+/// The cover crop sown across a Cover bed: which Seed Vault variety, and
+/// when it went in and was (or will be) terminated. Days are UTC dates.
+class CoverSowing {
+  const CoverSowing({
+    required this.varietyId,
+    required this.name,
+    this.sownOn,
+    this.terminatedOn,
+  });
+
+  /// The Seed Vault variety's ID.
+  final String varietyId;
+
+  /// Kept with the drawing so it still reads if the variety is removed.
+  final String name;
+  final DateTime? sownOn;
+
+  /// Mowed, tilled or tarped under; never before [sownOn].
+  final DateTime? terminatedOn;
+
+  /// Whether it is in the ground on [today]: sown (or planned) and not
+  /// yet terminated.
+  bool isGrowingOn(DateTime today) =>
+      sownOn != null && (terminatedOn == null || terminatedOn!.isAfter(today));
+
+  CoverSowing copyWith({
+    DateTime? Function()? sownOn,
+    DateTime? Function()? terminatedOn,
+  }) => CoverSowing(
+    varietyId: varietyId,
+    name: name,
+    sownOn: sownOn == null ? this.sownOn : sownOn(),
+    terminatedOn: terminatedOn == null ? this.terminatedOn : terminatedOn(),
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      other is CoverSowing &&
+      other.varietyId == varietyId &&
+      other.name == name &&
+      other.sownOn == sownOn &&
+      other.terminatedOn == terminatedOn;
+
+  @override
+  int get hashCode => Object.hash(varietyId, name, sownOn, terminatedOn);
+}
+
 /// The seed planted in a grow zone: which Seed Vault variety, and how far
 /// apart its plants go.
 ///
 /// The name is kept with the drawing so it still reads correctly if the
-/// variety is later removed from the vault. Size is the plant diameter;
-/// spacing is empty space between neighbouring footprints, in either axis.
+/// variety is later removed from the vault. Both spacings are centre to
+/// centre, as seed catalogs give them: [inRow] between plants along a
+/// line, [betweenRows] between neighbouring lines.
 class ZoneSeed {
   const ZoneSeed({
     required this.varietyId,
     required this.name,
-    required this.size,
-    required this.spacing,
+    required this.inRow,
+    required this.betweenRows,
     this.lines,
   });
 
@@ -132,50 +185,53 @@ class ZoneSeed {
   /// What the gardener sees, e.g. "Big Beef · Tomatoes".
   final String name;
 
-  /// Plant footprint diameter, in metres.
-  final double size;
+  /// Centre-to-centre distance between plants along a line, in metres.
+  final double inRow;
 
-  /// Empty edge-to-edge gap between plants and plant lines, in metres.
-  final double spacing;
+  /// Centre-to-centre distance between lines of plants, in metres.
+  final double betweenRows;
 
   /// Most lines of plants along each row bed; null fills the row with as
   /// many lines as fit. Flat ground is a grid and ignores it.
   final int? lines;
 
-  /// Centre-to-centre distance along and across planting lines.
-  double get pitch => size + spacing;
+  /// The room one plant takes: the closer of its two spacings. Plants
+  /// keep half of it clear of line ends and bed edges.
+  double get footprint => inRow < betweenRows ? inRow : betweenRows;
 
   /// Why these values cannot be used, or null when they can.
   String? get problem {
-    if (!(size > 0) || !size.isFinite) {
-      return 'Plant size must be above 0';
+    if (!(inRow > 0) || !inRow.isFinite) {
+      return 'In-row spacing must be above 0';
+    }
+    if (!(betweenRows > 0) || !betweenRows.isFinite) {
+      return 'Between-row spacing must be above 0';
     }
     if (lines case final n? when n < 1) return 'Lines must be 1 or more';
-    if (!(spacing >= 0) || !spacing.isFinite) {
-      return 'Plant spacing must be a finite distance of 0 or more';
-    }
-    if (!pitch.isFinite) return 'Plant size plus spacing must be finite';
     return null;
   }
 
-  ZoneSeed copyWith({double? size, double? spacing, int? Function()? lines}) =>
-      ZoneSeed(
-        varietyId: varietyId,
-        name: name,
-        size: size ?? this.size,
-        spacing: spacing ?? this.spacing,
-        lines: lines == null ? this.lines : lines(),
-      );
+  ZoneSeed copyWith({
+    double? inRow,
+    double? betweenRows,
+    int? Function()? lines,
+  }) => ZoneSeed(
+    varietyId: varietyId,
+    name: name,
+    inRow: inRow ?? this.inRow,
+    betweenRows: betweenRows ?? this.betweenRows,
+    lines: lines == null ? this.lines : lines(),
+  );
 
   @override
   bool operator ==(Object other) =>
       other is ZoneSeed &&
       other.varietyId == varietyId &&
       other.name == name &&
-      other.size == size &&
-      other.spacing == spacing &&
+      other.inRow == inRow &&
+      other.betweenRows == betweenRows &&
       other.lines == lines;
 
   @override
-  int get hashCode => Object.hash(varietyId, name, size, spacing, lines);
+  int get hashCode => Object.hash(varietyId, name, inRow, betweenRows, lines);
 }

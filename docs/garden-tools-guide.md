@@ -1,9 +1,15 @@
 # Garden tools guide
 
-Garden Gnome opens on Home, which shows five tools: Plan, Seed Vault,
-Greenhouse, Grow and Harvest. Each card shows a live count. To move
-between tools, use the leaf menu at the top left of any tool. It also
-has Home.
+Garden Gnome opens on Home, which shows three tools in the order you
+use them: Seed Vault, Plan and Grow. Each card shows a live count. To
+move between tools, use the leaf menu at the top left of any tool. It
+also has Home.
+
+The flow: enter your seed in the Seed Vault. In Plan, mark out the farm
+(Build), then drag your seed onto it (Plant). Seed you start in trays is
+started in Grow > Transplant, and from then on it is in Plant mode's
+Greenhouse panel to drag onto a planting too. Grow follows everything
+from sowing to harvest.
 
 ## Seed Vault
 - Add variety: pick a named variety from the bundled Johnny's catalog.
@@ -19,9 +25,17 @@ has Home.
   Seeds. Values marked * are estimates.
 - The bin on each variety row, left of its season icon, removes that
   variety from the vault.
+- Reorder from Johnny's, between SEED and GROWING, opens the variety's
+  Johnny's product page in a new tab. It is greyed for a variety the
+  Johnny's catalog does not list (hover shows why).
+- Cover crops (clovers, rye, buckwheat, mixes and more) can be added
+  like any variety. Their notes show Johnny's comparison chart (sowing
+  season, germination temperature, hardiness, seeding rates, depth,
+  benefits) and growing notes. They have no GROWING overrides, get no
+  sowing recommendations, and are sown on Cover beds (see below).
 - To filter the list, type in Search varieties or use the chips
-  (Vegetables, Herbs, Cool, Warm, Transplant, Direct sow).
-- Greenhouse, Grow and Harvest show only the farm open in Plan (its
+  (Vegetables, Herbs, Cover crops, Cool, Warm, Transplant, Direct sow).
+- Grow shows only the farm open in Plan (its
   name is on Home). Its climate and sowings are saved with that farm:
   sowing, planting out, finishing and climate changes are Undo steps in
   Plan and need a Save, like a drawing change. A new blank farm has
@@ -34,12 +48,21 @@ has Home.
   skips ones already in the vault (same crop and name).
 
 ## Plan: Build and Plant
-- Ground tool functions (beds only): Fallow is unprepared ground that
-  nothing is planted on; Flat and Row prepare a bed's soil. New beds
-  start Flat.
+- Ground tool functions (beds only), in order: Fallow is unprepared
+  ground that nothing is planted on; Cover is a bed sown with a cover
+  crop; Flat and Row prepare a bed's soil. New beds start Flat.
+- A Cover bed's cover crop is picked in Properties > COVER, or dragged
+  onto the bed from the Seeds panel in Plant mode (cover crops are
+  listed after the other seeds). Sown and Terminated are dates you set;
+  Seed needed works out the seed from the bed's area. Plantings over a
+  Cover bed plant nothing, and dropping seed or greenhouse plants on
+  one says "Plantings over cover crops cannot be seeded". Grow's
+  Growing section lists a Cover bed from Sown until Terminated, with a
+  Terminated today button. Render shows it as prepared soil washed
+  green until there is cover-crop art.
 - For Row ground, Properties > GROUND > Border reserves a clear walkway
   inside the bed's outline. Row width, Spacing and Border use inches
-  when drawing units are feet, and metres when drawing units are metres.
+  when drawing units are feet, and centimetres when drawing units are metres.
   Enter 60 inches for a five-foot perimeter path. Rows shorten or split to follow
   uneven edges, curves and holes, keeping their full width clear of the
   border. Bordered rows are centred, sharing leftover space equally at
@@ -51,7 +74,7 @@ has Home.
 - A planting (Layers > Add layer > Planting layer) is drawn over Flat or
   Row beds on the same property to say what is planted there. It
   follows the soil under it: over Row ground, plants go only along the
-  rows (a wide row gets several lines separated by Size plus Spacing);
+  rows (a wide row gets several lines, Between rows apart);
   over Flat ground, they go on a grid running that bed's Direction;
   over a fallow bed, nothing is planted.
 - If beds overlap, the topmost Flat or Row bed in Layers wins. Its
@@ -69,34 +92,40 @@ has Home.
   a planting to plant it (the planting lights up green where it would
   land), or click a seed to plant the selected planting.
 - Only plantings show Properties > GROW; they do not show ground
-  options. Size is the plant diameter, and Spacing is the empty gap
-  between plants. Plant centres are Size + Spacing apart, along rows
-  and between planting lines. Zero spacing lets neighbouring plants
-  touch. Changing spacing updates the layout and Plants count, including
-  on a single row, without changing the plant diameter.
-- Size starts at the variety's minimum in-row recommendation; Spacing
-  starts at its minimum between-row recommendation minus Size, or zero
-  if that difference is negative. Type to change either for this
-  planting. Plants over Row ground follow the rows; over Flat ground
+  options. In-row and Between rows are centre-to-centre distances, as
+  seed catalogs give them: In-row between plants along a line, Between
+  rows between neighbouring lines. They use inches with feet units and
+  centimetres with metres.
+- Both start at the variety's smallest recommended spacing. Type to
+  change either for this planting. Plants keep half the closer spacing
+  clear of bed edges and line ends.
+- In Render, each plant is drawn at its crop's typical full-grown
+  width, so a bed at catalog spacing fills in along the row. Those
+  widths are judged from common growing guides (Johnny's gives only
+  spacing) and only change the picture, never the count. Plants over Row ground follow the rows; over Flat ground
   they follow that bed's Direction (set in its Properties > GROUND).
   Plants (under Seed) shows how many fit. Sown and Transplanted are
   dates: click one to pick a day from the calendar. Sown alone means
   sown in place; adding Transplanted means it was started elsewhere and
   set out that day (the × clears it). Transplanted needs a Sown date and
-  cannot be earlier. Either date makes the planting show in Harvest,
+  cannot be earlier. Either date makes the planting show in Grow,
   named after the planting layer, counting from Transplanted when set,
   otherwise from Sown. Changing the seed changes that sowing; removing
   the seed or deleting the layer removes it. The bin removes the seed.
 
-## Grow
+## Grow: Sow and Transplant
+- The switch at the top right of Grow picks Sow (seed sown in place)
+  or Transplant (seed started in flats and pots). Grow remembers which
+  one you left it on.
 - Set Hardiness to your USDA zone. Last frost and First frost show the
-  zone's typical dates in grey; type your own to replace them (for
-  example "Apr 20").
-- Grow is for sowing in place; seed started in trays is in Greenhouse.
+  zone's typical dates in grey until you set your own with the pencil
+  (see Seasons and winter growing).
+- Sow is for sowing in place; seed started in trays is in Transplant.
   Plan first: you can only sow plantings already on the map (Plan >
   Plant mode, a planting with a seed and nothing sown yet).
-- The calendar has two sections. Growing, on top, is what is sown
-  (germination in grey, harvest in red). Upcoming, below and faded, is
+- The calendar has two sections. Growing, on top, is everything in the
+  ground: sown in place, or planted out of Transplant ("Planted out
+  <date>"), with germination in grey and harvest in red. Upcoming, below and faded, is
   what is not in the ground yet: plantings waiting to be sown and Seed
   Vault varieties in no planting yet ("not planned"), each with its
   sowing window. The solid part of a window is the best time.
@@ -109,19 +138,47 @@ has Home.
   first"). Add plant offers every planting waiting to be sown.
 - The Sow dialog shows the planting, the Sown date (today unless you
   change it) and how many plants it holds. That number comes from the
-  planting's Size, Spacing and Lines in Plan.
+  planting's In-row, Between rows and Lines in Plan.
+- The double tick (Harvest finished) on a Growing row takes it off the
+  calendar once picking is done; the bin removes the sowing entirely.
+
+## Seasons and winter growing
+- Every growing calendar shades the frost-free season (last frost to
+  first frost) in pale green behind the rows. Green LAST FROST and
+  FIRST FROST markers, styled like TODAY, mark where each season starts
+  and ends.
+- The climate bar shows Last frost, First frost and Latitude as text
+  with a pencil. Edit a frost date with its month and day dropdowns,
+  then the tick to apply (× cancels); the reset arrow goes back to the
+  zone's date. Edit Latitude by typing the degrees (e.g. 42.3) and
+  picking N or S; the reset arrow clears it.
+- Set the farm's Latitude to see winter options. They are timed from the last day with 10
+  hours of daylight, which depends on latitude, so they stay hidden
+  without it. Days never drop under 10 hours within about 32° of the equator.
+- Winter options come from Johnny's Winter Growing Guide charts and
+  cover about 25 cool-season crops (spinach, kale, lettuce, carrots,
+  arugula, chicory and others). Crops the charts don't cover show only
+  their usual windows.
+  - Winter harvest: sown late summer or fall, harvested through winter;
+    needs a high tunnel.
+  - Overwinter: sown in fall, left in place for the earliest spring
+    harvest; needs a low tunnel.
+- On the calendar these are outlined, hatched bars on the variety's own
+  row ("Needs tunnel" in the legend). The row text and the bar's tooltip
+  say which option it is, what it needs, and Johnny's reliability tier.
+- Rows and Start next describe each variety's soonest window, which may
+  be a winter one.
 
 ## Planting lines
 - A planting over Row ground has Lines in its GROW properties: how many
   lines of plants go along each row. All (the default) fills the row
   with as many as fit; type a number, or use the arrows, to plant fewer.
 - The most you can enter is what fits across the row at the planting's
-  Size and Spacing ("At most 5 lines fit. Reduce Spacing for more").
-  For more lines, reduce Spacing or Size. Widening Spacing later lowers
-  Lines to the new most. Over Flat ground plants form a grid and Lines
+  Between rows spacing ("At most 5 lines fit. Reduce Between rows for
+  more"). Widening Between rows later lowers Lines to the new most. Over Flat ground plants form a grid and Lines
   is greyed.
 
-## Greenhouse
+## Transplant
 - The calendar has two sections. Growing, on top, is each flat or pot
   in the greenhouse, with its germination bar (grey) and the dates it
   can be planted out (blue); chips show Growing, Ready or Overdue.
@@ -131,13 +188,6 @@ has Home.
   out, Upcoming by when the best start time begins.
 - The arrow button (Planted out today) moves the tray into the ground.
 - Start next: trays to start within a year.
-
-## Harvest
-- Shows when each planting comes ready and how long it keeps picking.
-  Solid bars are crops in the ground; faded bars are trays whose dates
-  are still estimates.
-- The double tick (Harvest finished) removes a planting from the
-  calendar.
 
 Everything in these tools is saved in this browser as you go.
 
@@ -149,11 +199,11 @@ stock availability. Some crops and cultivation-specific categories have no
 separately listed varieties. See
 `tools/johnnys-catalog/README.md`.
 
-## Greenhouse flats and pots
-- Greenhouse's Start next lists seed to start within a year. Its
+## Flats and pots
+- Transplant's Start next lists seed to start within a year. Its
   start button opens the dialog with that seed already chosen. Add plant
   (top of Start next) starts anything else; pick the seed in the dialog.
-  Greenhouse starts do not need a planting first: drag them onto one in
+  Trays do not need a planting first: drag them onto one in
   Plant mode when you know where they go.
 - The dialog asks for the Start date (today unless you change it, so
   you can enter what you will start in a few days), then Flats or Pots.
@@ -170,9 +220,11 @@ separately listed varieties. See
   the greenhouse unplanned.
 
 ## Calendars
-- Grow, Greenhouse and Harvest show today's date above the months.
+- Sow and Transplant show today's date above the months.
   Over the calendar, scroll the mouse wheel to zoom in (fewer days,
-  day numbers appear) or out (up to about three years); drag to move
-  earlier or later. Today brings the view back. Darker lines mark the
+  day numbers appear) or out (up to about three years); drag left or
+  right to move earlier or later, up or down to move through the list.
+  Over the names the wheel scrolls the list. Today brings the view
+  back. Darker lines mark the
   start of each week (Monday), fainter ones each day; zoomed far out,
   the darker lines mark months.

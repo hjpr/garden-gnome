@@ -1,0 +1,743 @@
+{
+ "runs": [
+  {
+   "spent_usd": 0.4727,
+   "records": [
+    {
+     "material": "wild_grass",
+     "index": 1,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Rough wild meadow grass. Loose clumps of short grass blades pointing every way, about fourteen clumps across the image width, with a few small clover leaves, a few tiny white and yellow flowers and dry tan blades mixed in. Muted greens #3F6E33 #5E8C3E #8AA65A. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672805,
+     "file": "wild_grass-c01.png"
+    },
+    {
+     "material": "wild_grass",
+     "index": 3,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Rough wild meadow grass. Loose clumps of short grass blades pointing every way, about fourteen clumps across the image width, with a few small clover leaves, a few tiny white and yellow flowers and dry tan blades mixed in. Muted greens #3F6E33 #5E8C3E #8AA65A. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672805,
+     "file": "wild_grass-c03.png"
+    },
+    {
+     "material": "crimson_clover",
+     "index": 3,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. A lush dense patch of crimson clover. About fifteen clover leaves span the image width; each leaf has three oval leaflets with pale V marks, medium greens #2F6B3F #4F9A3A #7FB255. About twelve small crimson flower heads scattered evenly, a little soil and dry stems in the gaps. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672815,
+     "file": "crimson_clover-c03.png"
+    },
+    {
+     "material": "crimson_clover",
+     "index": 1,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. A lush dense patch of crimson clover. About fifteen clover leaves span the image width; each leaf has three oval leaflets with pale V marks, medium greens #2F6B3F #4F9A3A #7FB255. About twelve small crimson flower heads scattered evenly, a little soil and dry stems in the gaps. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672815,
+     "file": "crimson_clover-c01.png"
+    },
+    {
+     "material": "crimson_clover",
+     "index": 2,
+     "reference": true,
+     "prompt": "Paint a seamless ground texture. A lush dense patch of crimson clover. About fifteen clover leaves span the image width; each leaf has three oval leaflets with pale V marks, medium greens #2F6B3F #4F9A3A #7FB255. About twelve small crimson flower heads scattered evenly, a little soil and dry stems in the gaps. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678555,
+     "file": "crimson_clover-c02.png"
+    },
+    {
+     "material": "wild_grass",
+     "index": 2,
+     "reference": true,
+     "prompt": "Paint a seamless ground texture. Rough wild meadow grass. Loose clumps of short grass blades pointing every way, about fourteen clumps across the image width, with a few small clover leaves, a few tiny white and yellow flowers and dry tan blades mixed in. Muted greens #3F6E33 #5E8C3E #8AA65A. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678545,
+     "file": "wild_grass-c02.png"
+    },
+    {
+     "material": "crimson_clover",
+     "index": 4,
+     "reference": true,
+     "prompt": "Paint a seamless ground texture. A lush dense patch of crimson clover. About fifteen clover leaves span the image width; each leaf has three oval leaflets with pale V marks, medium greens #2F6B3F #4F9A3A #7FB255. About twelve small crimson flower heads scattered evenly, a little soil and dry stems in the gaps. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678555,
+     "file": "crimson_clover-c04.png"
+    },
+    {
+     "material": "wild_grass",
+     "index": 4,
+     "reference": true,
+     "prompt": "Paint a seamless ground texture. Rough wild meadow grass. Loose clumps of short grass blades pointing every way, about fourteen clumps across the image width, with a few small clover leaves, a few tiny white and yellow flowers and dry tan blades mixed in. Muted greens #3F6E33 #5E8C3E #8AA65A. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678545,
+     "file": "wild_grass-c04.png"
+    },
+    {
+     "material": "lawn",
+     "index": 1,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. A tidy mown lawn. Short soft grass blades in small tufts pointing every way, about twenty tufts across the image width, even fresh medium green #4E8F3A #6FA24A #3A7030, no flowers, no clover, no mowing stripes. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672775,
+     "file": "lawn-c01.png"
+    },
+    {
+     "material": "lawn",
+     "index": 3,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. A tidy mown lawn. Short soft grass blades in small tufts pointing every way, about twenty tufts across the image width, even fresh medium green #4E8F3A #6FA24A #3A7030, no flowers, no clover, no mowing stripes. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672775,
+     "file": "lawn-c03.png"
+    },
+    {
+     "material": "lawn",
+     "index": 2,
+     "reference": true,
+     "prompt": "Paint a seamless ground texture. A tidy mown lawn. Short soft grass blades in small tufts pointing every way, about twenty tufts across the image width, even fresh medium green #4E8F3A #6FA24A #3A7030, no flowers, no clover, no mowing stripes. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678515,
+     "file": "lawn-c02.png"
+    },
+    {
+     "material": "lawn",
+     "index": 4,
+     "reference": true,
+     "prompt": "Paint a seamless ground texture. A tidy mown lawn. Short soft grass blades in small tufts pointing every way, about twenty tufts across the image width, even fresh medium green #4E8F3A #6FA24A #3A7030, no flowers, no clover, no mowing stripes. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678515,
+     "file": "lawn-c04.png"
+    },
+    {
+     "material": "dirt",
+     "index": 3,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Bare compacted garden dirt path. Light warm tan-brown earth #B8875A #9C6E45 #D2A574 with small rounded crumbs and pebbles; about forty clods across the image width, a few tiny stones, no plants. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067275,
+     "file": "dirt-c03.png"
+    },
+    {
+     "material": "dirt",
+     "index": 1,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Bare compacted garden dirt path. Light warm tan-brown earth #B8875A #9C6E45 #D2A574 with small rounded crumbs and pebbles; about forty clods across the image width, a few tiny stones, no plants. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067275,
+     "file": "dirt-c01.png"
+    },
+    {
+     "material": "dirt",
+     "index": 2,
+     "reference": true,
+     "prompt": "Paint a seamless ground texture. Bare compacted garden dirt path. Light warm tan-brown earth #B8875A #9C6E45 #D2A574 with small rounded crumbs and pebbles; about forty clods across the image width, a few tiny stones, no plants. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067849,
+     "file": "dirt-c02.png"
+    },
+    {
+     "material": "dirt",
+     "index": 4,
+     "reference": true,
+     "prompt": "Paint a seamless ground texture. Bare compacted garden dirt path. Light warm tan-brown earth #B8875A #9C6E45 #D2A574 with small rounded crumbs and pebbles; about forty clods across the image width, a few tiny stones, no plants. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067849,
+     "file": "dirt-c04.png"
+    },
+    {
+     "material": "prepped_soil",
+     "index": 1,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Freshly raked prepared garden soil, level and loose. Medium chocolate brown #8C5838 #6E4128 #A8714A, soft crumbly clods, about forty clods across the image width, no plants, no rake lines. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067276,
+     "file": "prepped_soil-c01.png"
+    },
+    {
+     "material": "prepped_soil",
+     "index": 3,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Freshly raked prepared garden soil, level and loose. Medium chocolate brown #8C5838 #6E4128 #A8714A, soft crumbly clods, about forty clods across the image width, no plants, no rake lines. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067447,
+     "file": "prepped_soil-c03.png"
+    },
+    {
+     "material": "prepped_soil",
+     "index": 2,
+     "reference": true,
+     "prompt": "Paint a seamless ground texture. Freshly raked prepared garden soil, level and loose. Medium chocolate brown #8C5838 #6E4128 #A8714A, soft crumbly clods, about forty clods across the image width, no plants, no rake lines. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.06785,
+     "file": "prepped_soil-c02.png"
+    },
+    {
+     "material": "prepped_soil",
+     "index": 4,
+     "reference": true,
+     "prompt": "Paint a seamless ground texture. Freshly raked prepared garden soil, level and loose. Medium chocolate brown #8C5838 #6E4128 #A8714A, soft crumbly clods, about forty clods across the image width, no plants, no rake lines. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": null,
+     "error": "None"
+    },
+    {
+     "material": "loam",
+     "index": 3,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Rich dark loamy garden bed soil, moist and crumbly. Dark brown #43291C #5C3A26 #2E1C12 with rounded crumbs, about fifty crumbs across the image width, a few tiny pale grit specks, no plants. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067276,
+     "file": "loam-c03.png"
+    },
+    {
+     "material": "loam",
+     "index": 1,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Rich dark loamy garden bed soil, moist and crumbly. Dark brown #43291C #5C3A26 #2E1C12 with rounded crumbs, about fifty crumbs across the image width, a few tiny pale grit specks, no plants. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067276,
+     "file": "loam-c01.png"
+    },
+    {
+     "material": "loam",
+     "index": 2,
+     "reference": true,
+     "prompt": "Paint a seamless ground texture. Rich dark loamy garden bed soil, moist and crumbly. Dark brown #43291C #5C3A26 #2E1C12 with rounded crumbs, about fifty crumbs across the image width, a few tiny pale grit specks, no plants. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.06785,
+     "file": "loam-c02.png"
+    },
+    {
+     "material": "loam",
+     "index": 4,
+     "reference": true,
+     "prompt": "Paint a seamless ground texture. Rich dark loamy garden bed soil, moist and crumbly. Dark brown #43291C #5C3A26 #2E1C12 with rounded crumbs, about fifty crumbs across the image width, a few tiny pale grit specks, no plants. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.06785,
+     "file": "loam-c04.png"
+    }
+   ]
+  },
+  {
+   "spent_usd": 0.0,
+   "records": [
+    {
+     "material": "crimson_clover",
+     "index": 5,
+     "reference": false,
+     "prompt": "Paint 1200 tiny clover plants seen vertically overhead in a lush dense green field. All the little leaves are less than 15px wide, flat medium green with pale V marks, matte gouache and pencil style. Crimson clover ONLY, three oval leaflets in each tiny cluster; just twelve miniature crimson buds scattered across the whole 1024 square. Uniform density and diffuse light. Foliage fills all the way to each outer edge, no empty space. Muted medium greens #2F6B3F #4F9A3A #7FB255. Entirely fresh natural arrangement number 5, no border or text.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": null,
+     "error": "None"
+    },
+    {
+     "material": "crimson_clover",
+     "index": 8,
+     "reference": false,
+     "prompt": "Paint 1200 tiny clover plants seen vertically overhead in a lush dense green field. All the little leaves are less than 15px wide, flat medium green with pale V marks, matte gouache and pencil style. Crimson clover ONLY, three oval leaflets in each tiny cluster; just twelve miniature crimson buds scattered across the whole 1024 square. Uniform density and diffuse light. Foliage fills all the way to each outer edge, no empty space. Muted medium greens #2F6B3F #4F9A3A #7FB255. Entirely fresh natural arrangement number 8, no border or text.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": null,
+     "error": "None"
+    },
+    {
+     "material": "crimson_clover",
+     "index": 7,
+     "reference": false,
+     "prompt": "Paint 1200 tiny clover plants seen vertically overhead in a lush dense green field. All the little leaves are less than 15px wide, flat medium green with pale V marks, matte gouache and pencil style. Crimson clover ONLY, three oval leaflets in each tiny cluster; just twelve miniature crimson buds scattered across the whole 1024 square. Uniform density and diffuse light. Foliage fills all the way to each outer edge, no empty space. Muted medium greens #2F6B3F #4F9A3A #7FB255. Entirely fresh natural arrangement number 7, no border or text.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672675,
+     "file": "crimson_clover-c07.png"
+    },
+    {
+     "material": "crimson_clover",
+     "index": 6,
+     "reference": false,
+     "prompt": "Paint 1200 tiny clover plants seen vertically overhead in a lush dense green field. All the little leaves are less than 15px wide, flat medium green with pale V marks, matte gouache and pencil style. Crimson clover ONLY, three oval leaflets in each tiny cluster; just twelve miniature crimson buds scattered across the whole 1024 square. Uniform density and diffuse light. Foliage fills all the way to each outer edge, no empty space. Muted medium greens #2F6B3F #4F9A3A #7FB255. Entirely fresh natural arrangement number 6, no border or text.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672675,
+     "file": "crimson_clover-c06.png"
+    }
+   ]
+  },
+  {
+   "spent_usd": 0.0,
+   "records": [
+    {
+     "material": "dirt",
+     "index": 5,
+     "reference": true,
+     "prompt": "Paint a seamless ground texture. Bare compacted garden dirt path, dry and LIGHT: pale sandy tan earth #C99A68 #B8875A #DDB585 with small rounded crumbs and pebbles; about forty clods across the image width, a few tiny stones, no plants. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": null,
+     "error": "None"
+    },
+    {
+     "material": "dirt",
+     "index": 6,
+     "reference": true,
+     "prompt": "Paint a seamless ground texture. Bare compacted garden dirt path, dry and LIGHT: pale sandy tan earth #C99A68 #B8875A #DDB585 with small rounded crumbs and pebbles; about forty clods across the image width, a few tiny stones, no plants. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678495,
+     "file": "dirt-c06.png"
+    },
+    {
+     "material": "wild_grass",
+     "index": 7,
+     "reference": true,
+     "prompt": "Paint a seamless ground texture. Rough wild meadow grass. Loose clumps of short grass blades pointing every way, about fourteen clumps across the image width, with a few small clover leaves, a few tiny white and yellow flowers and dry tan blades mixed in. Muted greens #3F6E33 #5E8C3E #8AA65A. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678545,
+     "file": "wild_grass-c07.png"
+    },
+    {
+     "material": "lawn",
+     "index": 7,
+     "reference": true,
+     "prompt": "Paint a seamless ground texture. A tidy mown lawn. Short soft grass blades in small tufts pointing every way, about twenty tufts across the image width, even fresh medium green #4E8F3A #6FA24A #3A7030, no flowers, no clover, no mowing stripes. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678515,
+     "file": "lawn-c07.png"
+    },
+    {
+     "material": "lawn",
+     "index": 6,
+     "reference": true,
+     "prompt": "Paint a seamless ground texture. A tidy mown lawn. Short soft grass blades in small tufts pointing every way, about twenty tufts across the image width, even fresh medium green #4E8F3A #6FA24A #3A7030, no flowers, no clover, no mowing stripes. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678515,
+     "file": "lawn-c06.png"
+    },
+    {
+     "material": "lawn",
+     "index": 5,
+     "reference": true,
+     "prompt": "Paint a seamless ground texture. A tidy mown lawn. Short soft grass blades in small tufts pointing every way, about twenty tufts across the image width, even fresh medium green #4E8F3A #6FA24A #3A7030, no flowers, no clover, no mowing stripes. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0680495,
+     "file": "lawn-c05.png"
+    },
+    {
+     "material": "wild_grass",
+     "index": 5,
+     "reference": true,
+     "prompt": "Paint a seamless ground texture. Rough wild meadow grass. Loose clumps of short grass blades pointing every way, about fourteen clumps across the image width, with a few small clover leaves, a few tiny white and yellow flowers and dry tan blades mixed in. Muted greens #3F6E33 #5E8C3E #8AA65A. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678545,
+     "file": "wild_grass-c05.png"
+    },
+    {
+     "material": "wild_grass",
+     "index": 6,
+     "reference": true,
+     "prompt": "Paint a seamless ground texture. Rough wild meadow grass. Loose clumps of short grass blades pointing every way, about fourteen clumps across the image width, with a few small clover leaves, a few tiny white and yellow flowers and dry tan blades mixed in. Muted greens #3F6E33 #5E8C3E #8AA65A. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678545,
+     "file": "wild_grass-c06.png"
+    },
+    {
+     "material": "dirt",
+     "index": 7,
+     "reference": true,
+     "prompt": "Paint a seamless ground texture. Bare compacted garden dirt path, dry and LIGHT: pale sandy tan earth #C99A68 #B8875A #DDB585 with small rounded crumbs and pebbles; about forty clods across the image width, a few tiny stones, no plants. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": null,
+     "error": "None"
+    },
+    {
+     "material": "prepped_soil",
+     "index": 6,
+     "reference": true,
+     "prompt": "Paint a seamless ground texture. Freshly raked prepared garden soil, level and loose. Medium chocolate brown #8C5838 #6E4128 #A8714A, soft crumbly clods, about forty clods across the image width, no plants, no rake lines. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.06785,
+     "file": "prepped_soil-c06.png"
+    },
+    {
+     "material": "prepped_soil",
+     "index": 5,
+     "reference": true,
+     "prompt": "Paint a seamless ground texture. Freshly raked prepared garden soil, level and loose. Medium chocolate brown #8C5838 #6E4128 #A8714A, soft crumbly clods, about forty clods across the image width, no plants, no rake lines. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.06785,
+     "file": "prepped_soil-c05.png"
+    },
+    {
+     "material": "loam",
+     "index": 6,
+     "reference": true,
+     "prompt": "Paint a seamless ground texture. Rich dark loamy garden bed soil, moist and crumbly. Dark brown #43291C #5C3A26 #2E1C12 with rounded crumbs, about fifty crumbs across the image width, a few tiny pale grit specks, no plants. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.06785,
+     "file": "loam-c06.png"
+    },
+    {
+     "material": "loam",
+     "index": 7,
+     "reference": true,
+     "prompt": "Paint a seamless ground texture. Rich dark loamy garden bed soil, moist and crumbly. Dark brown #43291C #5C3A26 #2E1C12 with rounded crumbs, about fifty crumbs across the image width, a few tiny pale grit specks, no plants. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.06785,
+     "file": "loam-c07.png"
+    },
+    {
+     "material": "loam",
+     "index": 5,
+     "reference": true,
+     "prompt": "Paint a seamless ground texture. Rich dark loamy garden bed soil, moist and crumbly. Dark brown #43291C #5C3A26 #2E1C12 with rounded crumbs, about fifty crumbs across the image width, a few tiny pale grit specks, no plants. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.06785,
+     "file": "loam-c05.png"
+    },
+    {
+     "material": "prepped_soil",
+     "index": 7,
+     "reference": true,
+     "prompt": "Paint a seamless ground texture. Freshly raked prepared garden soil, level and loose. Medium chocolate brown #8C5838 #6E4128 #A8714A, soft crumbly clods, about forty clods across the image width, no plants, no rake lines. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.06785,
+     "file": "prepped_soil-c07.png"
+    }
+   ]
+  },
+  {
+   "spent_usd": 0.0,
+   "records": [
+    {
+     "material": "prepped_soil",
+     "index": 10,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Freshly raked prepared garden soil, level and loose. Medium chocolate brown #8C5838 #6E4128 #A8714A, irregular angular crumbly clods of mixed sizes with dark gaps between them, about twenty clods across the image width, no leaves, no plants, no rake lines, no ink outlines. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067284,
+     "file": "prepped_soil-c10.png"
+    },
+    {
+     "material": "prepped_soil",
+     "index": 8,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Freshly raked prepared garden soil, level and loose. Medium chocolate brown #8C5838 #6E4128 #A8714A, irregular angular crumbly clods of mixed sizes with dark gaps between them, about twenty clods across the image width, no leaves, no plants, no rake lines, no ink outlines. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067284,
+     "file": "prepped_soil-c08.png"
+    },
+    {
+     "material": "prepped_soil",
+     "index": 9,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Freshly raked prepared garden soil, level and loose. Medium chocolate brown #8C5838 #6E4128 #A8714A, irregular angular crumbly clods of mixed sizes with dark gaps between them, about twenty clods across the image width, no leaves, no plants, no rake lines, no ink outlines. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067284,
+     "file": "prepped_soil-c09.png"
+    }
+   ]
+  },
+  {
+   "spent_usd": 0.0,
+   "records": [
+    {
+     "material": "lawn",
+     "index": 10,
+     "reference": true,
+     "prompt": "Paint a seamless ground texture. A tidy mown lawn. Short soft grass blades in small tufts pointing every way, about twenty tufts across the image width, even fresh medium green #4E8F3A #6FA24A #3A7030, no flowers, no clover, no mowing stripes. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678515,
+     "file": "lawn-c10.png"
+    },
+    {
+     "material": "lawn",
+     "index": 8,
+     "reference": true,
+     "prompt": "Paint a seamless ground texture. A tidy mown lawn. Short soft grass blades in small tufts pointing every way, about twenty tufts across the image width, even fresh medium green #4E8F3A #6FA24A #3A7030, no flowers, no clover, no mowing stripes. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678515,
+     "file": "lawn-c08.png"
+    },
+    {
+     "material": "lawn",
+     "index": 9,
+     "reference": true,
+     "prompt": "Paint a seamless ground texture. A tidy mown lawn. Short soft grass blades in small tufts pointing every way, about twenty tufts across the image width, even fresh medium green #4E8F3A #6FA24A #3A7030, no flowers, no clover, no mowing stripes. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0678515,
+     "file": "lawn-c09.png"
+    }
+   ]
+  },
+  {
+   "spent_usd": 0.0,
+   "records": [
+    {
+     "material": "loam",
+     "index": 21,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Rich dark moist tilled loam, freshly worked garden bed soil. Dark brown #4A2E1F #5C3A26 #3A2418, fine soft crumbly texture like crumbled chocolate cake, gentle low-contrast mottling and tiny crumbs. NO pebbles, NO stones, NO round clods, NO cobbles, no outlines, no leaves, no plants. Calm and quiet so plants drawn on top stand out. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672925,
+     "file": "loam-c21.png"
+    },
+    {
+     "material": "loam",
+     "index": 23,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Rich dark moist tilled loam, freshly worked garden bed soil. Dark brown #4A2E1F #5C3A26 #3A2418, fine soft crumbly texture like crumbled chocolate cake, gentle low-contrast mottling and tiny crumbs. NO pebbles, NO stones, NO round clods, NO cobbles, no outlines, no leaves, no plants. Calm and quiet so plants drawn on top stand out. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": null,
+     "error": "None"
+    },
+    {
+     "material": "loam",
+     "index": 22,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Rich dark moist tilled loam, freshly worked garden bed soil. Dark brown #4A2E1F #5C3A26 #3A2418, fine soft crumbly texture like crumbled chocolate cake, gentle low-contrast mottling and tiny crumbs. NO pebbles, NO stones, NO round clods, NO cobbles, no outlines, no leaves, no plants. Calm and quiet so plants drawn on top stand out. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": null,
+     "error": "None"
+    },
+    {
+     "material": "dirt",
+     "index": 23,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Soft bare garden earth, dry and light: fine crumbly sandy-tan loam #C99A68 #B8875A #D6AC7C, a smooth matte surface of tiny soft crumbs and fine grain with gentle low-contrast mottling, only a few slightly darker crumbs. NO pebbles, NO stones, NO round clods, NO cobbles, no outlines, no leaves, no plants. Calm and quiet so plants drawn on top stand out. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672955,
+     "file": "dirt-c23.png"
+    },
+    {
+     "material": "dirt",
+     "index": 22,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Soft bare garden earth, dry and light: fine crumbly sandy-tan loam #C99A68 #B8875A #D6AC7C, a smooth matte surface of tiny soft crumbs and fine grain with gentle low-contrast mottling, only a few slightly darker crumbs. NO pebbles, NO stones, NO round clods, NO cobbles, no outlines, no leaves, no plants. Calm and quiet so plants drawn on top stand out. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672955,
+     "file": "dirt-c22.png"
+    },
+    {
+     "material": "dirt",
+     "index": 21,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Soft bare garden earth, dry and light: fine crumbly sandy-tan loam #C99A68 #B8875A #D6AC7C, a smooth matte surface of tiny soft crumbs and fine grain with gentle low-contrast mottling, only a few slightly darker crumbs. NO pebbles, NO stones, NO round clods, NO cobbles, no outlines, no leaves, no plants. Calm and quiet so plants drawn on top stand out. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672955,
+     "file": "dirt-c21.png"
+    },
+    {
+     "material": "loam",
+     "index": 20,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Rich dark moist tilled loam, freshly worked garden bed soil. Dark brown #4A2E1F #5C3A26 #3A2418, fine soft crumbly texture like crumbled chocolate cake, gentle low-contrast mottling and tiny crumbs. NO pebbles, NO stones, NO round clods, NO cobbles, no outlines, no leaves, no plants. Calm and quiet so plants drawn on top stand out. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0674725,
+     "file": "loam-c20.png"
+    },
+    {
+     "material": "dirt",
+     "index": 20,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Soft bare garden earth, dry and light: fine crumbly sandy-tan loam #C99A68 #B8875A #D6AC7C, a smooth matte surface of tiny soft crumbs and fine grain with gentle low-contrast mottling, only a few slightly darker crumbs. NO pebbles, NO stones, NO round clods, NO cobbles, no outlines, no leaves, no plants. Calm and quiet so plants drawn on top stand out. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672955,
+     "file": "dirt-c20.png"
+    }
+   ]
+  },
+  {
+   "spent_usd": 0.4039,
+   "records": [
+    {
+     "material": "loam",
+     "index": 24,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Rich dark moist tilled loam, freshly worked garden bed soil. Dark brown #4A2E1F #5C3A26 #3A2418, fine soft crumbly texture like crumbled chocolate cake, gentle low-contrast mottling and tiny crumbs. NO pebbles, NO stones, NO round clods, NO cobbles, no outlines, no leaves, no plants. Calm and quiet so plants drawn on top stand out. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672925,
+     "file": "loam-c24.png"
+    },
+    {
+     "material": "loam",
+     "index": 26,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Rich dark moist tilled loam, freshly worked garden bed soil. Dark brown #4A2E1F #5C3A26 #3A2418, fine soft crumbly texture like crumbled chocolate cake, gentle low-contrast mottling and tiny crumbs. NO pebbles, NO stones, NO round clods, NO cobbles, no outlines, no leaves, no plants. Calm and quiet so plants drawn on top stand out. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0674545,
+     "file": "loam-c26.png"
+    },
+    {
+     "material": "loam",
+     "index": 25,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Rich dark moist tilled loam, freshly worked garden bed soil. Dark brown #4A2E1F #5C3A26 #3A2418, fine soft crumbly texture like crumbled chocolate cake, gentle low-contrast mottling and tiny crumbs. NO pebbles, NO stones, NO round clods, NO cobbles, no outlines, no leaves, no plants. Calm and quiet so plants drawn on top stand out. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672925,
+     "file": "loam-c25.png"
+    }
+   ]
+  },
+  {
+   "spent_usd": 0.202,
+   "records": [
+    {
+     "material": "loam",
+     "index": 30,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Rich dark moist tilled loam, freshly worked garden bed soil. Dark brown #4A2E1F #5C3A26 #3A2418, fine soft crumbly texture like crumbled chocolate cake, gentle low-contrast mottling and tiny crumbs. NO pebbles, NO stones, NO round clods, NO cobbles, no outlines, no leaves, no plants. Calm and quiet so plants drawn on top stand out. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": null,
+     "error": "None"
+    },
+    {
+     "material": "dirt",
+     "index": 30,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Soft bare garden earth, dry and light: fine crumbly sandy-tan loam #C99A68 #B8875A #D6AC7C, a smooth matte surface of tiny soft crumbs and fine grain with gentle low-contrast mottling, only a few slightly darker crumbs. NO pebbles, NO stones, NO round clods, NO cobbles, no outlines, no leaves, no plants. Calm and quiet so plants drawn on top stand out. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672955,
+     "file": "dirt-c30.png"
+    },
+    {
+     "material": "dirt",
+     "index": 31,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Soft bare garden earth, dry and light: fine crumbly sandy-tan loam #C99A68 #B8875A #D6AC7C, a smooth matte surface of tiny soft crumbs and fine grain with gentle low-contrast mottling, only a few slightly darker crumbs. NO pebbles, NO stones, NO round clods, NO cobbles, no outlines, no leaves, no plants. Calm and quiet so plants drawn on top stand out. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672955,
+     "file": "dirt-c31.png"
+    },
+    {
+     "material": "loam",
+     "index": 31,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Rich dark moist tilled loam, freshly worked garden bed soil. Dark brown #4A2E1F #5C3A26 #3A2418, fine soft crumbly texture like crumbled chocolate cake, gentle low-contrast mottling and tiny crumbs. NO pebbles, NO stones, NO round clods, NO cobbles, no outlines, no leaves, no plants. Calm and quiet so plants drawn on top stand out. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0675025,
+     "file": "loam-c31.png"
+    }
+   ]
+  },
+  {
+   "spent_usd": 0.0,
+   "records": [
+    {
+     "material": "prepped_soil",
+     "index": 42,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Freshly prepared garden bed soil, level and loose, medium chocolate brown #8C5838 #7A4C30 #9C6644, fine soft crumbly texture like raked compost-rich earth, tiny soft crumbs with gentle low-contrast mottling. NO pebbles, NO stones, NO round clods, NO cobbles, no rake lines, no outlines, no leaves, no plants. Calm and quiet so plants drawn on top stand out. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067296,
+     "file": "prepped_soil-c42.png"
+    },
+    {
+     "material": "prepped_soil",
+     "index": 40,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Freshly prepared garden bed soil, level and loose, medium chocolate brown #8C5838 #7A4C30 #9C6644, fine soft crumbly texture like raked compost-rich earth, tiny soft crumbs with gentle low-contrast mottling. NO pebbles, NO stones, NO round clods, NO cobbles, no rake lines, no outlines, no leaves, no plants. Calm and quiet so plants drawn on top stand out. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067296,
+     "file": "prepped_soil-c40.png"
+    },
+    {
+     "material": "prepped_soil",
+     "index": 43,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Freshly prepared garden bed soil, level and loose, medium chocolate brown #8C5838 #7A4C30 #9C6644, fine soft crumbly texture like raked compost-rich earth, tiny soft crumbs with gentle low-contrast mottling. NO pebbles, NO stones, NO round clods, NO cobbles, no rake lines, no outlines, no leaves, no plants. Calm and quiet so plants drawn on top stand out. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067296,
+     "file": "prepped_soil-c43.png"
+    },
+    {
+     "material": "prepped_soil",
+     "index": 41,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Freshly prepared garden bed soil, level and loose, medium chocolate brown #8C5838 #7A4C30 #9C6644, fine soft crumbly texture like raked compost-rich earth, tiny soft crumbs with gentle low-contrast mottling. NO pebbles, NO stones, NO round clods, NO cobbles, no rake lines, no outlines, no leaves, no plants. Calm and quiet so plants drawn on top stand out. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067296,
+     "file": "prepped_soil-c41.png"
+    },
+    {
+     "material": "prepped_soil",
+     "index": 44,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Freshly prepared garden bed soil, level and loose, medium chocolate brown #8C5838 #7A4C30 #9C6644, fine soft crumbly texture like raked compost-rich earth, tiny soft crumbs with gentle low-contrast mottling. NO pebbles, NO stones, NO round clods, NO cobbles, no rake lines, no outlines, no leaves, no plants. Calm and quiet so plants drawn on top stand out. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067296,
+     "file": "prepped_soil-c44.png"
+    }
+   ]
+  },
+  {
+   "spent_usd": 0.3365,
+   "records": [
+    {
+     "material": "prepped_soil",
+     "index": 47,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Freshly prepared garden bed soil, level and loose, medium chocolate brown #8C5838 #7A4C30 #9C6644, fine soft crumbly texture like raked compost-rich earth, tiny soft crumbs with gentle low-contrast mottling. NO pebbles, NO stones, NO round clods, NO cobbles, no rake lines, no outlines, no leaves, no plants. Calm and quiet so plants drawn on top stand out. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": null,
+     "error": "None"
+    },
+    {
+     "material": "prepped_soil",
+     "index": 45,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Freshly prepared garden bed soil, level and loose, medium chocolate brown #8C5838 #7A4C30 #9C6644, fine soft crumbly texture like raked compost-rich earth, tiny soft crumbs with gentle low-contrast mottling. NO pebbles, NO stones, NO round clods, NO cobbles, no rake lines, no outlines, no leaves, no plants. Calm and quiet so plants drawn on top stand out. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067296,
+     "file": "prepped_soil-c45.png"
+    },
+    {
+     "material": "prepped_soil",
+     "index": 46,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Freshly prepared garden bed soil, level and loose, medium chocolate brown #8C5838 #7A4C30 #9C6644, fine soft crumbly texture like raked compost-rich earth, tiny soft crumbs with gentle low-contrast mottling. NO pebbles, NO stones, NO round clods, NO cobbles, no rake lines, no outlines, no leaves, no plants. Calm and quiet so plants drawn on top stand out. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.067296,
+     "file": "prepped_soil-c46.png"
+    }
+   ]
+  },
+  {
+   "spent_usd": 0.0,
+   "records": [
+    {
+     "material": "prepped_soil",
+     "index": 51,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Freshly prepared garden bed soil, level and loose, medium chocolate brown #8C5838 #7A4C30 #9C6644, fine soft crumbly texture like raked compost-rich earth, tiny soft crumbs with gentle low-contrast mottling. NO pebbles, NO stones, NO round clods, NO cobbles, no rake lines, no streaks, no diagonal marks, no outlines, no leaves, no plants. Calm and quiet so plants drawn on top stand out. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672995,
+     "file": "prepped_soil-c51.png"
+    },
+    {
+     "material": "prepped_soil",
+     "index": 52,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Freshly prepared garden bed soil, level and loose, medium chocolate brown #8C5838 #7A4C30 #9C6644, fine soft crumbly texture like raked compost-rich earth, tiny soft crumbs with gentle low-contrast mottling. NO pebbles, NO stones, NO round clods, NO cobbles, no rake lines, no streaks, no diagonal marks, no outlines, no leaves, no plants. Calm and quiet so plants drawn on top stand out. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": null,
+     "error": "None"
+    },
+    {
+     "material": "prepped_soil",
+     "index": 50,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Freshly prepared garden bed soil, level and loose, medium chocolate brown #8C5838 #7A4C30 #9C6644, fine soft crumbly texture like raked compost-rich earth, tiny soft crumbs with gentle low-contrast mottling. NO pebbles, NO stones, NO round clods, NO cobbles, no rake lines, no streaks, no diagonal marks, no outlines, no leaves, no plants. Calm and quiet so plants drawn on top stand out. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": null,
+     "error": "None"
+    },
+    {
+     "material": "prepped_soil",
+     "index": 53,
+     "reference": false,
+     "prompt": "Paint a seamless ground texture. Freshly prepared garden bed soil, level and loose, medium chocolate brown #8C5838 #7A4C30 #9C6644, fine soft crumbly texture like raked compost-rich earth, tiny soft crumbs with gentle low-contrast mottling. NO pebbles, NO stones, NO round clods, NO cobbles, no rake lines, no streaks, no diagonal marks, no outlines, no leaves, no plants. Calm and quiet so plants drawn on top stand out. Seen vertically overhead, like a flat map, no perspective, no horizon. Matte hand-painted gouache illustration with soft pencil detail, clear readable shapes, gentle two-tone shading, diffuse even light, no cast shadows. Uniform density across the whole 1024 square, filling every edge, no empty space, no border, no vignette, no frame, no text, no rows, no stripes, no single direction.",
+     "model": "google/gemini-3.1-flash-image",
+     "cost_usd": 0.0672995,
+     "file": "prepped_soil-c53.png"
+    }
+   ]
+  }
+ ]
+}

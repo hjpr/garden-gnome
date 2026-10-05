@@ -2,13 +2,14 @@
 
 A Flutter web app for planning land and growing food. Home opens the tools:
 
+- **Seed Vault:** keep varieties and their growing requirements.
 - **Plan:** in Build mode, draw properties and zones with straight lines,
   curves, arcs, circles and polygons and edit ground, rows, features and
   reference images; in Plant mode, place Seed Vault varieties on grow
   zones.
-- **Seed Vault:** keep varieties and their growing requirements.
-- **Greenhouse, Grow and Harvest:** plan sowing, planting out and harvests
-  using the crop catalog and your frost dates.
+- **Grow (Sow | Transplant):** sow in place or start trays to plant
+  out, and follow them to harvest using the crop catalog and your frost
+  dates.
 
 Drawings save in the browser and can be exported as `.ggnome` files. The
 Seed Vault, plantings and climate settings are a separate browser record.

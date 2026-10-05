@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:garden_gnome/domain/grow/crop.dart';
 import 'package:garden_gnome/persistence/crop_catalog_loader.dart';
 
 void main() {
@@ -18,6 +19,7 @@ void main() {
           {'id': '1', 'cropId': 'tomatoes', 'name': 'Sun Gold'},
         ],
       }),
+      'assets/catalog/cover_crops.json': jsonEncode({'crops': []}),
     };
     final messenger =
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
@@ -38,24 +40,43 @@ void main() {
     expect(catalog.varieties, hasLength(1));
     expect(catalog.varieties.single.name, 'Sun Gold');
     expect(catalog[catalog.varieties.single.cropId]!.name, 'Tomatoes');
+    // Johnny's winter charts reach the bundled crops they cover, and only
+    // those: tomatoes have none.
+    expect(catalog['spinach']!.winterWindows, isNotEmpty);
+    expect(catalog['kale']!.winterWindows.map((w) => w.use).toSet(), {
+      WinterUse.winterHarvest,
+      WinterUse.overwinter,
+    });
+    expect(catalog['tomatoes']!.winterWindows, isEmpty);
   });
 
   test(
     'real bundled varieties load without skipped or orphaned entries',
     () async {
-      final raw =
-          jsonDecode(File('assets/catalog/varieties.json').readAsStringSync())
-              as Map<String, dynamic>;
+      List<dynamic> varietiesIn(String file) =>
+          (jsonDecode(File('assets/catalog/$file').readAsStringSync())
+                  as Map<String, dynamic>)['varieties']
+              as List;
       final catalog = await loadBundledCatalog();
-      expect(catalog.varieties, hasLength((raw['varieties'] as List).length));
+      expect(
+        catalog.varieties,
+        hasLength(
+          varietiesIn('varieties.json').length +
+              varietiesIn('cover_crops.json').length,
+        ),
+      );
       expect(catalog.varieties.length, greaterThan(1000));
       expect(
         catalog.varieties.map((v) => v.id).toSet(),
         hasLength(catalog.varieties.length),
       );
-      expect(catalog.varieties.every((v) => catalog[v.cropId] != null), isTrue);
+      expect(catalog.varieties.every((v) => catalog.knows(v.cropId)), isTrue);
       expect(
-        catalog.varieties.any((v) => catalog[v.cropId]!.category == 'Herbs'),
+        catalog.varieties.any((v) => catalog.coverCrop(v.cropId) != null),
+        isTrue,
+      );
+      expect(
+        catalog.varieties.any((v) => catalog[v.cropId]?.category == 'Herbs'),
         isTrue,
       );
       expect(

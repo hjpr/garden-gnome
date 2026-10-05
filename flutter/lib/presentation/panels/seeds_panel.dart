@@ -31,13 +31,21 @@ class _SeedsBodyState extends State<SeedsBody> {
       listenable: garden,
       builder: (context, _) {
         final all = garden.profiles;
-        if (all.isEmpty) {
+        final covers = [
+          for (final (v, c) in garden.coverVarieties)
+            CoverDrag(varietyId: v.id, name: '${v.name} · ${c.name}'),
+        ];
+        if (all.isEmpty && covers.isEmpty) {
           return const EmptyPanelText('Add seeds in the Seed Vault.');
         }
         final q = _query.trim().toLowerCase();
         final shown = [
           for (final p in all)
             if (q.isEmpty || p.displayName.toLowerCase().contains(q)) p,
+        ];
+        final shownCovers = [
+          for (final c in covers)
+            if (q.isEmpty || c.name.toLowerCase().contains(q)) c,
         ];
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -62,6 +70,13 @@ class _SeedsBodyState extends State<SeedsBody> {
                 editor: widget.editor,
                 profile: profile,
               ),
+            // Cover crops go on Cover beds, not plantings.
+            for (final cover in shownCovers)
+              _CoverTile(
+                key: ValueKey(cover.varietyId),
+                editor: widget.editor,
+                cover: cover,
+              ),
           ],
         );
       },
@@ -85,7 +100,11 @@ class _SeedTile extends StatelessWidget {
     final planted = selected != null && editor.isGrowZone(selected)
         ? editor.document.layers[selected]
         : null;
-    final tile = _SeedLabel(profile: profile, spacing: spacing);
+    final tile = _SeedLabel(
+      name: profile.variety.name,
+      crop: profile.crop.name,
+      trailing: spacing,
+    );
     return Draggable<VarietyProfile>(
       data: profile,
       // The drop lands where the pointer is, not the card's corner.
@@ -114,31 +133,89 @@ class _SeedTile extends StatelessWidget {
   }
 }
 
-class _SeedLabel extends StatelessWidget {
-  const _SeedLabel({required this.profile, required this.spacing});
+/// One cover crop: drag it onto a Cover bed, or click it to sow the
+/// selected Cover bed.
+class _CoverTile extends StatelessWidget {
+  const _CoverTile({super.key, required this.editor, required this.cover});
 
-  final VarietyProfile profile;
-  final String spacing;
+  final EditorController editor;
+  final CoverDrag cover;
+
+  @override
+  Widget build(BuildContext context) {
+    final selected = editor.selectedLayerId;
+    final bed = selected != null && editor.isCoverBed(selected)
+        ? selected
+        : null;
+    final (variety, crop) = switch (cover.name.split(' · ')) {
+      [final v, final c] => (v, c),
+      _ => (cover.name, 'Cover crop'),
+    };
+    final tile = _SeedLabel(
+      name: variety,
+      crop: crop,
+      trailing: 'Cover',
+      icon: Icons.grass,
+    );
+    return Draggable<CoverDrag>(
+      data: cover,
+      dragAnchorStrategy: pointerDragAnchorStrategy,
+      feedback: Material(
+        elevation: 6,
+        color: Palette.paper,
+        borderRadius: BorderRadius.circular(Metrics.radius),
+        child: SizedBox(width: 200, child: tile),
+      ),
+      childWhenDragging: Opacity(opacity: 0.4, child: tile),
+      child: Tooltip(
+        message: 'Drag onto a Cover bed',
+        waitDuration: const Duration(milliseconds: 600),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(Metrics.radius),
+          hoverColor: Palette.hover,
+          mouseCursor: SystemMouseCursors.grab,
+          onTap: bed == null
+              ? () => editor.showNotice('Drag cover crops onto a Cover bed')
+              : () => sowCover(editor, bed, cover),
+          child: tile,
+        ),
+      ),
+    );
+  }
+}
+
+class _SeedLabel extends StatelessWidget {
+  const _SeedLabel({
+    required this.name,
+    required this.crop,
+    required this.trailing,
+    this.icon = Icons.spa_outlined,
+  });
+
+  final String name;
+  final String crop;
+  final String trailing;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 5),
     child: Row(
       children: [
-        const Icon(Icons.spa_outlined, size: 15, color: Palette.accent),
+        Icon(icon, size: 15, color: Palette.accent),
         const SizedBox(width: 8),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                profile.variety.name,
+                name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(fontSize: 12.5, color: Palette.ink),
               ),
               Text(
-                profile.crop.name,
+                crop,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(fontSize: 11, color: Palette.muted),
@@ -147,7 +224,7 @@ class _SeedLabel extends StatelessWidget {
           ),
         ),
         Text(
-          spacing,
+          trailing,
           style: const TextStyle(fontSize: 11, color: Palette.faint),
         ),
       ],

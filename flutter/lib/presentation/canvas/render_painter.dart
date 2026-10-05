@@ -10,6 +10,7 @@ abstract final class _RenderColours {
   static const preppedSoil = Color(0xFFA0613D);
   static const loam = Color(0xFF432B1D);
   static const furrow = Color(0xFF9A6E48);
+  static const coverWash = Color(0x8C5E9A2E);
 }
 
 /// The Render view: the farm from above, painted with ground textures.
@@ -64,11 +65,27 @@ extension _RenderPainter on ScenePainter {
     GroundType? ground,
     RowSpec rows,
   ) {
-    final (texture, fallback) = ground == GroundType.flat
-        ? (RenderTexture.preppedSoil, _RenderColours.preppedSoil)
-        : (RenderTexture.dirt, _RenderColours.dirt);
+    final clover =
+        ground == GroundType.cover &&
+        scene.coverCropIds[layerId] == 'crimson-clover' &&
+        scene.renderAssets?.texture(RenderTexture.crimsonClover) != null;
+    final (texture, fallback) = switch (ground) {
+      GroundType.cover when clover => (
+        RenderTexture.crimsonClover,
+        _RenderColours.preppedSoil,
+      ),
+      GroundType.flat || GroundType.cover => (
+        RenderTexture.preppedSoil,
+        _RenderColours.preppedSoil,
+      ),
+      _ => (RenderTexture.dirt, _RenderColours.dirt),
+    };
     final blended = _fillBlended(canvas, size, path, texture);
     if (!blended) _fillTextured(canvas, path, texture, fallback);
+    // Unknown/non-clover crops, or missing art, keep the generic cover.
+    if (ground == GroundType.cover && !clover) {
+      canvas.drawPath(path, Paint()..color = _RenderColours.coverWash);
+    }
     if (ground == GroundType.row) {
       canvas.save();
       canvas.clipPath(path);
@@ -272,6 +289,7 @@ extension _RenderPainter on ScenePainter {
     bool edge = false,
   }) {
     final image = scene.renderAssets!.texture(texture)!;
+    final small = scene.renderAssets!.smallCopies(texture);
     final origin = _camera.toScreen(Vec.zero);
     final tint = texture.tint;
     final values = [
@@ -285,11 +303,16 @@ extension _RenderPainter on ScenePainter {
       tint.r, tint.g, tint.b, tint.a, // uTint
       ...scene.renderAssets!.meanColour(texture), // uMean
       edge ? _edgeReach : 0.0, texture.edgeNoise, // uEdge
+      scene.renderAssets!.atlasGrid(texture).width,
+      scene.renderAssets!.atlasGrid(texture).height, // uAtlasGrid
+      small == null ? 1.0 : 3.0, // uLevels
     ];
     for (var i = 0; i < values.length; i++) {
       shader.setFloat(i, values[i]);
     }
     shader.setImageSampler(0, image);
+    shader.setImageSampler(1, small?.$1 ?? image);
+    shader.setImageSampler(2, small?.$2 ?? image);
     return shader;
   }
 

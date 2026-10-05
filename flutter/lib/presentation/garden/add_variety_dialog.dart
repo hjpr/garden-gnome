@@ -27,13 +27,14 @@ class _AddVarietyDialogState extends State<_AddVarietyDialog> {
   CatalogVariety? _selected;
 
   bool _matches(CatalogVariety variety) {
-    final crop = widget.catalog[variety.cropId];
-    if (crop == null) return false;
+    final cropName = widget.catalog.nameOf(variety.cropId);
+    final category = widget.catalog.categoryOf(variety.cropId);
+    if (cropName == null || category == null) return false;
     final q = _query.trim().toLowerCase();
     return q.isEmpty ||
         variety.name.toLowerCase().contains(q) ||
-        crop.name.toLowerCase().contains(q) ||
-        crop.category.toLowerCase().contains(q);
+        cropName.toLowerCase().contains(q) ||
+        category.toLowerCase().contains(q);
   }
 
   void _submit() {
@@ -87,7 +88,9 @@ class _AddVarietyDialogState extends State<_AddVarietyDialog> {
                         itemCount: varieties.length,
                         itemBuilder: (context, index) {
                           final variety = varieties[index];
-                          final crop = widget.catalog[variety.cropId]!;
+                          final cropName = widget.catalog.nameOf(
+                            variety.cropId,
+                          )!;
                           return Material(
                             color: variety == _selected
                                 ? Palette.wash
@@ -114,7 +117,7 @@ class _AddVarietyDialogState extends State<_AddVarietyDialog> {
                                     ),
                                     const SizedBox(width: 12),
                                     Text(
-                                      crop.name,
+                                      cropName,
                                       style: const TextStyle(
                                         fontSize: 11.5,
                                         color: Palette.faint,

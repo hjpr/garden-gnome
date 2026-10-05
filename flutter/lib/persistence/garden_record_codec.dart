@@ -181,6 +181,7 @@ Map<String, Object?> climateToJson(Climate c) => {
   'zone': c.zone.code,
   'last_spring_frost': c.lastSpringFrost?.code,
   'first_fall_frost': c.firstFallFrost?.code,
+  'latitude': ?c.latitude,
 };
 
 /// Throws [FormatException] when a value cannot be read.
@@ -188,7 +189,16 @@ Climate climateFromJson(Map<String, Object?> json) => Climate(
   zone: _zone(json['zone']),
   lastSpringFrost: _monthDay(json['last_spring_frost']),
   firstFallFrost: _monthDay(json['first_fall_frost']),
+  latitude: _latitude(json['latitude']),
 );
+
+double? _latitude(Object? value) {
+  if (value == null) return null;
+  if (value is num && value.isFinite && value.abs() <= 90) {
+    return value.toDouble();
+  }
+  throw const FormatException('the latitude is not readable');
+}
 
 Map<String, Object?> plantingToJson(Planting p) => {
   'id': p.id,

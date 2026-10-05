@@ -10,15 +10,20 @@ import 'package:garden_gnome/domain/vec.dart';
 const _smallSeed = ZoneSeed(
   varietyId: 'test',
   name: 'Test',
-  size: 0.25,
-  spacing: 0.25,
+  inRow: 0.5,
+  betweenRows: 0.5,
 );
 const _wideRows = ZoneProperties(
   ground: GroundType.row,
   rows: RowSpec(width: 2, spacing: 0, direction: 0, border: 0),
 );
 
-const _seed = ZoneSeed(varietyId: 'test', name: 'Test', size: 0.5, spacing: 0);
+const _seed = ZoneSeed(
+  varietyId: 'test',
+  name: 'Test',
+  inRow: 0.5,
+  betweenRows: 0.5,
+);
 const _flat = ZoneProperties(ground: GroundType.flat);
 const _rows = ZoneProperties(
   ground: GroundType.row,
@@ -163,7 +168,7 @@ void _overlapTests() {
   });
 
   test('overlap counts stay exact beyond the drawing position cap', () {
-    final denseSeed = _seed.copyWith(size: 0.02);
+    final denseSeed = _seed.copyWith(inRow: 0.02, betweenRows: 0.02);
     final layout = _garden(
       [(soil, _flat), (soil, _flat)],
       grow,

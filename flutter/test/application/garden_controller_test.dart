@@ -195,6 +195,68 @@ void main() {
     },
   );
 
+  test('cover crops stay in the vault, off the calendars', () async {
+    final garden = _garden(MemoryGardenRecordStore(), DateTime(2026, 4, 1));
+    await garden.load();
+    final rye = garden.addVariety('winter-rye', 'Winter Rye (Common)');
+    final beef = garden.addVariety('tomatoes', 'Big Beef');
+    expect(garden.profiles.map((p) => p.id), [beef]);
+    expect(garden.profileOf(rye), isNull);
+    expect(garden.coverVarieties.single.$1.id, rye);
+    expect(garden.coverVarieties.single.$2.name, 'Winter Rye');
+    expect(garden.recommendations().map((r) => r.profile.id).toSet(), {beef});
+    final (added, skipped) = garden.importVarieties([
+      const Variety(id: 'x', cropId: 'winter-rye', name: 'Winter Rye (Common)'),
+      const Variety(id: 'y', cropId: 'winter-rye', name: 'Other Rye'),
+    ]);
+    expect((added, skipped), (1, 1));
+  });
+
+  test('reorder opens the catalog product page, or the own link', () async {
+    final opened = <String>[];
+    final garden = GardenController(
+      store: MemoryGardenRecordStore(),
+      toasts: ToastCenter(),
+      catalog: testCatalog,
+      clock: () => DateTime(2026, 4, 1),
+      openLink: (url) async {
+        opened.add(url);
+        return true;
+      },
+    );
+    await garden.load();
+    // addVariety replaces the record, so read it after the call.
+    Variety add(String name) {
+      final id = garden.addVariety('tomatoes', name);
+      return garden.record.varieties[id]!;
+    }
+
+    final beef = add('big beef');
+    final own = add(
+      'Sun Gold',
+    ).copyWith(url: () => 'https://example.test/sun-gold');
+    final unknown = add('Grandma');
+    expect(garden.reorderUrlOf(beef), bigBeefUrl);
+    expect(garden.reorderUrlOf(own), 'https://example.test/sun-gold');
+    expect(garden.reorderUrlOf(unknown), isNull);
+    await garden.reorder(beef);
+    await garden.reorder(unknown);
+    expect(opened, [bigBeefUrl]);
+  });
+
+  test('a link that cannot be opened says so', () async {
+    final garden = GardenController(
+      store: MemoryGardenRecordStore(),
+      toasts: ToastCenter(),
+      catalog: testCatalog,
+      openLink: (_) async => false,
+    );
+    await garden.load();
+    final id = garden.addVariety('tomatoes', 'Big Beef');
+    await garden.reorder(garden.record.varieties[id]!);
+    expect(garden.toasts.toasts.last.message, 'Could not open $bigBeefUrl');
+  });
+
   test('the bundled catalog loads with every crop usable', () async {
     final text = File('assets/catalog/crops.json').readAsStringSync();
     final catalog = decodeCropCatalog(text);

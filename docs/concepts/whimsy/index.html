@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Garden Gnome — A little more delight</title>
+<style>
+:root { color-scheme:light; --paper:#faf9f5; --ink:#28372d; --muted:#61695f; --rule:#d5d9cf; --accent:#365e3e; --wash:#e7ecdf; font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif; color:var(--ink); background:var(--paper); line-height:1.6; }
+* { box-sizing:border-box; }
+body { margin:0; }
+a { color:inherit; text-underline-offset:4px; }
+a:hover { color:var(--accent); }
+:focus-visible { outline:3px solid var(--accent); outline-offset:4px; }
+.skip { position:absolute; top:-100px; left:20px; }
+.skip:focus { top:10px; background:white; padding:12px; z-index:3; }
+header,main,footer { max-width:1504px; margin:auto; padding:32px; }
+header { padding-bottom:20px; }
+.topline { display:flex; align-items:center; justify-content:space-between; gap:20px; border-bottom:1px solid var(--rule); padding-bottom:18px; }
+.brand { font-family:Georgia,serif; font-size:22px; }
+.label { font-size:12px; text-transform:uppercase; letter-spacing:.12em; color:var(--muted); }
+h1 { font:400 clamp(34px,4vw,58px)/1.1 Georgia,serif; max-width:850px; margin:30px 0 18px; }
+h2 { font:400 clamp(28px,3vw,38px)/1.15 Georgia,serif; margin:0 0 16px; }
+h3 { font-size:20px; line-height:1.3; margin:0 0 8px; }
+p { margin:0 0 14px; }
+.intro { max-width:820px; font-size:18px; }
+.meta { display:flex; flex-wrap:wrap; gap:10px 24px; color:var(--muted); font-size:14px; }
+nav { display:flex; flex-wrap:wrap; gap:8px 24px; margin-top:22px; }
+nav a { display:inline-flex; min-height:44px; align-items:center; }
+main { padding-top:12px; }
+section { padding:40px 0; border-top:1px solid var(--rule); scroll-margin-top:20px; }
+section:first-child { border:0; padding-top:12px; }
+.compare { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; }
+.compare figure { margin:0; }
+figure a { display:block; }
+img { display:block; width:100%; height:auto; }
+.compare img { aspect-ratio:1376/768; object-fit:cover; border:1px solid var(--rule); }
+figcaption { padding-top:16px; }
+figcaption p { font-size:15px; }
+.small { font-size:13px; color:var(--muted); }
+.badge { display:inline-block; padding:3px 9px; font-size:12px; font-weight:600; border-radius:4px; background:var(--wash); margin:0 8px 8px 0; }
+.rework { background:#f4ead4; color:#715013; }
+.discard { background:#eee5e0; color:#794731; }
+.direction-head { display:grid; grid-template-columns:1fr 1fr; gap:32px; align-items:start; margin-bottom:20px; }
+.direction-head p { max-width:680px; }
+.wide { margin:0; }
+.wide img { border:1px solid var(--rule); border-radius:6px; }
+.notes { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; margin:22px 0 0; }
+.notes strong { display:block; margin-bottom:6px; }
+.notes p { font-size:15px; }
+.recommendation { padding:22px 24px; background:var(--wash); margin:28px 0 0; max-width:980px; }
+.plants { margin-top:24px; }
+.plants img { border:1px solid var(--rule); }
+.plants figcaption { min-height:166px; }
+ul { padding-left:20px; }
+li { margin-bottom:8px; }
+.controls { display:flex; flex-wrap:wrap; align-items:end; gap:18px; margin:20px 0; }
+label { display:grid; gap:5px; font-size:14px; }
+select { font:inherit; padding:9px 12px; min-height:44px; border:1px solid var(--rule); background:white; border-radius:5px; color:var(--ink); }
+#sample-strip { --sprite-size:32px; display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:8px; padding:30px 14px; background:#A0613D; border-radius:6px; }
+.sample { display:flex; align-items:center; flex-direction:column; justify-content:end; gap:14px; min-width:0; }
+.sample img { width:var(--sprite-size); height:var(--sprite-size); object-fit:contain; }
+.sample span { font-size:11px; background:#faf9f5; color:#28372d; padding:2px 5px; border-radius:3px; text-align:center; }
+#sample-strip.pixel img { image-rendering:pixelated; }
+#sample-status { font-size:13px; color:var(--muted); margin-top:10px; }
+.legend { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px 20px; font-size:14px; margin:18px 0; }
+.legend span { padding:8px 0; border-bottom:1px solid var(--rule); }
+.table-wrap { overflow:auto; }
+table { border-collapse:collapse; width:100%; font-size:15px; margin:18px 0; }
+th,td { padding:12px; text-align:left; border-bottom:1px solid var(--rule); }
+th { background:var(--wash); }
+.details-grid { display:grid; grid-template-columns:1fr 1fr; gap:38px; }
+code { font-size:.9em; overflow-wrap:anywhere; }
+details { margin:18px 0; }
+summary { cursor:pointer; padding:12px 0; min-height:44px; }
+details img { max-width:900px; margin:12px 0; }
+footer { border-top:1px solid var(--rule); font-size:13px; color:var(--muted); padding-bottom:48px; }
+@media(max-width:850px) { header,main,footer { padding-left:20px; padding-right:20px; } .compare,.notes,.direction-head,.details-grid { grid-template-columns:1fr; } .plants figcaption { min-height:0; } #sample-strip { grid-template-columns:repeat(6,minmax(0,1fr)); row-gap:24px; } .legend { grid-template-columns:1fr 1fr; } }
+@media(max-width:420px) { #sample-strip { grid-template-columns:repeat(3,minmax(0,1fr)); } .legend { grid-template-columns:1fr; } .topline { align-items:start; flex-direction:column; gap:6px; } }
+@media(prefers-reduced-motion:reduce) { * { scroll-behavior:auto!important; } }
+@media print { nav,.controls,.skip { display:none; } header,main,footer { padding:16px; } section { break-inside:avoid; } .compare { grid-template-columns:repeat(3,minmax(0,1fr)); } body { font-size:12pt; } a { text-decoration:none; } }
+</style>
+</head>
+<body>
+<a href="#content" class="skip">Skip to concepts</a>
+<header>
+  <div class="topline"><span class="brand">Garden Gnome</span><span class="label">Home &amp; crop art / Concept round 01</span></div>
+  <h1>A little more delight.<br>The same serious tools.</h1>
+  <p class="intro">Three ways to make Home feel like a place worth returning to. Keep Seed Vault, Plan and Grow clear, immediate and familiar. Let the garden bring the personality.</p>
+  <p class="small">Round 1 concept archive. Pocket Garden is now selected for Home; the cover-crop sheet is the reference for new texture artwork. “Willow Farm” and all pictured counts are illustrative, not your garden data.</p>
+  <div class="meta"><span>3 home directions</span><span>12 crops × 3 styles</span><span>6 cover-crop studies</span><span>Generation review: 3 keep / 4 rework / 1 discard</span></div>
+  <nav aria-label="Concept sections"><a href="#compare">Compare homes</a><a href="#plants">Compare crop art</a><a href="#scale">Small-size test</a><a href="#covers">Cover crops</a><a href="#production">Production scope</a></nav>
+</header>
+<main id="content">
+<section id="compare" aria-labelledby="compare-title">
+<h2 id="compare-title">Choose the feeling</h2>
+<div class="compare">
+  <figure><a href="#pocket"><img src="proofs/pocket-home.png" width="1376" height="768" alt="Pocket Garden home, a warm illustrated garden with three navigation cards"></a><figcaption><span class="badge">A / Recommended home</span><h3>Pocket Garden</h3><p>A treasured handheld garden. Hand-painted beds, a seed cabinet, a tiny gnome and a greenhouse. Warm without becoming a toy.</p></figcaption></figure>
+  <figure><a href="#field"><img src="proofs/field-home.png" width="1376" height="768" alt="Field Station home, a pixel garden map in a quiet software frame"></a><figcaption><span class="badge">B / Indie sim</span><h3>Field Station</h3><p>A gardener’s little simulation. Pixel craft, orderly plots and a contained map. The clearest separation between play and work.</p></figcaption></figure>
+  <figure><a href="#village"><img src="proofs/village-home.png" width="1376" height="768" alt="Garden Village home, a sculpted miniature garden on a pale background"></a><figcaption><span class="badge">C / Cozy village</span><h3>Garden Village</h3><p>Soft matte miniatures and welcoming life-sim whimsy. An original garden world inspired by the warmth of Animal Crossing, not copied characters or props.</p></figcaption></figure>
+</div>
+<div class="recommendation"><strong>Selected: Pocket Garden for Home.</strong><p>The cover-crop sheet below is the chosen illustration reference for terrain and botanical artwork. Next: six variants each of wild grass, lawn, dirt, prepared soil, loam and crimson clover, with stable selection, rotation and blending. The alternatives remain here as the original concept archive.</p></div>
+</section>
+<section id="pocket" aria-labelledby="pocket-title">
+<div class="direction-head"><div><p class="label">Direction A / Quaint mobile-game nostalgia</p><h2 id="pocket-title">Pocket Garden</h2></div><p><span class="badge">Keep as direction</span><br>A place to tend, not a game to grind. The three tools correspond to three places in the illustrated garden, while the actual controls stay obvious.</p></div>
+<figure class="wide"><a href="proofs/pocket-home.png"><img src="proofs/pocket-home.png" width="1376" height="768" alt="Full Pocket Garden home concept"></a><figcaption class="small">pocket-home.png · Open image for full resolution. Model-rendered text and artwork are concept references.</figcaption></figure>
+<div class="notes"><p><strong>Bring forward</strong>Gouache texture, warm morning light, tiny environmental storytelling. The gnome is a discovery, not a talking assistant.</p><p><strong>Keep professional</strong>Real Flutter labels and counts, keyboard-focusable tool cards, no illustrated text as a control. Tools available before the illustration loads.</p><p><strong>Tighten</strong>The scene is tall. On short and narrow screens shrink or simplify the art, never the tool targets. Keep the user's farm name prominent.</p></div>
+</section>
+<section id="field" aria-labelledby="field-title">
+<div class="direction-head"><div><p class="label">Direction B / Indie farming sim</p><h2 id="field-title">Field Station</h2></div><p><span class="badge">Keep as direction</span><br>A contained garden map with the quiet satisfaction of an indie sim. Best if you want the playful part to feel structured and a little technical.</p></div>
+<figure class="wide"><a href="proofs/field-home.png"><img src="proofs/field-home.png" width="1376" height="768" alt="Full Field Station home concept"></a><figcaption class="small">field-home.png · Pixel-style proof, not a production pixel atlas.</figcaption></figure>
+<div class="notes"><p><strong>Bring forward</strong>Distinct crop rows, miniature seed store, practical potting bench. The scene lives inside a clean frame rather than behind the controls.</p><p><strong>Keep professional</strong>Retain the existing sans-serif UI typography. The model introduced serif card headings; that is not a proposed global type change.</p><p><strong>Tighten</strong>Pixel crops look much sharper than the app's painted soil. This direction needs deliberate pixel scale and zoom rules, not arbitrary image resizing.</p></div>
+</section>
+<section id="village" aria-labelledby="village-title">
+<div class="direction-head"><div><p class="label">Direction C / Life-sim whimsy</p><h2 id="village-title">Garden Village</h2></div><p><span class="badge">Keep as direction</span><br>A little sculpted world you could almost pick up. Soft leaves, cedar furniture and a rounded greenhouse, with the same three clear tools.</p></div>
+<figure class="wide"><a href="proofs/village-home.png"><img src="proofs/village-home.png" width="1376" height="768" alt="Corrected Garden Village home with exactly one row of three navigation cards"></a><figcaption class="small">village-home.png · Corrected proof: duplicate cards and stray lettering removed.</figcaption></figure>
+<div class="notes"><p><strong>Bring forward</strong>Tactile materials, simplified plant silhouettes and a restrained terracotta gnome. Warm life-sim influence without game economies.</p><p><strong>Keep professional</strong>The work is still one click away. No avatars, quests, coins, streaks, forced animations or pretend weather readings.</p><p><strong>Tighten</strong>The headline is too much like a landing page for daily use. Replace it with a quieter farm greeting; keep the garden itself as the welcome.</p></div>
+</section>
+<section id="plants" aria-labelledby="plants-title">
+<h2 id="plants-title">Plants, not green circles</h2>
+<p class="intro">The same twelve crops in three treatments. These are cleaned exploratory cutouts, not an approved production library. Each image links to a labeled sheet; individual transparent PNGs live in <code>samples/</code>.</p>
+<div class="compare plants">
+<figure><a href="proofs/pocket-cutouts.png"><img src="proofs/pocket-cutouts.png" width="1040" height="880" alt="Twelve labeled hand-painted crop cutouts"></a><figcaption><span class="badge rework">Rework for production</span><h3>Painted canopies</h3><p>Closest to existing terrain. Leafy heads work well; fine tomato and carrot detail gets weak at small sizes. Some roots and stems are incorrectly exposed.</p><a class="small" href="proofs/pocket-plants.png">Raw generation: includes duplicated and erroneous cells</a></figcaption></figure>
+<figure><a href="proofs/field-cutouts.png"><img src="proofs/field-cutouts.png" width="1040" height="880" alt="Twelve labeled pixel-style crop cutouts"></a><figcaption><span class="badge rework">Rework for production</span><h3>Pixel canopies</h3><p>Strongest outlines on dark soil. Also the largest style change: noisy detail, inconsistent pixel pitch and some side-on plants need authoring, not just resizing.</p><a class="small" href="proofs/field-plants.png">Raw generation: includes extra crop variants</a></figcaption></figure>
+<figure><a href="proofs/village-cutouts.png"><img src="proofs/village-cutouts.png" width="1040" height="880" alt="Twelve labeled sculpted matte crop cutouts"></a><figcaption><span class="badge rework">Rework for production</span><h3>Sculpted canopies</h3><p>Clean leaf masses and charming heads. Promising for larger zooms. Corn is too generic; bean perspective and exposed beet/carrot roots need correction.</p><a class="small" href="proofs/village-plants.png">Raw generation: twelve-cell reference</a></figcaption></figure>
+</div>
+<p class="small">Samples: tomato, carrot, lettuce, broccoli, pepper, onion, beet, kale, cucumber, bush bean, sweet corn and cabbage. Selection follows real catalog IDs; there are no invented catalog additions.</p>
+</section>
+<section id="scale" aria-labelledby="scale-title">
+<h2 id="scale-title">Judge them on the soil</h2>
+<p class="intro">An offline composite using the app's actual prepared-soil texture. Positions and image sizes are held equal for comparison; this does not model real crop spacing and is not a screenshot of implemented behavior.</p>
+<figure class="wide"><a href="proofs/soil-comparison.png"><img src="proofs/soil-comparison.png" width="1440" height="850" alt="Three identical planted-bed layouts on current soil, with painted, pixel and clay plants and small-size strips"></a><figcaption class="small">soil-comparison.png · Open at native resolution to inspect the baked-in 32 px strips. Below, samples use actual CSS pixel sizes.</figcaption></figure>
+<div class="controls">
+<label>Art direction<select id="style"><option value="pocket">Pocket Garden / painted</option><option value="field">Field Station / pixel</option><option value="village">Garden Village / sculpted</option></select></label>
+<label>Sprite box<select id="size"><option value="24">24 px</option><option value="32" selected>32 px</option><option value="48">48 px</option><option value="64">64 px</option></select></label>
+<label>Background<select id="background"><option value="#A0613D">Prepared soil color</option><option value="#432B1D">Dark loam color</option><option value="#F7F8F5">Light canvas</option></select></label>
+</div>
+<div id="sample-strip" aria-label="Actual-size crop sample strip"></div>
+<p id="sample-status" aria-live="polite"></p>
+<noscript><p>Enable JavaScript for the size controls. All concept sheets above remain available without JavaScript.</p></noscript>
+<p><strong>What the test shows:</strong> cabbage and lettuce silhouettes hold up best. Fine branching plants lose identity at small scales. Use labels and selection states to carry precision; artwork must not be the only way to identify a crop.</p>
+</section>
+<section id="covers" aria-labelledby="covers-title">
+<div class="direction-head"><div><p class="label">Continuous foliage, not geometric hatching</p><h2 id="covers-title">A living cover-crop layer</h2></div><p><span class="badge rework">Rework for production</span><br>Distinct leaf structure makes the cover types readable. These are texture candidates, not seamless tiles: borders, repeated motifs and flowering state still need work.</p></div>
+<figure class="wide"><a href="proofs/cover-crops.png"><img src="proofs/cover-crops.png" width="1376" height="768" alt="Six cover crop texture studies: clover, rye, buckwheat, vetch, mustard and peas with oats"></a><figcaption class="small">cover-crops.png · Reading order: left to right, top row then bottom row.</figcaption></figure>
+<div class="legend"><span>01 / Crimson clover</span><span>02 / Winter rye</span><span>03 / Buckwheat</span><span>04 / Hairy vetch</span><span>05 / Mustard</span><span>06 / Peas and oats</span></div>
+<p>Use sparse flowers as an optional visual variant, not a claim that every cover crop is flowering. Final coverage should use edge-safe foliage and the existing ground-blending approach, clipped inside the bed. Preserve technical outlines and hit testing.</p>
+</section>
+<section id="production" aria-labelledby="production-title">
+<h2 id="production-title">From concepts to a complete library</h2>
+<p>Full coverage is inventoried, not claimed complete. The catalog has overlapping types such as pelleted seed and greenhouse variants; they may share an approved botanical canopy. Keep distinct IDs and make reuse explicit rather than assuming one picture per variety.</p>
+<div class="table-wrap"><table><thead><tr><th>Catalog group</th><th>Entries</th><th>Sampled this round</th><th>Production-ready</th></tr></thead><tbody><tr><td>Vegetables</td><td>109</td><td>12 types, three styles</td><td>0</td></tr><tr><td>Herbs</td><td>37</td><td>Not sampled</td><td>0</td></tr><tr><td>Cover crops</td><td>26</td><td>6 textures</td><td>0</td></tr><tr><td>Total</td><td>172</td><td>18 catalog entries</td><td>0</td></tr></tbody></table></div>
+<p><a href="catalog-art-inventory.csv" download>Download full catalog art inventory</a> · <a href="generation-manifest.json">Generation review and costs</a> · <a href="README.md">Production notes</a></p>
+<div class="details-grid">
+<div><h3>Lock the asset contract</h3><ul><li>True 90° overhead canopies. Keep roots underground and avoid side-on produce stickers.</li><li>Transparent individual plant PNGs, shared lighting, root-center anchor and a measured canopy footprint. No baked-in soil disk.</li><li>Keep artwork inside the existing size footprint. Plant spacing, counts, saved geometry and selection behavior must not change.</li><li>Start with one representative canopy, explicitly not a live growth-stage prediction. Add stage-aware variants only if backed by app state.</li><li>Use controlled variants to break repetition without randomising the garden each repaint.</li><li>Keep Wire view and low-zoom line fallbacks. A missing image must still draw a usable plant marker.</li></ul></div>
+<div><h3>Keep the scope small</h3><ul><li>Choose a Home direction and a crop direction independently.</li><li>Correct a small pilot set and validate 24 / 32 / 64 px legibility before full-catalog generation.</li><li>Build clean cover-crop tiles and test seams, mixed covers, clipping and far-zoom appearance.</li><li>Home remains a native accessible layout. Decorative artwork should never hide focus or carry the only navigation.</li><li>On narrow screens, stack the real tool cards and shorten the scene; no horizontal map panning to reach a tool.</li><li>Optional restrained motion can come later. No loading delay or forced animation; respect reduced motion.</li></ul></div>
+</div>
+<details><summary>Rejected first Garden Village proof</summary><span class="badge discard">Discard</span><p>The first output duplicated all three navigation cards, invented small lettering and added palette swatches. It is retained for provenance, not as a fourth concept.</p><a href="proofs/village-home-original.png"><img src="proofs/village-home-original.png" width="1376" height="768" alt="Rejected first Garden Village proof with duplicated navigation cards"></a></details>
+</section>
+</main>
+<footer><p>Round 01 · 8 image generations including one correction · google/gemini-3.1-flash-image via OpenRouter · Total reported generation cost: $0.540329. Requested formats: landscape 16:9 and square 1:1; delivered originals: 1376 × 768 and 1024 × 1024.</p><p>All wordmarks, labels and logos inside generated images are model-rendered concept art, not production artwork. Sample cutouts are exploratory and not bundled into the app. Existing Home, Seed Vault, Grow and Plan code is unchanged.</p><a href="../../index.html">Back to project design references</a></footer>
+<script>
+const crops = [['tomatoes','Tomato'],['carrots','Carrot'],['lettuce','Lettuce'],['broccoli','Broccoli'],['peppers','Pepper'],['onions','Onion'],['beets','Beet'],['kale','Kale'],['cucumber','Cucumber'],['bush-bean','Bush bean'],['corn-sweet','Corn'],['cabbage','Cabbage']];
+const strip = document.getElementById('sample-strip');
+const styleControl = document.getElementById('style');
+const sizeControl = document.getElementById('size');
+const backgroundControl = document.getElementById('background');
+for (const [id, label] of crops) {
+  const item = document.createElement('div');
+  item.className = 'sample';
+  const image = document.createElement('img');
+  image.alt = label + ' exploratory crop cutout';
+  image.dataset.crop = id;
+  image.width = 256;
+  image.height = 256;
+  const caption = document.createElement('span');
+  caption.textContent = label;
+  item.append(image, caption);
+  strip.append(item);
+}
+function updateSamples() {
+  const style = styleControl.value;
+  const size = sizeControl.value;
+  strip.style.setProperty('--sprite-size', size + 'px');
+  strip.style.backgroundColor = backgroundControl.value;
+  strip.classList.toggle('pixel', style === 'field');
+  for (const image of strip.querySelectorAll('img')) {
+    image.src = 'samples/' + style + '/' + image.dataset.crop + '.png';
+  }
+  document.getElementById('sample-status').textContent = crops.length + ' exploratory cutouts · ' + size + ' × ' + size + ' CSS px boxes (including transparent padding) · no production assets';
+}
+for (const control of [styleControl, sizeControl, backgroundControl]) control.addEventListener('change', updateSamples);
+updateSamples();
+</script>
+</body>
+</html>

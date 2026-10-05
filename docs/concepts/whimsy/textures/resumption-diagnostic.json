@@ -1,0 +1,22 @@
+{
+  "status": "blocked",
+  "provider": "openrouter",
+  "model": "google/gemini-3.1-flash-image",
+  "authorized_additional_budget_usd": 15,
+  "additional_successful_generation_cost_usd": 0,
+  "successful_generations": 0,
+  "failed_requests": 6,
+  "provider_error": "403: Key limit exceeded (total limit)",
+  "active_key_budget": {
+    "limit": 100,
+    "limit_remaining": 0,
+    "limit_reset": null,
+    "usage": 100.1795343
+  },
+  "fragments": [
+    "corrections-grass.json",
+    "corrections-soil.json",
+    "new-corrections-clover.json"
+  ],
+  "runtime_assets_changed": false
+}

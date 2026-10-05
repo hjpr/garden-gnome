@@ -25,6 +25,7 @@ import 'curve_paths.dart';
 import 'land_painter.dart';
 import 'measurement_label.dart';
 import 'pattern_painter.dart';
+import 'plant_art.dart';
 import 'render_assets.dart';
 import 'scene_state.dart';
 

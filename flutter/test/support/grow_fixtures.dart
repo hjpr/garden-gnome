@@ -52,10 +52,38 @@ final testBean = Crop(
   harvestWindowDays: const IntRange(14, 21),
 );
 
+/// A cover crop: Seed Vault only, never on the calendars.
+final testRye = CoverCrop(
+  id: 'winter-rye',
+  name: 'Winter Rye',
+  sowingSeason: 'Anytime (Fall for Grain)',
+  minGermTempF: 34,
+  hardinessZone: '3',
+  growthRate: 'Medium',
+  seedPer1000SqFt: '2–3 Lb.',
+  seedPerAcre: '60–150 Lb.',
+  sowingDepth: '¾–1½"',
+  benefits: const [CoverBenefit('Erosion control')],
+);
+
+const bigBeefUrl = 'https://www.johnnyseeds.com/big-beef-5.html';
+
 final testCatalog = CropCatalog(
   [testTomato, testLettuce, testBean],
+  coverCrops: [testRye],
   varieties: const [
-    CatalogVariety(id: 'big-beef', cropId: 'tomatoes', name: 'Big Beef'),
+    CatalogVariety(
+      id: 'big-beef',
+      cropId: 'tomatoes',
+      name: 'Big Beef',
+      url: bigBeefUrl,
+    ),
+    CatalogVariety(
+      id: 'rye',
+      cropId: 'winter-rye',
+      name: 'Winter Rye (Common)',
+      url: 'https://www.johnnyseeds.com/winter-rye-968G.html',
+    ),
     CatalogVariety(id: 'sun-gold', cropId: 'tomatoes', name: 'Sun Gold'),
     CatalogVariety(id: 'little-gem', cropId: 'lettuce', name: 'Little Gem'),
     CatalogVariety(id: 'provider', cropId: 'bush-bean', name: 'Provider'),

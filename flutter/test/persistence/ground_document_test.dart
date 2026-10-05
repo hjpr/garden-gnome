@@ -165,8 +165,12 @@ void main() {
       json.remove(key);
     }
     final props = ((json['layers'] as Map)[grow] as Map)['properties'] as Map;
+    // Version 7 seeds held a size and an empty gap.
     props['seed'] = <String, Object?>{
-      ...(props['seed'] as Map).cast<String, Object?>(),
+      'variety_id': seed().varietyId,
+      'name': seed().name,
+      'size': 0.5,
+      'spacing': 0.25,
       'plant_on': '2027-04-15',
     };
     final opened = documentFromJson(json);
@@ -177,10 +181,10 @@ void main() {
     expect(opened.plantingCounter, 1);
   });
 
-  test('seed diameter and empty gap round-trip explicitly', () {
+  test('seed centre distances round-trip explicitly', () {
     final (editor, _, _, grow) = garden(GroundType.row);
-    for (final gap in [0.0, 0.75]) {
-      final planted = seed(size: 0.5, spacing: gap);
+    for (final between in [0.5, 1.25]) {
+      final planted = seed(inRow: 0.3, betweenRows: between);
       editor.setSeed(grow, planted);
       final json = documentToJson(editor.document);
       expect(json['schema_version'], schemaVersion);
@@ -188,38 +192,61 @@ void main() {
       expect(props['seed'], {
         'variety_id': planted.varietyId,
         'name': planted.name,
-        'size': 0.5,
-        'spacing': gap,
+        'in_row': 0.3,
+        'between_rows': between,
       });
       final opened = decodeGgnome(encodeGgnome(editor.document));
       expect((opened.layers[grow]!.properties as ZoneProperties).seed, planted);
     }
   });
 
-  test('legacy centre distances become diameter and nonnegative empty gap', () {
+  test('schema 4-12 size and gap open as one centre distance both ways', () {
     final (editor, _, _, grow) = garden(GroundType.row);
-    for (final between in [0.25, 0.5, 1.25]) {
-      final json = documentToJson(editor.document)..['schema_version'] = 3;
-      final props = ((json['layers'] as Map)[grow] as Map)['properties'] as Map;
-      props['seed'] = {
-        'variety_id': 'legacy',
-        'name': 'Legacy',
-        'in_row': 0.5,
-        'between_rows': between,
-      };
-      final opened = documentFromJson(json);
-      final planted = (opened.layers[grow]!.properties as ZoneProperties).seed!;
-      expect(planted.size, 0.5);
-      expect(planted.spacing, between <= 0.5 ? 0 : 0.75);
-      final reopened = decodeGgnome(encodeGgnome(opened));
-      expect(
-        (reopened.layers[grow]!.properties as ZoneProperties).seed,
-        planted,
-      );
+    final json = documentToJson(editor.document)..['schema_version'] = 12;
+    final props = ((json['layers'] as Map)[grow] as Map)['properties'] as Map;
+    props['seed'] = {
+      'variety_id': 'old',
+      'name': 'Old',
+      'size': 0.5,
+      'spacing': 0.25,
+    };
+    final planted =
+        (documentFromJson(json).layers[grow]!.properties as ZoneProperties)
+            .seed!;
+    expect(planted.inRow, 0.75);
+    expect(planted.betweenRows, 0.75);
+    for (final (field, value) in [('size', 0), ('spacing', -1)]) {
+      (props['seed'] as Map)[field] = value;
+      expect(() => documentFromJson(json), throwsA(isA<DocumentFormatError>()));
+      (props['seed'] as Map)['size'] = 0.5;
+      (props['seed'] as Map)['spacing'] = 0.25;
     }
+    (props['seed'] as Map)['spacing'] = 0;
+    final touching =
+        (documentFromJson(json).layers[grow]!.properties as ZoneProperties)
+            .seed!;
+    expect(touching.inRow, 0.5);
   });
 
-  test('legacy damaged distances are rejected before gap conversion', () {
+  test('schema 3 centre distances open as they were', () {
+    final (editor, _, _, grow) = garden(GroundType.row);
+    final json = documentToJson(editor.document)..['schema_version'] = 3;
+    final props = ((json['layers'] as Map)[grow] as Map)['properties'] as Map;
+    props['seed'] = {
+      'variety_id': 'legacy',
+      'name': 'Legacy',
+      'in_row': 0.5,
+      'between_rows': 1.25,
+    };
+    final opened = documentFromJson(json);
+    final planted = (opened.layers[grow]!.properties as ZoneProperties).seed!;
+    expect(planted.inRow, 0.5);
+    expect(planted.betweenRows, 1.25);
+    final reopened = decodeGgnome(encodeGgnome(opened));
+    expect((reopened.layers[grow]!.properties as ZoneProperties).seed, planted);
+  });
+
+  test('legacy damaged distances are refused', () {
     final (editor, _, _, grow) = garden(GroundType.row);
     for (final field in ['in_row', 'between_rows']) {
       for (final value in [0, -1, double.nan, double.infinity, '1', null]) {
@@ -241,11 +268,11 @@ void main() {
     }
   });
 
-  test('invalid or missing seed size and gap are refused', () {
+  test('invalid or missing seed spacings are refused', () {
     final (editor, _, _, grow) = garden(GroundType.flat);
     editor.setSeed(grow, seed());
-    for (final field in ['size', 'spacing']) {
-      for (final value in [-1, double.nan, double.infinity, '5', null]) {
+    for (final field in ['in_row', 'between_rows']) {
+      for (final value in [0, -1, double.nan, double.infinity, '5', null]) {
         final json =
             jsonDecode(jsonEncode(documentToJson(editor.document)))
                 as Map<String, Object?>;

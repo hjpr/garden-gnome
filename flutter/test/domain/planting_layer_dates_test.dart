@@ -32,8 +32,8 @@ void main() {
     const other = ZoneSeed(
       varietyId: 'variety-2',
       name: 'Other',
-      size: 0.5,
-      spacing: 0.25,
+      inRow: 0.75,
+      betweenRows: 0.75,
     );
     editor.setSeed(grow, other);
     expect(editor.document.currentPlantingOf(grow)!.varietyId, 'variety-2');
@@ -132,8 +132,8 @@ void main() {
     const other = ZoneSeed(
       varietyId: 'variety-2',
       name: 'Other',
-      size: 0.5,
-      spacing: 0.25,
+      inRow: 0.75,
+      betweenRows: 0.75,
     );
     // Planned for before it was sown: goes out the day it was sown.
     editor.placeTray(grow, tray.id, other, DateTime.utc(2027, 2, 1));

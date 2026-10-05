@@ -60,6 +60,51 @@ extension ZoneGround on GardenDocument {
     );
   }
 
+  /// This document with [cover] sown across Cover bed [layerId] (null
+  /// takes it out). Choosing a different cover crop keeps the dates.
+  /// Returns this same document when nothing would change.
+  ///
+  /// Throws [StateError] when the layer is not a Cover bed or the dates
+  /// run backwards.
+  GardenDocument withCover(String layerId, CoverSowing? cover) {
+    final layer = layers[layerId];
+    final properties = layer?.properties;
+    if (properties is! ZoneProperties || !properties.isCover) {
+      throw StateError(coverBedsOnly);
+    }
+    if (cover case CoverSowing(
+      :final sownOn?,
+      :final terminatedOn?,
+    ) when terminatedOn.isBefore(sownOn)) {
+      throw StateError('Terminated cannot be before Sown');
+    }
+    if (properties.cover == cover) return this;
+    return withLayer(
+      layer!.copyWith(properties: properties.copyWith(cover: () => cover)),
+    );
+  }
+
+  /// Why a seed cannot go on a Cover bed or on plantings over one.
+  static const coverBedsOnly = 'Cover crops are sown on Cover beds';
+
+  /// The Cover beds of [layerId]'s property under planting [layerId];
+  /// a planting over one cannot be seeded.
+  bool isOverCover(String layerId) {
+    final grow = layers.containsKey(layerId)
+        ? geometryOf(layerId).region
+        : null;
+    final parent = parentOf(layerId);
+    if (grow == null || parent == null) return false;
+    for (final id in parent.children) {
+      if (id == layerId) continue;
+      if (layers[id]?.properties case ZoneProperties(isCover: true)) {
+        final region = geometryOf(id).region;
+        if (region != null && region.overlaps(grow)) return true;
+      }
+    }
+    return false;
+  }
+
   /// This document with [seed] planted in grow zone [layerId] (null takes
   /// the seed out). Returns this same document when nothing would change.
   ///

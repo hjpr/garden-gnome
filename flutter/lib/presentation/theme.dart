@@ -27,6 +27,7 @@ abstract final class Palette {
 
   // Ground type indicators, independent of editable outline colours.
   static const groundZone = Color(0xFF6B7280);
+  static const groundCover = Color(0xFF5E8C31);
   static const groundFlat = Color(0xFFBF5700);
   static const groundRow = Color(0xFF98DFC2);
   static const groundGrow = Color(0xFF00875A);
@@ -40,6 +41,13 @@ abstract final class Palette {
   static const greenhouse = Color(0xFFB9822F);
   static const plantOut = Color(0xFF3C74A6);
   static const harvest = Color(0xFFC0583A);
+
+  /// The frost-free season band behind the growing calendars.
+  static const season = Color(0x1A3F8A4F);
+
+  /// The FROST-FREE badge and line where each season starts: the band's
+  /// green, solid.
+  static const seasonMark = Color(0xFF6FA87A);
   static const caution = Color(0xFFB7791F);
 }
 

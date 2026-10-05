@@ -14,17 +14,17 @@ import 'zone_ground.dart';
 /// zones it is drawn over, and follows their rules.
 ///
 /// - Over Row ground, plants go only along the rows. A bed wide enough for
-///   more than one line of plant footprints at the seed's pitch gets
-///   several lines, centred on the row.
-/// - Over Flat ground, plants go on a grid: lines [ZoneSeed.pitch]
-///   apart, running the Flat zone's direction, with plants
-///   [ZoneSeed.pitch] apart along each line.
+///   more than one line at the seed's [ZoneSeed.betweenRows] gets several
+///   lines, centred on the row.
+/// - Over Flat ground, plants go on a grid: lines [ZoneSeed.betweenRows]
+///   apart, running the Flat zone's direction.
+/// - Along every line, plants are [ZoneSeed.inRow] apart.
 /// - Over plain dirt, or outside any zone, nothing is planted.
 /// - Where soil zones overlap, the topmost soil in drawing order wins,
 ///   including its paths and borders. Holes expose the soil below.
 ///
-/// Along any line, plants keep at least half their diameter clear of both
-/// ends. The footprints and the empty gaps between them are centred on it.
+/// Plants keep half their [ZoneSeed.footprint] clear of line ends and
+/// bed edges, and are centred on what they fill.
 class PlantLayout {
   PlantLayout._(
     this.seed,
@@ -91,7 +91,7 @@ extension ZonePlanting on GardenDocument {
   }
 
   /// Most lines of [seed] that fit along the row beds under planting
-  /// [layerId] at its size and spacing: the widest bed's count, capped at
+  /// [layerId] at its between-row spacing: the widest bed's count, capped at
   /// [PlantLayout.maxLinesPerRow]. Null when no row bed lies under it.
   int? maxLinesOf(String layerId, ZoneSeed seed) {
     final grow = layers.containsKey(layerId)
@@ -107,7 +107,7 @@ extension ZonePlanting on GardenDocument {
       }
       final fit = math.min(
         PlantLayout.maxLinesPerRow,
-        _fittingPlants(layout.spec.width, seed),
+        _fitting(layout.spec.width, seed, seed.betweenRows),
       );
       if (most == null || fit > most) most = fit;
     }
@@ -147,7 +147,7 @@ extension ZonePlanting on GardenDocument {
           seed,
           soil.rows.direction,
         ),
-        GroundType.grow => const <RowRun>[],
+        GroundType.cover || GroundType.grow => const <RowRun>[],
       };
       if (found.isNotEmpty) soils.add(soil.ground!);
       lines.addAll(found);
@@ -170,12 +170,12 @@ extension ZonePlanting on GardenDocument {
     // The seed's Lines setting caps it, but never past what fits.
     final perRow = math.min(
       math.min(PlantLayout.maxLinesPerRow, seed.lines ?? 1 << 30),
-      _fittingPlants(layout.spec.width, seed),
+      _fitting(layout.spec.width, seed, seed.betweenRows),
     );
     final lines = <RowRun>[];
     for (final run in layout.runs) {
       for (var k = 0; k < perRow; k++) {
-        final shift = across * ((k - (perRow - 1) / 2) * seed.pitch);
+        final shift = across * ((k - (perRow - 1) / 2) * seed.betweenRows);
         for (final shifted in clipToRegion(
           grow,
           run.start + shift,
@@ -203,13 +203,13 @@ extension ZonePlanting on GardenDocument {
     final (lowAlong, highAlong) = extentAlong(grow, along);
     final span = highAcross - lowAcross;
     if (!(span > 0)) return const [];
-    final count = _fittingPlants(span, seed);
+    final count = _fitting(span, seed, seed.betweenRows);
     if (count > PlantLayout.maxGridLines) return const [];
     final lines = <RowRun>[];
-    // Centre the footprints, keeping at least half a diameter at each side.
-    final first = lowAcross + (span - (count - 1) * seed.pitch) / 2;
+    // Centre the lines, keeping half a footprint clear at each side.
+    final first = lowAcross + (span - (count - 1) * seed.betweenRows) / 2;
     for (var i = 0; i < count; i++) {
-      final offset = first + i * seed.pitch;
+      final offset = first + i * seed.betweenRows;
       final from = across * offset + along * (lowAlong - 1);
       final to = across * offset + along * (highAlong + 1);
       for (final run in clipToRegion(grow, from, to)) {
@@ -220,7 +220,7 @@ extension ZonePlanting on GardenDocument {
   }
 }
 
-/// Places plants [ZoneSeed.pitch] apart along each line, centred on it.
+/// Places plants [ZoneSeed.inRow] apart along each line, centred on it.
 PlantLayout _plantAlong(
   List<RowRun> lines,
   ZoneSeed seed,
@@ -232,16 +232,16 @@ PlantLayout _plantAlong(
   for (final line in lines) {
     final runLength = line.length;
     length += runLength;
-    final n = _fittingPlants(runLength, seed);
+    final n = _fitting(runLength, seed, seed.inRow);
     if (n == 0) continue;
     count += n;
     if (positions.length >= PlantLayout.maxPositions) continue;
-    final step = (line.end - line.start) / runLength * seed.pitch;
+    final step = (line.end - line.start) / runLength * seed.inRow;
     final start =
         line.start +
         (line.end - line.start) /
             runLength *
-            ((runLength - (n - 1) * seed.pitch) / 2);
+            ((runLength - (n - 1) * seed.inRow) / 2);
     for (var i = 0; i < n && positions.length < PlantLayout.maxPositions; i++) {
       positions.add(start + step * i.toDouble());
     }
@@ -256,10 +256,12 @@ PlantLayout _plantAlong(
   );
 }
 
-/// n footprints occupy size + (n - 1) * pitch, not n full pitches.
-int _fittingPlants(double length, ZoneSeed seed) {
-  if (length < seed.size - 1e-9) return 0;
-  return math.max(0, ((length - seed.size) / seed.pitch + 1e-9).floor() + 1);
+/// How many plants or lines [pitch] apart fit in [length]: n of them
+/// take one footprint plus (n - 1) pitches.
+int _fitting(double length, ZoneSeed seed, double pitch) {
+  final room = seed.footprint;
+  if (length < room - 1e-9) return 0;
+  return math.max(0, ((length - room) / pitch + 1e-9).floor() + 1);
 }
 
 final _plantLayouts = Expando<Map<String, PlantLayout?>>('plant layouts');

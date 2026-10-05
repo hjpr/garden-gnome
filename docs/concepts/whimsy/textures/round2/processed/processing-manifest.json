@@ -1,0 +1,169 @@
+{
+  "tile_size": 1024,
+  "atlas_grid": [
+    3,
+    1
+  ],
+  "mip_step": 4,
+  "materials": [
+    {
+      "material": "wild_grass",
+      "sources": [
+        "round2/candidates/wild_grass-c02.png",
+        "round2/candidates/wild_grass-c04.png",
+        "round2/candidates/wild_grass-c06.png"
+      ],
+      "mean_rgb": [
+        [
+          80.5999984741211,
+          104.4000015258789,
+          69.30000305175781
+        ],
+        [
+          80.69999694824219,
+          104.5,
+          69.30000305175781
+        ],
+        [
+          81.0,
+          105.19999694824219,
+          69.5
+        ]
+      ]
+    },
+    {
+      "material": "lawn",
+      "sources": [
+        "round2/candidates/lawn-c02.png",
+        {
+          "source": "round2/candidates/lawn-c09.png",
+          "scale": 1.15
+        },
+        "round2/candidates/lawn-c10.png"
+      ],
+      "mean_rgb": [
+        [
+          68.19999694824219,
+          99.5,
+          60.29999923706055
+        ],
+        [
+          68.5,
+          99.19999694824219,
+          60.400001525878906
+        ],
+        [
+          68.5,
+          99.5,
+          60.5
+        ]
+      ]
+    },
+    {
+      "material": "dirt",
+      "sources": [
+        "round2/candidates/dirt-c22.png",
+        "round2/candidates/dirt-c21.png",
+        "round2/candidates/dirt-c31.png"
+      ],
+      "mean_rgb": [
+        [
+          202.3000030517578,
+          160.3000030517578,
+          114.4000015258789
+        ],
+        [
+          202.39999389648438,
+          160.1999969482422,
+          114.4000015258789
+        ],
+        [
+          202.0,
+          160.10000610351562,
+          114.19999694824219
+        ]
+      ]
+    },
+    {
+      "material": "prepped_soil",
+      "sources": [
+        "round2/candidates/prepped_soil-c42.png",
+        "round2/candidates/prepped_soil-c43.png",
+        "round2/candidates/prepped_soil-c44.png"
+      ],
+      "mean_rgb": [
+        [
+          106.4000015258789,
+          73.5,
+          52.099998474121094
+        ],
+        [
+          106.4000015258789,
+          73.5,
+          52.0
+        ],
+        [
+          106.5999984741211,
+          73.5,
+          52.099998474121094
+        ]
+      ]
+    },
+    {
+      "material": "loam",
+      "sources": [
+        "round2/candidates/loam-c24.png",
+        "round2/candidates/loam-c20.png",
+        "round2/candidates/loam-c31.png"
+      ],
+      "mean_rgb": [
+        [
+          48.900001525878906,
+          31.399999618530273,
+          20.399999618530273
+        ],
+        [
+          48.79999923706055,
+          31.299999237060547,
+          20.299999237060547
+        ],
+        [
+          48.900001525878906,
+          31.399999618530273,
+          20.399999618530273
+        ]
+      ]
+    },
+    {
+      "material": "crimson_clover",
+      "sources": [
+        "raw/crimson_clover-05.png",
+        {
+          "source": "round2/candidates/crimson_clover-c06.png",
+          "scale": 1.15
+        },
+        {
+          "source": "round2/candidates/crimson_clover-c07.png",
+          "scale": 1.3
+        }
+      ],
+      "mean_rgb": [
+        [
+          86.4000015258789,
+          118.19999694824219,
+          76.9000015258789
+        ],
+        [
+          86.69999694824219,
+          119.0,
+          77.0999984741211
+        ],
+        [
+          86.30000305175781,
+          118.5,
+          77.0
+        ]
+      ]
+    }
+  ]
+}

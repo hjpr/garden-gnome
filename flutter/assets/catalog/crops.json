@@ -107,7 +107,8 @@
         "daysToMaturity",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "anise",
@@ -197,7 +198,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "anise-hyssop",
@@ -289,7 +291,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "artichoke",
@@ -379,7 +382,8 @@
         "daysToMaturity",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "arugula",
@@ -476,6 +480,52 @@
         "harvestWindowDays",
         "inRowSpacingIn",
         "betweenRowSpacingIn"
+      ],
+      "winterWindows": [
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            8,
+            9
+          ],
+          "tier": 2,
+          "detail": "wild arugula"
+        },
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            5,
+            6
+          ],
+          "tier": 2,
+          "detail": "salad arugula"
+        },
+        {
+          "use": "overwinter",
+          "structure": "lowTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            8,
+            9
+          ],
+          "tier": 2,
+          "detail": "wild arugula"
+        },
+        {
+          "use": "overwinter",
+          "structure": "lowTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            1,
+            3
+          ],
+          "tier": 2,
+          "detail": "salad arugula"
+        }
       ]
     },
     {
@@ -565,6 +615,30 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "inRowSpacingIn"
+      ],
+      "winterWindows": [
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "transplant",
+          "weeksBefore": [
+            8,
+            9
+          ],
+          "tier": 1,
+          "detail": "tatsoi"
+        },
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            4,
+            5
+          ],
+          "tier": 2,
+          "detail": "mizuna, baby leaf"
+        }
       ]
     },
     {
@@ -653,7 +727,8 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "inRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "baby-leaf-beets",
@@ -751,7 +826,8 @@
         "harvestWindowDays",
         "inRowSpacingIn",
         "betweenRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "chicory-baby-leaf",
@@ -842,6 +918,48 @@
         "harvestWindowDays",
         "inRowSpacingIn",
         "betweenRowSpacingIn"
+      ],
+      "winterWindows": [
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "transplant",
+          "weeksBefore": [
+            13,
+            16
+          ],
+          "tier": 2
+        },
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            13,
+            16
+          ],
+          "tier": 2
+        },
+        {
+          "use": "overwinter",
+          "structure": "lowTunnel",
+          "method": "transplant",
+          "weeksBefore": [
+            8,
+            9
+          ],
+          "tier": 2
+        },
+        {
+          "use": "overwinter",
+          "structure": "lowTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            8,
+            9
+          ],
+          "tier": 2
+        }
       ]
     },
     {
@@ -944,6 +1062,19 @@
         "harvestWindowDays",
         "inRowSpacingIn",
         "betweenRowSpacingIn"
+      ],
+      "winterWindows": [
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            6,
+            7
+          ],
+          "tier": 3,
+          "detail": "baby leaf"
+        }
       ]
     },
     {
@@ -1051,6 +1182,28 @@
         "harvestWindowDays",
         "inRowSpacingIn",
         "betweenRowSpacingIn"
+      ],
+      "winterWindows": [
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            5,
+            6
+          ],
+          "tier": 1
+        },
+        {
+          "use": "overwinter",
+          "structure": "lowTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            1,
+            3
+          ],
+          "tier": 1
+        }
       ]
     },
     {
@@ -1148,7 +1301,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "beets",
@@ -1254,7 +1408,8 @@
         "plantOutWeeks",
         "fallCrop",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "chicory-belgian-endive",
@@ -1336,7 +1491,8 @@
         "fallCrop",
         "harvestWindowDays",
         "inRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "borage",
@@ -1428,7 +1584,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "broccoli",
@@ -1550,7 +1707,8 @@
         "daysToMaturity",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "broccoli-raab",
@@ -1626,6 +1784,28 @@
         "daysToMaturity",
         "maturityFrom",
         "plantOutWeeks"
+      ],
+      "winterWindows": [
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "transplant",
+          "weeksBefore": [
+            8,
+            9
+          ],
+          "tier": 2
+        },
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            5,
+            6
+          ],
+          "tier": 2
+        }
       ]
     },
     {
@@ -1697,7 +1877,8 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "inRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "brussels-sprouts",
@@ -1805,7 +1986,8 @@
         "plantOutWeeks",
         "fallCrop",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "bunching-onions",
@@ -1901,6 +2083,28 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "sowingDepthIn"
+      ],
+      "winterWindows": [
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "transplant",
+          "weeksBefore": [
+            12,
+            13
+          ],
+          "tier": 3
+        },
+        {
+          "use": "overwinter",
+          "structure": "lowTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            11,
+            12
+          ],
+          "tier": 3
+        }
       ]
     },
     {
@@ -1981,7 +2185,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "bush-bean",
@@ -2084,7 +2289,8 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "inRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "buttercup-winter-squash",
@@ -2191,7 +2397,8 @@
         "daysToMaturity",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "butternut-winter-squash",
@@ -2298,7 +2505,8 @@
         "daysToMaturity",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "cabbage",
@@ -2408,7 +2616,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "caraway",
@@ -2496,7 +2705,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "cardoon",
@@ -2582,7 +2792,8 @@
         "daysToMaturity",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "carrots",
@@ -2686,6 +2897,28 @@
         "plantOutWeeks",
         "fallCrop",
         "harvestWindowDays"
+      ],
+      "winterWindows": [
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            12,
+            13
+          ],
+          "tier": 3
+        },
+        {
+          "use": "overwinter",
+          "structure": "lowTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            10,
+            13
+          ],
+          "tier": 3
+        }
       ]
     },
     {
@@ -2796,7 +3029,8 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "inRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "celery-and-celeriac",
@@ -2909,7 +3143,8 @@
         "daysToMaturity",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "celtuce",
@@ -2998,7 +3233,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "chamomile",
@@ -3095,7 +3331,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "chervil",
@@ -3185,7 +3422,8 @@
         "plantOutWeeks",
         "fallCrop",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "chicory-endive-escarole",
@@ -3296,7 +3534,8 @@
         "fallCrop",
         "harvestWindowDays",
         "inRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "chinese-cabbage",
@@ -3407,7 +3646,8 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "inRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "chinese-leeks-garlic-chives",
@@ -3504,7 +3744,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "chives",
@@ -3601,7 +3842,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "cilantro-coriander",
@@ -3692,6 +3934,29 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "betweenRowSpacingIn"
+      ],
+      "winterWindows": [
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            8,
+            10
+          ],
+          "tier": 2
+        },
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            6,
+            7
+          ],
+          "tier": 2,
+          "detail": "baby leaf"
+        }
       ]
     },
     {
@@ -3785,7 +4050,8 @@
         "harvestWindowDays",
         "inRowSpacingIn",
         "betweenRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "claytonia",
@@ -3874,6 +4140,28 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "betweenRowSpacingIn"
+      ],
+      "winterWindows": [
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            7,
+            8
+          ],
+          "tier": 1
+        },
+        {
+          "use": "overwinter",
+          "structure": "lowTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            7,
+            8
+          ],
+          "tier": 1
+        }
       ]
     },
     {
@@ -3984,7 +4272,8 @@
         "daysToMaturity",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "sage",
@@ -4083,7 +4372,8 @@
         "plantOutWeeks",
         "fallCrop",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "cress",
@@ -4156,7 +4446,8 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "betweenRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "cumin",
@@ -4248,7 +4539,8 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "betweenRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "cutting-celery",
@@ -4339,7 +4631,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "daikon-radishes",
@@ -4431,7 +4724,8 @@
         "plantOutWeeks",
         "fallCrop",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "dandelion",
@@ -4526,7 +4820,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "delicata-sweet-dumpling-winter-squash",
@@ -4633,7 +4928,8 @@
         "daysToMaturity",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "dill",
@@ -4725,7 +5021,8 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "betweenRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "lemon-grass",
@@ -4820,7 +5117,8 @@
         "plantOutWeeks",
         "fallCrop",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "eggplant",
@@ -4921,7 +5219,8 @@
         "daysToMaturity",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "fava-bean",
@@ -5003,7 +5302,8 @@
         "plantOutWeeks",
         "fallCrop",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "fennel",
@@ -5102,7 +5402,8 @@
         "daysToMaturity",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "cucumber",
@@ -5216,7 +5517,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "flower-sprouts",
@@ -5295,7 +5597,8 @@
         "harvestWindowDays",
         "inRowSpacingIn",
         "betweenRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "french-filet-beans",
@@ -5398,7 +5701,8 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "inRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "fresh-shell-bean",
@@ -5491,7 +5795,8 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "inRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "garlic",
@@ -5588,7 +5893,8 @@
         "harvestWindowDays",
         "inRowSpacingIn",
         "overwinterWeeks"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "greenhouse-cucumbers",
@@ -5691,7 +5997,8 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "betweenRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "greenhouse-eggplants",
@@ -5786,7 +6093,8 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "inRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "greenhouse-peppers",
@@ -5885,7 +6193,8 @@
         "harvestWindowDays",
         "inRowSpacingIn",
         "betweenRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "greenhouse-tomatoes",
@@ -5985,7 +6294,8 @@
         "harvestWindowDays",
         "inRowSpacingIn",
         "betweenRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "horseradish",
@@ -6058,7 +6368,8 @@
         "inRowSpacingIn",
         "betweenRowSpacingIn",
         "sowingDepthIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "hubbard-winter-squash",
@@ -6166,7 +6477,8 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "inRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "husk-cherry",
@@ -6261,7 +6573,8 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "betweenRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "hyssop",
@@ -6352,7 +6665,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "italian-dandelion-chicory",
@@ -6454,6 +6768,48 @@
         "plantOutWeeks",
         "fallCrop",
         "harvestWindowDays"
+      ],
+      "winterWindows": [
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "transplant",
+          "weeksBefore": [
+            13,
+            16
+          ],
+          "tier": 2
+        },
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            13,
+            16
+          ],
+          "tier": 2
+        },
+        {
+          "use": "overwinter",
+          "structure": "lowTunnel",
+          "method": "transplant",
+          "weeksBefore": [
+            8,
+            9
+          ],
+          "tier": 2
+        },
+        {
+          "use": "overwinter",
+          "structure": "lowTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            8,
+            9
+          ],
+          "tier": 2
+        }
       ]
     },
     {
@@ -6561,7 +6917,8 @@
         "daysToMaturity",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "kale",
@@ -6670,6 +7027,50 @@
         "daysToMaturity",
         "plantOutWeeks",
         "harvestWindowDays"
+      ],
+      "winterWindows": [
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "transplant",
+          "weeksBefore": [
+            13,
+            15
+          ],
+          "tier": 1
+        },
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            6,
+            7
+          ],
+          "tier": 1,
+          "detail": "baby leaf"
+        },
+        {
+          "use": "overwinter",
+          "structure": "lowTunnel",
+          "method": "transplant",
+          "weeksBefore": [
+            6,
+            7
+          ],
+          "tier": 1
+        },
+        {
+          "use": "overwinter",
+          "structure": "lowTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            1,
+            3
+          ],
+          "tier": 1,
+          "detail": "baby leaf"
+        }
       ]
     },
     {
@@ -6749,7 +7150,8 @@
         "harvestWindowDays",
         "inRowSpacingIn",
         "betweenRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "kohlrabi",
@@ -6853,7 +7255,8 @@
         "fallCrop",
         "harvestWindowDays",
         "inRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "lavender",
@@ -6947,7 +7350,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "leaf-broccoli",
@@ -7020,7 +7424,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "fallCrop"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "leaf-fennel",
@@ -7116,7 +7521,8 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "betweenRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "leeks",
@@ -7224,7 +7630,8 @@
         "fallCrop",
         "harvestWindowDays",
         "betweenRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "lemon-balm",
@@ -7318,7 +7725,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "lettuce",
@@ -7433,6 +7841,29 @@
         "plantOutWeeks",
         "fallCrop",
         "harvestWindowDays"
+      ],
+      "winterWindows": [
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "transplant",
+          "weeksBefore": [
+            10,
+            11
+          ],
+          "tier": 3
+        },
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            6,
+            7
+          ],
+          "tier": 3,
+          "detail": "baby leaf"
+        }
       ]
     },
     {
@@ -7518,7 +7949,8 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "inRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "lovage",
@@ -7609,7 +8041,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "magenta-spreen",
@@ -7695,7 +8128,8 @@
         "fallCrop",
         "harvestWindowDays",
         "inRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "malabar-spinach",
@@ -7776,7 +8210,8 @@
         "plantOutWeeks",
         "fallCrop",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "melons",
@@ -7883,7 +8318,8 @@
         "plantOutWeeks",
         "fallCrop",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "mexican-mint-marigold",
@@ -7974,7 +8410,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "mini-broccoli",
@@ -8081,7 +8518,8 @@
         "fallCrop",
         "harvestWindowDays",
         "inRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "mint",
@@ -8178,7 +8616,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "mustard",
@@ -8260,7 +8699,8 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "inRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "mache",
@@ -8343,6 +8783,18 @@
         "plantOutWeeks",
         "fallCrop",
         "harvestWindowDays"
+      ],
+      "winterWindows": [
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            8,
+            9
+          ],
+          "tier": 3
+        }
       ]
     },
     {
@@ -8426,7 +8878,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "corn-old-fashioned-sweet",
@@ -8511,7 +8964,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "onion-sets",
@@ -8584,7 +9038,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "onions",
@@ -8702,6 +9157,28 @@
         "daysToMaturity",
         "plantOutWeeks",
         "harvestWindowDays"
+      ],
+      "winterWindows": [
+        {
+          "use": "overwinter",
+          "structure": "lowTunnel",
+          "method": "transplant",
+          "weeksBefore": [
+            13,
+            14
+          ],
+          "tier": 3
+        },
+        {
+          "use": "overwinter",
+          "structure": "lowTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            13,
+            14
+          ],
+          "tier": 3
+        }
       ]
     },
     {
@@ -8779,7 +9256,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "oregano-greek",
@@ -8872,7 +9350,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "corn-ornamental-dry-field",
@@ -8962,7 +9441,8 @@
         "daysToMaturity",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "ornamental-gourds",
@@ -9059,7 +9539,8 @@
         "harvestWindowDays",
         "inRowSpacingIn",
         "betweenRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "pac-choi",
@@ -9156,6 +9637,18 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "inRowSpacingIn"
+      ],
+      "winterWindows": [
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "transplant",
+          "weeksBefore": [
+            8,
+            10
+          ],
+          "tier": 2
+        }
       ]
     },
     {
@@ -9263,7 +9756,8 @@
         "plantOutWeeks",
         "fallCrop",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "parsnip",
@@ -9354,7 +9848,8 @@
         "daysToMaturity",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "peas",
@@ -9445,7 +9940,8 @@
         "daysToMaturity",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "pelleted-beets",
@@ -9559,7 +10055,8 @@
         "plantOutWeeks",
         "fallCrop",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "pelleted-carrots",
@@ -9666,6 +10163,28 @@
         "fallCrop",
         "harvestWindowDays",
         "inRowSpacingIn"
+      ],
+      "winterWindows": [
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            12,
+            13
+          ],
+          "tier": 3
+        },
+        {
+          "use": "overwinter",
+          "structure": "lowTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            10,
+            13
+          ],
+          "tier": 3
+        }
       ]
     },
     {
@@ -9777,7 +10296,8 @@
         "daysToMaturity",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "pelleted-lettuce",
@@ -9895,6 +10415,29 @@
         "plantOutWeeks",
         "fallCrop",
         "harvestWindowDays"
+      ],
+      "winterWindows": [
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "transplant",
+          "weeksBefore": [
+            10,
+            11
+          ],
+          "tier": 3
+        },
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            6,
+            7
+          ],
+          "tier": 3,
+          "detail": "baby leaf"
+        }
       ]
     },
     {
@@ -10013,6 +10556,28 @@
         "daysToMaturity",
         "plantOutWeeks",
         "harvestWindowDays"
+      ],
+      "winterWindows": [
+        {
+          "use": "overwinter",
+          "structure": "lowTunnel",
+          "method": "transplant",
+          "weeksBefore": [
+            13,
+            14
+          ],
+          "tier": 3
+        },
+        {
+          "use": "overwinter",
+          "structure": "lowTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            13,
+            14
+          ],
+          "tier": 3
+        }
       ]
     },
     {
@@ -10112,7 +10677,8 @@
         "fallCrop",
         "harvestWindowDays",
         "inRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "peppers",
@@ -10221,7 +10787,8 @@
         "daysToMaturity",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "pole-bean",
@@ -10319,7 +10886,8 @@
         "daysToMaturity",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "potatoes",
@@ -10401,7 +10969,8 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "inRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "pumpkins",
@@ -10512,7 +11081,8 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "inRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "purslane",
@@ -10601,7 +11171,8 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "betweenRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "radicchio",
@@ -10708,6 +11279,48 @@
         "plantOutWeeks",
         "fallCrop",
         "harvestWindowDays"
+      ],
+      "winterWindows": [
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "transplant",
+          "weeksBefore": [
+            13,
+            16
+          ],
+          "tier": 2
+        },
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            13,
+            16
+          ],
+          "tier": 2
+        },
+        {
+          "use": "overwinter",
+          "structure": "lowTunnel",
+          "method": "transplant",
+          "weeksBefore": [
+            8,
+            9
+          ],
+          "tier": 2
+        },
+        {
+          "use": "overwinter",
+          "structure": "lowTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            8,
+            9
+          ],
+          "tier": 2
+        }
       ]
     },
     {
@@ -10804,6 +11417,18 @@
         "plantOutWeeks",
         "fallCrop",
         "harvestWindowDays"
+      ],
+      "winterWindows": [
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            5,
+            7
+          ],
+          "tier": 3
+        }
       ]
     },
     {
@@ -10899,7 +11524,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "root-parsley",
@@ -10975,7 +11601,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "rosemary",
@@ -11069,7 +11696,8 @@
         "plantOutWeeks",
         "fallCrop",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "rutabaga",
@@ -11158,7 +11786,8 @@
         "plantOutWeeks",
         "fallCrop",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "salad-burnet",
@@ -11252,7 +11881,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "salad-mixes",
@@ -11334,7 +11964,8 @@
         "harvestWindowDays",
         "inRowSpacingIn",
         "betweenRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "saltwort",
@@ -11425,7 +12056,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "scorzonera-salsify",
@@ -11505,7 +12137,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "shallots",
@@ -11616,7 +12249,8 @@
         "daysToMaturity",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "shiso",
@@ -11703,7 +12337,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "sorrel",
@@ -11787,7 +12422,8 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "betweenRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "soybean",
@@ -11877,7 +12513,8 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "inRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "spaghetti-winter-squash",
@@ -11984,7 +12621,8 @@
         "daysToMaturity",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "specialty-summer-squash",
@@ -12088,7 +12726,8 @@
         "daysToMaturity",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "spinach",
@@ -12196,6 +12835,49 @@
         "harvestWindowDays",
         "inRowSpacingIn",
         "betweenRowSpacingIn"
+      ],
+      "winterWindows": [
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "transplant",
+          "weeksBefore": [
+            7,
+            8
+          ],
+          "tier": 1
+        },
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            7,
+            8
+          ],
+          "tier": 1
+        },
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            5,
+            6
+          ],
+          "tier": 1,
+          "detail": "baby leaf"
+        },
+        {
+          "use": "overwinter",
+          "structure": "lowTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            1,
+            3
+          ],
+          "tier": 1
+        }
       ]
     },
     {
@@ -12290,7 +12972,8 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "betweenRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "summer-savory",
@@ -12384,7 +13067,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "summer-squash",
@@ -12488,7 +13172,8 @@
         "daysToMaturity",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "corn-super-sweet",
@@ -12576,7 +13261,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "corn-sweet",
@@ -12670,7 +13356,8 @@
         "daysToMaturity",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "marjoram",
@@ -12764,7 +13451,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "sweet-potatoes",
@@ -12850,7 +13538,8 @@
         "harvestWindowDays",
         "inRowSpacingIn",
         "sowingDepthIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "swiss-chard",
@@ -12960,6 +13649,39 @@
         "daysToMaturity",
         "plantOutWeeks",
         "harvestWindowDays"
+      ],
+      "winterWindows": [
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "transplant",
+          "weeksBefore": [
+            9,
+            10
+          ],
+          "tier": 3
+        },
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            9,
+            10
+          ],
+          "tier": 3
+        },
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            6,
+            7
+          ],
+          "tier": 3,
+          "detail": "baby leaf"
+        }
       ]
     },
     {
@@ -13057,7 +13779,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "tomatillo",
@@ -13151,7 +13874,8 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "betweenRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "tomatoes",
@@ -13264,7 +13988,8 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "inRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "turnips",
@@ -13356,6 +14081,18 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "inRowSpacingIn"
+      ],
+      "winterWindows": [
+        {
+          "use": "winterHarvest",
+          "structure": "highTunnel",
+          "method": "direct",
+          "weeksBefore": [
+            9,
+            10
+          ],
+          "tier": 3
+        }
       ]
     },
     {
@@ -13441,7 +14178,8 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "betweenRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "watermelons",
@@ -13556,7 +14294,8 @@
         "plantOutWeeks",
         "fallCrop",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "wild-marjoram",
@@ -13649,7 +14388,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "winter-savory",
@@ -13743,7 +14483,8 @@
         "maturityFrom",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "winter-squash",
@@ -13862,7 +14603,8 @@
         "plantOutWeeks",
         "harvestWindowDays",
         "inRowSpacingIn"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "yellow-summer-squash",
@@ -13966,7 +14708,8 @@
         "daysToMaturity",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     },
     {
       "id": "zucchini",
@@ -14070,7 +14813,10 @@
         "daysToMaturity",
         "plantOutWeeks",
         "harvestWindowDays"
-      ]
+      ],
+      "winterWindows": []
     }
-  ]
+  ],
+  "winterSource": "Johnny's Selected Seeds — Winter Growing Guide planting charts",
+  "winterFetched": "2026-10-03"
 }

@@ -7,9 +7,9 @@ import 'plan_screen.dart';
 import 'garden/garden_page.dart';
 import 'garden/greenhouse_screen.dart';
 import 'garden/grow_screen.dart';
-import 'garden/harvest_screen.dart';
 import 'garden/seed_vault_screen.dart';
 import 'home_screen.dart';
+import 'widgets/mode_switch.dart';
 
 /// Shows the open tool, or home. Plan is kept alive while another tool
 /// is open (Offstage), so switching back keeps its view, panels and any
@@ -52,14 +52,27 @@ class AppShell extends StatelessWidget {
 
   Widget _gardenTool(AppTool? tool) {
     if (tool == null) return HomeBody(navigator: navigator, garden: garden);
+    final mode = navigator.growMode;
     return GardenPage(
       navigator: navigator,
       toasts: garden.toasts,
+      actions: [
+        if (tool == AppTool.grow)
+          SegmentSwitch<GrowMode>(
+            values: GrowMode.values,
+            selected: mode,
+            label: (m) => m.label,
+            icon: (m) =>
+                m == GrowMode.sow ? Icons.grass : Icons.move_down_outlined,
+            onSelect: (m) => navigator.growMode = m,
+          ),
+      ],
       body: switch (tool) {
         AppTool.seedVault => SeedVaultBody(garden: garden),
-        AppTool.greenhouse => GreenhouseBody(garden: garden),
+        AppTool.grow when mode == GrowMode.transplant => GreenhouseBody(
+          garden: garden,
+        ),
         AppTool.grow => GrowBody(garden: garden),
-        AppTool.harvest => HarvestBody(garden: garden),
         AppTool.plan => const SizedBox.shrink(),
       },
     );

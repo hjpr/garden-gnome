@@ -513,6 +513,14 @@ def main():
             crops.append(apply_overrides(crop, overrides))
 
     crops.sort(key=lambda c: (c["name"].lower(), c["id"]))
+    # Winter-harvest and overwintering windows from Johnny's winter charts.
+    # Imported here: winter_charts imports this module for fetch().
+    import winter_charts
+    try:
+        winter_charts.attach(crops, winter_charts.fetch_charts(args.cache, args.refresh))
+    except Exception as e:  # Never publish a partial collection.
+        print(f"  ! winter charts: {e}", file=sys.stderr)
+        sys.exit(1)
     problems = validate(crops)
     if problems:
         print(f"{len(problems)} validation problems:", file=sys.stderr)
@@ -520,7 +528,8 @@ def main():
             print("  - " + p, file=sys.stderr)
         sys.exit(1)
 
-    out = {"source": SOURCE, "fetched": datetime.date.today().isoformat(), "crops": crops}
+    out = {"source": SOURCE, "fetched": datetime.date.today().isoformat(),
+           "winterSource": winter_charts.SOURCE, "crops": crops}
     outputs = [(args.out, json.dumps(out, indent=2, ensure_ascii=False) + "\n")]
     if args.raw:
         outputs.append((args.raw, json.dumps(raw, indent=2, ensure_ascii=False) + "\n"))

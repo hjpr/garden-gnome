@@ -34,8 +34,8 @@ Future<(GardenController, String)> _garden({required bool planBeans}) async {
       ZoneSeed(
         varietyId: bean,
         name: 'Provider · Bush Beans',
-        size: map.seed().size,
-        spacing: map.seed().spacing,
+        inRow: map.seed().inRow,
+        betweenRows: map.seed().betweenRows,
       ),
     );
   }
@@ -55,7 +55,7 @@ void main() {
 
       garden.sowPlanting(grow, on: DateTime(2026, 4, 25));
       expect(garden.plannedSowings(), isEmpty);
-      final sown = garden.directSowings().single.planting;
+      final sown = garden.inGround().single.planting;
       expect(sown.layerId, grow);
       expect(sown.sownOn, DateTime.utc(2026, 4, 25));
       expect(garden.farm.farm.currentPlantingOf(grow)!.id, sown.id);
@@ -128,7 +128,7 @@ void main() {
     expect(find.text('Apr 20, 2026'), findsOneWidget, reason: 'today');
     await tester.tap(find.widgetWithText(FilledButton, 'Sow'));
     await tester.pumpAndSettle();
-    expect(garden.directSowings(), hasLength(1));
+    expect(garden.inGround(), hasLength(1));
     expect(find.text('Sown'), findsOneWidget);
 
     // Nothing left to plan: Add plant is greyed.

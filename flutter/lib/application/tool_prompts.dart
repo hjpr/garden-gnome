@@ -15,8 +15,8 @@ String toolPrompt(EditorController editor) {
   }
   if (editor.mode == EditMode.plant &&
       (editor.selectedLayerId == null ||
-          !editor.isGrowZone(editor.selectedLayerId!))) {
-    return 'Select a planting to work on it';
+          !editor.isPlantable(editor.selectedLayerId!))) {
+    return 'Select a planting or Cover bed to work on it';
   }
   if (editor.selectedLayer == null) {
     return editor.document.propertyIds.isEmpty

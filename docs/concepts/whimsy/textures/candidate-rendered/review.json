@@ -1,0 +1,15 @@
+{
+  "status": "reviewed_not_approved_not_installed",
+  "images": {
+    "scene": "Actual ScenePainter output. Top row: dirt, prepared soil and planted rows. Bottom: resolved crimson clover and the generic unknown-cover fallback.",
+    "scene-close-160px-per-m": "Color matching removes much of the patchwork, but grass strokes and clover leaves still change size across cells. These candidates are not approved.",
+    "wild_grass": "Remaining mismatch: fine stippled turf, longer blades and sparse clippings are different treatments, not just different colors.",
+    "lawn": "Brightness islands improve, but blade length, orientation and density still differ between sources.",
+    "dirt": "Color matching substantially reduces smooth light islands. Some changes in grain density remain.",
+    "prepped_soil": "The obvious pale cell islands largely disappear. Source near-duplicates and inconsistent aggregate density remain unresolved.",
+    "loam": "Strongest corrected bank: fine crumbs and much less visible cell-to-cell tone variation. Still an isolated candidate, not installed.",
+    "crimson_clover": "Large and small leaf clusters remain visibly mixed. Pale source-border fragments also survive. Not approved."
+  },
+  "comparison": "Unmatched originals retained in candidate-rendered-unmatched; current candidate-rendered is per-bank mean/contrast matched. Both are real Flutter renders.",
+  "remaining": "Grass and clover need consistent feature size/style; prepared soil requires independent compositions; final application browser/performance verification remains blocked on approved banks."
+}

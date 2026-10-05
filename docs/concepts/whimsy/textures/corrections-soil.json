@@ -1,0 +1,759 @@
+{
+  "materials": [
+    "dirt",
+    "prepped_soil"
+  ],
+  "generations": [
+    {
+      "material": "dirt",
+      "variant": 1,
+      "file": "raw/dirt-01.png",
+      "cost_usd": 0.0678475,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "Generate a new single 1024x1024 square full-bleed DIRT ground illustration, independent variant 01. Supplied botanical artwork guides only handmade matte gouache / fine colored-pencil markmaking, NOT plant content. Warm medium tan-brown packed granular earth #C99A64 with restrained #A0613D fine flecks and few tiny rounded stones, smooth walkable pathway texture. No actual path shape: dirt covers entire frame uniformly. Exactly overhead, small irregular local granular details, diffuse flat light, rotation-safe, consistent feature scale. Not rocky rubble or cracked mud. No plants, rows, ruts, furrows, directional highlights, gradient, vignette, margin, border, swatch, panels, grid, text, horizon, islands, objects, animals, insects, photo, clay3D or pixels.",
+      "verdict": "keep",
+      "reason": "Warm tan full-bleed granular dirt with tiny stones; slight local directional pencil hatching, stone density varies modestly. Final bank: independent microcomposition; newer 04/06 are modestly brighter/smoother than retained originals, requiring renderer cohesion review.",
+      "excluded": false,
+      "inspection": "Full 1536x1088 contact sheet inspected (512px per source); all new generated sources separately inspected at 1024px; 128px luminance correlations measured. Runtime/seam gate not exercised.",
+      "sha256": "e514b06ae5a29c2a2d4fe6311f047aaeefa9ee73dd360980b651b3f8b91397fb"
+    },
+    {
+      "material": "dirt",
+      "variant": 2,
+      "file": "raw/dirt-02.png",
+      "cost_usd": 0.0678475,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "Generate a new single 1024x1024 square full-bleed DIRT ground illustration, independent variant 02. Supplied botanical artwork guides only handmade matte gouache / fine colored-pencil markmaking, NOT plant content. Warm medium tan-brown packed granular earth #C99A64 with restrained #A0613D fine flecks and few tiny rounded stones, smooth walkable pathway texture. No actual path shape: dirt covers entire frame uniformly. Exactly overhead, small irregular local granular details, diffuse flat light, rotation-safe, consistent feature scale. Not rocky rubble or cracked mud. No plants, rows, ruts, furrows, directional highlights, gradient, vignette, margin, border, swatch, panels, grid, text, horizon, islands, objects, animals, insects, photo, clay3D or pixels.",
+      "verdict": "keep",
+      "reason": "Warm tan full-bleed granular dirt with tiny stones; slight local directional pencil hatching, stone density varies modestly. Final bank: independent microcomposition; newer 04/06 are modestly brighter/smoother than retained originals, requiring renderer cohesion review.",
+      "excluded": false,
+      "inspection": "Full 1536x1088 contact sheet inspected (512px per source); all new generated sources separately inspected at 1024px; 128px luminance correlations measured. Runtime/seam gate not exercised.",
+      "sha256": "8e76a2ece373c08769bba6f7e4432a7fa9285c32aa49c3a174f3113ab5c6f6d5"
+    },
+    {
+      "material": "dirt",
+      "variant": 3,
+      "file": "raw/dirt-03.png",
+      "cost_usd": 0.0678475,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "Generate a new single 1024x1024 square full-bleed DIRT ground illustration, independent variant 03. Supplied botanical artwork guides only handmade matte gouache / fine colored-pencil markmaking, NOT plant content. Warm medium tan-brown packed granular earth #C99A64 with restrained #A0613D fine flecks and few tiny rounded stones, smooth walkable pathway texture. No actual path shape: dirt covers entire frame uniformly. Exactly overhead, small irregular local granular details, diffuse flat light, rotation-safe, consistent feature scale. Not rocky rubble or cracked mud. No plants, rows, ruts, furrows, directional highlights, gradient, vignette, margin, border, swatch, panels, grid, text, horizon, islands, objects, animals, insects, photo, clay3D or pixels.",
+      "verdict": "keep",
+      "reason": "Warm tan full-bleed granular dirt with tiny stones; slight local directional pencil hatching, stone density varies modestly. Final bank: independent microcomposition; newer 04/06 are modestly brighter/smoother than retained originals, requiring renderer cohesion review.",
+      "excluded": false,
+      "inspection": "Full 1536x1088 contact sheet inspected (512px per source); all new generated sources separately inspected at 1024px; 128px luminance correlations measured. Runtime/seam gate not exercised.",
+      "sha256": "88337db95d1b561ff3023e4405a7ddaed1daca9edbee47fff7d91c330d94b518"
+    },
+    {
+      "material": "dirt",
+      "variant": 4,
+      "file": "raw/dirt-04.png",
+      "prompt": "Paint a full-bleed 1024 square overhead texture of warm tan packed dirt #C99A64, restrained #A0613D fine grains and sparse tiny pebbles. A four-meter ground area: all particles 2\u201312 pixels, mostly smooth fine earth. Crisp matte handpainted gouache and delicate colored pencil. Independent random composition D4, uniform detail density and flat diffuse illumination. No path shape, plants, furrows, large stones, dark outlines, shadows, vignette, border, text, photo or 3D.",
+      "cost_usd": 0.067258,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "keep",
+      "excluded": false,
+      "reason": "Independent fine warm tan earth, tiny grains and sparse pebbles, no focal rocks or border; slight microhighlight on pebbles. Final bank: independent microcomposition; newer 04/06 are modestly brighter/smoother than retained originals, requiring renderer cohesion review.",
+      "sha256": "0929fc541514cff7664accc9dccad2c1450c5a1c41302dd89901dc4ccb2e1f58",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_image_urls": [],
+      "generation_mode": "text-to-image",
+      "inspection": "Full 1536x1088 contact sheet inspected (512px per source); all new generated sources separately inspected at 1024px; 128px luminance correlations measured. Runtime/seam gate not exercised."
+    },
+    {
+      "material": "dirt",
+      "variant": 5,
+      "file": "raw/dirt-05.png",
+      "cost_usd": 0.0678475,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "Generate a new single 1024x1024 square full-bleed DIRT ground illustration, independent variant 05. Supplied botanical artwork guides only handmade matte gouache / fine colored-pencil markmaking, NOT plant content. Warm medium tan-brown packed granular earth #C99A64 with restrained #A0613D fine flecks and few tiny rounded stones, smooth walkable pathway texture. No actual path shape: dirt covers entire frame uniformly. Exactly overhead, small irregular local granular details, diffuse flat light, rotation-safe, consistent feature scale. Not rocky rubble or cracked mud. No plants, rows, ruts, furrows, directional highlights, gradient, vignette, margin, border, swatch, panels, grid, text, horizon, islands, objects, animals, insects, photo, clay3D or pixels.",
+      "verdict": "keep",
+      "reason": "Warm tan full-bleed granular dirt with tiny stones; slight local directional pencil hatching, stone density varies modestly. Final bank: independent microcomposition; newer 04/06 are modestly brighter/smoother than retained originals, requiring renderer cohesion review.",
+      "excluded": false,
+      "inspection": "Full 1536x1088 contact sheet inspected (512px per source); all new generated sources separately inspected at 1024px; 128px luminance correlations measured. Runtime/seam gate not exercised.",
+      "sha256": "c47150c1bc65e4a65f3e4f1d60f87453abb24f8b3a54554f02b31d8798baa63a"
+    },
+    {
+      "material": "dirt",
+      "variant": 6,
+      "file": "raw/dirt-06.png",
+      "prompt": "Paint a full-bleed 1024 square overhead texture of warm tan packed dirt #C99A64, restrained #A0613D fine grains and sparse tiny pebbles. A four-meter ground area: all particles 2\u201312 pixels, mostly smooth fine earth. Crisp matte handpainted gouache and delicate colored pencil. Independent random composition D6, uniform detail density and flat diffuse illumination. No path shape, plants, furrows, large stones, dark outlines, shadows, vignette, border, text, photo or 3D.",
+      "cost_usd": 0.067465,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "keep",
+      "excluded": false,
+      "reason": "Independent fine warm tan grains with sparse small pebbles; a few pebbles approach 15px but no large focal rock masses. Final bank: independent microcomposition; newer 04/06 are modestly brighter/smoother than retained originals, requiring renderer cohesion review.",
+      "sha256": "8c97daed9cb960f7004b0a00bfbf5235a91c63001a197bfcfe651d68ad2e4745",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_image_urls": [],
+      "generation_mode": "text-to-image",
+      "inspection": "Full 1536x1088 contact sheet inspected (512px per source); all new generated sources separately inspected at 1024px; 128px luminance correlations measured. Runtime/seam gate not exercised."
+    },
+    {
+      "material": "prepped_soil",
+      "variant": 1,
+      "file": "raw/prepped_soil-01.png",
+      "cost_usd": 0.06786,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "One full-frame square 1024x1024 PREPARED SOIL illustration, independently arranged version 01. Style reference only: matte handmade gouache and delicate colored-pencil marks, not botanical content or swatch layout. Uniform warm dark medium-brown earth #A0613D with modest #432B1D and #C99A64 flecks, finer softly broken irregular aggregates and tiny crumbs, cultivated loose soil but NO cultivation lines. Visually darker than tan dirt and lighter than dark loam. Consistent fine feature scale, small aggregate marks on continuous earth, evenly distributed. Exactly overhead, nondirectional diffuse lighting, rotation-safe, full bleed to every edge. No rows, furrows, ruts, large clods, rocks, directional shadows, shiny highlights, wet patches, gradient, vignette, border, panels, text, horizon, plants, objects, insects, animals, photo, 3D clay or pixels.",
+      "verdict": "keep",
+      "reason": "Full-frame matte fine warm brown crumbs, no furrows; some recurring granular motifs within image.",
+      "excluded": false,
+      "inspection": "Full 1536x1088 contact sheet inspected (512px per source); all new generated sources separately inspected at 1024px; 128px luminance correlations measured. Runtime/seam gate not exercised.",
+      "sha256": "1ce15682c7e86435a5f5997057318592135443a46b0a107f2a84d1b617eb1c23"
+    },
+    {
+      "material": "prepped_soil",
+      "variant": 2,
+      "file": "raw/prepped_soil-02.png",
+      "prompt": "Paint only soil, using the reference's crisp matte gouache and pencil technique, not its plants or panels. Full-bleed 1024 square flat overhead medium warm brown #A0613D earth. Smooth fine soil sprinkled with tiny 2\u20138 pixel dark-brown and ochre crumbs, representing four metres of ground. Original random arrangement throughout, no repeated motifs. Uniform color and diffuse light. No rocks, furrows, plants, borders, text, black outlines, large clods or 3D.",
+      "cost_usd": 0.0678145,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "rework",
+      "excluded": true,
+      "reason": "Independent fine-scale matte soil source, but visibly lighter and sparser than retained soil-01; bank cohesion not met. Preserve as candidate; do not promote.",
+      "sha256": "e543afb57af8389ae7965534920d8e0d50ea06ef2ec18c76f461dacdf86a12d0",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_image_urls": [
+        "../proofs/cover-crops.png"
+      ],
+      "generation_mode": "text composition with botanical style reference",
+      "inspection": "Full 1536x1088 contact sheet inspected (512px per source); all new generated sources separately inspected at 1024px; 128px luminance correlations measured. Runtime/seam gate not exercised."
+    },
+    {
+      "material": "prepped_soil",
+      "variant": 3,
+      "file": "raw/prepped_soil-03.png",
+      "cost_usd": 0.067861,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "Paint a newly arranged original prepared-soil ground texture, variant 03. Keep this source's warm medium dark brown palette, small crumb scale, handmade matte gouache and fine colored-pencil detail. Invent fresh irregular placement, not a flip or rotation. Soil completely fills 1024 square canvas. Strict overhead, uniform flat diffuse light, no shadows or highlights. Fine softly broken aggregates, continuous earth, no rows or furrows. No borders, grids, margins, text, gradient, vignette, big clods, objects or plants.",
+      "verdict": "rework",
+      "reason": "Retains recognizable soil-01 arrangement and broad mottling; independently arranged generation still needed, despite correlation below the strongest near-clone group.",
+      "excluded": true,
+      "inspection": "Full 1536x1088 contact sheet inspected (512px per source); all new generated sources separately inspected at 1024px; 128px luminance correlations measured. Runtime/seam gate not exercised.",
+      "sha256": "ae23a33dcf4fd667f7aefd8bed1b5b13e050c1838d893d10c7e710268ef206d1",
+      "original_review": {
+        "verdict": "keep",
+        "reason": "Full-bleed fine warm brown earth, subtle diffuse crumb details; some repeated source motifs.",
+        "excluded": false,
+        "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested."
+      }
+    },
+    {
+      "material": "prepped_soil",
+      "variant": 4,
+      "file": "raw/prepped_soil-04.png",
+      "cost_usd": 0.067963,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "Paint a newly arranged original prepared-soil ground texture, variant 04. Keep this source's warm medium dark brown palette, small crumb scale, handmade matte gouache and fine colored-pencil detail. Invent fresh irregular placement, not a flip or rotation. Soil completely fills 1024 square canvas. Strict overhead, uniform flat diffuse light, no shadows or highlights. Fine softly broken aggregates, continuous earth, no rows or furrows. No borders, grids, margins, text, gradient, vignette, big clods, objects or plants.",
+      "verdict": "rework",
+      "reason": "Visual soil quality acceptable, but 128px luminance correlation >0.90 with variant 01 reveals retained arrangement; insufficiently independent composition.",
+      "excluded": true,
+      "inspection": "Full 1536x1088 contact sheet inspected (512px per source); all new generated sources separately inspected at 1024px; 128px luminance correlations measured. Runtime/seam gate not exercised.",
+      "sha256": "21c8aa643fad9f617d86311fd47bc580450a0113cc94ec465f0abc40ece04ab7"
+    },
+    {
+      "material": "prepped_soil",
+      "variant": 5,
+      "file": "raw/prepped_soil-05.png",
+      "cost_usd": 0.067816,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "Paint a newly arranged original prepared-soil ground texture, variant 05. Keep this source's warm medium dark brown palette, small crumb scale, handmade matte gouache and fine colored-pencil detail. Invent fresh irregular placement, not a flip or rotation. Soil completely fills 1024 square canvas. Strict overhead, uniform flat diffuse light, no shadows or highlights. Fine softly broken aggregates, continuous earth, no rows or furrows. No borders, grids, margins, text, gradient, vignette, big clods, objects or plants.",
+      "verdict": "rework",
+      "reason": "Outlined aggregates visibly coarser than soil-01 and soil-03; requires finer 3\u201312px crumb scale for bank cohesion.",
+      "excluded": true,
+      "inspection": "Full 1536x1088 contact sheet inspected (512px per source); all new generated sources separately inspected at 1024px; 128px luminance correlations measured. Runtime/seam gate not exercised.",
+      "sha256": "e670f94ae7aa238899862c98285d1008ba09a2c654636783c1c69456250b0850",
+      "original_review": {
+        "verdict": "keep",
+        "reason": "Full-bleed warm brown soil; tiny aggregate placement differs but some source motifs retained; 05 has larger outlined crumbs.",
+        "excluded": false,
+        "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested."
+      }
+    },
+    {
+      "material": "prepped_soil",
+      "variant": 6,
+      "file": "raw/prepped_soil-06.png",
+      "cost_usd": 0.067816,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "Paint a newly arranged original prepared-soil ground texture, variant 06. Keep this source's warm medium dark brown palette, small crumb scale, handmade matte gouache and fine colored-pencil detail. Invent fresh irregular placement, not a flip or rotation. Soil completely fills 1024 square canvas. Strict overhead, uniform flat diffuse light, no shadows or highlights. Fine softly broken aggregates, continuous earth, no rows or furrows. No borders, grids, margins, text, gradient, vignette, big clods, objects or plants.",
+      "verdict": "rework",
+      "reason": "Visual soil quality acceptable, but 128px luminance correlation >0.90 with variant 01 reveals retained arrangement; insufficiently independent composition.",
+      "excluded": true,
+      "inspection": "Full 1536x1088 contact sheet inspected (512px per source); all new generated sources separately inspected at 1024px; 128px luminance correlations measured. Runtime/seam gate not exercised.",
+      "sha256": "afa3162925a133650762f622b3d00e553f9e5b2a0ef02d6019684e76c18883b7"
+    }
+  ],
+  "rejected": [
+    {
+      "material": "prepped_soil",
+      "variant": 2,
+      "file": "raw/rejected/prepped_soil-02-correction-attempt-1.png",
+      "prompt": "Top-down handpainted texture of finely crumbled warm brown garden soil. Tiny delicate earth-colored stipples over a smooth medium-brown base. Gouache and colored pencil illustration, flat diffuse light. Fine detail scale, showing a four metre square of earth. Continuous full-bleed 1024 square texture with evenly distributed detail, no objects, no plants, no text or borders.",
+      "cost_usd": 0.06724,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Conspicuous internally repeated quadrants/motifs and denser granular relief; not a consistent independently detailed surface.",
+      "sha256": "199507be28d9ce8c39fb262ac75b35fd7d6e1e6b9141ab059c19e235ab2eee32",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_image_urls": [],
+      "generation_mode": "text-to-image",
+      "inspection": "Full 1024 source visually inspected."
+    },
+    {
+      "material": "prepped_soil",
+      "variant": 3,
+      "file": "raw/rejected/prepped_soil-03-correction-attempt-1.png",
+      "prompt": "Paint only soil, using the reference's crisp matte gouache and pencil technique, not its plants or panels. Full-bleed 1024 square flat overhead medium warm brown #A0613D earth. Smooth fine soil sprinkled with tiny 2\u20138 pixel dark-brown and ochre crumbs, representing four metres of ground. Fresh irregular arrangement, variant three. Uniform color and diffuse light. No rocks, furrows, plants, borders, text, black outlines, large clods or 3D.",
+      "cost_usd": 0.0678135,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Too sparse and coarse relative to the fine crumb bank: isolated pebbly dark flecks instead of fine continuous granularity.",
+      "sha256": "e76aa7e6eeb2e8e6a5e397fa965415b76a3a364e55328fcd1edc42d33cd5f9bb",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_image_urls": [
+        "../proofs/cover-crops.png"
+      ],
+      "generation_mode": "text composition with botanical style reference",
+      "inspection": "Full 1024 source visually inspected."
+    },
+    {
+      "material": "dirt",
+      "variant": 4,
+      "file": "raw/rejected/dirt-04-superseded-da02e755a914.png",
+      "cost_usd": 0.0678095,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "Create an independent new arrangement of this original illustrated dirt texture, variant 04. Keep exact warm tan-brown palette, fine grain scale and sparse tiny stones. Paint a fresh composition rather than mirror or rotate existing pixels. Full-bleed 1024 square, exactly overhead, flat nondirectional lighting. Matte gouache and pencil illustration, not photo. Dirt everywhere with no border, text, panel, grid, gradient, vignette, path outline, ruts, plants or objects.",
+      "verdict": "discard",
+      "reason": "Superseded during independent fine-scale bank correction. Image-to-image retained original dirt-01 composition too closely; needs independently generated details.",
+      "excluded": true,
+      "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested.",
+      "sha256": "da02e755a914e52cf0779ac8033fa13f0325392ff86e53b82fe8988533768e8e",
+      "original_file": "raw/dirt-04.png",
+      "original_review": {
+        "verdict": "rework",
+        "reason": "Image-to-image retained original dirt-01 composition too closely; needs independently generated details.",
+        "excluded": true,
+        "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested."
+      }
+    },
+    {
+      "material": "dirt",
+      "variant": 6,
+      "file": "raw/rejected/dirt-06-superseded-ebbaccd47b6f.png",
+      "cost_usd": 0.0678095,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "Create an independent new arrangement of this original illustrated dirt texture, variant 06. Keep exact warm tan-brown palette, fine grain scale and sparse tiny stones. Paint a fresh composition rather than mirror or rotate existing pixels. Full-bleed 1024 square, exactly overhead, flat nondirectional lighting. Matte gouache and pencil illustration, not photo. Dirt everywhere with no border, text, panel, grid, gradient, vignette, path outline, ruts, plants or objects.",
+      "verdict": "discard",
+      "reason": "Superseded during independent fine-scale bank correction. Image-to-image retained original dirt-01 composition too closely; needs independently generated details.",
+      "excluded": true,
+      "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested.",
+      "sha256": "ebbaccd47b6ff3ce239529bc034266fd393a477f124b6036ae9da5f154d8cef4",
+      "original_file": "raw/dirt-06.png",
+      "original_review": {
+        "verdict": "rework",
+        "reason": "Image-to-image retained original dirt-01 composition too closely; needs independently generated details.",
+        "excluded": true,
+        "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested."
+      }
+    },
+    {
+      "material": "prepped_soil",
+      "variant": 2,
+      "file": "raw/rejected/prepped_soil-02-superseded-74f642c72238.png",
+      "cost_usd": 0.067816,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "prompt": "Paint a newly arranged original prepared-soil ground texture, variant 02. Keep this source's warm medium dark brown palette, small crumb scale, handmade matte gouache and fine colored-pencil detail. Invent fresh irregular placement, not a flip or rotation. Soil completely fills 1024 square canvas. Strict overhead, uniform flat diffuse light, no shadows or highlights. Fine softly broken aggregates, continuous earth, no rows or furrows. No borders, grids, margins, text, gradient, vignette, big clods, objects or plants.",
+      "verdict": "discard",
+      "reason": "Superseded during independent fine-scale bank correction. Visual soil quality acceptable, but 128px luminance correlation >0.90 with variant 01 reveals retained arrangement; insufficiently independent composition.",
+      "excluded": true,
+      "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested.",
+      "sha256": "74f642c72238f9b42fcb83b8f9f04fe0f993c1dcc5877efef01146876cbeb2f4",
+      "original_file": "raw/prepped_soil-02.png",
+      "original_review": {
+        "verdict": "rework",
+        "reason": "Visual soil quality acceptable, but 128px luminance correlation >0.90 with variant 01 reveals retained arrangement; insufficiently independent composition.",
+        "excluded": true,
+        "inspection": "Visually inspected at source or 512px contact-sheet thumbnail; not production seam-tested."
+      }
+    }
+  ],
+  "additional_cost_usd": 0.337591,
+  "new_attempts": [
+    {
+      "material": "dirt",
+      "variant": 4,
+      "file": "raw/dirt-04.png",
+      "prompt": "Paint a full-bleed 1024 square overhead texture of warm tan packed dirt #C99A64, restrained #A0613D fine grains and sparse tiny pebbles. A four-meter ground area: all particles 2\u201312 pixels, mostly smooth fine earth. Crisp matte handpainted gouache and delicate colored pencil. Independent random composition D4, uniform detail density and flat diffuse illumination. No path shape, plants, furrows, large stones, dark outlines, shadows, vignette, border, text, photo or 3D.",
+      "cost_usd": 0.067258,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "keep",
+      "excluded": false,
+      "reason": "Independent fine warm tan earth, tiny grains and sparse pebbles, no focal rocks or border; slight microhighlight on pebbles. Final bank: independent microcomposition; newer 04/06 are modestly brighter/smoother than retained originals, requiring renderer cohesion review.",
+      "sha256": "0929fc541514cff7664accc9dccad2c1450c5a1c41302dd89901dc4ccb2e1f58",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_image_urls": [],
+      "generation_mode": "text-to-image",
+      "inspection": "Full 1536x1088 contact sheet inspected (512px per source); all new generated sources separately inspected at 1024px; 128px luminance correlations measured. Runtime/seam gate not exercised."
+    },
+    {
+      "material": "prepped_soil",
+      "variant": 2,
+      "file": "raw/rejected/prepped_soil-02-correction-attempt-1.png",
+      "prompt": "Top-down handpainted texture of finely crumbled warm brown garden soil. Tiny delicate earth-colored stipples over a smooth medium-brown base. Gouache and colored pencil illustration, flat diffuse light. Fine detail scale, showing a four metre square of earth. Continuous full-bleed 1024 square texture with evenly distributed detail, no objects, no plants, no text or borders.",
+      "cost_usd": 0.06724,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Conspicuous internally repeated quadrants/motifs and denser granular relief; not a consistent independently detailed surface.",
+      "sha256": "199507be28d9ce8c39fb262ac75b35fd7d6e1e6b9141ab059c19e235ab2eee32",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_image_urls": [],
+      "generation_mode": "text-to-image",
+      "inspection": "Full 1024 source visually inspected."
+    },
+    {
+      "material": "dirt",
+      "variant": 6,
+      "file": "raw/dirt-06.png",
+      "prompt": "Paint a full-bleed 1024 square overhead texture of warm tan packed dirt #C99A64, restrained #A0613D fine grains and sparse tiny pebbles. A four-meter ground area: all particles 2\u201312 pixels, mostly smooth fine earth. Crisp matte handpainted gouache and delicate colored pencil. Independent random composition D6, uniform detail density and flat diffuse illumination. No path shape, plants, furrows, large stones, dark outlines, shadows, vignette, border, text, photo or 3D.",
+      "cost_usd": 0.067465,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "keep",
+      "excluded": false,
+      "reason": "Independent fine warm tan grains with sparse small pebbles; a few pebbles approach 15px but no large focal rock masses. Final bank: independent microcomposition; newer 04/06 are modestly brighter/smoother than retained originals, requiring renderer cohesion review.",
+      "sha256": "8c97daed9cb960f7004b0a00bfbf5235a91c63001a197bfcfe651d68ad2e4745",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_image_urls": [],
+      "generation_mode": "text-to-image",
+      "inspection": "Full 1536x1088 contact sheet inspected (512px per source); all new generated sources separately inspected at 1024px; 128px luminance correlations measured. Runtime/seam gate not exercised."
+    },
+    {
+      "material": "prepped_soil",
+      "variant": 2,
+      "file": "raw/prepped_soil-02.png",
+      "prompt": "Paint only soil, using the reference's crisp matte gouache and pencil technique, not its plants or panels. Full-bleed 1024 square flat overhead medium warm brown #A0613D earth. Smooth fine soil sprinkled with tiny 2\u20138 pixel dark-brown and ochre crumbs, representing four metres of ground. Original random arrangement throughout, no repeated motifs. Uniform color and diffuse light. No rocks, furrows, plants, borders, text, black outlines, large clods or 3D.",
+      "cost_usd": 0.0678145,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "rework",
+      "excluded": true,
+      "reason": "Independent fine-scale matte soil source, but visibly lighter and sparser than retained soil-01; bank cohesion not met. Preserve as candidate; do not promote.",
+      "sha256": "e543afb57af8389ae7965534920d8e0d50ea06ef2ec18c76f461dacdf86a12d0",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_image_urls": [
+        "../proofs/cover-crops.png"
+      ],
+      "generation_mode": "text composition with botanical style reference",
+      "inspection": "Full 1536x1088 contact sheet inspected (512px per source); all new generated sources separately inspected at 1024px; 128px luminance correlations measured. Runtime/seam gate not exercised."
+    },
+    {
+      "material": "prepped_soil",
+      "variant": 3,
+      "file": "raw/rejected/prepped_soil-03-correction-attempt-1.png",
+      "prompt": "Paint only soil, using the reference's crisp matte gouache and pencil technique, not its plants or panels. Full-bleed 1024 square flat overhead medium warm brown #A0613D earth. Smooth fine soil sprinkled with tiny 2\u20138 pixel dark-brown and ochre crumbs, representing four metres of ground. Fresh irregular arrangement, variant three. Uniform color and diffuse light. No rocks, furrows, plants, borders, text, black outlines, large clods or 3D.",
+      "cost_usd": 0.0678135,
+      "pixels": [
+        1024,
+        1024
+      ],
+      "verdict": "discard",
+      "excluded": true,
+      "reason": "Too sparse and coarse relative to the fine crumb bank: isolated pebbly dark flecks instead of fine continuous granularity.",
+      "sha256": "e76aa7e6eeb2e8e6a5e397fa965415b76a3a364e55328fcd1edc42d33cd5f9bb",
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "reference_image_urls": [
+        "../proofs/cover-crops.png"
+      ],
+      "generation_mode": "text composition with botanical style reference",
+      "inspection": "Full 1024 source visually inspected."
+    }
+  ],
+  "audit": {
+    "source_count": 12,
+    "successful_new_generation_count": 5,
+    "provider_blocker": "OpenRouter/Gemini 400 copyright/trademark filter on bare-earth prompts; eight new soil calls failed including minimal neutral diagnostic. Not a billing limit; no provider/model/config switch. Stopped after diagnostic failures.",
+    "remaining_sub_budget_usd": 2.662409,
+    "perceptual_correlations": {
+      "dirt": {
+        "method": "Pearson correlation of Pillow grayscale images resized to 128x128 with LANCZOS; interpreted alongside full-source/contact visual inspection.",
+        "matrix": [
+          [
+            1.0,
+            0.046407,
+            0.076821,
+            0.02618,
+            0.057735,
+            0.03158
+          ],
+          [
+            0.046407,
+            1.0,
+            0.047364,
+            0.024847,
+            0.055247,
+            0.023252
+          ],
+          [
+            0.076821,
+            0.047364,
+            1.0,
+            -0.003619,
+            0.093891,
+            0.028764
+          ],
+          [
+            0.02618,
+            0.024847,
+            -0.003619,
+            1.0,
+            0.006615,
+            0.025808
+          ],
+          [
+            0.057735,
+            0.055247,
+            0.093891,
+            0.006615,
+            1.0,
+            0.004278
+          ],
+          [
+            0.03158,
+            0.023252,
+            0.028764,
+            0.025808,
+            0.004278,
+            1.0
+          ]
+        ],
+        "variant_order": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "max_off_diagonal": 0.09389141811586413
+      },
+      "prepped_soil": {
+        "method": "Pearson correlation of Pillow grayscale images resized to 128x128 with LANCZOS; interpreted alongside full-source/contact visual inspection.",
+        "matrix": [
+          [
+            1.0,
+            0.028047,
+            0.849384,
+            0.978614,
+            0.660019,
+            0.920533
+          ],
+          [
+            0.028047,
+            1.0,
+            0.023493,
+            0.028586,
+            0.022251,
+            0.039879
+          ],
+          [
+            0.849384,
+            0.023493,
+            1.0,
+            0.846234,
+            0.564956,
+            0.796438
+          ],
+          [
+            0.978614,
+            0.028586,
+            0.846234,
+            1.0,
+            0.657344,
+            0.9153
+          ],
+          [
+            0.660019,
+            0.022251,
+            0.564956,
+            0.657344,
+            1.0,
+            0.621364
+          ],
+          [
+            0.920533,
+            0.039879,
+            0.796438,
+            0.9153,
+            0.621364,
+            1.0
+          ]
+        ],
+        "variant_order": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "max_off_diagonal": 0.9786137626127142
+      }
+    },
+    "source_gate": "PARTIAL: dirt has six independently composed fine-scale sources (04/06 newly replaced), with modest brightness/grain-density variation to review in renderer. Prepared soil remains incomplete: 01 retained, new 02 independent but lighter/sparser and excluded, 03/04/06 old near-clones excluded, 05 old coarse source excluded. Soil replacement blocked by repeated provider false-positive copyright errors.",
+    "runtime_gate": "Not exercised; seam conditioning and actual shader verification remain parent tasks.",
+    "previous_provider_blocker": "OpenRouter 403: Key limit exceeded (total limit). Both initial parallel calls failed; no retry, provider switch, or config change.",
+    "accepted_counts": {
+      "dirt": 6,
+      "prepped_soil": 1
+    },
+    "new_failed_attempt_count": 8,
+    "checks": {
+      "current_generation_records": 12,
+      "all_square_1024": true,
+      "source_sha256_verified": true,
+      "expected_keys_complete": true,
+      "rejected_backups_exist": true
+    },
+    "palette_mean_rgb": {
+      "dirt": [
+        [
+          183.492,
+          136.51,
+          87.232
+        ],
+        [
+          179.267,
+          131.543,
+          81.544
+        ],
+        [
+          182.704,
+          132.776,
+          76.156
+        ],
+        [
+          194.305,
+          144.744,
+          94.231
+        ],
+        [
+          180.888,
+          133.126,
+          82.258
+        ],
+        [
+          191.287,
+          143.392,
+          93.54
+        ]
+      ],
+      "prepped_soil": [
+        [
+          122.374,
+          72.598,
+          39.175
+        ],
+        [
+          146.797,
+          92.171,
+          56.068
+        ],
+        [
+          119.682,
+          69.969,
+          37.472
+        ],
+        [
+          119.392,
+          67.765,
+          35.044
+        ],
+        [
+          117.148,
+          68.178,
+          36.236
+        ],
+        [
+          117.156,
+          68.979,
+          37.058
+        ]
+      ]
+    }
+  },
+  "failed_attempts": [
+    {
+      "material": "dirt",
+      "variant": 4,
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "success": false,
+      "error": "403 Key limit exceeded (total limit)",
+      "cost_usd": 0.0
+    },
+    {
+      "material": "prepped_soil",
+      "variant": 2,
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "success": false,
+      "error": "403 Key limit exceeded (total limit)",
+      "cost_usd": 0.0
+    },
+    {
+      "material": "prepped_soil",
+      "variant": 2,
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "success": false,
+      "error": "400: Gemini blocked this request: it was flagged for copyrighted or trademarked material.",
+      "cost_usd": 0.0,
+      "prompt": "Paint a full-bleed 1024 square overhead texture of prepared garden soil, medium warm brown #A0613D with subtle fine crumb speckles. A four-meter ground area: aggregates only 2\u201312 pixels, continuous finely crumbled earth, not stones. Crisp matte handpainted gouache and delicate colored pencil. Independent random composition S2, uniform detail density and flat diffuse illumination. No furrows, plants, large clods, black outlines, shadows, vignette, border, text, photo or 3D."
+    },
+    {
+      "material": "prepped_soil",
+      "variant": 2,
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "success": false,
+      "error": "400: Gemini blocked this request: it was flagged for copyrighted or trademarked material.",
+      "cost_usd": 0.0,
+      "prompt": "An original handpainted overhead garden earth texture, full-bleed square 1024 pixels. Medium warm brown #A0613D continuous soil with densely scattered tiny irregular crumbs only 2\u20138 pixels across. Fine-scale four-meter ground coverage. Matte gouache color and delicate colored-pencil stippling, crisp quiet detail, even flat light. Uniform distribution without a focal point. No large clods, rocks, dark outlines, furrows, plants, borders, text, vignette, photography or 3D rendering."
+    },
+    {
+      "material": "prepped_soil",
+      "variant": 3,
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "success": false,
+      "error": "400: Gemini blocked this request: it was flagged for copyrighted or trademarked material.",
+      "cost_usd": 0.0,
+      "prompt": "Paint only soil, using the reference's crisp matte gouache and pencil technique, not its plants or panels. Full-bleed 1024 square flat overhead medium warm brown #A0613D earth. Smooth fine soil sprinkled evenly with thousands of tiny 2\u20136 pixel dark-brown and ochre crumbs, representing four metres of ground. Original random arrangement throughout, no repeated motifs. Uniform color and diffuse light. No rocks, furrows, plants, borders, text, black outlines, large clods or 3D."
+    },
+    {
+      "material": "prepped_soil",
+      "variant": 3,
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "success": false,
+      "error": "400: Gemini blocked this request: it was flagged for copyrighted or trademarked material.",
+      "cost_usd": 0.0,
+      "prompt": "Paint only soil, using the reference's crisp matte gouache and pencil technique, not its plants or panels. Full-bleed 1024 square flat overhead medium warm brown #A0613D earth. Smooth fine soil sprinkled with tiny 2\u20138 pixel dark-brown and ochre crumbs, representing four metres of ground. Original random arrangement throughout, no repeated motifs. Uniform color and diffuse light. No rocks, furrows, plants, borders, text, black outlines, large clods or 3D."
+    },
+    {
+      "material": "prepped_soil",
+      "variant": 3,
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "success": false,
+      "error": "400: Gemini blocked this request: it was flagged for copyrighted or trademarked material.",
+      "cost_usd": 0.0,
+      "prompt": "Flat overhead illustration of smooth brown earth #A0613D, fine tiny irregular speckles 2\u20136 pixels wide, evenly scattered over the whole image. Matte gouache and colored-pencil marks. Four metres of ground, full-bleed 1024 square. Uniform tone, independent irregular pattern, no lighting gradient, no objects, no plants, no large rocks, no borders or writing."
+    },
+    {
+      "material": "prepped_soil",
+      "variant": 3,
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "success": false,
+      "error": "400: Gemini blocked this request: it was flagged for copyrighted or trademarked material.",
+      "cost_usd": 0.0,
+      "prompt": "A square of fine brown earth viewed straight down, warm terracotta-brown #A0613D. Delicate handmade gouache and pencil illustration. Thousands of tiny crumb marks, each 2\u20136 pixels, evenly spread on a smooth brown field. New random layout with no repeats. Full-bleed 1024 square representing 4 metres. Flat light; no plants, stones, furrows, borders or text."
+    },
+    {
+      "material": "prepped_soil",
+      "variant": 3,
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "success": false,
+      "error": "400: Gemini blocked this request: it was flagged for copyrighted or trademarked material.",
+      "cost_usd": 0.0,
+      "prompt": "Top-down handpainted texture of finely crumbled warm medium brown garden soil. Tiny delicate earth-colored stipples over a smooth brown base. Gouache and colored pencil illustration, flat diffuse light. Fine detail scale, showing a four metre square of earth. Continuous full-bleed 1024 square texture with evenly distributed non-repeating detail, no objects, no plants, no text or borders."
+    },
+    {
+      "material": "prepped_soil",
+      "variant": 3,
+      "model": "google/gemini-3.1-flash-image",
+      "provider": "openrouter",
+      "success": false,
+      "error": "400: Gemini blocked this request: it was flagged for copyrighted or trademarked material.",
+      "cost_usd": 0.0,
+      "prompt": "An overhead square illustration of brown dirt. Fine tiny dark speckles on smooth warm brown ground. Flat matte paint, subtle pencil grain, no stones, plants, text or margins. 1024 by 1024 pixels."
+    }
+  ]
+}

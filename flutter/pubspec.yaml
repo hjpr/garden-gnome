@@ -26,7 +26,9 @@ flutter:
   uses-material-design: true
   assets:
     - assets/icons/
+    - assets/home/
     - assets/render/
+    - assets/render/plants/
     - assets/textures/
     - assets/textures/wild_grass/
     - assets/textures/lawn/

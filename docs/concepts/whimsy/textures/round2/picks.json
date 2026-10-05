@@ -1,0 +1,55 @@
+{
+  "_note": "Built-in ground textures. Each ground lists named sets; every picture becomes assets/textures/<ground>/<set>-<n>.jpg. The FIRST set is the default selection. Within a set, pictures are colour-matched to the set's first. A pick is a path or {source, scale}; scale > 1 crops the middle and enlarges (shapes drawn too small). Paths relative to docs/concepts/whimsy/textures. Build with tools/render-art/texture_banks.py.",
+  "wild_grass": [
+    {"name": "meadow", "sources": [
+      "round2/candidates/wild_grass-c02.png",
+      "round2/candidates/wild_grass-c04.png",
+      "round2/candidates/wild_grass-c06.png"]},
+    {"name": "tufted", "sources": ["round2/candidates/wild_grass-c07.png"]}
+  ],
+  "lawn": [
+    {"name": "lawn", "sources": [
+      "round2/candidates/lawn-c02.png",
+      {"source": "round2/candidates/lawn-c09.png", "scale": 1.15},
+      "round2/candidates/lawn-c10.png"]},
+    {"name": "fine", "sources": [
+      "round2/candidates/lawn-c05.png",
+      "round2/candidates/lawn-c04.png"]}
+  ],
+  "dirt": [
+    {"name": "soft", "sources": [
+      "round2/candidates/dirt-c22.png",
+      "round2/candidates/dirt-c21.png",
+      "round2/candidates/dirt-c31.png"]},
+    {"name": "pebbly", "sources": [
+      {"source": "round2/candidates/dirt-c06.png", "scale": 1.25},
+      "round2/candidates/dirt-c02.png",
+      {"source": "round2/candidates/dirt-c04.png", "scale": 1.15}]}
+  ],
+  "prepped_soil": [
+    {"name": "soft", "sources": [
+      "round2/candidates/prepped_soil-c42.png",
+      "round2/candidates/prepped_soil-c53.png",
+      "round2/candidates/prepped_soil-c43.png"]},
+    {"name": "cloddy", "sources": [
+      {"source": "round2/candidates/prepped_soil-c02.png", "scale": 1.35},
+      "round2/candidates/prepped_soil-c09.png",
+      "round2/candidates/prepped_soil-c10.png"]}
+  ],
+  "loam": [
+    {"name": "soft", "sources": [
+      "round2/candidates/loam-c24.png",
+      "round2/candidates/loam-c20.png",
+      "round2/candidates/loam-c31.png"]},
+    {"name": "crumbly", "sources": [
+      "round2/candidates/loam-c02.png",
+      "round2/candidates/loam-c04.png",
+      "round2/candidates/loam-c07.png"]}
+  ],
+  "crimson_clover": [
+    {"name": "clover", "sources": [
+      "raw/crimson_clover-05.png",
+      {"source": "round2/candidates/crimson_clover-c06.png", "scale": 1.15},
+      {"source": "round2/candidates/crimson_clover-c07.png", "scale": 1.3}]}
+  ]
+}
