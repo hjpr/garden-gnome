@@ -25,7 +25,13 @@ uniform float uVariation;   // strength of the brightness drift
 uniform vec4 uTint;         // colour drifted toward (rgb) and how far (a)
 uniform vec3 uMean;         // the texture's average colour
 uniform vec2 uEdge;         // edge mask mode: x = strength (0 = colour), y = noise size m
+uniform vec2 uAtlasGrid;    // 3 x 1 variants, or legacy 1 x 1
+uniform float uLevels;      // 3 = full + mid + far copies bound, else full only
 uniform sampler2D uTexture;
+// The same atlas shrunk 4x and 16x, read when zoomed out so fine detail
+// averages out instead of shimmering. Bound to uTexture when absent.
+uniform sampler2D uTextureMid;
+uniform sampler2D uTextureFar;
 
 out vec4 fragColor;
 
@@ -60,22 +66,42 @@ float fbm(vec2 p) {
       0.15 * valueNoise(p * 4.01 + 31.7);
 }
 
-// One texel, wrapped so the texture repeats.
-vec3 texel(vec2 t) {
-  vec2 w = mod(t, uTexSize);
-  return texture(uTexture, (w + 0.5) / uTexSize).rgb;
+// Each zoomed-out copy is this much smaller than the one before.
+const float kLevelStep = 4.0;
+
+// Wrap every bilinear tap INSIDE the chosen square tile. Never let
+// hardware filtering or modulo over the full atlas sample a neighbour.
+vec3 texel(vec2 t, vec2 tile, float level) {
+  vec2 size = uTexSize / pow(kLevelStep, level);
+  vec2 tileSize = size / uAtlasGrid;
+  vec2 at = (tile * tileSize + mod(t, tileSize) + 0.5) / size;
+  if (level < 0.5) return texture(uTexture, at).rgb;
+  if (level < 1.5) return texture(uTextureMid, at).rgb;
+  return texture(uTextureFar, at).rgb;
 }
 
 // The texture at uv (1 = one repeat), wrapped and bilinear filtered.
-vec3 sampleWrapped(vec2 uv) {
-  vec2 p = uv * uTexSize - 0.5;
+vec3 sampleLevel(vec2 uv, vec2 tile, float level) {
+  vec2 p = uv * (uTexSize / pow(kLevelStep, level) / uAtlasGrid) - 0.5;
   vec2 i = floor(p);
   vec2 f = p - i;
-  vec3 a = texel(i);
-  vec3 b = texel(i + vec2(1.0, 0.0));
-  vec3 c = texel(i + vec2(0.0, 1.0));
-  vec3 d = texel(i + vec2(1.0, 1.0));
+  vec3 a = texel(i, tile, level);
+  vec3 b = texel(i + vec2(1.0, 0.0), tile, level);
+  vec3 c = texel(i + vec2(0.0, 1.0), tile, level);
+  vec3 d = texel(i + vec2(1.0, 1.0), tile, level);
   return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+}
+
+// How far zoomed out, in copies: 0 = full size, 1 = mid, 2 = far, with
+// fractions blending the two neighbours. Set once per pixel in main().
+float gLod = 0.0;
+
+vec3 sampleWrapped(vec2 uv, vec2 tile) {
+  float low = floor(gLod);
+  vec3 near = sampleLevel(uv, tile, low);
+  float t = gLod - low;
+  if (t < 0.01) return near;
+  return mix(near, sampleLevel(uv, tile, low + 1.0), t);
 }
 
 // The texture as seen through hex cell [vertex]: shifted and turned by a
@@ -87,7 +113,12 @@ vec3 cellSample(vec2 uv, vec2 vertex, vec2 centre) {
   float s = sin(angle);
   vec2 d = uv - centre;
   vec2 turned = vec2(c * d.x - s * d.y, s * d.x + c * d.y) + centre;
-  return sampleWrapped(turned + r * 7.31);
+  // Independent hash stream: variant choice must not follow rotation or
+  // offset, and must stay anchored to the world-cell lattice.
+  float variant = floor(hash12(vertex + vec2(127.1, 311.7) + uSeed * 2.37)
+      * (uAtlasGrid.x * uAtlasGrid.y));
+  vec2 tile = vec2(mod(variant, uAtlasGrid.x), floor(variant / uAtlasGrid.x));
+  return sampleWrapped(turned + r * 7.31, tile);
 }
 
 // Hex cells per texture repeat: a cell covers about two-thirds of it.
@@ -96,6 +127,14 @@ const float kCellScale = 1.5;
 void main() {
   vec2 world = (FlutterFragCoord().xy - uOrigin) / uPxPerMetre;
   vec2 uv = world / uMetres;
+
+  // Full-size texels per screen pixel: above 1 the picture is shrunk on
+  // screen and its detail would shimmer, so read a smaller copy.
+  float texelsPerPixel =
+      (uTexSize.x / uAtlasGrid.x) / max(uMetres * uPxPerMetre, 1e-3);
+  float levels = uLevels > 2.5 ? 3.0 : 1.0;
+  float lod = log2(max(texelsPerPixel, 1.0)) / log2(kLevelStep);
+  gLod = clamp(lod, 0.0, levels - 1.0);
 
   // Triangle grid on the skewed hex lattice: the three cell centres
   // around this point and how much each one counts.
@@ -139,6 +178,10 @@ void main() {
   float patches = smoothstep(0.42, 0.78, fbm(world / 7.0 + uSeed * 3.3 + 50.0));
   vec3 tinted = uTint.rgb * (luma(colour) / max(luma(uTint.rgb), 0.01));
   colour = mix(colour, tinted, uTint.a * patches);
+
+  // Past the smallest copy, fade toward the average colour rather than
+  // let the last copy shimmer.
+  colour = mix(colour, uMean, smoothstep(levels - 1.0, levels + 0.5, lod) * 0.7);
 
   colour = clamp(colour, 0.0, 1.0);
 

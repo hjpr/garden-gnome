@@ -2,15 +2,18 @@ import 'package:flutter/material.dart';
 
 import '../../application/camera.dart';
 import '../../application/editor_controller.dart';
+import '../../application/texture_library.dart';
 import '../../application/workspace_settings.dart';
 import '../../domain/units.dart';
 import '../theme.dart';
 import '../widgets/property_controls.dart';
+import 'textures_panel.dart';
 
 /// The groups Preferences is split into, listed down its left side.
 enum PreferencesCategory {
   canvas('Canvas'),
   style('Style'),
+  textures('Textures'),
   notifications('Notifications');
 
   const PreferencesCategory(this.label);
@@ -24,9 +27,12 @@ enum PreferencesCategory {
 /// dialog discards them. Choices from a list (menu size, toast position)
 /// apply at once.
 class PreferencesBody extends StatefulWidget {
-  const PreferencesBody({super.key, required this.editor});
+  const PreferencesBody({super.key, required this.editor, this.textures});
 
   final EditorController editor;
+
+  /// Ground textures; null (tests) greys the Textures category.
+  final TextureLibrary? textures;
 
   @override
   State<PreferencesBody> createState() => _PreferencesBodyState();
@@ -208,6 +214,15 @@ class _PreferencesBodyState extends State<PreferencesBody> {
           ],
         ),
       ],
+      PreferencesCategory.textures => [
+        TexturesPanel(
+          library: widget.textures!,
+          onNotice: (message, {error = false}) => setState(() {
+            _status = message;
+            _statusIsError = error;
+          }),
+        ),
+      ],
       PreferencesCategory.notifications => [
         PropertyGroup(
           title: 'TOASTS',
@@ -247,7 +262,14 @@ class _PreferencesBodyState extends State<PreferencesBody> {
           child: InkWell(
             borderRadius: BorderRadius.circular(Metrics.radius),
             hoverColor: Palette.hover,
-            onTap: () => setState(() => _category = category),
+            onTap:
+                category == PreferencesCategory.textures &&
+                    widget.textures == null
+                ? null
+                : () => setState(() {
+                    _category = category;
+                    _status = null;
+                  }),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               child: Row(

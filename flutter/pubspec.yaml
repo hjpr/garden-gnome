@@ -27,6 +27,13 @@ flutter:
   assets:
     - assets/icons/
     - assets/render/
+    - assets/textures/
+    - assets/textures/wild_grass/
+    - assets/textures/lawn/
+    - assets/textures/dirt/
+    - assets/textures/prepped_soil/
+    - assets/textures/loam/
+    - assets/textures/crimson_clover/
     - assets/catalog/
   shaders:
     - shaders/ground.frag

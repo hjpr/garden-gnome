@@ -1,0 +1,86 @@
+{
+  "wild_grass": {
+    "files": [
+      "meadow-1.jpg",
+      "meadow-2.jpg",
+      "meadow-3.jpg",
+      "tufted-1.jpg"
+    ],
+    "default": [
+      "meadow-1.jpg",
+      "meadow-2.jpg",
+      "meadow-3.jpg"
+    ]
+  },
+  "lawn": {
+    "files": [
+      "lawn-1.jpg",
+      "lawn-2.jpg",
+      "lawn-3.jpg",
+      "fine-1.jpg",
+      "fine-2.jpg"
+    ],
+    "default": [
+      "lawn-1.jpg",
+      "lawn-2.jpg",
+      "lawn-3.jpg"
+    ]
+  },
+  "dirt": {
+    "files": [
+      "soft-1.jpg",
+      "soft-2.jpg",
+      "soft-3.jpg",
+      "pebbly-1.jpg",
+      "pebbly-2.jpg",
+      "pebbly-3.jpg"
+    ],
+    "default": [
+      "soft-1.jpg",
+      "soft-2.jpg",
+      "soft-3.jpg"
+    ]
+  },
+  "prepped_soil": {
+    "files": [
+      "soft-1.jpg",
+      "soft-2.jpg",
+      "soft-3.jpg",
+      "cloddy-1.jpg",
+      "cloddy-2.jpg",
+      "cloddy-3.jpg"
+    ],
+    "default": [
+      "soft-1.jpg",
+      "soft-2.jpg",
+      "soft-3.jpg"
+    ]
+  },
+  "loam": {
+    "files": [
+      "soft-1.jpg",
+      "soft-2.jpg",
+      "soft-3.jpg",
+      "crumbly-1.jpg",
+      "crumbly-2.jpg",
+      "crumbly-3.jpg"
+    ],
+    "default": [
+      "soft-1.jpg",
+      "soft-2.jpg",
+      "soft-3.jpg"
+    ]
+  },
+  "crimson_clover": {
+    "files": [
+      "clover-1.jpg",
+      "clover-2.jpg",
+      "clover-3.jpg"
+    ],
+    "default": [
+      "clover-1.jpg",
+      "clover-2.jpg",
+      "clover-3.jpg"
+    ]
+  }
+}

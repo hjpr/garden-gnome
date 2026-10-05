@@ -1,28 +1,42 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'application/app_tools.dart';
 import 'application/document_session.dart';
 import 'application/farm.dart';
 import 'application/garden_controller.dart';
+import 'application/texture_library.dart';
 import 'persistence/crop_catalog_loader.dart';
 import 'persistence/document_codec.dart';
 import 'persistence/drawing_library.dart';
 import 'persistence/garden_record_store.dart';
+import 'persistence/texture_store.dart';
 import 'persistence/workspace_store.dart';
+import 'platform/farm_files.dart';
 import 'presentation/app_shell.dart';
+import 'presentation/canvas/texture_preparer.dart';
 import 'presentation/theme.dart';
 
 void main() {
   // The catalog and garden record are read before runApp, which needs
   // the asset bundle and plugins ready.
   WidgetsFlutterBinding.ensureInitialized();
+  // Ground textures: built-ins from assets/textures, installed packs and
+  // the user's own pictures app-wide (Preferences > Textures).
+  AppTextures.instance = TextureLibrary(
+    store: IdbTextureStore(),
+    preparer: const UiTexturePreparer(),
+    readAsset: (asset) async =>
+        (await rootBundle.load(asset)).buffer.asUint8List(),
+  );
   final session = DocumentSession(
     library: BrowserDrawingLibrary(),
     workspace: WorkspaceStore(),
     codec: const GgnomeCodec(),
     lastFarm: LastFarmPreference(),
+    files: createFarmFiles(),
   );
   // One toast stack for every tool. The growing tools work on the farm
   // open in Plan.
