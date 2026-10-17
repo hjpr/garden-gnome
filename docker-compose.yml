@@ -1,0 +1,8 @@
+services:
+  garden-gnome:
+    build: .
+    image: garden-gnome:latest
+    container_name: garden-gnome
+    ports:
+      - "80:80"
+    restart: unless-stopped

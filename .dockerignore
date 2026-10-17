@@ -1,0 +1,14 @@
+# Keep the build context small: only flutter/ and src/icons are needed.
+.git
+node_modules
+docs
+tools
+tests
+test-results
+playwright-report
+flutter/build
+flutter/.dart_tool
+flutter/.flutter-plugins-dependencies
+flutter/linux
+flutter/test
+**/__pycache__

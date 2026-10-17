@@ -39,6 +39,18 @@ Flutter test suite. npm is only a convenience entry point; it does not install
 Flutter or its packages. See [the Flutter README](flutter/README.md) for code
 and test boundaries.
 
+## Run it in Docker
+
+From the repository root:
+
+```sh
+docker compose up -d --build    # build the app and serve it on port 80
+```
+
+Then open `http://<server>`. Run the same command again after pulling
+new code. The image builds the app itself, so the server only needs Docker.
+Drawings and the Seed Vault stay in each visitor's browser, not on the server.
+
 ## Repository boundaries
 
 - `flutter/` is the current application, its tests and bundled assets.
